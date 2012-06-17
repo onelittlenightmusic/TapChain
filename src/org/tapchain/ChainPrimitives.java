@@ -6,11 +6,11 @@ public class ChainPrimitives {
 	ChainPrimitives() {
 	}
 	
-	public interface AxonN<T> extends Axon<T> {
+	public interface AxonN<T> extends IAxon<T> {
 		public AxonN<T> resetOutN(int n);
 //		public boolean pushN(int n, T x);
 //		public T popN(int n);
-		public Axon<T> getN(int n);
+		public IAxon<T> getN(int n);
 	}
 	
 	public static class SyncQueueN<T> extends SyncQueue<T> implements AxonN<T> {

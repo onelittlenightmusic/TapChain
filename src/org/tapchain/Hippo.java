@@ -4,7 +4,7 @@ import java.util.AbstractQueue;
 import java.util.Iterator;
 
 public class Hippo<T> extends AbstractQueue<T> 
-	implements Axon<T> {
+	implements IAxon<T> {
 	private static final long serialVersionUID = 1L;
 	T memory = null, old = null;
 	boolean closed = false;
@@ -60,7 +60,7 @@ public class Hippo<T> extends AbstractQueue<T>
 		return closed;
 	}
 	@Override
-	public Axon<T> reset() {
+	public IAxon<T> reset() {
 		memory = null;
 		return this;
 	}

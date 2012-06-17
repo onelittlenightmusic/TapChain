@@ -2,10 +2,8 @@ package org.tapchain;
 
 import java.util.concurrent.SynchronousQueue;
 
-import org.tapchain.Axon.AxonException;
 
-
-public class SyncObject<T> extends SynchronousQueue<T> implements Axon<T> {
+public class SyncObject<T> extends SynchronousQueue<T> implements IAxon<T> {
 	/**
 	 * 
 	 */
@@ -24,7 +22,7 @@ public class SyncObject<T> extends SynchronousQueue<T> implements Axon<T> {
 	}
 
 	@Override
-	public T sync_pop() throws InterruptedException, Axon.AxonException {
+	public T sync_pop() throws InterruptedException, IAxon.AxonException {
 		if(!cont) return null;
 		if(t == null)
 			t = Thread.currentThread();
@@ -35,7 +33,7 @@ public class SyncObject<T> extends SynchronousQueue<T> implements Axon<T> {
 			if(cont)
 				throw e;
 			else
-				throw new Axon.AxonException();
+				throw new IAxon.AxonException();
 		}
 		t = null;
 		return rtn;
@@ -79,7 +77,7 @@ public class SyncObject<T> extends SynchronousQueue<T> implements Axon<T> {
 	}
 
 	@Override
-	public Axon<T> reset() {
+	public IAxon<T> reset() {
 		return this;
 	}
 

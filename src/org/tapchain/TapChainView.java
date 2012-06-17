@@ -1,11 +1,13 @@
 package org.tapchain;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import org.tapchain.AndroidPiece.AndroidView;
-import org.tapchain.AnimationChain.*;
+import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.Chain.ChainException;
-import org.tapchain.TapChainEditor.*;
+import org.tapchain.TapChainEdit.*;
 
 import org.tapchain.R;
 
@@ -15,17 +17,12 @@ import android.app.FragmentTransaction;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.Vibrator;
-import android.speech.RecognizerIntent;
-//import android.support.v4.app.Fragment;
-//import android.support.v4.app.FragmentActivity;
-//import android.support.v4.app.FragmentManager;
-//import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,20 +31,15 @@ import android.view.SurfaceView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window.Callback;
-import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.Toast;
-import android.widget.ViewFlipper;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -55,81 +47,91 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.GradientDrawable.Orientation;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 
-public class TapChainView extends Activity implements SensorEventListener {
-	static boolean DEBUG = true;
+public class TapChainView extends Activity implements SensorEventListener, IWindowCallback {
+	static final boolean DEBUG = true;
 	
-	static WritingView view_edit;
-	GridFragment sel;
-	static FrameLayout controlview = null;
-    SensorManager sensorManager;
-    MediaPlayer player = null;
-  private Sensor accelerometer;//‰Á‘¬“x‚¹ƒ“ƒT[
-	static FrameLayout rootview = null;
+	WritingView viewEditing;
+	FrameLayout viewControl = null;
+  SensorManager sensorManager;
+  MediaPlayer player = null;
+  private Sensor accelerometer;
+	FrameLayout rootview = null;
 	Handler mq = new Handler();
-	static FrameLayout frameLayout;
-	TapChainEditor editor = null;
+	FrameLayout frameLayout;
+	TapChainEdit editor = new TapChainAndroidEdit();
+	static final String VIEW_SELECT = "SELECT";
 	
+	@Override
+	public boolean redraw(String str) {
+		viewEditing.onDraw();
+		return true;
+	}
+	static final String X = "LOCATIONX", Y = "LOCATIONY", V = "VIEWS";
+	static final RectF rf = new RectF(0, 0, 100,100);
+	@Override
+	public void onSaveInstanceState(Bundle out) {
+		RectF r = new RectF(rf);
+		viewEditing.matrix.mapRect(r);
+		out.putParcelable(X, r);
+		out.putParcelableArray(V, editor.dictPiece.values().toArray(new Parcelable[0]));
+	}
+
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+//		if(savedInstanceState != null) {
+//			view_edit.setXY(savedInstanceState.getInt(X),
+//				savedInstanceState.getInt(Y));
+//			for(Parcelable p : savedInstanceState.getParcelableArray(V)) {
+//				Log.w("TapChain", String.format("%s => %s", ((AndroidView)p).getName(),editor.dictionary.containsValue(p)?"OK":"NG"));
+//			}
+//		}
     requestWindowFeature(Window.FEATURE_NO_TITLE);
 		//Writing Window Initialization
-		AndroidPiece.setActivity(this);
-		view_edit = new WritingView(this, this);
-		editor = new TapChainEditor(view_edit);
-//		editor.InitWindow(view_edit);
-//			editor.Create();
-		TapChainEditor.setModelAction(new ModelActionCallback() {
-			@Override
-			public boolean end() {
-				editor.kickDraw();
-				return false;
+		AndroidActor.setActivity(this);
+		viewEditing = new WritingView(this, this);
+		if(savedInstanceState != null) {
+			viewEditing.matrix.setRectToRect(rf, (RectF)savedInstanceState.getParcelable(X), Matrix.ScaleToFit.FILL);
+			viewEditing.matrix.invert(viewEditing.inverse);
+			Parcelable[] p = savedInstanceState.getParcelableArray(V);
+			int i = 0;
+			for(IPieceView v: editor.dictPiece.values()) {
+				v.setCenter(((AndroidView)p[i++]).getCenter());
 			}
-			@Override
-			public boolean redraw(String str) {
-				view_edit.onDraw();
-				return true;
-			}
-		});
+		}
+		AndroidActor.setWindow(viewEditing);
+		editor.setWindow(viewEditing);
+		//Initialization of PieceFactory
+		editor.setModelAction(this);
 		
 		rootview = new FrameLayout(this);
-    frameLayout = new FrameLayout(this)
-//    {
-//    	public boolean onInterceptTouchEvent (MotionEvent event) {
-//				int action = event.getAction();
-//				switch (action) {
-//				case MotionEvent.ACTION_MOVE:
-//					p.getContentView().dispatchTouchEvent(event);
-//					break;
-//				}
-//				return false;
-//    	}
-//    }
-    ;
+    frameLayout = new FrameLayout(this);
 		setContentView(frameLayout);
-		controlview = new FrameLayout(this);
+		viewControl = new FrameLayout(this);
 		LinearLayout view_bottom_left = new LinearLayout(this);
 		view_bottom_left.setGravity(Gravity.LEFT | Gravity.BOTTOM);
 		Button button_start = new Button(this);
 		Button button_up = new Button(this);
 		Button button_clear = new Button(this);
+		Button button_freeze = new Button(this);
 		Button button_refresh = new Button(this);
 		button_start.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				view_edit.PressButton();
+				viewEditing.PressButton();
 			}
 		});
 		button_start.setText(">");
@@ -147,7 +149,14 @@ public class TapChainView extends Activity implements SensorEventListener {
 				editor.reset();
 			}
 		});
-		button_refresh.setText("!");
+		button_freeze.setText("!");
+		button_freeze.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				editor.freezeToggle();
+			}
+		});
+		button_refresh.setText("R");
 		button_refresh.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -161,19 +170,23 @@ public class TapChainView extends Activity implements SensorEventListener {
 		view_bottom_left.addView(
 				button_clear, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		view_bottom_left.addView(
+				button_freeze, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		view_bottom_left.addView(
 				button_refresh, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		controlview.addView(
+		viewControl.addView(
 				view_bottom_left, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));		
 		LinearLayout view_bottom_right = new LinearLayout(this);
-		view_bottom_right.setId(0x12345678);
 		view_bottom_right.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
 		Button button_plus = new Button(this);
-		button_plus.setText(" [+] ");
+		button_plus.setText("[  +  ]");
 		button_plus.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
 		button_plus.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				sel.show(GridShow.HALF);
+		    GridFragment f = (GridFragment) getFragmentManager().findFragmentByTag(VIEW_SELECT);
+				if(f!=null){
+					f.toggle();
+				}
 			}
 		});
 		view_bottom_left.addView(button_plus);
@@ -188,52 +201,18 @@ public class TapChainView extends Activity implements SensorEventListener {
 		view_bottom_right.addView(button_finish, new LayoutParams(
 				LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
-		controlview.addView(view_bottom_right, new LayoutParams(LayoutParams.FILL_PARENT,
+		viewControl.addView(view_bottom_right, new LayoutParams(LayoutParams.FILL_PARENT,
 				LayoutParams.FILL_PARENT));
-//		LinearLayout view_center_left = new LinearLayout(this);
-//		LinearLayout view_center_right = new LinearLayout(this);
-//		view_center_left.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-//		view_center_right.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-//		controlview.addView(view_center_left,
-//				new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-//		controlview.addView(view_center_right,
-//				new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-
-		//		LinearLayout viewReplay = new LinearLayout(this);
-//		viewReplay.addView(new ReadingView(this),
-//				new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-//		viewReplay.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
-//		rootview.addView(viewReplay, new LayoutParams(
-//				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-		rootview.addView(view_edit,
+		rootview.addView(viewEditing,
 				new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-		sel = new GridFragment(this);
+//		cam = new CameraFragment(this);
 		
-//		rootview.addView(sel, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-//    ViewAdapter adapter = new ViewAdapter();
-//    for(int j=0; j<pf.getSize()+1; j++) {
-//    	View v = new LocalButton(this,j);
-//    	final int NUM = j;
-//    	v.setOnClickListener(new View.OnClickListener() {
-//				@Override
-//				public void onClick(View v) {
-////					if(rootview.getDisplayedChild() ==2) {
-//						setCode(NUM);
-////						rootview.showPrevious();
-////					}
-//				}
-//			});
-//     	adapter.add(v);
-//    }
-//    sel.setAdapter(adapter);
-
 		frameLayout.addView(rootview);
-//		frameLayout.addView(linearLayout, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-		frameLayout.addView(controlview, new LayoutParams(LayoutParams.FILL_PARENT,
+		frameLayout.addView(viewControl, new LayoutParams(LayoutParams.FILL_PARENT,
 				LayoutParams.FILL_PARENT));
-		frameLayout.setId(0x01234567);
+		frameLayout.setId(0x00001235);
+		frameLayout.setTag("OVERLAY");
 
-//		rootview.showNext();
 
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		player = MediaPlayer.create(this, R.raw.tennisball);
@@ -242,91 +221,85 @@ public class TapChainView extends Activity implements SensorEventListener {
 		rootview.addView(l);
 		l.setGravity(Gravity.BOTTOM|Gravity.RIGHT);
     l.setId(0x00001234);
-//    rootview.setForegroundGravity(Gravity.BOTTOM|Gravity.RIGHT);
-//    sel.setSize(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-//    FragmentTransaction ft2 = getSupportFragmentManager().beginTransaction();
-//   if(null == getSupportFragmentManager().findFragmentByTag("SELECTB")) {
-//    	ft2.add(0x00001234, sel, "SELECTB");
-//      ft2.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//      ft2.hide(sel);
-//    	ft2.commit();
-//    }
+		new GridFragment().setContext(this).show(GridShow.HIDE);
+		Log.i("TapChainView.state","onCreate");
+   
 	}
 	
-//	public class OverlayFragment extends Fragment {
-//		int piece_num = 0;
-//		OverlayFragment(int num) {
-//			super();
-//			piece_num = num;
-//		}
-//		@Override
-//		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saved) {
-//			View v = new LocalButton(getActivity(), piece_num);
-//			v.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-//			return v;
-//		}
-//	}
 	public enum GridShow { SHOW, HIDE, HALF }
 	public static class GridFragment extends Fragment {
+		String tag = VIEW_SELECT;
+		GridShow show = GridShow.HIDE;
 		int _width = LayoutParams.FILL_PARENT, _height = LayoutParams.FILL_PARENT;
+		boolean autohide = false;
 		TapChainView a = null;
-		public GridFragment(TapChainView a) {
+		public GridFragment() {
 			super();
-			this.a = a;
 		}
+		public GridFragment setContext(TapChainView a) {
+	  	Log.i("TapChain", "GridFragment#setContext called");
+			this.a = a;
+			return this;
+		}
+		
 	  @Override
 	  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saved) {
-			ViewSelector sel = a.new ViewSelector(getActivity());
+	  	Log.i("TapChain", "GridFragment#onCreateView called");
+			ActorSelector sel = new ActorSelector(a);
 	    ViewAdapter adapter = new ViewAdapter();
-	    for(int j=0; j<a.editor.GetFactory().getSize()+1; j++)
-	    	adapter.add(a.new LocalButton(j));
+	    for(int j=0; j<a.editor.getFactory().getSize()+1; j++)
+	    	adapter.add(new ActorButton(a, j));
 	    sel.setAdapter(adapter);
-	    sel.setLayoutParams(new LayoutParams(_width, _height));
+	    sel.setLayoutParams(new LinearLayout.LayoutParams(_width, _height));
 	    return sel;
 	  }
 	  public void setSize(int w, int h) {
+	  	Log.i("TapChain", "GridFragment#setSize called");
 	  	_width = w;
 	  	_height = h;
+	  	getView().setLayoutParams(new LinearLayout.LayoutParams(_width, _height));
+	  	
 	  }
 	  public void show(GridShow _show) {
+	  	Log.i("TapChain", "GridFragment#show called");
+	  	show = _show;
 	    FragmentTransaction ft = a.getFragmentManager().beginTransaction();
-	    if(null == a.getFragmentManager().findFragmentByTag("SELECTB")) {
+	    if(this != a.getFragmentManager().findFragmentByTag(tag)) {
+		  	Log.w("TapChain", "GridFragment#show fragment replaced");
 	      ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//      ft.addToBackStack(null);
-	    	ft.add(0x00001234, this, "SELECTB");
+	    	ft.replace(0x00001234, this, tag);
 	    }
-//	    else {
-//	    	ft.replace(0x00001234, this, "SELECTB");
-//	    }
 	    switch(_show) {
     	case SHOW:
     		setSize(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-//    		Pair<Integer, Integer> p = a.checkDisplayAndRotate();
-//    		setSize(p.first, p.second);
-//    		setSize(100,100);
 	    	ft.show(this);
 	    	break;
     	case HALF:
     		Pair<Integer, Integer> p1 = a.checkDisplayAndRotate();
-//    		setSize(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
     		setSize(p1.first, p1.second);
  	    	ft.show(this);
 	    	break;
     	case HIDE:
-//	    } else {
 	    	ft.hide(this);
 	    }
     	ft.commit();
-	  		
+	  }
+	  public void toggle() {
+	  	show((show==GridShow.HIDE)?GridShow.HALF:GridShow.HIDE);
+	  }
+	  public void setAutohide() {
+	  	autohide = !autohide;
+	  }
+	  public void kickAutohide() {
+	  	if(autohide)
+	  		show(GridShow.HIDE);
 	  }
 	}
 	
-	public class ViewSelector extends GridView {
-		ViewSelector(Activity act) {
+	public static class ActorSelector extends GridView {
+		ActorSelector(final Activity act) {
         super(act);
-        setBackgroundColor(0xff000000);
-//        view_select_contents.setOrientation(LinearLayout.VERTICAL);
-//        	setStretchMode(GridView.STRETCH_SPACING_UNIFORM);
+        setBackgroundColor(0xaa000000);
         setColumnWidth(100);
         setVerticalSpacing(0);
         setHorizontalSpacing(0);
@@ -336,12 +309,13 @@ public class TapChainView extends Activity implements SensorEventListener {
   				@Override
   				public boolean onTouch(View v, MotionEvent event) {
   					int action = event.getAction();
-//  					Log.w("Action", String.format("action = %d", action));
   					switch (action) {
   					case MotionEvent.ACTION_DOWN:
   					case MotionEvent.ACTION_POINTER_DOWN:
   						default:
-  							sel.show(GridShow.HIDE);
+  					    GridFragment f = (GridFragment) act.getFragmentManager().findFragmentByTag(VIEW_SELECT);
+  							if(f!=null)
+  								f.show(GridShow.HIDE);
   					}
 						return false;
   				}
@@ -379,9 +353,9 @@ public class TapChainView extends Activity implements SensorEventListener {
 	    }
 	}
 	static OverlayPopup p = null;
-	public class LocalButton extends PieceImage {
-		LocalButton(final int j) {
-			super(j);
+	public static class ActorButton extends PieceImage {
+		ActorButton(final Context c, final int j) {
+			super(c, j);
 			if (p == null)
 				p = new OverlayPopup(j);
 			setOnTouchListener(new View.OnTouchListener() {
@@ -393,8 +367,10 @@ public class TapChainView extends Activity implements SensorEventListener {
 						case MotionEvent.ACTION_DOWN:
 						case MotionEvent.ACTION_POINTER_DOWN:
 							getParent().requestDisallowInterceptTouchEvent(true);
-							p.setView(j);
-							sel.show(GridShow.HIDE);
+							p.setView(c, j);
+ 					    GridFragment f = (GridFragment) ((Activity)c).getFragmentManager().findFragmentByTag(VIEW_SELECT);
+							if(f!=null)
+								f.kickAutohide();
 							p.show((int)event.getRawX(), (int)event.getRawY());
 //							LocalButton.this.clearFocus();
 							break;
@@ -404,8 +380,9 @@ public class TapChainView extends Activity implements SensorEventListener {
 							break;
 						case MotionEvent.ACTION_POINTER_UP:
 						case MotionEvent.ACTION_UP:
-							view_edit.sendDownEvent(event.getRawX(), event.getRawY());
-							setCode(j);
+							((TapChainView)c).viewEditing.sendDownEvent(event.getRawX(), event.getRawY());
+							((TapChainView)c).setCode(j);
+							((TapChainView)c).viewEditing.sendUpEvent();
 				    	p.dismiss();
 						case MotionEvent.ACTION_CANCEL:
 							break;
@@ -417,21 +394,23 @@ public class TapChainView extends Activity implements SensorEventListener {
 		}
 	}
 	
-	public class OverlayPopup extends PopupWindow {
+	public static class OverlayPopup extends PopupWindow {
 		int halfw, halfh;
 		View v = null;
+		Context cxt = null;
 		OverlayPopup (int j) {
 			super();
-			setView(j);
+//			setView(c, j);
 			setWindowLayoutMode(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		}
-		public void setView(int i) {
-			v = new PieceImage(i);
+		public void setView(Context c, int i) {
+			v = new PieceImage(c, i);
+			cxt = c;
 			setContentView(v);
 		}
 		public void show(int x, int y) {
 			if(!isShowing())
-				showAtLocation(frameLayout, Gravity.NO_GRAVITY,
+				showAtLocation(((Activity)cxt).findViewById(0x00001235), Gravity.NO_GRAVITY,
 					x-v.getWidth()/2, y-v.getHeight()/2
 					);
 			else
@@ -440,30 +419,32 @@ public class TapChainView extends Activity implements SensorEventListener {
 						-1, -1);
 		}
 	}
-	public class PieceImage extends ImageView {
-		PieceImage(final int j) {
-			super(TapChainView.this);
-//			setFocusable(false);
-			PieceFactory f = editor.GetFactory();
-			String name = String.format("%d",j);
-			if(f.getName(j)!=null)
-				name += f.getName(j);
-			final AndroidView v = (AndroidView) f.getView(j, null);
-			Drawable a = (v!=null)?v.getDrawable():getResources().getDrawable(R.drawable.withface1);
+	public static class PieceImage extends ImageView {
+		PieceImage(Context c, final int j) {
+			super(c);
+			Factory f = ((TapChainView)c).editor.getFactory();
+			AndroidView v = null;
+			try {
+				v = (AndroidView) f.createView(j).newInstance(null);
+			} catch (ChainException e) {
+				e.printStackTrace();
+			}
+			Drawable a = (v!=null)?v.getDrawable():getResources().getDrawable(R.drawable.cancel);
 			setImageDrawable(a);
 		}
 	}
 	
+	
    @Override
     protected void onStop() {
      super.onStop();
+ 		Log.i("TapChainView.state","onStop");
 	   if(sensorManager != null)
         sensorManager.unregisterListener(this);
     }
    @Override
 	public void onConfigurationChanged(Configuration newConfig) {
   	 super.onConfigurationChanged(newConfig);
-//  	 checkDisplayAndRotate();
    }
    
    public Pair<Integer, Integer> checkDisplayAndRotate() {
@@ -472,27 +453,14 @@ public class TapChainView extends Activity implements SensorEventListener {
      if(metrix.widthPixels > metrix.heightPixels)
     	 return new Pair<Integer, Integer>(metrix.widthPixels/2,LayoutParams.FILL_PARENT);
   	 return new Pair<Integer, Integer>(LayoutParams.FILL_PARENT, metrix.heightPixels/2);
-//     setDisplayEditor("SELECT", metrix.widthPixels > metrix.heightPixels);
    }
    
    public void setDisplayEditor(GridFragment f, boolean visible) {
-//  		FragmentManager fm = getSupportFragmentManager();
-//   		FragmentTransaction ft = fm.beginTransaction();
-//   		Fragment mFragment1 = fm.findFragmentByTag(tag);
-//   		if (mFragment1 != null) {
-//   			if(visible)
-//   				ft.show(mFragment1);
-//  			else
-//  				ft.hide(mFragment1);
-//   			ft.commit();
-//   		}
-//  	 f.show(visible);
- 	 
    }
 	@Override
 	protected void onResume() {
 	    super.onResume();
-	  	checkDisplayAndRotate();
+			Log.i("TapChainView.state","onResume");
 	    try {
 	    accelerometer = sensorManager
 	    	.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
@@ -514,7 +482,6 @@ public class TapChainView extends Activity implements SensorEventListener {
 		Sensor sensor = event.sensor;
 		if(sensor == accelerometer) {
 			float tmp = targetValue;
-			//Getting a result from accelerometer.
             currentAccelerationValues[0] = event.values[0];// - currentOrientationValues[0];
             currentAccelerationValues[1] = event.values[1];// - currentOrientationValues[1];
             currentAccelerationValues[2] = event.values[2];// - currentOrientationValues[2];
@@ -529,8 +496,7 @@ public class TapChainView extends Activity implements SensorEventListener {
             	Float rtn = targetValue/60f;
             	if(rtn>2f) rtn=2f;
             	if(rtn<0.5f) rtn=0.5f;
-    			editor.GetManager().Get().Shake(rtn);
-//    			ChainEditor.kickDraw("Shake!?");
+    			editor.getManager().get().Shake(rtn);
             }
        }
 	}
@@ -539,53 +505,43 @@ public class TapChainView extends Activity implements SensorEventListener {
       Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
       vibrator.vibrate(interval);
 	}
+	
+	HashMap<Integer, IntentHandler> intentHandlers = new HashMap<Integer, IntentHandler>(); 
+	public TapChainView addIntentHandler(int requestCode, IntentHandler h) {
+		intentHandlers.put(requestCode, h);
+		return this;
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch(requestCode) {
-		case AndroidPiece.VOICE_REQUEST:
-			if(resultCode != RESULT_OK)
-				break;
-	            // get the returned value
-	            ArrayList<String> results =
-	                data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-	            
-	            // refer the value
-	            StringBuffer buffer = new StringBuffer();
-	            for (int i = 0; i < results.size(); i++) {
-	                buffer.append(results.get(i));
-	            }
-	            AndroidPiece.recognized.push(buffer.toString());
-	            // show the value
-	            Toast.makeText(this, buffer.toString(),
-	                    Toast.LENGTH_LONG).show();
-	            break;
-		case 0:
-		default:
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode != RESULT_OK)
+			return;
+		if(intentHandlers.containsKey(requestCode))
+			intentHandlers.get(requestCode).onIntent(resultCode, data);
+		else
 			setCode(data.getIntExtra("TEST", 0));
-		}
 		return;
 	}
-	public static void setVisibility() {
-		if(controlview.getVisibility() == View.VISIBLE)
-			controlview.setVisibility(View.INVISIBLE);
+	public void setVisibility() {
+		if(viewControl.getVisibility() == View.VISIBLE)
+			viewControl.setVisibility(View.INVISIBLE);
 		else
-			controlview.setVisibility(View.VISIBLE);
+			viewControl.setVisibility(View.VISIBLE);
 	}
 	
 	public void setCode(int code) {
-		if(code < editor.GetFactory().getSize())
-			editor.GetFactory().getInstance(code);
+		if(code < editor.getFactory().getSize())
+			editor.getFactory().getInstance(code);
 	}
 	
-	public class WritingView extends BasicSurfaceView implements
+	public class WritingView extends TapChainSurfaceView implements
 			GestureDetector.OnDoubleTapListener {
 		TapChainView v = null;
 
 		public WritingView(Context context, TapChainView v) {
 			super(context);
-			window_orient.x = -100;
-			window_orient.y = -100;
+			move(-100, -100);
 			this.v = v;
 		}
 		
@@ -595,7 +551,7 @@ public class TapChainView extends Activity implements SensorEventListener {
 //					Log.i("MAIN_DEBUG", str);
 //				}
 				canvas.setMatrix(matrix);
-				editor.Show(canvas);
+				editor.show(canvas);
 		}
 
 		void drawText(Canvas canvas, String str) {
@@ -615,6 +571,10 @@ public class TapChainView extends Activity implements SensorEventListener {
 		
 		public void sendDownEvent(float x, float y) {
 			v.editor.onDown(getPosition(x, y));
+		}
+		
+		public void sendUpEvent() {
+			v.editor.onUp();
 		}
 
 		@Override
@@ -645,7 +605,13 @@ public class TapChainView extends Activity implements SensorEventListener {
 		public WorldPoint getVector(float x, float y) {
 			float[] pos = new float[] {x, y};
 			inverse.mapVectors(pos);
-			return new WorldPoint((int)pos[0], (int)pos[1]);
+			return new WorldPoint((int)pos[0], (int)pos[1]).setDif();
+		}
+		
+		public ScreenPoint getScreenVector(float x, float y) {
+			float[] pos = new float[] {x, y};
+			matrix.mapVectors(pos);
+			return new ScreenPoint((int)pos[0], (int)pos[1]);
 		}
 		
 		@Override
@@ -654,14 +620,14 @@ public class TapChainView extends Activity implements SensorEventListener {
 
 		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
-			editor.GetManager().Get().TouchOff();
+			editor.getManager().get().TouchOff();
 			return false;
 		}
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
-			TapChainView.setVisibility();
-			editor.GetManager().Get().TouchOff();
+			((TapChainView)getContext()).setVisibility();
+			editor.getManager().get().TouchOff();
 			return false;
 		}
 
@@ -672,28 +638,23 @@ public class TapChainView extends Activity implements SensorEventListener {
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
-//			if(ChainEditor.onSingleTapConfirmed()) {
-//				((TapChainView)getContext()).setDisplayEditor("SELECT", false);
-//			}
+			editor.onSingleTapConfirmed();
 			return true;
 		}
 
 		public boolean PressButton() {
 			editor.Compile();
-			editor.Start();
+			editor.start();
 			return true;
 		}
-/*		
-		public boolean GoParent() {
-			if(ChainEditor.isRoot()) {
-				return false;
-			}
-			ChainEditor.goParent();
-			return true;
+		@Override
+		public void move(int vx, int vy) {
+			ScreenPoint v = getScreenVector(-vx, -vy);
+			matrix.postTranslate(v.x, v.y);
+			matrix.invert(inverse);
 		}
-		*/
 	}
-	public class ReadingView extends BasicSurfaceView {
+	public class ReadingView extends TapChainSurfaceView {
 		ReadingView(Context context) {
 			super(context);
 		}
@@ -702,16 +663,17 @@ public class TapChainView extends Activity implements SensorEventListener {
 		public void draw(Canvas canvas) {
 		}
 	}
-	abstract class BasicSurfaceView extends SurfaceView implements
+	abstract class TapChainSurfaceView extends SurfaceView implements
 		SurfaceHolder.Callback,
 		GestureDetector.OnGestureListener,
-		TapChainEditor.IWindow {
+		TapChainEdit.IWindow {
 		GradientDrawable mGradient, mGradient2;
 		private GestureDetector gdetect = new GestureDetector(this);
 		Matrix matrix = new Matrix();
 		Matrix inverse = new Matrix();
 		Paint paint = new Paint(), paint_text = new Paint();
-		public BasicSurfaceView(Context context) {
+		WorldPoint window_size = new WorldPoint();
+		public TapChainSurfaceView(Context context) {
 			
 			super(context);
 			mGradient = new GradientDrawable(
@@ -724,27 +686,33 @@ public class TapChainView extends Activity implements SensorEventListener {
 			paint_text.setColor(0xff000000);
 			paint_text.setTextSize(20);
 			paint.setColor(0xff444444);
-	        setFocusable(true);
+//	        setFocusable(true);
 	        requestFocus();
+		}
+		
+		@Override
+		public WorldPoint getWindowPoint() {
+			return window_size;
 		}
 
 		public void onDraw() {
+//			Log.w("TapChainView", "writing view locked");
 			Canvas canvas = getHolder().lockCanvas();
 			if (canvas != null) {
 				paintBackground(canvas);
 				draw(canvas);
-				canvas.drawText("View = "+Integer.toString(editor.GetManager().Get().getViewNum()), 20, 20, paint_text);
-				canvas.drawText("Effect = "+Integer.toString(editor.GetManager().Get().aFunc.size()), 20, 40, paint_text);
-				canvas.drawText("View = "+Integer.toString(editor.GetUserManager().Get().getViewNum()), 20, 20, paint_text);
-				canvas.drawText("UserEffect = "+Integer.toString(editor.GetUserManager().Get().aFunc.size()), 20, 60, paint_text);
+				canvas.drawText("View = "+Integer.toString(editor.getManager().get().getViewNum()), 20, 20, paint_text);
+				canvas.drawText("Effect = "+Integer.toString(editor.getManager().get().aFunc.size()), 20, 40, paint_text);
+				canvas.drawText("UserView = "+Integer.toString(editor.getUserManager().get().getViewNum()), 20, 60, paint_text);
+				canvas.drawText("UserEffect = "+Integer.toString(editor.getUserManager().get().aFunc.size()), 20, 80, paint_text);
 				getHolder().unlockCanvasAndPost(canvas);
 			}
 		}
 		public abstract void draw(Canvas canvas);
 		public void paintBackground(Canvas canvas) {
-//			mGradient.draw(canvas);
-//			mGradient2.draw(canvas);
-			canvas.drawRect(new Rect(0, 0, window_size.x, window_size.y), paint);
+			mGradient.draw(canvas);
+			mGradient2.draw(canvas);
+//			canvas.drawRect(new Rect(0, 0, window_size.x, window_size.y), paint);
 			return;
 		}
 		@Override
@@ -828,10 +796,6 @@ public class TapChainView extends Activity implements SensorEventListener {
 			case MotionEvent.ACTION_POINTER_UP:
 				mode = NONE;
 				matrix.invert(inverse);
-				// put_points(ev);
-				// int index = (action & MotionEvent.ACTION_POINTER_ID_MASK) >>
-				// MotionEvent.ACTION_POINTER_ID_SHIFT;
-				// points.remove(ev.getPointerId(index));
 				break;
 			}
 			return true;
@@ -839,51 +803,92 @@ public class TapChainView extends Activity implements SensorEventListener {
 
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
-			
-
 		}
 
 		public boolean onDown(MotionEvent e) {
-//			((View) this.getParent()).setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, 250));
 			return false;
 		}
 
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public void onLongPress(MotionEvent e) {
-			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public void onShowPress(MotionEvent e) {
-			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 		
 		public void move(int vx, int vy) {
-			window_orient.x += vx;
-			window_orient.y += vy;
 		}
 
 	}
+	public static class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+    private SurfaceHolder holder;
+    protected Camera camera;
+ 
+    CameraPreview(Context context) {
+        super(context);
+        holder = getHolder();
+        holder.addCallback(this);
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    }
+ 
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        camera = Camera.open();
+        try {
+					camera.setPreviewDisplay(holder);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    }
+ 
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        camera.stopPreview();
+        Camera.Parameters parameters = camera.getParameters();
+        List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
+
+        // You need to choose the most appropriate previewSize for your app
+        Camera.Size previewSize = previewSizes.get(0);// .... select one of previewSizes here
+
+        parameters.setPreviewSize(previewSize.width, previewSize.height);
+        camera.setParameters(parameters);
+//        params.setPreviewFormat(format);
+//        params.setPreviewSize(width, height);
+//        camera.setParameters(params);
+        camera.startPreview();
+    }
+    
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        camera.stopPreview();
+        camera.release();
+    }
+	}
+	
+	public interface IntentHandler {
+		public void onIntent(int resultCode, Intent data);
+	}
+
+
+
 }

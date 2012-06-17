@@ -1,11 +1,9 @@
 package org.tapchain;
 
-import org.tapchain.TapChainEditor.IWindow;
-
-import android.graphics.Rect;
+import org.tapchain.TapChainEdit.IWindow;
 
 
-public class ScreenPoint implements HeroicPoint {
+public class ScreenPoint implements IPoint {
 	public int x, y;
 
 	public ScreenPoint() {
@@ -40,16 +38,20 @@ public class ScreenPoint implements HeroicPoint {
 
 	
 	public WorldPoint getWorldPoint(IWindow v) {
-		return new WorldPoint(this.x + IWindow.window_orient.x, this.y + IWindow.window_orient.y);
+		return new WorldPoint(this.x , this.y );
 	}
 
 	@Override
-	public ScreenPoint sub(HeroicPoint sizeClosed) {
+	public ScreenPoint sub(IPoint sizeClosed) {
 		return new ScreenPoint(this.x - sizeClosed.x(), this.y - sizeClosed.y());
 	}
 
-	public ScreenPoint plus(ScreenPoint screenPoint) {
-		return new ScreenPoint(this.x + screenPoint.x, this.y + screenPoint.y);
+	public ScreenPoint plus(IPoint offset1) {
+		return new ScreenPoint(this.x + offset1.x(), this.y + offset1.y());
+	}
+	
+	public ScreenPoint plus(float x, float y) {
+		return new ScreenPoint(this.x + x, this.y + y);
 	}
 
 	@Override
@@ -62,7 +64,7 @@ public class ScreenPoint implements HeroicPoint {
 		return y;
 	}
 
-	public boolean isContained(Rect rect) {
-		return rect.contains(this.x, this.y);
+	public ScreenPoint multiply(float coeff) {
+		return new ScreenPoint(coeff*this.x, coeff*this.y);
 	}
 }

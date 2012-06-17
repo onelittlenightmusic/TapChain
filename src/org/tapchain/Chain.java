@@ -5,88 +5,60 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.*;
 
-import org.tapchain.AnimationChain.BasicPiece;
-import org.tapchain.AnimationChain.ErrorHandler;
-import org.tapchain.AnimationChainManager.LogHandler;
-import org.tapchain.AnimationChainManager.StatusHandler;
+import org.tapchain.ActorChain.IErrorHandler;
+import org.tapchain.ActorManager.ILogHandler;
+import org.tapchain.ActorManager.StatusHandler;
 import org.tapchain.Chain.ChainPiece.PackType;
-import org.tapchain.Chain.ChainPiece.PieceState;
-import org.tapchain.ChainController.ControlCallback;
+import org.tapchain.ChainController.IControlCallback;
 
-import android.util.Log;
-import android.util.Pair;
 
 
 @SuppressWarnings("serial")
 public class Chain {
 	static int n = 0;
-	ConcurrentSkipListSet<ChainPiece> aFunc;
+	ConcurrentSkipListSet<IPiece> aFunc;
 	ChainController ctrl;
-	private ChainOperator list = null;
+	private ChainPieceOperator operator = null;
 	int mode = 0;//0: Run-as-a-thread mode, 1: Automatic mode
 	public static int THREAD_MODE = 0;
 	public static int AUTO_MODE = 1;
 	public boolean AUTO_END = true;
-	LogHandler log = null;
+	ILogHandler log = null;
 
 	Chain(int _mode, int time) {
-		aFunc = new ConcurrentSkipListSet<ChainPiece>();
+		aFunc = new ConcurrentSkipListSet<IPiece>();
 		mode = _mode;
 		ctrl = new ChainController(time);
 		Set(null);
-		list = new ChainOperator(this);
-	}
-	Chain(int _mode) {
-		this(_mode, 20);
+		operator = new ChainPieceOperator(this);
 	}
 	Chain() {
-		this(AUTO_MODE, 20);
+		this(AUTO_MODE, 30);
 	}
-	public Chain Set(final ControlCallback cb) {
+	public Chain Set(final IControlCallback cb) {
 //		if(mode == AUTO_MODE) {
 			if(cb == null) {
-				ctrl.Set(new ControlCallback() {
-					public boolean impl() {
+				ctrl.Set(new IControlCallback() {
+					public boolean callback() {
 						Chain.this.notifyAllFunc();
 						return false;
 					}
 				});
 			} else {
-				ctrl.Set(new ControlCallback() {
-					public boolean impl() {
-						cb.impl();
+				ctrl.Set(new IControlCallback() {
+					public boolean callback() {
+						cb.callback();
 						Chain.this.notifyAllFunc();
 						return false;
 					}
 				});
 			}
-//		} else {
-//			if(cb == null) {
-//				ctrl.Set(new ControlCallback() {
-//					public boolean impl() {
-//						Chain.this.notifyAllFunc();
-//						return false;
-////						return !aFunc.isEmpty();
-//					}
-//				});
-//			} else {
-//				ctrl.Set(new ControlCallback() {
-//					public boolean impl() {
-//						cb.impl();
-//						Chain.this.notifyAllFunc();
-//						return false;
-////						return !aFunc.isEmpty();
-//					}
-//				});
-//			}			
-//		}
 		return this;
 	}
 	
-	public Chain setLog(LogHandler l) {
+	public Chain setLog(ILogHandler l) {
 		log = l;
 		return this;
 	}
@@ -96,28 +68,31 @@ public class Chain {
 		return this;
 	}
 	
-	public Chain Kick() {
-		ctrl.Kick();
+	public Chain kick() {
+		ctrl.kick();
 		return this;
 	}
 	
 	public enum Flex { FIXED, FLEX }
 
-	public ChainPiece addPiece(ChainPiece cp) {
-		cp.setParent(this);
+	public IPiece addPiece(IPiece cp) {
+		if(cp instanceof ChainPiece)
+			((ChainPiece)cp).setParent(this);
 		if(mode == AUTO_MODE) {
 //			aFunc.add(cp);
-			cp.start();
-			Kick();
+			if(cp instanceof ChainPiece) {
+				((ChainPiece)cp).start();
+			}
+			kick();
 		}
 		if(log != null)
-			log.Log("Chain", String.format("RTN: ADD, CP: %s", cp.getClass().getCanonicalName()));
+			log.log("Chain", String.format("RTN: ADD, CP: %s", cp.getName()));
 		return cp;
 		
 	}
 	
 	public boolean notifyAllFunc() {
-		for (ChainPiece f : aFunc)
+		for (IPiece f : aFunc)
 				f.signal();
 		return true;
 	}
@@ -127,25 +102,25 @@ public class Chain {
 		return cp;
 	}
 
-	public ChainPiece removePiece(ChainPiece f) {
-		f.end();
+	public IPiece removePiece(IPiece bp) {
+		bp.end();
 		if(log != null)
-			log.Log("Chain", String.format("RTN: REM, CP: %s", f.getClass().getCanonicalName()));
-		aFunc.remove(f);
-		return f;
+			log.log("Chain", String.format("RTN: REM, CP: %s", bp.getName()));
+		aFunc.remove(bp);
+		return bp;
 	}
 	
-	public ChainOperator getManager() {
-		return list;
+	public ChainPieceOperator getOperator() {
+		return operator;
 	}
 	
-	class ChainManager {
-		List<ChainPiece> q = new ArrayList<ChainPiece>();
-		List<ChainPiece> q2 = new ArrayList<ChainPiece>();
-		Axon<String> revolver = new Toggle<String>();
+	class ChainOperator {
+		List<IPiece> q = new ArrayList<IPiece>();
+		List<IPiece> q2 = new ArrayList<IPiece>();
+		IAxon<String> revolver = new Toggle<String>();
 		Chain _p = null;
 
-		public ChainManager(Chain parent) {
+		public ChainOperator(Chain parent) {
 			_p = parent;
 		}
 
@@ -153,33 +128,18 @@ public class Chain {
 			return false;
 		}
 
-		public synchronized ChainPiece add(ChainPiece cp) {
-			q.add(cp);
-			Kick();
-			return cp;
+		public synchronized IPiece add(IPiece bp) {
+			q.add(bp);
+			kick();
+			return bp;
 		}
 
-//		public synchronized boolean revolve() {
-//			if (revolver.size() == 0) {
-//				return false;
-//			}
-//			try {
-//					revolver.sync_pop();
-//				} catch (Axon.AxonException e) {
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//				return false;
-//			}
-//			save();
-//			return true;
-//		}
-
-		public synchronized boolean save() {
+		public synchronized List<IPiece> save() {
 			aFunc.addAll(q);
-			for(ChainPiece cp: q)
+			for(IPiece cp: q)
 				addPiece(cp);
-			q.clear();
-			return false;
+			q = new ArrayList<IPiece>();
+			return q;
 		}
 
 		public boolean isEmpty() {
@@ -187,41 +147,120 @@ public class Chain {
 		}
 	}
 	
-	public class ChainOperator extends ChainManager {
-		public ChainOperator(Chain parent) {
+	public class ChainPieceOperator extends ChainOperator {
+		public ChainPieceOperator(Chain parent) {
 			super(parent);
 		}
 		
 		public synchronized void start() {
 			if(mode == AUTO_MODE) return;
-			for(ChainPiece cp : aFunc)
-				cp.start();
-			ctrl.Kick();
+			for(IPiece cp : aFunc)
+				if(cp instanceof ChainPiece) {
+					((ChainPiece)cp).start();
+				}
+			ctrl.kick();
 		}
 		
 		public synchronized void reset() {
-			for(ChainPiece cp: aFunc)
-				cp.restart();
+			for(IPiece cp: aFunc)
+				if(cp instanceof ChainPiece) {
+					((ChainPiece)cp).restart();
+				}
 		}
 	}
+	public static class Connection<T> {
+		IPiece piece;
+		T t;
+		public Connection(IPiece piece, T t) {
+			this.piece = piece;
+			this.t = t;
+		}
+		public IPiece getPiece() {
+			return piece;
+		}
+		public T getConnect() {
+			return t;
+		}
+	}
+	public static class ConnectionIO extends Connection<ChainPath> {
+		public ConnectionIO(IPiece piece, ChainPath t) {
+			super(piece, t);
+		}
+	}
+	public static class ConnectionO extends Connection<ChainOutConnector> {
+		public ConnectionO(IPiece piece, ChainOutConnector t) {
+			super(piece, t);
+		}
+	}
+	public static abstract class Piece implements IPiece {
+
+		@Override
+		public ConnectionIO appendTo(PackType stack, IPiece target, PackType stack_target) throws ChainException {
+			//if user assigns PREV FUNCTION
+			if(target == null) {
+				throw new ChainException(this, "appendTo()/Invalid Target/Null");
+			} else if(this == target) {
+				throw new ChainException(this, "appendTo()/Invalid Target/Same as Successor");
+			}
+			return null;
+		}
+		
+		@Override
+		public ConnectionO appended(Class<?> cls, Output type, PackType stack, IPiece from) throws ChainException {
+			return null;
+		}
+		
+		@Override
+		public IPath detach(IPiece y) {
+			return null;
+		}
+
+		@Override
+		public Collection<IPiece> getPartners() {
+			return null;
+		}
+
+		@Override
+		public boolean isConnectedTo(IPiece target) {
+			return false;
+		}
+
+		@Override
+		public IPiece signal() {
+			return null;
+		}
+
+		@Override
+		public void end() {
+		}
+
+		private String name = null;
+		public IPiece setName(String name) {
+			this.name = name;
+			return this;
+		}
+		public String getName() {
+			if(name != null)
+				return name;
+			return getClass().getName();
+		}
+
+	}
 	
-	public static class ChainPiece implements PieceBody, Serializable, Tickable {
+	public static class ChainPiece extends Piece implements IPiece, Serializable, Tickable {
 		public static ExecutorService threadExecutor = Executors.newCachedThreadPool();
 		protected PieceHead fImpl;
-//		protected ChainInPathPack aIn, aInHeap, aInEvent, aInFamily;
 		protected ArrayList<ChainInPathPack> inPack = new ArrayList<ChainInPathPack>();
 		protected ArrayList<ChainOutConnectorPack> outPack = new ArrayList<ChainOutConnectorPack>();
-//		protected ChainOutPathPack aOut, aOutHeap, aOutFamily, aOutEvent;
 		protected CountDownLatch signal = new CountDownLatch(0);
-		private Boolean _chainlive = false, controlled_by_ac = true;
+		private Boolean _chainlive = false, controlled_by_ac = true, inited = false;
 //		Thread _th = null;
-		private String name = null;
-		Future f = null;
+		Future<?> f = null;
 		Chain _root_chain = null;
 		ChainPiece cp_reactor = this;
 		int mynum = 0;
-		protected ChainPartner partner = new ChainPartner();
-		private ErrorHandler _error = null;
+		protected Partner partner = new Partner();
+		private IErrorHandler _error = null;
 		private StatusHandler _statush = null;
 		enum PackType {
 			PASSTHRU, HEAP, FAMILY, EVENT
@@ -234,12 +273,12 @@ public class Chain {
 		ChainPiece() {
 			this(new PieceHead() {
 				@Override
-				public boolean pieceImpl(PieceBody f) throws InterruptedException {
+				public boolean pieceRun(IPiece f) throws InterruptedException {
 					return false;
 				}
 
 				@Override
-				public boolean pieceReset(PieceBody f) {
+				public boolean pieceReset(IPiece f) {
 					return false;
 				}
 			});
@@ -247,19 +286,15 @@ public class Chain {
 		ChainPiece(PieceHead tmpFImpl) {
 			mynum = n++;
 			fImpl = tmpFImpl;
-			addNewInPack().setInType(InputType.ALL);//PASSTHRU
-			addNewInPack().setInType(InputType.FIRST);//HEAP
-			addNewInPack().setInType(InputType.ALL);//FAMILY
-			addNewInPack().setInType(InputType.ALL);//.setUserPathListener(reset);//EVENT
+			addNewInPack().setInType(Input.ALL);//PASSTHRU
+			addNewInPack().setInType(Input.FIRST);//HEAP
+			addNewInPack().setInType(Input.ALL);//FAMILY
+			addNewInPack().setInType(Input.ALL);//.setUserPathListener(reset);//EVENT
 			
 			addNewOutPack();//PASSTHRU
 			addNewOutPack();//HEAP
-			addNewOutPack().setDefaultType(OutType.HIPPO);//FAMILY
+			addNewOutPack().setOutType(Output.HIPPO);//FAMILY
 			addNewOutPack();//EVENT
-			
-//			signal = new Toggle<String>();
-//			playing.sync_push(true);
-			init();
 		}
 		
 		protected ChainInPathPack addNewInPack() {
@@ -301,29 +336,28 @@ public class Chain {
 		}
 
 		public <T> T __exec(T obj, String flg) {
-			if(logFlag && _root_chain != null && _root_chain.log != null)
-				_root_chain.log.Log(flg, String.format("RTN: %s, CP: %s", obj, getName()));
+			if(logFlag)
+				return __log(obj, flg);
 			return obj;
+		}
+		
+		public <T> T __log(T obj, String flg) {
+			if( _root_chain != null && _root_chain.log != null)
+				_root_chain.log.log(flg, String.format("RTN: %s, CP: %s", obj, getName()));
+			return obj;
+			
 		}
 		
 		public void init() {
 		}
-		public ChainPiece restart() {
-//			for(ChainOutPath o: getOutPack(PackType.PASSTHRU).array)
-//				try {
-//					o.getQueue().reset();
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-			end();
-			try {
-				waitEnd();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		public void restart() {
+			if(isAlive()) {
+				f.cancel(true);
+				signal = new CountDownLatch(1);
+			} else {
+				start();
 			}
-			signal = new CountDownLatch(1);
-			start();
-			return this;
+			return;
 		}
 		
 		public ChainPiece signal() {
@@ -337,60 +371,33 @@ public class Chain {
 			return true;
 	}
 	
-		public ChainPiece setName(String name) {
-			this.name = name;
-			return this;
-		}
-		public String getName() {
-			if(name != null)
-				return name;
-			return getClass().getName();
-		}
-
-		
-		
-//		public ChainPiece pushEndSignal() {
-//			try {
-//				signalQueue.sync_push(null);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//			_th.interrupt();
-//			return this;
-//		}
-//		
 		public void start() {
 			final ChainPiece cp_this = this;
 			if(_root_chain == null) return;
 			final boolean autoend = _root_chain.AUTO_END;
 			if(isAlive()) return;
 //			_th = new Thread() {
+			if(!inited) {
+				init();
+				inited = true;
+			}
 			f = threadExecutor.submit(new Runnable() {
 				public void run() {
 					changeState(PieceState.STARTED);
-					try {
-						cp_this.onInitialize();
-					} catch (ChainException e) {
-						e.printStackTrace();
-						cp_this.onError(e);
-					}
-					int i = 0;
-					boolean rtn = true;
+					signal = new CountDownLatch(1);
 					synchronized(_chainlive) {
 						_chainlive = true;
 					}
 					fImpl.pieceReset(cp_reactor);
 					changeState(PieceState.RUNNING);
-					main_loop: while (rtn) {
+					main_loop: while (true) {
 						try {
 							__exec(String.format("ID:%d Main[#0 ->SIG]", mynum), "ChainPiece#impl");
 							if(controlled_by_ac && !cp_this.next()) {
-								rtn = false;
 								break main_loop;
 							}
 							__exec(String.format("ID:%d Main[#1 SIG->FUNC]", mynum), "ChainPiece#impl");
 							if(!_doAndLoopInError(fImpl, cp_reactor)) {
-								rtn = false;
 								break main_loop;
 							}
 							__exec(String.format("ID:%d Main[#2 FUNC->OK]", mynum), "ChainPiece#impl");
@@ -398,12 +405,12 @@ public class Chain {
 						} catch (InterruptedException e) {
 							if(!_chainlive)
 								break main_loop;
-							cp_this.interrupted();
 							__exec(String.format("ID:%d Main[#-1 INTERRUPTED]", mynum), "ChainPiece#impl");
 							fImpl.pieceReset(cp_reactor);
 						}
 					}
 					try {
+						changeState(PieceState.END);
 						__exec(String.format("ID:%d Main[#-2 END]", mynum), "ChainPiece#impl");
 						cp_this.onTerminate();
 					} catch (ChainException e) {
@@ -413,19 +420,18 @@ public class Chain {
 						 _root_chain.removePiece(cp_this);
 						__exec(String.format("ID:%d Main[#-3 AUTOREMOVE]", mynum), "ChainPiece#impl");
 					}
-					changeState(PieceState.END);
 				}
 			});
 //			};
 //			_th.start();
 		}
 		
-		protected ChainPiece end() {
+		public void end() {
 			synchronized(_chainlive) {
 				_chainlive = false;
 			}
-			interrupt();
-			return this;
+			f.cancel(true);
+			return;
 		}
 
 		protected void waitEnd() throws InterruptedException {
@@ -442,21 +448,24 @@ public class Chain {
 		private boolean _doAndLoopInError(PieceHead head, ChainPiece cp) throws InterruptedException {
 			while(true) {
 				try {
-					return head.pieceImpl(cp);
+					return head.pieceRun(cp);
 				} catch (ChainException e) {
 					onError(e);
 					switch(e.loop){
 					case INTERRUPT:
 						throw new InterruptedException();
 					case LOCK:
-						recvUnerrorEvent();
-						onUnerror(e);
+						try{
+							recvUnerrorEvent();
+						} finally {
+							onUnerror(e);
+						}
 					default:
 					}
 				}
 			}
 		}
-		protected ChainPiece setError(ErrorHandler er) {
+		protected ChainPiece setError(IErrorHandler er) {
 			_error = er;
 			return this;
 		}
@@ -465,17 +474,21 @@ public class Chain {
 			_statush = st;
 			return this;
 		}
+		
+		protected StatusHandler getStatusHandler() {
+			return _statush;
+		}
 
 		protected boolean onError(ChainException e) {
 			if (_error != null)
-				_error.ErrorHandler(this, e);
+				_error.onError(this, e);
 			changeState(PieceState.ERROR);
 			return true;
 		}
 		
 		protected boolean onUnerror(ChainException e) {
 			if(_error != null)
-				_error.ErrorCanceller(this, e);
+				_error.onCancel(this, e);
 			restoreState();
 			return true;
 		}
@@ -492,7 +505,6 @@ public class Chain {
 		public boolean tick() {
 			if(_statush != null)
 				_statush.tickView();
-			_root_chain.Kick();
 			return true;
 		}
 		
@@ -504,18 +516,7 @@ public class Chain {
 		}
 		
 		public boolean isAlive() {
-//			return _th != null && _th.isAlive();
 			return status!=PieceState.NOTSTARTED && status!=PieceState.END;
-		}
-		public void interrupt() {
-				f.cancel(true);
-		}
-		public void interrupted() {
-			return;
-		}
-		protected void onInitialize() throws ChainException {
-			signal = new CountDownLatch(1);
-			return;
 		}
 		protected void onTerminate() throws ChainException {
 			return;
@@ -524,22 +525,6 @@ public class Chain {
 		
 		//2.PathPack setting functions
 		protected ChainOutConnectorPack getOutPack(PackType stack) {
-//			ChainOutPathPack pack = null;
-//			switch(stack) {
-//			case PASSTHRU:
-//				pack = aOut;
-//				break;
-//			case HEAP:
-//				pack = aOutHeap;
-//				break;
-//			case FAMILY:
-//				pack = aOutFamily;
-//				break;
-//			case EVENT:
-//				pack = aOutEvent;
-//				break;
-//			}
-//			return pack;
 			return outPack.get(stack.ordinal());
 		}
 		protected ChainOutConnectorPack getOutPack(int num) {
@@ -556,19 +541,19 @@ public class Chain {
 				return null;
 			return inPack.get(num);
 		}
-		public ChainPiece setOutPackType(PackType pack, OutType type) {
-			getOutPack(pack).setDefaultType(type);
+		public ChainPiece setOutPackType(PackType pack, Output type) {
+			getOutPack(pack).setOutType(type);
 			return this;
 		}
 		
-		public ChainPiece setInPackType(PackType pack, InputType type) {
+		public ChainPiece setInPackType(PackType pack, Input type) {
 			getInPack(pack).setInType(type);
 			return this;
 		}
 		protected ChainInConnector addInPath(Class<?> c, PackType stack) {
 			return getInPack(stack).addNewPath(c);
 		}
-		protected ChainOutConnector addOutPath(Class<?> c, OutType io, PackType stack) {
+		protected ChainOutConnector addOutPath(Class<?> c, Output io, PackType stack) {
 			ChainOutConnector rtn = getOutPack(stack).addNewPath(c, io);
 			return rtn;
 		}
@@ -576,22 +561,17 @@ public class Chain {
 			partner.detachAll();
 			return;
 		}
-		public ChainPiece detachInPack(PackType packtype) {
-			getInPack(packtype).detachAll();
-			return this;
-		}
-		public ChainPiece detachOutPack(PackType packtype) {
-			getOutPack(packtype).detachAll();
-			return this;
-		}
-		public Collection<ChainPath> getLinks() {
+		public Collection<IPath> getLinks() {
 			return partner.getPaths();
 		}
-		public Collection<ChainPiece> getPartners() {
+		public Collection<IPiece> getPartners() {
 			return partner.getPartners();
 		}
-		public ChainPath detach(ChainPiece cp) {
-			return partner.getPath(cp).detach();
+		public void setPartner(IPath o, IPiece cp) {
+			partner.setPartner(o, cp);
+		}
+		public IPath detach(IPiece cp) {
+			return partner.getPath((ChainPiece)cp).detach();
 		}
 		public boolean hasInPath(PackType packtype) {
 			return getInPack(packtype).hasPath();
@@ -603,23 +583,11 @@ public class Chain {
 
 		
 		//3.Input/Output functions
-//		protected boolean ioCheck() {
-//			boolean rtn = true;
-//			for(ChainInPath a: getInPack(PackType.PASSTHRU).array) {
-//				if(a.getQueue().isClosed())
-//					rtn = false;
-//			}
-//			for(ChainOutPath a: getOutPack(PackType.PASSTHRU).array) {
-//				if(a.getQueue().isClosed())
-//					rtn = false;
-//			}
-//			return rtn;
-//		}
 		public <T> T getCache(ChainInConnector i) throws InterruptedException {
-			if(getInPack(PackType.PASSTHRU).array.contains(i)) {
+			if(getInPack(PackType.PASSTHRU).contains(i)) {
 				return i.<T>getCache();
 			}
-			else if(getInPack(PackType.EVENT).array.contains(i)) {
+			else if(getInPack(PackType.EVENT).contains(i)) {
 				return i.<T>getCache();
 			}
 			return null;
@@ -637,7 +605,7 @@ public class Chain {
 		public boolean outputAllReset() {
 //			if(aOutHeap.array.isEmpty()) return false;
 			boolean rtn = false;
-			Log.e("AllReset", "Called");
+//			Log.e("AllReset", "Called");
 //			rtn |= aOutHeap.send_reset();
 //			rtn |= aOut.send_reset();
 //			rtn |= aOutThis.send_reset();
@@ -652,56 +620,22 @@ public class Chain {
 		
 		ChainPiece getNext() {
 			ChainPiece tmp = null;
-			if(getOutPack(PackType.PASSTHRU).array.isEmpty()) {
+			if(getOutPack(PackType.PASSTHRU).isEmpty()) {
 			} else {
-				getOutPack(PackType.PASSTHRU).array.peek();
+				getOutPack(PackType.PASSTHRU).get(0);
 			}
 			return tmp;
 		}
 		
 		//4.External functions related with connections(called by other thread)
-		public Pair<ChainPiece, ChainPath> appendTo(PackType stack, ChainPiece target, PackType stack_target) throws ChainException {
-			//if user assigns PREV FUNCTION
-			if(target == null) {
-				throw new ChainException(this, "appendTo()/Invalid Target/Null");
-			} else if(this == target) {
-				throw new ChainException(this, "appendTo()/Invalid Target/Same as Successor");
-			}
-			return null;
-		}
-		
-		public Pair<ChainPiece, ChainOutConnector> appended(Class<?> cls, OutType type, PackType stack, ChainPiece from) throws ChainException {
-			return null;
-		}
-		
-		public ChainPiece detachFrom(ChainPiece cp) {
+		public void detached(IPiece cp) {
 			partner.unsetPartner(cp);
-			return this;
-		}
-		
-		public ChainPiece detached(ChainPiece cp) {
-			partner.unsetPartner(cp);
-			return this;
 		}
 		
 		public boolean postAppend() {
 			return sendUnerrorEvent();
 		}
 		
-//		boolean waitResume() throws InterruptedException {
-//			return playing.sync_pop();
-//		}
-
-//		protected ChainPiece suspend() {
-//			playing.reset();
-//			return this;
-//		}
-//		
-//		protected ChainPiece resume() {
-//			playing.sync_push(true);
-//			return this;
-//		}
-//		
 		public void waitOutput(ArrayList<Object> rtn) throws InterruptedException {
 			getOutPack(PackType.PASSTHRU).waitOutput(rtn);
 		}
@@ -711,7 +645,7 @@ public class Chain {
 		
 //		boolean outputType = false;//true: wait for at least one output, false: no wait
 		public boolean clearInputHeap() {
-			if(getInPack(PackType.HEAP).array.isEmpty()) return false;
+			if(getInPack(PackType.HEAP).isEmpty()) return false;
 //			for(ChainInPath a : getInPack(PackType.HEAP).array)
 //				a.reset();
 			getInPack(PackType.HEAP).reset();
@@ -719,8 +653,8 @@ public class Chain {
 		}
 		
 		protected boolean inputHeapAsync() {
-			if(getInPack(PackType.EVENT).array.isEmpty()) return false;
-			for(ChainInConnector a : getInPack(PackType.EVENT).array)
+			if(getInPack(PackType.EVENT).isEmpty()) return false;
+			for(ChainInConnector a : getInPack(PackType.EVENT))
 				if(a.isNotEmpty())
 					return true;
 //			for(ListIterator<ChainInPath> itr = aInQueueHeap.listIterator(aInQueueHeap.size()-1); itr.hasPrevious();)
@@ -733,7 +667,7 @@ public class Chain {
 		public ArrayList<Object> input(PackType type) throws InterruptedException {
 			return getInPack(type).input();
 		}
-		public boolean isConnectedTo(ChainPiece cp) {
+		public boolean isConnectedTo(IPiece cp) {
 			return partner.isConnectedTo(cp);
 		}
 		public boolean isAppendedTo(ChainPiece cp, PackType pt) {
@@ -752,52 +686,54 @@ public class Chain {
 			return true;
 		}
 		
-		public static class ChainPartner implements Serializable {
-			ConcurrentHashMap<ChainPiece, ChainPath> partner;
-			ChainPartner() {
-				partner = new ConcurrentHashMap<ChainPiece, ChainPath>();
+		public static class Partner implements Serializable {
+			ConcurrentHashMap<IPiece, IPath> partner;
+			Partner() {
+				partner = new ConcurrentHashMap<IPiece, IPath>();
 			}
-			public ChainPartner setPartner(ChainPath o, ChainPiece cp) {
+			public Partner setPartner(IPath o, IPiece cp) {
 				partner.put(cp, o);
 				return this;
 			}
-			public ChainPartner unsetPartner(ChainPiece cp) {
+			public Partner unsetPartner(IPiece cp) {
 				partner.remove(cp);
 				return this;
 			}
 //			public ChainPiece getPartner(ChainPathPair o) {
 //				return partner.get(o);
 //			}
-			public boolean isConnectedTo(ChainPiece cp) {
+			public boolean isConnectedTo(IPiece cp) {
 				return partner.containsKey(cp);
 			}
 			public boolean isAppendedTo(ChainPiece cp, PackType pt) {
-				ChainPath _path = null;
+				IPath _path = null;
 				if((_path = partner.get(cp)) != null)
 					if(_path.getOutConnector().pack == cp.getOutPack(pt))
 						return true;
 				return false;
 			}
-			public Collection<ChainPath> getPaths() {
+			public Collection<IPath> getPaths() {
 				return partner.values();
 			}
 			public void detachAll() {
-				for(ChainPath pair : partner.values())
+				for(IPath pair : partner.values())
 					pair.detach();
 				partner.clear();
 			}
-			public ChainPath getPath(ChainPiece cp) {
+			public IPath getPath(ChainPiece cp) {
 				return partner.get(cp);
 			}
-			public Collection<ChainPiece> getPartners() {
+			public Collection<IPiece> getPartners() {
 				return partner.keySet();
 			}
 		}
 		
 		
-		public static class ChainPathPack implements Serializable {
+		public static class PathPack<T extends Connector> extends ArrayList<T> implements Serializable {
 			PackType ptype = PackType.EVENT;
-			ChainPathPack() {
+			IPiece parent;
+			PathPack(ChainPiece _parent) {
+				parent = _parent;
 			}
 			public PackType getPtype() {
 				return ptype;
@@ -805,58 +741,56 @@ public class Chain {
 			public void setPtype(PackType ptype) {
 				this.ptype = ptype;
 			}
+			protected synchronized T addPath(T connect) {
+				add(connect);
+				notifyAll();
+				return connect;
+			}
+			public synchronized T removePath(T connect) {
+				remove(connect);
+				notifyAll();
+				return connect;
+			}
 			public void detachAll() {
+				for(T outpath : this) {
+					outpath.detach();
+				}
+			}
+			public boolean hasPath() {
+				return !isEmpty();
 			}
 		}
 		
 		
-		public static class ChainOutConnectorPack extends ChainPathPack {
-			Queue<ChainOutConnector> array;
+		public static class ChainOutConnectorPack extends PathPack<ChainOutConnector> {
+//			Queue<ChainOutConnector> array;
 			SyncQueue<Object> queue;
-			ChainPiece parent;
 			Boolean lock = false;
-			OutType defaultType = OutType.NORMAL;
+			Output defaultType = Output.NORMAL;
 			ChainOutConnectorPack(ChainPiece _parent) {
-				array = new ConcurrentLinkedQueue<ChainOutConnector>();
+				super(_parent);
+//				array = new ConcurrentLinkedQueue<ChainOutConnector>();
 				queue = new SyncQueue<Object>();
-				parent = _parent;
 			}
-			public boolean hasPath() {
-				return !array.isEmpty();
-			}
-			protected ChainOutConnectorPack setDefaultType(OutType type) {
+			protected ChainOutConnectorPack setOutType(Output type) {
 				defaultType = type;
 				return this;
 			}
-			public ChainOutConnector addNewPath(Class<?> c, OutType type) {
+			public ChainOutConnector addNewPath(Class<?> c, Output type) {
 				ChainOutConnector rtn = new ChainOutConnector(parent, c, this, (type!=null)?type:defaultType);
 				parent.__exec(String.format("NewPath = %s", rtn.type), "COPP#addNewPath");
-				synchronized(array) {
-					array.add(rtn);
-					array.notifyAll();
-				}
-				for(Iterator<Object> it = queue.iterator(); it.hasNext(); ) {
+				addPath(rtn);
+				for(Object o : queue) {
 					try {
-						rtn.sync_push(it.next());
+						rtn.sync_push(o);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
 				return rtn;
 			}
-			public void removePath(ChainOutConnector path) {
-				synchronized(array) {
-					array.remove(path);
-					array.notifyAll();
-				}
-			}
-			public void detachAll() {
-				for(ChainOutConnector outpath : array) {
-					outpath.detach();
-				}
-			}
-			public boolean clear() {
-				for(ChainOutConnector o: array) {
+			public boolean clearAll() {
+				for(ChainOutConnector o: this) {
 					o.reset();
 				}
 				queue.clear();
@@ -864,7 +798,7 @@ public class Chain {
 			}
 			public boolean send_reset() {
 				boolean rtn = false;
-				for(ChainOutConnector o: array) {
+				for(ChainOutConnector o: this) {
 					rtn |= o.send_reset();
 				}
 				return rtn;
@@ -881,13 +815,13 @@ public class Chain {
 					while(lock) lock.wait();
 				}
 				ArrayList<Object> rtn = new ArrayList<Object>();
-				int size = array.size();
+				int size = size();
 				for(int i = 0; i < size; i++)
 					rtn.add(obj);
 				if(queue.size()==10)
 					try {
 						queue.sync_pop();
-					} catch (Axon.AxonException e) {
+					} catch (IAxon.AxonException e) {
 						return false;
 					}
 				if(obj != null)
@@ -895,11 +829,11 @@ public class Chain {
 				return outputAll(rtn);
 			}
 			public boolean outputAll(ArrayList<?> ar) throws InterruptedException {
-				if(array.isEmpty()) return false;
+				if(isEmpty()) return false;
 //				if(array.size() > ar.size()) return false;
 				int i = 0;
 				boolean rtn = false;
-				for(ChainOutConnector a : array)
+				for(ChainOutConnector a : this)
 					rtn |= a.async_push(ar.get(i<ar.size()-1?i++:i));
 //				ListIterator<?> itr2 = ar.listIterator(ar.size());
 //				for(ListIterator<ChainOutPath> itr = aOutQueue.listIterator(aOutQueue.size()); itr.hasPrevious();)
@@ -908,15 +842,15 @@ public class Chain {
 			}
 			public void waitOutput(ArrayList<Object> rtn) throws InterruptedException {
 				while(!outputAll(rtn)) {
-					synchronized(array) {
-						array.wait();
+					synchronized(this) {
+						wait();
 					}
 				}
 			}
 			public void waitOutputAll(Object rtn) throws InterruptedException {
 				while(!outputAllSimple(rtn)) {
-					synchronized(array) {
-						array.wait();
+					synchronized(this) {
+						wait();
 					}
 				}
 			}
@@ -924,55 +858,33 @@ public class Chain {
 		
 		
 		
-		static enum InputType {
+		static enum Input {
 			ALL, FIRST, COUNT
 		}
-		public static class ChainInPathPack extends ChainPathPack {
-			InputType inputType;
-			PathListener listen, userlisten, resetHandler;
-			ChainPiece parent;
-			Queue<ChainInConnector> array;
-			SyncQueue<ChainConnector> order_first;
+		public static class ChainInPathPack extends PathPack<ChainInConnector> {
+			Input inputType;
+			IPathListener listen, userlisten, resetHandler;
+			SyncQueue<Connector> order_first;
 			Iterator<ChainInConnector> now_count = null;
 			public ChainInPathPack(ChainPiece _parent) {
-				array = new ConcurrentLinkedQueue<ChainInConnector>();
-				order_first = new SyncQueue<ChainConnector>();
-				inputType = InputType.ALL;
-				listen = new PathListener();
-				userlisten = new PathListener();
-				resetHandler = new PathListener();
-				parent = _parent;
-			}
-			public boolean hasPath() {
-				return !array.isEmpty();
+				super(_parent);
+				order_first = new SyncQueue<Connector>();
+				inputType = Input.ALL;
 			}
 			public ChainInConnector addNewPath(Class<?> c)  {
 				ChainInConnector rtn = new ChainInConnector(parent, c, this);
-				rtn.setListener(new PathListener() {
+				rtn.setListener(new IPathListener() {
 					@Override
-					public void OnPushed(ChainConnector p) throws InterruptedException {
-						super.OnPushed(p);
-						listen.OnPushed(p);
-						userlisten.OnPushed(p);
+					public void OnPushed(Connector p, Object obj) throws InterruptedException {
+						if(listen != null)
+							listen.OnPushed(p, obj);
+						if(userlisten != null)
+							userlisten.OnPushed(p, obj);
 					}
 				});
 				rtn.setResetHandler(resetHandler);
-				synchronized(array) {
-					array.add(rtn);
-					array.notifyAll();
-				}
+				addPath(rtn);
 				return rtn;
-			}
-			public void removePath(ChainInConnector path) {
-				synchronized(array) {
-					array.remove(path);
-					array.notifyAll();
-				}
-			}
-			public void detachAll() {
-				for(ChainInConnector outpath : array) {
-					outpath.detach();
-				}
 			}
 			public ArrayList<Object> inputPeek() throws InterruptedException {
 				ArrayList<Object> rtn = null;
@@ -988,17 +900,17 @@ public class Chain {
 				return rtn;
 			}
 			private ArrayList<Object> _inputPeekAll() throws InterruptedException {
-				if(array.isEmpty()) return null;
+				if(isEmpty()) return null;
 				ArrayList<Object> rtn = new ArrayList<Object>();
-				for(ChainInConnector a : array)
+				for(ChainInConnector a : this)
 					rtn.add(a.sync_peek());
 				return rtn;
 			}
 			private ArrayList<Object> _inputPeekFirst() throws InterruptedException {
-				ChainConnector p = order_first.sync_peek();
+				Connector p = order_first.sync_peek();
 				ArrayList<Object> rtn = new ArrayList<Object>();
 				rtn.add(p.sync_peek());
-				Log.w("INPUT", p.parentPiece.getName());
+//				Log.w("INPUT", p.parentPiece.getName());
 				return rtn;
 			}
 			public ArrayList<Object> input() throws InterruptedException {
@@ -1020,68 +932,62 @@ public class Chain {
 				return rtn;
 			}
 			private ArrayList<Object> _inputAll() throws InterruptedException {
-				if(array.isEmpty()) return null;
+				if(isEmpty()) return null;
 				ArrayList<Object> rtn = new ArrayList<Object>();
-				for(ChainInConnector a : array)
+				for(ChainInConnector a : this)
 					rtn.add(a.sync_pop());
 				return rtn;
 			}
 			
 			private ArrayList<Object> _inputFirst() throws InterruptedException {
-				SyncQueue<ChainConnector> _pushedPath = order_first;
-				ChainConnector p;
+				SyncQueue<Connector> _pushedPath = order_first;
+				Connector p;
 				try {
 					p = _pushedPath.sync_pop();
-				} catch (Axon.AxonException e) {
+				} catch (IAxon.AxonException e) {
 					return null;
 				}
 				ArrayList<Object> rtn = new ArrayList<Object>();
 				rtn.add(p.sync_pop());
 				parent.__exec(String.format("outputType = %s",p.type), "ChainPiece#_inputFirst");
-				if(p.type == OutType.HIPPO) {
+				if(p.type == Output.HIPPO) {
 					order_first.sync_push(p);
 				}
 				return rtn;
 			}
 			
-//			public Object inputHead() throws InterruptedException {
-//				ChainInPath i = array.peek();
-//				while (i == null)
-//					synchronized (array) {
-//						array.wait();
-//						i = array.peek();
-//					}
-//				return input().get(0);
-//			}
-
 			private ArrayList<Object> _inputCount() throws InterruptedException {
-				if(array.isEmpty()) return null;
+				if(isEmpty()) return null;
 				ArrayList<Object> rtn = new ArrayList<Object>();
 				if(now_count == null || !now_count.hasNext()) {
-					Log.w("Chain_InputCount", "Cleared");
-					now_count = array.iterator();
+					now_count = iterator();
 				}
 				rtn.add(now_count.next().sync_pop());
 //				reset();
 				return rtn;
 			}
 			
-			public ChainInPathPack setInType(InputType type) {
-				order_first = new SyncQueue<ChainConnector>();
+			public Object inputOne(int num) throws InterruptedException {
+				if(isEmpty()) return null;
+				if(size() <= num) return null;
+				return get(num).sync_pop();
+			}
+
+			public ChainInPathPack setInType(Input type) {
+				order_first = new SyncQueue<Connector>();
 				inputType = type;
-				PathListener tmpListener = null;
+				IPathListener tmpListener = null;
 				switch(type) {
 				case ALL:
 				case COUNT:
 					//cancel TYPE[INPUT FIRST]
-					tmpListener = new PathListener();
+					tmpListener = null;//new PathListener();
 					break;
 				case FIRST:
 					//prepare TYPE[INPUT FIRST]
-					tmpListener = new PathListener() {
+					tmpListener = new IPathListener() {
 						@Override
-						public void OnPushed(ChainConnector p) throws InterruptedException {
-							super.OnPushed(p);
+						public void OnPushed(Connector p, Object obj) throws InterruptedException {
 							order_first.sync_push(p);
 						}
 					};
@@ -1090,87 +996,63 @@ public class Chain {
 				_setPathListener(tmpListener);
 				return this;
 			}
-			ChainInPathPack _setPathListener(PathListener _listen) {
+			ChainInPathPack _setPathListener(IPathListener _listen) {
 				listen = _listen;
-				for(ChainInConnector a: array)
-					a.setListener(new PathListener() {
-						@Override
-						public void OnPushed(ChainConnector p) throws InterruptedException {
-							super.OnPushed(p);
-							listen.OnPushed(p);
-							userlisten.OnPushed(p);
-						}
-					});
 				return this;
 			}
-			public ChainInPathPack setResetHandler(PathListener _reset) {
+			public ChainInPathPack setResetHandler(IPathListener _reset) {
 				resetHandler = _reset;
-				for(ChainInConnector a: array)
+				for(ChainInConnector a: this)
 					a.setListener(_reset);
 				return this;
 			}
-			public ChainInPathPack setUserPathListener(PathListener _listen) {
+			public ChainInPathPack setUserPathListener(IPathListener _listen) {
 				userlisten = _listen;
-				for(ChainInConnector a: array)
-					a.setListener(new PathListener() {
-						@Override
-						public void OnPushed(ChainConnector p) throws InterruptedException {
-							super.OnPushed(p);
-							listen.OnPushed(p);
-							userlisten.OnPushed(p);
-						}
-					});
 				return this;
 			}
 			public void reset() {
-				for(ChainInConnector o: array) {
+				for(ChainInConnector o: this) {
 					o.reset();
 				}
 			}
 
 		}
 	};
-	public static class FlexChainPiece extends ChainPiece {
+	public static class FlexPiece extends ChainPiece {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		FlexChainPiece() {
+		FlexPiece() {
 			super();
 		}
-		FlexChainPiece(PieceHead fImpl) {
+		FlexPiece(PieceHead fImpl) {
 			super(fImpl);
 		}
-		public Pair<ChainPiece, ChainPath> appendTo(PackType stack, ChainPiece cp, Class<?> cls, PackType stack_target) throws ChainException {
+		public ConnectionIO appendTo(PackType stack, IPiece cp, Class<?> cls, PackType stack_target) throws ChainException {
 			super.appendTo(stack,cp,stack_target);
 			ChainInConnector i = addInPath(cls, stack);
-			Pair<ChainPiece, ChainOutConnector> o = cp.appended(cls, null, stack_target, this);
-			if(i.connect(o.second)) {
-				ChainPath p =  new ChainPath(o.first, this, o.second, i);
-				return new Pair<ChainPiece, ChainPath>(o.first,p);
+			ConnectionO o = cp.appended(cls, null, stack_target, this);
+			if(i.connect(o.getConnect())) {
+				ChainPath p =  new ChainPath((ChainPiece)o.getPiece(), this, o.getConnect(), i);
+				return new ConnectionIO(o.getPiece(),p);
 			}
 			return null;
 		}
 		@Override
-		public Pair<ChainPiece, ChainPath> appendTo(PackType stack, ChainPiece cp, PackType stack_target) throws ChainException {
+		public ConnectionIO appendTo(PackType stack, IPiece cp, PackType stack_target) throws ChainException {
 			return appendTo(stack, cp, ChainPiece.class, stack_target);
 		}
 		@Override
-		public Pair<ChainPiece, ChainOutConnector> appended(Class<?> cls, OutType type, PackType stack_target, ChainPiece from) throws ChainException {
+		public ConnectionO appended(Class<?> cls, Output type, PackType stack_target, IPiece from) throws ChainException {
 			ChainOutConnector o = addOutPath(cls, type, stack_target);
 //			partner.setPartner(o, from);
-			return new Pair<ChainPiece, ChainOutConnector>(this, o);
-		}
-		@Override
-		public FlexChainPiece detachFrom(ChainPiece cp) {
-			super.detachFrom(cp);
-			return this;
+			return new ConnectionO(this, o);
 		}
 		
 		@Override
-		public FlexChainPiece detached(ChainPiece cp) {
+		public void detached(IPiece cp) {
 			super.detached(cp);
-			return this;
 		}
 	}
 	public static class FixedChainPiece extends ChainPiece {
@@ -1185,46 +1067,46 @@ public class Chain {
 			super(fImpl);
 		}
 		@Override
-		public Pair<ChainPiece, ChainPath> appendTo(PackType stack, ChainPiece cp, PackType stack_target) throws ChainException {
+		public ConnectionIO appendTo(PackType stack, IPiece cp, PackType stack_target) throws ChainException {
 			super.appendTo(stack, cp, stack_target);
-			for(ChainInConnector i : getInPack(PackType.PASSTHRU).array) {
-				Pair<ChainPiece, ChainOutConnector> o = cp.appended(i.class_name, null, stack_target, this);
-				if(i.connect(o.second)) {
+			for(ChainInConnector i : getInPack(PackType.PASSTHRU)) {
+				ConnectionO o = cp.appended(i.class_name, null, stack_target, this);
+				if(i.connect(o.getConnect())) {
 //					used = !hasAnyUnusedConnect();
-					return new Pair<ChainPiece, ChainPath>(o.first, new ChainPath(o.first, this, o.second, i));
+					return new ConnectionIO(o.getPiece(), new ChainPath((ChainPiece)o.getPiece(), this, o.getConnect(), i));
 				}
 			}
 			return null;
 		}
-		protected Pair<ChainPiece, ChainOutConnector> appended(Class<?> cls) throws ChainException {
-			for(ChainOutConnector o : getOutPack(PackType.PASSTHRU).array)
+		protected ConnectionO appended(Class<?> cls) throws ChainException {
+			for(ChainOutConnector o : getOutPack(PackType.PASSTHRU))
 				if(o.class_name == cls)
-					return new Pair<ChainPiece, ChainOutConnector>(this, o);
+					return new ConnectionO(this, o);
 			return null;
 		}
 		
 	}
-	enum OutType { NORMAL, HIPPO, SYNC, TOGGLE }
-	public static class ChainConnector implements Serializable {
-		ChainPiece parentPiece = null;
+	enum Output { NORMAL, HIPPO, SYNC, TOGGLE }
+	public static class Connector implements IConnector, Serializable {
+		IPiece parentPiece = null;
 		Class<?> class_name = null;
 		boolean used = false;
-		ChainConnector partner = null;
+		Connector partner = null;
 		int order = 0;
-		Hippo<Axon<?>> QueueImpl = new Hippo<Axon<?>>();
-		OutType type = OutType.NORMAL;
-		PathListener listen = null, resetHandler = null;
+		Hippo<IAxon<?>> QueueImpl = new Hippo<IAxon<?>>();
+		Output type = Output.NORMAL;
+		IPathListener listen = null, resetHandler = null;
 		boolean end = false;
 		ChainPath parentPath = null;
 		
-		public ChainConnector() {
+		public Connector() {
 		}
-		public ChainConnector(ChainPiece parent_, Class<?> c) {
+		public Connector(IPiece parent, Class<?> c) {
 			this();
-			parentPiece = parent_;
+			parentPiece = parent;
 			class_name = c;
 		}
-		protected ChainConnector setParentPath(ChainPath _path) {
+		protected Connector setParentPath(ChainPath _path) {
 			parentPath = _path;
 			return this;
 		}
@@ -1233,73 +1115,67 @@ public class Chain {
 				return;
 			parentPath.detach();
 		}
-		public ChainPiece getParent() {
+		public IPiece getParent() {
 			return parentPiece;
 		}
-		public ChainConnector setUsed(boolean b) {
+		public Connector setUsed(boolean b) {
 			used = b;
 			return this;
 		}
-		public ChainConnector setPartner(ChainConnector i) {
+		public Connector setPartner(Connector i) {
 			partner = i;
 			return this;
 		}
-		public ChainConnector setListener(PathListener _listen) {
+		public Connector setListener(IPathListener _listen) {
 			listen = _listen;
 			return this;
 		}
-		public ChainConnector setResetHandler(PathListener _reset) {
+		public Connector setResetHandler(IPathListener _reset) {
 			resetHandler = _reset;
 			return this;
 		}
 		public boolean isConnected() {
 			return used;
 		}
-		public /*synchronized*/ChainConnector setQueueImpl(Axon<?> q) {
+		//the best part of codes that i could implement
+		public Connector setQueueImpl(IAxon<?> q) {
 			QueueImpl.sync_push(q);
-//			notifyAll();
 			return this;
 		}
-		public Axon<?> getQueue() throws InterruptedException {
+		public IAxon<?> getQueue() throws InterruptedException {
 			return QueueImpl.sync_pop();
 		}
 		
 		@SuppressWarnings("unchecked")
-		public /*synchronized*/ <T> T sync_pop() throws InterruptedException {
-//			while(QueueImpl==null) {
-//				wait();
-//			}
+		public <T> T sync_pop() throws InterruptedException {
 			try {
-				T rtn = ((Axon<Packet<T>>)getQueue()).sync_pop().getObject();
+				T rtn = ((IAxon<Packet<T>>)getQueue()).sync_pop().getObject();
 				if(parentPath != null)
 					parentPath.tick();
 				return rtn;
-			} catch (Axon.AxonException e) {
+			} catch (IAxon.AxonException e) {
 				return null;
 			}
 		}
 		
 		@SuppressWarnings("unchecked")
-		public/* synchronized*/ <T> T sync_peek() throws InterruptedException {
-//			while(QueueImpl==null) {
-//				wait();
-//			}
-			return ((Axon<Packet<T>>)getQueue()).sync_peek().getObject();
+		public <T> T sync_peek() throws InterruptedException {
+			return ((IAxon<Packet<T>>)getQueue()).sync_peek().getObject();
 		}
 		
 		@SuppressWarnings("unchecked")
 		public <T> boolean sync_push(T obj) throws InterruptedException {
-			boolean rtn = ((Axon<Packet<T>>)getQueue()).sync_push(new Packet<T>(obj, null));
+			boolean rtn = ((IAxon<Packet<T>>)getQueue()).sync_push(new Packet<T>(obj, null));
 			if(rtn && listen != null)
-				listen.OnPushed(this);
+				listen.OnPushed(this, obj);
 			return rtn;
 		}
 		
 		public <T> boolean async_push(T obj) throws InterruptedException {
 			@SuppressWarnings("unchecked")
-			boolean rtn = ((Axon<Packet<T>>)getQueue()).async_push(new Packet<T>(obj, null));
+			boolean rtn = ((IAxon<Packet<T>>)getQueue()).async_push(new Packet<T>(obj, null));
 			if(rtn && listen != null)
-				listen.OnPushed(this);
+				listen.OnPushed(this, obj);
 			return rtn;
 		}
 		
@@ -1308,7 +1184,7 @@ public class Chain {
 			if(rtn) {
 				QueueImpl.reset();
 				try {
-					resetHandler.OnPushed(this);
+					resetHandler.OnPushed(this, null);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -1322,18 +1198,12 @@ public class Chain {
 		
 		@SuppressWarnings("unchecked")
 		public <T> T getCache() throws InterruptedException {
-//			while(QueueImpl==null) {
-//				wait();
-//			}
-			return ((Axon<Packet<T>>)getQueue()).getCache().getObject();
+			return ((IAxon<Packet<T>>)getQueue()).getCache().getObject();
 		}
 		
 		@SuppressWarnings("unchecked")
-		public ChainPiece getCacheSource() throws InterruptedException {
-//			while(QueueImpl==null) {
-//				wait();
-//			}
-			return ((Axon<Packet<?>>)getQueue()).getCache().getSource();
+		public IPiece getCacheSource() throws InterruptedException {
+			return ((IAxon<Packet<?>>)getQueue()).getCache().getSource();
 		}
 		
 		public void reset() {
@@ -1343,45 +1213,49 @@ public class Chain {
 		
 	}
 	
-	public static class ChainOutConnector extends ChainConnector {
+	public static class ChainOutConnector extends Connector {
 		ChainPiece.ChainOutConnectorPack pack = null;
-		public ChainOutConnector(ChainPiece parent, Class<?> c, ChainPiece.ChainOutConnectorPack _pack, OutType _type) {
+		public ChainOutConnector(IPiece parent, Class<?> c, ChainPiece.ChainOutConnectorPack _pack, Output _type) {
 			super(parent, c);
 			pack = _pack;
 			setType(_type);
-			Axon<?> q;
-			if(_type == OutType.NORMAL) {
-				if(c == String.class) {
-					q = new SyncQueue<Packet<String>>();
-				} else if(c == Integer.class) {
-					q = new SyncQueue<Packet<Integer>>();
-				} else {
-					q = new SyncQueue<Packet<String>>();
-				}
-			} else if(_type == OutType.HIPPO) {
-				if(c == String.class) {
-					q = new Hippo<Packet<String>>();
-				} else if(c == Integer.class) {
-					q = new Hippo<Packet<Integer>>();
-				} else {
-					q = new Hippo<Packet<String>>();
-				}
-			} else if(_type == OutType.TOGGLE) {
-				if(c == String.class) {
-					q = new Toggle<Packet<String>>();
-				} else if(c == Integer.class) {
-					q = new Toggle<Packet<Integer>>();
-				} else {
-					q = new Toggle<Packet<String>>();
-				}
+			IAxon<?> q;
+			if(_type == Output.NORMAL) {
+//				if(c == String.class) {
+//					q = new SyncQueue<Packet<String>>();
+//				} else if(c == Integer.class) {
+//					q = new SyncQueue<Packet<Integer>>();
+//				} else {
+//					q = new SyncQueue<Packet<String>>();
+//				}
+				q = new SyncQueue<Packet<?>>();
+			} else if(_type == Output.HIPPO) {
+//				if(c == String.class) {
+//					q = new Hippo<Packet<String>>();
+//				} else if(c == Integer.class) {
+//					q = new Hippo<Packet<Integer>>();
+//				} else {
+//					q = new Hippo<Packet<String>>();
+//				}
+				q = new Hippo<Packet<?>>();
+			} else if(_type == Output.TOGGLE) {
+//				if(c == String.class) {
+//					q = new Toggle<Packet<String>>();
+//				} else if(c == Integer.class) {
+//					q = new Toggle<Packet<Integer>>();
+//				} else {
+//					q = new Toggle<Packet<String>>();
+//				}
+				q = new Toggle<Packet<?>>();
 			} else {
-				if(c == String.class) {
-					q = new SyncObject<Packet<String>>();
-				} else if(c == Integer.class) {
-					q = new SyncObject<Packet<Integer>>();
-				} else {
-					q = new SyncObject<Packet<String>>();
-				}
+//				if(c == String.class) {
+//					q = new SyncObject<Packet<String>>();
+//				} else if(c == Integer.class) {
+//					q = new SyncObject<Packet<Integer>>();
+//				} else {
+//					q = new SyncObject<Packet<String>>();
+//				}
+				q = new SyncObject<Packet<?>>();
 			}
 			setQueueImpl(q);
 		}
@@ -1390,7 +1264,7 @@ public class Chain {
 			return compile(c);
 		}
 */
-		public ChainOutConnector setType(OutType _type) {
+		public ChainOutConnector setType(Output _type) {
 			type = _type;
 			return this;
 		}
@@ -1414,10 +1288,10 @@ public class Chain {
 		}
 	}
 	
-	public static class ChainInConnector extends ChainConnector {
+	public static class ChainInConnector extends Connector {
 		ChainPiece.ChainInPathPack pack = null;
-		public ChainInConnector(ChainPiece cModel, Class<?> c, ChainPiece.ChainInPathPack _pack) {
-			super(cModel, c);
+		public ChainInConnector(IPiece parent, Class<?> c, ChainPiece.ChainInPathPack _pack) {
+			super(parent, c);
 			pack = _pack;
 		}
 /*		public Axon<?> compile() {
@@ -1446,7 +1320,7 @@ public class Chain {
 				int size = o.getQueue().size();
 //				Log.w("ChainConnect", Integer.toString(size));
 				for(int i = 0; i < size; i++ ) {
-						listen.OnPushed(o);
+						listen.OnPushed(o, null);
 				}
 			} catch (InterruptedException e) {
 				throw new ChainException(this, "Connect was cancelled");
@@ -1458,20 +1332,24 @@ public class Chain {
 		}
 	}
 	
-	public static class ChainPath implements Tickable {
-		ChainPiece _cp_start, _cp_end;
+	public static class ChainPath implements Tickable, IPath {
+		IPiece _cp_start, _cp_end;
 		ChainOutConnector _out;
 		ChainInConnector _in;
 		private StatusHandler h = null;
 		ChainPath(ChainPiece cp_start, ChainPiece cp_end, ChainOutConnector out, ChainInConnector in) {
+			attach(cp_start, cp_end, out, in);
+		}
+		public ChainPath attach(IPiece cp_start, IPiece cp_end, ChainOutConnector out, ChainInConnector in) {
 			_out = out;
 			_in = in;
 			_cp_start = cp_start;
 			_cp_end = cp_end;
 			_out.setParentPath(this);
 			_in.setParentPath(this);
-			_cp_end.partner.setPartner(this, _cp_start);
-			_cp_start.partner.setPartner(this, _cp_end);
+			_cp_end.setPartner(this, _cp_start);
+			_cp_start.setPartner(this, _cp_end);
+			return this;
 	}
 		public ChainOutConnector getOutConnector() {
 			return _out;
@@ -1479,19 +1357,17 @@ public class Chain {
 		public ChainInConnector getInConnector() {
 			return _in;
 		}
-		public ChainPiece get_cp_end() {
+		public IPiece get_cp_end() {
 			return _cp_end;
 		}
-		public ChainPiece get_cp_start() {
+		public IPiece get_cp_start() {
 			return _cp_start;
 		}
 		public ChainPath detach() {
 			getOutConnector().end();
 			getInConnector().end();
-//			_cp_start.partner.unsetPartner(_cp_end);
-//			_cp_end.partner.unsetPartner(_cp_start);
 			_cp_start.detached(_cp_end);
-			_cp_end.detachFrom(_cp_start);
+			_cp_end.detached(_cp_start);
 			return this;
 		}
 		@Override
@@ -1504,15 +1380,11 @@ public class Chain {
 			this.h = h;
 			return this;
 		}
+		public StatusHandler getStatusHandler() {
+			return h;
+		}
 	}
 
-	public interface PieceHead {
-		abstract boolean pieceImpl(PieceBody f) throws InterruptedException, ChainException;
-		abstract boolean pieceReset(PieceBody f);
-	}
-	
-	public interface PieceBody {
-	}
 	
 	public static class ChainException extends Exception {
 
@@ -1527,21 +1399,21 @@ public class Chain {
 			super("ChainException: Unknown Error");
 			err = "Unknown";
 		}
-		ChainException(ChainPiece cp, String str, LoopableError _loop) {
+		ChainException(IPiece piece, String str, LoopableError _loop) {
 			super("ChainException: "+str);
 			err = str;
-			location = cp.getName();
+			location = piece.getName();
 			loop = _loop;
 		}
-		ChainException(ChainPiece cp, String str) {
-			this(cp, str, LoopableError.LOOPABLE);
+		ChainException(IPiece piece, String str) {
+			this(piece, str, LoopableError.LOOPABLE);
 		}
-		ChainException(ChainConnector cp, String str) {
+		ChainException(Connector cp, String str) {
 			super("ChainException: "+str);
 			err = str;
 			location = "Path";
 		}
-		ChainException(Manager<?> cp, String str) {
+		ChainException(IManager<?> cp, String str) {
 			super("ChainException: "+str);
 			err = str;
 			location = "Manager";
@@ -1551,33 +1423,69 @@ public class Chain {
 			err = str;
 			location = cp.getName();
 		}
+		public ChainException(Factory pieceFactory, String str) {
+			super("ChainException: "+str);
+			err = str;
+			location = "Factory";
+		}
 		
 	}
 	public enum LoopableError {
 		LOOPABLE, INTERRUPT, LOCK
 	}
-	public static class PathListener implements Serializable {
-		public void OnPushed(ChainConnector p) throws InterruptedException {
-		}
+	public interface IPathListener {
+		public void OnPushed(Connector p, Object obj) throws InterruptedException;
 	}
 	
-	public static class Packet<T> {
+	public static class Packet<T> implements IPacket<T> {
 		T obj = null;
-		ChainPiece source = null;
-		Packet(T _obj, ChainPiece _source) {
+		IPiece source = null;
+		Packet(T _obj, IPiece _source) {
 			obj = _obj;
 			source = _source;
 		}
 		public T getObject() {
 			return obj;
 		}
-		public ChainPiece getSource() {
+		public IPiece getSource() {
 			return source;
 		}
 	}
 	
+	public interface IPacket<T> {
+		public T getObject();
+		public IPiece getSource();
+	}
+	
 	public interface Tickable {
 		boolean tick();
+	}
+	public interface IPath {
+		public IPath attach(IPiece cp_start, IPiece cp_end, ChainOutConnector out, ChainInConnector in);
+		public ChainOutConnector getOutConnector();
+		public IPath detach();
+		public IPath setStatusHandler(StatusHandler statusHandler);
+	}
+	
+	public interface IConnector {
+	}
+	public interface PieceHead {
+		abstract boolean pieceRun(IPiece f) throws InterruptedException, ChainException;
+		abstract boolean pieceReset(IPiece f);
+	}
+	
+	public interface IPiece {
+		public ConnectionO appended(Class<?> cls, Output type, PackType stack, IPiece from) throws ChainException;
+		public ConnectionIO appendTo(PackType stack, IPiece piece_to, PackType stack_target) throws ChainException;
+		public void detached(IPiece _cp_end);
+		public void setPartner(IPath chainPath, IPiece _cp_start);
+		public IPath detach(IPiece y);
+		public Collection<IPiece> getPartners();
+		public boolean isConnectedTo(IPiece target);
+		public IPiece signal();
+		public void end();
+		public String getName();
+		public <T> T __exec(T obj, String flg);
 	}
 }
 

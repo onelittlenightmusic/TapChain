@@ -2,11 +2,9 @@ package org.tapchain;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.tapchain.Axon.AxonException;
-
 
 public class SyncQueue<T> extends ConcurrentLinkedQueue<T>
-		implements Axon<T> {
+		implements IAxon<T> {
 	/**
 	 * 
 	 */
@@ -46,12 +44,12 @@ public class SyncQueue<T> extends ConcurrentLinkedQueue<T>
 		return _tmp;
 	}
 
-	public T sync_pop() throws InterruptedException, Axon.AxonException {
+	public T sync_pop() throws InterruptedException, IAxon.AxonException {
 		cache = null;
 			synchronized(this) {
 				while (null == (cache = super.poll())) {
 					if(closed)
-						throw new Axon.AxonException();
+						throw new IAxon.AxonException();
 					wait();
 				}
 			}

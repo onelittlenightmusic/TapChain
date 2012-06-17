@@ -3,12 +3,9 @@ package org.tapchain;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.tapchain.AnimationChain.TapChainAnimation;
-import org.tapchain.AnimationChain.TapChainViewI;
+import org.tapchain.ActorChain.TapChainAnimation;
+import org.tapchain.ActorChain.IView;
 import org.tapchain.Chain.ChainException;
-
-
-import android.graphics.Canvas;
 
 
 public class ChainAnimation implements TapChainAnimation {
@@ -21,8 +18,8 @@ public class ChainAnimation implements TapChainAnimation {
 		return this;
 	}
 	@Override
-	public boolean effect_run() throws ChainException, InterruptedException {
-		if(!q.get(0).effect_run()) {
+	public boolean actorRun() throws ChainException, InterruptedException {
+		if(!q.get(0).actorRun()) {
 			q.remove(0);
 		}
 		return !q.isEmpty();
@@ -34,11 +31,7 @@ public class ChainAnimation implements TapChainAnimation {
 		return false;
 	}
 	@Override
-	public int getDuration() {
-		return 0;
-	}
-	@Override
-	public TapChainViewI setCenter(WorldPoint point) {
+	public IView setCenter(WorldPoint point) {
 		return null;
 	}
 	

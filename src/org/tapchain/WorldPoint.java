@@ -2,13 +2,14 @@ package org.tapchain;
 
 import java.io.Serializable;
 
-import org.tapchain.TapChainEditor.IWindow;
-
-import android.graphics.Rect;
+import org.tapchain.TapChainEdit.IWindow;
 
 
-@SuppressWarnings("serial")
-public class WorldPoint implements Serializable, HeroicPoint {
+public class WorldPoint implements Serializable, IPoint {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7149778824307308364L;
 	public int x, y;
 	public static enum WPEffect { POS, DIF }
 	private WPEffect effect = WPEffect.POS;
@@ -45,14 +46,14 @@ public class WorldPoint implements Serializable, HeroicPoint {
 	public WorldPoint multiply(float a) {
 		return new WorldPoint((int)(a*x), (int)(a*y));
 	}
-	public WorldPoint sub(HeroicPoint b) {
+	public WorldPoint sub(IPoint b) {
 		if(b==null) return this;
 		return new WorldPoint(x-b.x(), y-b.y());
 	}
 	public ScreenPoint getScreenPoint(IWindow v) {
 		if(v == null) 
 			return new ScreenPoint(x, y);
-		return new ScreenPoint(this.x - IWindow.window_orient.x, this.y - IWindow.window_orient.y);
+		return new ScreenPoint(this.x, this.y);
 	}
 	@Override
 	public String toString() {
@@ -81,10 +82,6 @@ public class WorldPoint implements Serializable, HeroicPoint {
 	public static WorldPoint minus(WorldPoint wp) {
 		if(wp==null) return new WorldPoint();
 		return new WorldPoint(-wp.x(), -wp.y());
-	}
-	
-	public boolean isContained(Rect r) {
-		return r.contains(this.x, this.y);
 	}
 	
 }
