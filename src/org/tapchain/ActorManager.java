@@ -198,12 +198,12 @@ public class ActorManager extends Manager {
 	}
 	
 	@Override
-	public ActorManager setView(Blueprint v) {
+	public ActorManager setView(Blueprint v) throws ChainException {
 		return setView(getPiece(), v);
 	}
 	
 	@Override
-	public ActorManager setView(IPiece bp, Blueprint _view) {
+	public ActorManager setView(IPiece bp, Blueprint _view) throws ChainException {
 		if(pieceEdit!=null) {
 			IPieceView v = pieceEdit.setView(bp, _view);
 			if(v!=null)
@@ -276,7 +276,7 @@ public class ActorManager extends Manager {
 		public void unsetPathView(IPath rtn);
 	}
 	public interface IPieceEdit {
-		public IPieceView setView(IPiece bp, Blueprint _view);
+		public IPieceView setView(IPiece bp, Blueprint _view) throws ChainException;
 		public IPieceView getView(IPiece y);
 		public void unsetView(IPiece bp);
 		public void refreshView(IPiece bp, IPiece obj);

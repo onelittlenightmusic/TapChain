@@ -441,6 +441,7 @@ public class TapChainView extends Activity implements SensorEventListener, IWind
  		Log.i("TapChainView.state","onStop");
 	   if(sensorManager != null)
         sensorManager.unregisterListener(this);
+	   editor.onDownClear();
     }
    @Override
 	public void onConfigurationChanged(Configuration newConfig) {

@@ -145,15 +145,13 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 		}
 	}
 
+	static Bitmap bm_bg;
 	public class LocalView extends TapChainAndroidEdit.EditorView implements
 				Serializable {
-			Bitmap bitmap = BitmapFactory.decodeResource(
-					AndroidActor.getResources(), R.drawable.newframe2);
 			Paint _paint = new Paint();
 			Paint paint2 = new Paint();
 			int fontsize = 20;
-			public Bitmap bm_bg = null, bm_bg_anim = null, bm_fg = null, bm_cn = null,
-					bm_star = null;
+			public Bitmap bm_fg = null;
 			Integer frontview = null;
 			String name;
 			WorldPoint sizeOpened = new WorldPoint(300, 300), sizeClosed = null;
@@ -177,16 +175,10 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 				_paint.setColor(0xff999999);
 				_paint.setTextAlign(Paint.Align.CENTER);
 	
-				bm_bg = BitmapFactory.decodeResource(
+				if(bm_bg == null)
+					bm_bg = BitmapFactory.decodeResource(
 						AndroidActor.getResources(), R.drawable.newframe);
 				sizeClosed = new WorldPoint(bm_bg.getWidth() / 2, bm_bg.getHeight() / 2);
-				bm_bg_anim = BitmapFactory.decodeResource(
-						AndroidActor.getResources(), R.drawable.newframe);
-				bm_cn = BitmapFactory.decodeResource(
-						AndroidActor.getResources(), R.drawable.bubble4);
-				bm_star = BitmapFactory.decodeResource(
-						AndroidActor.getResources(), R.drawable.star);
-	//			_size = sizeClosed.clone();
 				if (_bm != null) {
 					localview_init(_bm);
 				}
@@ -207,9 +199,8 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 			}
 	
 			public LocalView localview_init(Integer bit) {
-				Bitmap tmp = BitmapFactory.decodeResource(
+				bm_fg = BitmapFactory.decodeResource(
 						AndroidActor.getResources(), bit);
-				bm_fg = tmp;
 				frontview = bit;
 				return this;
 			}
@@ -575,33 +566,33 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 				}
 				return offset;
 			}
-			class view extends TapChainAndroidEdit.EditorView {
-				Bitmap bm_back;
+			static Bitmap bm_heart = BitmapFactory.decodeResource(
+					AndroidActor.getResources(), R.drawable.heart_bright);
+			class view extends EditorView {
 				float b = 0f;
+				@Override
 				public void view_init() {
-					bm_back = BitmapFactory.decodeResource(
-							AndroidActor.getResources(), R.drawable.heart_bright);
 				}
 				@Override
 				public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size, int alpha) {
 						ScreenPoint packet = getPoint(b);
-						canvas.drawBitmap(bm_back, packet.x - bm_back.getWidth()/2, packet.y - bm_back.getHeight()/2, paint);
+						canvas.drawBitmap(bm_heart, packet.x - bm_heart.getWidth()/2, packet.y - bm_heart.getHeight()/2, paint);
 						return true;
 				}
 			};
 			public void onTick() {
-				maker
-				.add(new view().disableLoop())
-				._child()
-				.add(new Actor.Txn<Float>() {
-					public void txn(Actor.ViewActor c) throws ChainException {
-							((view)c).b += getEffectValue();
-					}
-				}.initEffect(0.2f, 5).disableLoop())
-				.young(new Actor.Reseter().setContinue(false).disableLoop())
-				._exit()
-				.save();
-					;
+//				maker
+//				.add(new view().disableLoop())
+//				._child()
+//				.add(new Actor.Txn<Float>() {
+//					public void txn(Actor.ViewActor c) throws ChainException {
+//							((view)c).b += getEffectValue();
+//					}
+//				}.initEffect(0.2f, 5).disableLoop())
+//				.young(new Actor.Resetter().setContinue(false).disableLoop())
+//				._exit()
+//				.save();
+//					;
 			}
 		}
 
@@ -792,7 +783,7 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 						return increment();
 					}
 				}.initEffect(1, 10)/*.setLogLevel(true)*/)
-				.young(new Actor.Reseter().setContinue(true))
+				.young(new Actor.Resetter().setContinue(true))
 				._exit()
 				._return()
 				.add(circle)
@@ -819,7 +810,7 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 				})
 			._child()
 			.add(new Actor.Mover().initEffect(new WorldPoint(10, 10).setDif(), 10)/*.setLogLevel(true)*/)
-			.young(new Actor.Reseter().setContinue(true))
+			.young(new Actor.Resetter().setContinue(true))
 			._exit()
 				.save();
 
@@ -902,7 +893,7 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 //		.because(TouchFilter.class)
 //		._return()
 		.child(Actor.Sleeper.class)
-		.and(Actor.Reseter.class)
+		.and(Actor.Resetter.class)
 		.setview(TestRecord.class)
 		.save()
 		.New(AndroidActor.AndroidCamera.class)
@@ -920,7 +911,7 @@ public class TapChainAndroidEdit extends TapChainEdit implements ILogHandler {
 		.New(Actor.Sleeper.class)
 		.setview(TestTime.class)
 		.save()
-		.New(Actor.Reseter.class).setview(TestReset.class).save()
+		.New(Actor.Resetter.class).setview(TestReset.class).save()
 		.New(Actor.Counter.class).setview(TestTime2.class).save()
 		.New(Actor.Value.class).addArg(new Class<?>[]{Object.class},
 				new Object[]{3}).setview(TestTime2.class).save()

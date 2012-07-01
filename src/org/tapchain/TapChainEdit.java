@@ -157,16 +157,13 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	}
 
 	@Override
-	public IPieceView setView(final IPiece cp2, final Blueprint bp) {
+	public IPieceView setView(final IPiece cp2, final Blueprint bp) throws ChainException {
 		final IPieceView _view;
-		try {
 			ActorManager manager = getManager();
 			_view = (IPieceView) bp.newInstance(manager);
+			if(_view == null)
+				throw new ChainException(cp2, "view not created");
 			manager.save();
-		} catch (ChainException e) {
-			e.printStackTrace();
-			return null;
-		}
 		dictPiece.put(cp2, _view);
 		_view.setMyTapChain(cp2);
 		final Initializer ia = new Initializer();
@@ -324,6 +321,11 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		getManager().get().TouchOn(nowPoint);
 		nowPiece = touchPiece(nowPoint);
 //		moveView(circle);
+		return true;
+	}
+	
+	public boolean onDownClear() {
+		getManager().get().TouchClear();
 		return true;
 	}
 

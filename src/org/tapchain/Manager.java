@@ -233,11 +233,11 @@ public class Manager implements IManager<IPiece> {
 		return this;
 	}
 
-	public Manager setView(IPiece bp, Blueprint v) {
+	public Manager setView(IPiece bp, Blueprint v) throws ChainException {
 		return this;
 	}
 
-	public Manager setView(Blueprint v) {
+	public Manager setView(Blueprint v) throws ChainException {
 		return this;
 	}
 

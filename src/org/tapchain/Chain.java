@@ -92,8 +92,11 @@ public class Chain {
 	}
 	
 	public boolean notifyAllFunc() {
-		for (IPiece f : aFunc)
-				f.signal();
+//		for (IPiece f : aFunc)
+		if(aFunc.isEmpty())
+			return false;
+		else
+			aFunc.first().signal();
 		return true;
 	}
 	
@@ -252,7 +255,7 @@ public class Chain {
 		protected PieceHead fImpl;
 		protected ArrayList<ChainInPathPack> inPack = new ArrayList<ChainInPathPack>();
 		protected ArrayList<ChainOutConnectorPack> outPack = new ArrayList<ChainOutConnectorPack>();
-		protected CountDownLatch signal = new CountDownLatch(0);
+		protected static CyclicBarrier signal = new CyclicBarrier(Integer.MAX_VALUE);
 		private Boolean _chainlive = false, controlled_by_ac = true, inited = false;
 //		Thread _th = null;
 		Future<?> f = null;
@@ -353,21 +356,25 @@ public class Chain {
 		public void restart() {
 			if(isAlive()) {
 				f.cancel(true);
-				signal = new CountDownLatch(1);
+//				signal = new CountDownLatch(1);
 			} else {
 				start();
 			}
 			return;
 		}
 		
+		@Override
 		public ChainPiece signal() {
-			signal.countDown();
+				signal.reset();
 			return this;
 		}
 		
 		public boolean next() throws InterruptedException {
-			signal.await();
-			signal = new CountDownLatch(1);
+			try {
+				signal.await();
+			} catch (BrokenBarrierException e) {
+//				throw new InterruptedException();
+			}
 			return true;
 	}
 	
@@ -384,7 +391,7 @@ public class Chain {
 			f = threadExecutor.submit(new Runnable() {
 				public void run() {
 					changeState(PieceState.STARTED);
-					signal = new CountDownLatch(1);
+//					signal = new CountDownLatch(1);
 					synchronized(_chainlive) {
 						_chainlive = true;
 					}
@@ -646,12 +653,16 @@ public class Chain {
 //		boolean outputType = false;//true: wait for at least one output, false: no wait
 		public boolean clearInputHeap() {
 			if(getInPack(PackType.HEAP).isEmpty()) return false;
-//			for(ChainInPath a : getInPack(PackType.HEAP).array)
-//				a.reset();
 			getInPack(PackType.HEAP).reset();
 			return true;
 		}
 		
+		public boolean clearOutputHeap() {
+			if(getOutPack(PackType.HEAP).isEmpty()) return false;
+			getOutPack(PackType.HEAP).reset();
+			return true;
+			
+		}
 		protected boolean inputHeapAsync() {
 			if(getInPack(PackType.EVENT).isEmpty()) return false;
 			for(ChainInConnector a : getInPack(PackType.EVENT))
@@ -771,6 +782,9 @@ public class Chain {
 				super(_parent);
 //				array = new ConcurrentLinkedQueue<ChainOutConnector>();
 				queue = new SyncQueue<Object>();
+			}
+			public void reset() {
+				queue.reset();
 			}
 			protected ChainOutConnectorPack setOutType(Output type) {
 				defaultType = type;

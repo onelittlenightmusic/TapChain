@@ -650,7 +650,7 @@ public class Actor extends FlexPiece
 		}
 	}
 
-	public static class Reseter extends Actor.Effecter {
+	public static class Resetter extends Actor.Effecter {
 		boolean cont = false;
 
 		@Override
@@ -659,7 +659,7 @@ public class Actor extends FlexPiece
 			return false;
 		}
 
-		public Reseter setContinue(boolean cont) {
+		public Resetter setContinue(boolean cont) {
 			this.cont = cont;
 			return this;
 		}

@@ -81,6 +81,12 @@ public class ActorChain extends Chain {
 		touchSw.push(new Boolean(true));
 		return this;
 	}
+	
+	public ActorChain TouchClear(){
+		touchOn.clearInputHeap();
+		touchOn.clearOutputHeap();
+		return this;
+	}
 
 	public ActorChain TouchOff() {
 		touchOff.push("");

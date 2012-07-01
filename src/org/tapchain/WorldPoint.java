@@ -1,11 +1,9 @@
 package org.tapchain;
 
-import java.io.Serializable;
-
 import org.tapchain.TapChainEdit.IWindow;
 
 
-public class WorldPoint implements Serializable, IPoint {
+public class WorldPoint implements IPoint {
 	/**
 	 * 
 	 */
