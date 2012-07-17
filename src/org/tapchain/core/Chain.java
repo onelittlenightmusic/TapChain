@@ -330,7 +330,7 @@ public class Chain {
 			loop = _loop;
 		}
 
-		ChainException(IPiece piece, String str) {
+		public ChainException(IPiece piece, String str) {
 			this(piece, str, LoopableError.LOOPABLE);
 		}
 
@@ -356,6 +356,14 @@ public class Chain {
 			super("ChainException: " + str);
 			err = str;
 			location = "Factory";
+		}
+		
+		public String getLocation() {
+			return location;
+		}
+		
+		public String getError() {
+			return err;
 		}
 
 	}

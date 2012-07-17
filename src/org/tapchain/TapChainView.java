@@ -3,14 +3,12 @@ package org.tapchain;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.tapchain.core.AndroidActor;
+import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IntentHandler;
 import org.tapchain.core.ScreenPoint;
-import org.tapchain.core.TapChainAndroidEdit;
 import org.tapchain.core.TapChainEdit;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.core.AndroidActor.AndroidView;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.TapChainEdit.*;
 

@@ -26,9 +26,8 @@ import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.PathPack.ChainInPathPack;
 
 @SuppressWarnings("serial")
-public class Actor extends FlexPiece
-		implements IActor,
-		IPush, IFilter, Comparable<Actor>, IPieceHead {
+public class Actor extends FlexPiece implements IActor, IPush, IFilter,
+		Comparable<Actor>, IPieceHead {
 	private IActorReset _reset = null;
 	private Boolean animation_loop = false, live = false;
 	Actor target = null;
@@ -36,8 +35,8 @@ public class Actor extends FlexPiece
 	LinkedList<Integer> generation = new LinkedList<Integer>();
 	int time = 0;
 
-	//1.Initialization
-	Actor() {
+	// 1.Initialization
+	public Actor() {
 		super();
 		super.setFunc(this);
 		setInPackType(PackType.HEAP, ChainInPathPack.Input.FIRST);
@@ -57,8 +56,9 @@ public class Actor extends FlexPiece
 			__exec(preReset(), "BasicPiece#impl@init");
 			time = 0;
 			if (_reset != null) {
-				boolean reset_cont = __exec(_reset.actorReset(),"BasicPiece#impl@reset");
-				if(!reset_cont){
+				boolean reset_cont = __exec(_reset.actorReset(),
+						"BasicPiece#impl@reset");
+				if (!reset_cont) {
 					postEnd();
 					return false;
 				}
@@ -75,16 +75,15 @@ public class Actor extends FlexPiece
 
 	boolean outthis = true;
 
-	private Actor preReset()
-			throws InterruptedException, ChainException {
+	private Actor preReset() throws InterruptedException, ChainException {
 		if (outthis)
-			__exec(outputAllSimple(PackType.FAMILY, this), "BasicPiece#init@sendthis");
+			__exec(outputAllSimple(PackType.FAMILY, this),
+					"BasicPiece#init@sendthis");
 		__exec(input(PackType.EVENT), "BasicPiece#init@sendevent");
 		return this;
 	}
 
-	private void postEnd()
-			throws InterruptedException {
+	private void postEnd() throws InterruptedException {
 		__exec(outputAllSimple(PackType.EVENT, this), "BasicPiece#end@");
 	}
 
@@ -107,7 +106,7 @@ public class Actor extends FlexPiece
 	public boolean actorRun() throws ChainException, InterruptedException {
 		return false;
 	}
-	
+
 	public Actor getParent(PackType type) throws ChainException {
 		return (Actor) pull(getInPack(type));// parent;
 	}
@@ -134,7 +133,7 @@ public class Actor extends FlexPiece
 
 	}
 
-	//3.Changing state
+	// 3.Changing state
 	int mynum = ++ActorChain.num;
 
 	@Override
@@ -154,7 +153,7 @@ public class Actor extends FlexPiece
 
 	public void end() {
 		for (Actor bp : member)
-			if(bp != this)
+			if (bp != this)
 				bp.end();
 		super.end();
 		return;
@@ -169,7 +168,7 @@ public class Actor extends FlexPiece
 		return this;
 	}
 
-	protected Actor disableLoop() {
+	public Actor disableLoop() {
 		animation_loop = false;
 		return this;
 	}
@@ -181,11 +180,11 @@ public class Actor extends FlexPiece
 		// setReactor(cp.getReactor());
 		try {
 			target = (Actor) (i.getPiece());
-			__exec(
-					String.format("target %s: append %s", i.getPiece().getName(), getName()),
-					"BasicPiece#APPEND");
+			__exec(String.format("target %s: append %s",
+					i.getPiece().getName(), getName()), "BasicPiece#APPEND");
 		} catch (ClassCastException e1) {
-			throw new ChainException(this, "BasicEffect: target is not a BasicPiece");
+			throw new ChainException(this,
+					"BasicEffect: target is not a BasicPiece");
 		}
 		if (stack == PackType.FAMILY && stack_target == PackType.FAMILY)
 			target.addMember(this);
@@ -202,8 +201,7 @@ public class Actor extends FlexPiece
 		ConnectionResultIO o = null;
 		if (_push != null) {
 			try {
-				o = appendTo(PackType.HEAP, _push, Object.class,
-						PackType.HEAP);
+				o = appendTo(PackType.HEAP, _push, Object.class, PackType.HEAP);
 			} catch (ChainException e) {
 				__exec(getName() + "/Connection to PushEvent : NG",
 						"BasicPiece#ConnectToPush");
@@ -247,7 +245,8 @@ public class Actor extends FlexPiece
 
 	public void kick() {
 		try {
-			__exec(getOutPack(PackType.EVENT).outputAllSimple(""), "BasicKicker");
+			__exec(getOutPack(PackType.EVENT).outputAllSimple(""),
+					"BasicKicker");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -267,27 +266,25 @@ public class Actor extends FlexPiece
 		try {
 			Object rtn = in.inputOne(i);
 			if (rtn == null)
-				throw new ChainException(this, "CONNECT!",
-						LoopableError.LOCK);
+				throw new ChainException(this, "CONNECT!", LoopableError.LOCK);
 			return rtn;
 		} catch (InterruptedException e) {
 			throw new ChainException(this, "Interrupted in pull()");
 		}
 	}
-	
+
 	Object pull(PathPack.ChainInPathPack in) throws ChainException {
 		try {
 			ArrayList<Object> rtn = in.input();
 			if (rtn == null)
-				throw new ChainException(this, "CONNECT!",
-						LoopableError.LOCK);
+				throw new ChainException(this, "CONNECT!", LoopableError.LOCK);
 			return rtn.get(0);
 		} catch (InterruptedException e) {
 			throw new ChainException(this, "Interrupted in pull()");
 		}
 	}
 
-	Object pull() throws ChainException {
+	protected Object pull() throws ChainException {
 		return pull(getInPack(PackType.HEAP));
 	}
 
@@ -306,7 +303,7 @@ public class Actor extends FlexPiece
 	}
 
 	public Actor invalidate() {
-		((ActorChain)_root_chain).kick();
+		((ActorChain) _root_chain).kick();
 		__log(String.format("%s kicks", getName()), "TapChain");
 		return this;
 	}
@@ -320,12 +317,12 @@ public class Actor extends FlexPiece
 		private float _Angle = 0.0f;
 		int color = 0;
 
-		//1.Initialization
-		ViewActor() {
+		// 1.Initialization
+		public ViewActor() {
 			super();
 		}
 
-		//2.Getters and setters
+		// 2.Getters and setters
 		public ViewActor ctrlStop() {
 			removeViewFromAnimation();
 			return this;
@@ -417,7 +414,8 @@ public class Actor extends FlexPiece
 		public float getAngle() {
 			return _Angle;
 		}
-		//3.Changing state
+
+		// 3.Changing state
 		protected void addViewToAnimation() {
 			((ActorChain) _root_chain).vlist.add(this);
 		}
@@ -428,10 +426,9 @@ public class Actor extends FlexPiece
 
 		@Override
 		public final boolean view_impl(Object canvas) {
-			return view_user(canvas, getCenter(), getSize(),
-					getAlpha(), getAngle());
+			return view_user(canvas, getCenter(), getSize(), getAlpha(),
+					getAngle());
 		};
-
 
 	}
 
@@ -439,7 +436,8 @@ public class Actor extends FlexPiece
 			ISound {
 		int length = 0;
 
-		Sound() {
+		// 1.Initialization
+		public Sound() {
 			super();
 			setControlled(false);
 			setLoop(null);
@@ -476,7 +474,7 @@ public class Actor extends FlexPiece
 			return this;
 		}
 	}
-	
+
 	public static abstract class Controllable extends Loop implements
 			TapChainControllable {
 		CountDownLatch state = new CountDownLatch(1);
@@ -484,20 +482,21 @@ public class Actor extends FlexPiece
 		boolean auto = false;
 		boolean rtn = true;
 
-		Controllable() {
+		// 1.Initialization
+		public Controllable() {
 			super();
 		}
 
 		@Override
 		public boolean actorReset() throws ChainException {
-			if(rtn)
+			if (rtn)
 				_ctrlReset();
 			return rtn;
 		}
-		
+
 		@Override
 		public boolean actorRun() throws InterruptedException, ChainException {
-//			_ctrlReset();
+			// _ctrlReset();
 			_ctrlStart();
 			rtn = _waitFinish();
 			_ctrlStop();
@@ -522,7 +521,7 @@ public class Actor extends FlexPiece
 			try {
 				state.await();
 			} catch (InterruptedException e) {
-				throw new ChainException(this, "LoopCtrl: Interrupted in waitWake()",
+				throw new ChainException(this, "end before wake",
 						LoopableError.INTERRUPT);
 			}
 			return this;
@@ -547,7 +546,7 @@ public class Actor extends FlexPiece
 			try {
 				finish.await();
 			} catch (InterruptedException e) {
-				throw new ChainException(this, "LoopCtrl: Interrupted in waitFinish()",
+				throw new ChainException(this, "end before finish",
 						LoopableError.INTERRUPT);
 			}
 			return !end;
@@ -558,7 +557,8 @@ public class Actor extends FlexPiece
 			return this;
 		}
 
-		private Controllable _ctrlStart() throws ChainException, InterruptedException {
+		private Controllable _ctrlStart() throws ChainException,
+				InterruptedException {
 			ctrlStart();
 			_wake(true);
 			return this;
@@ -592,8 +592,7 @@ public class Actor extends FlexPiece
 		}
 	}
 
-	public static abstract class Txn<T> extends
-			Actor.EffecterSkelton<T> {
+	public static abstract class Txn<T> extends Actor.EffecterSkelton<T> {
 		@Override
 		public boolean actorRun() throws ChainException {
 			ViewActor _t = getTargetView();
@@ -607,13 +606,13 @@ public class Actor extends FlexPiece
 		public abstract void txn(ViewActor _t) throws ChainException;
 	}
 
-	public static class Mover extends
-			Actor.EffecterSkelton<WorldPoint> {
+	public static class Mover extends Actor.EffecterSkelton<WorldPoint> {
 
 		@Override
 		public boolean actorRun() throws ChainException {
 			WorldPoint _dir = getEffectValue();// (_direction != null)?
-																					// _direction:(WorldPoint) pull();
+												// _direction:(WorldPoint)
+												// pull();
 			ViewActor _t = getTargetView();
 			synchronized (_t) {
 				switch (_dir.getEffect()) {
@@ -672,9 +671,9 @@ public class Actor extends FlexPiece
 	}
 
 	public static class Value extends Actor.BasicState {
+		// 1.Initialization
 		public Value(Object obj) {
 			super();
-			// push(obj);
 			setValue(obj);
 		}
 
@@ -687,12 +686,13 @@ public class Actor extends FlexPiece
 	public static class ValueLimited extends Actor {
 		int count = 1;
 
+		// 1.Initialization
 		public ValueLimited(Integer count) {
 			super();
 			setLoop(null);
 			this.count = count;
 		}
-		
+
 		public ValueLimited(Integer count, Object obj) {
 			this(count);
 			setValue(obj);
@@ -728,7 +728,8 @@ public class Actor extends FlexPiece
 			try {
 				setTarget((Controllable) (getParent(parent_type)));
 			} catch (ClassCastException e) {
-				throw new ChainException(this, "EffectSkelton: Failed to get Parent",
+				throw new ChainException(this,
+						"EffectSkelton: Failed to get Parent",
 						LoopableError.LOCK);
 			}
 			getTarget().waitWake();
@@ -762,20 +763,20 @@ public class Actor extends FlexPiece
 	}
 
 	public abstract static class Loop extends Actor implements IActorReset {
-			Loop() {
-				super();
-				super.setLoop(this);
-			}
-	
-			@Override
-			public boolean actorReset() throws ChainException {
-	//			getInPack(PackType.HEAP).reset();
-				return true;
-			}
+		public Loop() {
+			super();
+			super.setLoop(this);
 		}
 
-	public static abstract class StaticPiece extends Actor
-			implements IPathListener {
+		@Override
+		public boolean actorReset() throws ChainException {
+			// getInPack(PackType.HEAP).reset();
+			return true;
+		}
+	}
+
+	public static abstract class StaticPiece extends Actor implements
+			IPathListener {
 		public StaticPiece() {
 			super();
 			kickFamily(false);
@@ -788,30 +789,33 @@ public class Actor extends FlexPiece
 		Variable() {
 			super();
 		}
-	
+
 		@Override
 		public boolean actorRun() throws ChainException, InterruptedException {
 			push(getParent(PackType.FAMILY));
 			return false;
 		}
 	}
-	
+
 	public static class Counter extends Loop {
 		int counter = 0, threshold = 3;
-		Counter() {
+		//1.Initiailization
+		public Counter() {
 			super();
 			setInPackType(PackType.EVENT, ChainInPathPack.Input.FIRST);
 		}
+
 		public Counter setThreshold(int th) {
 			this.threshold = th;
 			return this;
 		}
+
 		@Override
 		public boolean actorReset() throws ChainException {
 			counter = 0;
 			return true;
 		}
-		
+
 		@Override
 		public boolean actorRun() throws ChainException, InterruptedException {
 			return ++counter < threshold;
@@ -819,65 +823,76 @@ public class Actor extends FlexPiece
 	}
 
 	public static class EffecterSkelton<T> extends Effecter {
-			private ViewActor target_view = null, target_cache = null;
-			private int _i = 0, _duration = 0;
-			T effect_val = null, cache = null;
-			@Override
-			public boolean actorReset() throws ChainException {
-				super.actorReset();
-	//			setTargetView((BasicView)getTarget());
-				resetTargetView();
-				setCounter(0);
-				resetEffectValue();
-				return true;
-			}
-			public EffecterSkelton<T> setCounter(int _i) {
-				this._i = _i;
-				return this;
-			}
-			public int getCounter() {
-				return _i;
-			}
-			public boolean increment() {
-				return ++_i < _duration;
-			}
-			public EffecterSkelton<T> setTargetView(ViewActor target_view) {
-				this.target_view = target_view;
-				return this;
-			}
-			public ViewActor getTargetView() {
-				return target_cache;
-			}
-			public EffecterSkelton<T> resetTargetView() throws ChainException {
-				target_cache = (target_view!= null)? target_view:(ViewActor)getTarget();
-				return this;
-			}
-			public EffecterSkelton<T> initEffect(T val, int duration) {
-				effect_val = val;
-				_duration = duration;
-				if(effect_val != null)
-					cache = effect_val;
-				return this;
-			}
-			@SuppressWarnings("unchecked")
-			public EffecterSkelton<T> resetEffectValue() throws ChainException {
-				cache = (effect_val!= null)? effect_val:(T) pull();
-				return this;
-			}
-			public T getEffectValue() throws ChainException {
-				return cache;
-			}
+		private ViewActor target_view = null, target_cache = null;
+		private int _i = 0, _duration = 0;
+		T effect_val = null, cache = null;
+
+		@Override
+		public boolean actorReset() throws ChainException {
+			super.actorReset();
+			// setTargetView((BasicView)getTarget());
+			resetTargetView();
+			setCounter(0);
+			resetEffectValue();
+			return true;
 		}
+
+		public EffecterSkelton<T> setCounter(int _i) {
+			this._i = _i;
+			return this;
+		}
+
+		public int getCounter() {
+			return _i;
+		}
+
+		public boolean increment() {
+			return ++_i < _duration;
+		}
+
+		public EffecterSkelton<T> setTargetView(ViewActor target_view) {
+			this.target_view = target_view;
+			return this;
+		}
+
+		public ViewActor getTargetView() {
+			return target_cache;
+		}
+
+		public EffecterSkelton<T> resetTargetView() throws ChainException {
+			target_cache = (target_view != null) ? target_view
+					: (ViewActor) getTarget();
+			return this;
+		}
+
+		public EffecterSkelton<T> initEffect(T val, int duration) {
+			effect_val = val;
+			_duration = duration;
+			if (effect_val != null)
+				cache = effect_val;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public EffecterSkelton<T> resetEffectValue() throws ChainException {
+			cache = (effect_val != null) ? effect_val : (T) pull();
+			return this;
+		}
+
+		public T getEffectValue() throws ChainException {
+			return cache;
+		}
+	}
 
 	public static class Rotater extends Txn<Integer> {
 		public Rotater alpha_init(int direction, int duration) {
 			initEffect(direction, duration);
 			return this;
 		}
-	
+
 		@Override
 		public void txn(ViewActor _t) throws ChainException {
-					_t.setAngle(_t.getAngle() + getEffectValue());
+			_t.setAngle(_t.getAngle() + getEffectValue());
 		}
 	}
 
@@ -886,9 +901,10 @@ public class Actor extends FlexPiece
 			initEffect(_color, 0);
 			return this;
 		}
+
 		@Override
 		public void txn(ViewActor _t) throws ChainException {
-				_t.setColor(getEffectValue());
+			_t.setColor(getEffectValue());
 		}
 	}
 
@@ -900,26 +916,27 @@ public class Actor extends FlexPiece
 	}
 
 	public abstract static class RelationFilter extends LoopBoost {
-			private static final long serialVersionUID = 1L;
-	
-			RelationFilter() {
-				super();
-			}
-	
-			@Override
-			public boolean actorRun() throws InterruptedException, ChainException {
-				Object event = null;//pull();
-				boolean rtn = false;
-	//			for (Object obj : getReactor()) {
-				Object obj = null;//pull();
-					rtn |= relation_impl((ViewActor) obj, (ViewActor) event);
-//					push(new Pair<Object, Object>(event, obj));
-	//			}
-				return !rtn;
-			}
-	
-			public abstract boolean relation_impl(ViewActor a, ViewActor b) throws InterruptedException;
+		private static final long serialVersionUID = 1L;
+
+		public RelationFilter() {
+			super();
 		}
+
+		@Override
+		public boolean actorRun() throws InterruptedException, ChainException {
+			Object event = null;// pull();
+			boolean rtn = false;
+			// for (Object obj : getReactor()) {
+			Object obj = null;// pull();
+			rtn |= relation_impl((ViewActor) obj, (ViewActor) event);
+			// push(new Pair<Object, Object>(event, obj));
+			// }
+			return !rtn;
+		}
+
+		public abstract boolean relation_impl(ViewActor a, ViewActor b)
+				throws InterruptedException;
+	}
 
 	public static class Filter extends LoopBoost {
 		@Override
@@ -933,44 +950,46 @@ public class Actor extends FlexPiece
 			// if filter() returns true, output and exit single function
 			// loop
 		}
-	
+
 	}
 
 	public static abstract class Recorder extends Controllable implements
 			IRecorder {
-	
-		Recorder() {
+
+		//1.Initialization
+		public Recorder() {
 			super();
 			setControlled(false);
 		}
-	
+
 		public Recorder ctrlStop() {
 			record_stop();
 			return this;
 		}
-	
+
 		public Recorder ctrlStart() throws ChainException {
 			record_start();
 			return this;
 		}
-	
+
 		public Recorder ctrlReset() {
 			return this;
 		}
 	}
 
 	public static class BasicMerge extends LoopBoost {
-		BasicMerge() {
+		//1.Initialization
+		public BasicMerge() {
 			super();
 			setInPackType(PackType.EVENT, ChainInPathPack.Input.FIRST);
 		}
-	
+
 	}
 
 	public static class BasicSplit extends LoopBoost {
 		ConnectionResultO o = null;
 		Class<?> cls = null;
-	
+
 		BasicSplit(Class<?> _cls) {
 			super();
 			try {
@@ -980,7 +999,7 @@ public class Actor extends FlexPiece
 			}
 			cls = _cls;
 		}
-	
+
 		@Override
 		public ConnectionResultO appended(Class<?> _cls, Output type,
 				PackType stack_target, IPiece from) throws ChainException {
@@ -997,21 +1016,23 @@ public class Actor extends FlexPiece
 	}
 
 	public static class BasicState extends Filter {
-		BasicState() {
+		//1.Initialization
+		public BasicState() {
 			super();
 			setOutPackType(PackType.HEAP, Output.HIPPO);
 			setLoop(null);
 		}
-	
+
 	}
 
 	public static class BasicToggle extends LoopBoost {
-		BasicToggle() {
+		//1.Intialization
+		public BasicToggle() {
 			super();
 			setOutPackType(PackType.EVENT, Output.HIPPO);
 			setLoop(null);
 		}
-	
+
 		@Override
 		public boolean actorRun() throws InterruptedException, ChainException {
 			kick();
@@ -1025,81 +1046,89 @@ public class Actor extends FlexPiece
 
 	public static abstract class BasicQuaker extends Controllable {
 		int val = 100;
-	
+
+		//1.Initialization
 		public BasicQuaker(int interval) {
 			super();
 			permitAutoRestart();
 			val = interval;
 		}
-	
+
 		public abstract boolean quake_impl();
-	
+
 		public BasicQuaker ctrlStart() {
 			quake_impl();
 			return this;
 		}
-	
+
 		public BasicQuaker ctrlStop() {
 			return this;
 		}
-	
+
 		public BasicQuaker ctrlReset() {
 			return this;
+		}
+
+		public int getVal() {
+			return val;
 		}
 	}
 
 	public static abstract class BasicLight extends Controllable implements
-				TapChainLight {
-			BasicLight() {
-				super();
-			}
-			@Override
-			public boolean actorRun() {
-				TurnOn();
-				return false;
-			}
-	
-			public abstract boolean turn_on();
-	
-			public abstract boolean turn_off();
-	
-			public abstract boolean change_color(int r, int g, int b, int a);
-	
-			public BasicLight TurnOn() {
-				turn_on();
-	//			suspend();
-				return this;
-			}
-	
-			public BasicLight TurnOff() {
-				turn_off();
-	//			suspend();
-				return this;
-			}
-	
-			public BasicLight ChangeColor(int r, int g, int b, int a) {
-				change_color(r, g, b, a);
-				return this;
-			}
-	
-			public BasicLight ctrlStart() {
-				TurnOn();
-				return this;
-			}
-	
-			public BasicLight ctrlStop() {
-				TurnOff();
-				return this;
-			}
-	
-			public BasicLight ctrlReset() {
-				TurnOff();
-				return this;
-			}
+			TapChainLight {
+		//1.Initialization
+		public BasicLight() {
+			super();
 		}
+
+		@Override
+		public boolean actorRun() {
+			TurnOn();
+			return false;
+		}
+
+		public abstract boolean turn_on();
+
+		public abstract boolean turn_off();
+
+		public abstract boolean change_color(int r, int g, int b, int a);
+
+		public BasicLight TurnOn() {
+			turn_on();
+			// suspend();
+			return this;
+		}
+
+		public BasicLight TurnOff() {
+			turn_off();
+			// suspend();
+			return this;
+		}
+
+		public BasicLight ChangeColor(int r, int g, int b, int a) {
+			change_color(r, g, b, a);
+			return this;
+		}
+
+		public BasicLight ctrlStart() {
+			TurnOn();
+			return this;
+		}
+
+		public BasicLight ctrlStop() {
+			TurnOff();
+			return this;
+		}
+
+		public BasicLight ctrlReset() {
+			TurnOff();
+			return this;
+		}
+	}
 
 	public static class Stun extends Loop {
 		boolean started = false;
+
 		@Override
 		public boolean actorRun() throws ChainException {
 			started = !started;
@@ -1108,21 +1137,24 @@ public class Actor extends FlexPiece
 	}
 
 	public static class MoveFilter extends Actor.WorldPointFilter {
-		MoveFilter() {
+		//1.Initialization
+		public MoveFilter() {
 			super(ActorChain.move);
 		}
 	}
 
 	public static class LongPressFilter extends Filter {
-		LongPressFilter() {
+		//1.Initialization
+		public LongPressFilter() {
 			super();
 			connectToPush(ActorChain.longpress);
 		}
-	
+
 	}
 
 	public static class ShakeFilter extends Filter {
-		ShakeFilter() {
+		//1.Initialization
+		public ShakeFilter() {
 			super();
 			connectToPush(ActorChain.shake);
 		}
@@ -1130,17 +1162,18 @@ public class Actor extends FlexPiece
 
 	public static class LockSingle extends Filter {
 		static Actor open = new Actor();
-	
-		LockSingle() {
+
+		//1.Initialization
+		public LockSingle() {
 			super();
 			connectToPush(open);
 		}
-	
+
 		@Override
 		public ConnectionResultO appended(Class<?> cls, Output type,
 				PackType stack_target, IPiece from) throws ChainException {
-			ConnectionResultO rtn = super.appended(cls, type,
-					stack_target, from);
+			ConnectionResultO rtn = super.appended(cls, type, stack_target,
+					from);
 			open.push("");
 			return rtn;
 		}
@@ -1153,33 +1186,34 @@ public class Actor extends FlexPiece
 	public static class ManagerPiece extends StaticPiece {
 		Manager maker;
 		IPiece parent;
+
+		//1.Initialization
 		public ManagerPiece() {
 			super();
 		}
-		
+
 		public ManagerPiece(IPiece pb) {
 			this();
 			parent = pb;
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public void OnPushed(Connector p, Object obj)
 				throws InterruptedException {
 			BlueprintManager bm = maker.makeBlueprint();
-			if(parent != null)
+			if (parent != null)
 				bm.setOuterInstanceForInner(parent);
 			try {
 				outputAllSimple(PackType.FAMILY,
-					bm
-					.add((Class<? extends Actor>) obj)
-					.getBlueprint()
-					.newInstance(maker));
+						bm.add((Class<? extends Actor>) obj).getBlueprint()
+								.newInstance(maker));
 			} catch (ChainException e) {
 				maker.log(e.err);
 			}
 			clearInputHeap();
 		}
+
 		@Override
 		public void postRegister(ActorManager maker) {
 			super.postRegister(maker);
@@ -1188,24 +1222,27 @@ public class Actor extends FlexPiece
 	}
 
 	static class WorldPointFilter extends Filter {
-		WorldPointFilter(Actor p) {
+		//1.Initialization
+		public WorldPointFilter(Actor p) {
 			super();
 			connectToPush(p);
 		}
-	
+
 		WorldPoint getWorldPoint() throws ChainException {
 			return (WorldPoint) pull();
 		}
 	}
 
 	public static class TouchFilter extends WorldPointFilter {
-		TouchFilter() {
+		//1.Initialization
+		public TouchFilter() {
 			super(ActorChain.touchOn);
 		}
 	}
 
 	public static class TouchUpFilter extends Filter {
-		TouchUpFilter() {
+		//1.Initialization
+		public TouchUpFilter() {
 			super();
 			connectToPush(ActorChain.touchOff);
 		}
@@ -1215,35 +1252,36 @@ public class Actor extends FlexPiece
 		WaitEndHeap() {
 			super();
 		}
-	
+
 		@Override
 		public boolean filter(Object obj) {
 			return true;
 		}
-	
+
 	}
 
 	public static class TouchOnOffState extends BasicState {
-			boolean state_bool = false;
-	
-			TouchOnOffState() {
-				super();
-				// super.connectToPush(touchSw);
-				setOutPackType(PackType.EVENT, Output.HIPPO);
-	//			setInPackType(PackType.HEAP, InputType.COUNT);
-			}
-	
-			@Override
-			public boolean filter(Object obj) {
-				state_bool = !state_bool;
-				if (!state_bool) {
-					push(null);
-					clearKick();
-				}
-	//			Log.w("TouchOnOff", state_bool ? "on" : "off" + "ed");
-				return state_bool;
-			}
+		boolean state_bool = false;
+
+		//1.Initialization
+		public TouchOnOffState() {
+			super();
+			// super.connectToPush(touchSw);
+			setOutPackType(PackType.EVENT, Output.HIPPO);
+			// setInPackType(PackType.HEAP, InputType.COUNT);
 		}
+
+		@Override
+		public boolean filter(Object obj) {
+			state_bool = !state_bool;
+			if (!state_bool) {
+				push(null);
+				clearKick();
+			}
+			// Log.w("TouchOnOff", state_bool ? "on" : "off" + "ed");
+			return state_bool;
+		}
+	}
 
 	/**
 	 * 

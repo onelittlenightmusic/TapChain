@@ -14,7 +14,7 @@ import org.tapchain.core.Connector.*;
 public class PathPack<T extends Connector> extends ArrayList<T> implements Serializable {
 	PackType ptype = PackType.EVENT;
 	IPiece parent;
-	PathPack(ChainPiece _parent) {
+	PathPack(Piece _parent) {
 		parent = _parent;
 	}
 	public PackType getPtype() {
@@ -46,7 +46,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 				SyncQueue<Object> queue;
 				Boolean lock = false;
 				Output defaultType = Output.NORMAL;
-				ChainOutConnectorPack(ChainPiece _parent) {
+				ChainOutConnectorPack(Piece _parent) {
 					super(_parent);
 	//				array = new ConcurrentLinkedQueue<ChainOutConnector>();
 					queue = new SyncQueue<Object>();
@@ -138,14 +138,14 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 				}
 			}
 	public static class ChainInPathPack extends PathPack<ChainInConnector> {
-		static enum Input {
+		public static enum Input {
 			ALL, FIRST, COUNT
 		}
 				ChainInPathPack.Input inputType;
 				IPathListener listen, userlisten, resetHandler;
 				SyncQueue<Connector> order_first;
 				Iterator<ChainInConnector> now_count = null;
-				public ChainInPathPack(ChainPiece _parent) {
+				public ChainInPathPack(Piece _parent) {
 					super(_parent);
 					order_first = new SyncQueue<Connector>();
 					inputType = ChainInPathPack.Input.ALL;

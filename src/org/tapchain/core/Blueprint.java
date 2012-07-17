@@ -93,20 +93,18 @@ public class Blueprint implements IBlueprint {
 	}
 	public Actor newInstance(Manager maker, Class<?>[] types, Object[] args) throws ChainException {
 		Actor rtn = null;
-		ChainException ex = null;
+//		ChainException ex = null;
 		try {
 			rtn = __newInstance(types, args);
 			This.setInstance(rtn, maker);
 		__init_children(rtn, maker);
 		init_user(rtn, maker);
 		} catch (Exception e) {
-			ex = new ChainException(maker, "PieceFactory: cant create new instance");
+			throw /*ex = */new ChainException(maker, "PieceFactory: cant create new instance");
 		}
-		if(ex != null)
-			if(maker != null)
-				maker.error(ex);
-//			else
-//				Log.w("PieceBlueprintError", "maker ==null and instantiation failed");
+//		if(ex != null)
+//			if(maker != null)
+//				maker.error(ex);
 		if(maker != null) {
 			maker.add(rtn);
 		}

@@ -5,12 +5,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import org.tapchain.ActorChain.*;
-import org.tapchain.Chain.Connector;
-import org.tapchain.Chain.ChainException;
-import org.tapchain.Chain.IPathListener;
-import org.tapchain.TapChainEdit.IWindow;
-import org.tapchain.TapChainView.IntentHandler;
+import org.tapchain.R;
+import org.tapchain.core.Actor;
+import org.tapchain.core.Connector;
+import org.tapchain.core.IPoint;
+import org.tapchain.core.IntentHandler;
+import org.tapchain.core.ScreenPoint;
+import org.tapchain.core.WorldPoint;
+import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.Chain.IPathListener;
+import org.tapchain.core.Chain.PackType;
+import org.tapchain.core.TapChainEdit.IWindow;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +60,8 @@ public class AndroidActor {
 	static final int CAMERA_REQUEST = 122;
 	static Actor recognized = new Actor();
 
+	// 1.Initialization
+	// 2.Getters and setters
 	public static void setActivity(TapChainView act) {
 		activity = act;
 	}
@@ -69,13 +77,13 @@ public class AndroidActor {
 	public static Resources getResources() {
 		return activity.getResources();
 	}
-	
+
 	public static ScreenPoint getScreenPoint(WorldPoint wp) {
 		return wp.getScreenPoint(w);
 	}
 
 	public static void makeAlert(final String alert) {
-		activity.mq.post(new Runnable() {
+		activity.postMQ(new Runnable() {
 			@Override
 			public void run() {
 				Toast.makeText(activity, alert, Toast.LENGTH_SHORT).show();
@@ -84,6 +92,9 @@ public class AndroidActor {
 
 	}
 
+	// 3.Changing state
+	// 4.Termination
+	// 5.Local classes
 	public static class AndroidSound extends Actor.Sound {
 		MediaPlayer localplay = null;
 
@@ -159,7 +170,8 @@ public class AndroidActor {
 	}
 
 	public static class AndroidSound2 extends Actor.Sound {
-		static SoundPool localplay = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+		static SoundPool localplay = new SoundPool(10,
+				AudioManager.STREAM_MUSIC, 0);
 		int id = 0;
 		float rate = 1.0f;
 		int resource = 0;
@@ -180,7 +192,8 @@ public class AndroidActor {
 		public boolean play_impl() {
 			localplay.setOnLoadCompleteListener(new OnLoadCompleteListener() {
 				@Override
-				public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+				public void onLoadComplete(SoundPool soundPool, int sampleId,
+						int status) {
 					localplay.play(id, 100, 100, 1, 0, rate);
 					finish(false);
 				}
@@ -226,7 +239,8 @@ public class AndroidActor {
 			// make sure the directory we plan to store the recording in exists
 			File directory = new File(path).getParentFile();
 			if (!directory.exists() && !directory.mkdirs()) {
-				throw new ChainException(this, "Path to file could not be created.");
+				throw new ChainException(this,
+						"Path to file could not be created.");
 			}
 
 			recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -241,7 +255,7 @@ public class AndroidActor {
 				e.printStackTrace();
 			}
 			recorder.start();
-			makeAlert("ò^âπÇäJénÇµÇ‹ÇµÇΩÅB");
+			makeAlert("");
 			return false;
 		}
 
@@ -254,7 +268,7 @@ public class AndroidActor {
 	}
 
 	public static class AndroidView extends Actor.ViewActor implements
-		Parcelable {
+			Parcelable {
 		Paint paint = new Paint();
 
 		AndroidView() {
@@ -298,8 +312,8 @@ public class AndroidActor {
 			return new Drawable() {
 				@Override
 				public void draw(Canvas arg0) {
-					view_user(arg0, new ScreenPoint(getSize().x / 2, getSize().y / 2),
-							getSize(), getAlpha());
+					view_user(arg0, new ScreenPoint(getSize().x / 2,
+							getSize().y / 2), getSize(), getAlpha());
 				}
 
 				@Override
@@ -339,8 +353,8 @@ public class AndroidActor {
 			return rtn;
 		}
 
-		public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
-				int alpha) {
+		public boolean view_user(Canvas canvas, ScreenPoint sp,
+				WorldPoint size, int alpha) {
 			return false;
 		}
 
@@ -348,19 +362,22 @@ public class AndroidActor {
 		public int describeContents() {
 			return 0;
 		}
+
 		@Override
 		public void writeToParcel(Parcel arg0, int arg1) {
 		}
 
 		public static final Parcelable.Creator<Parcelable> CREATOR = new Parcelable.Creator<Parcelable>() {
 			public Parcelable createFromParcel(Parcel in) {
-					AndroidView v = new AndroidView();
-					return v;
+				AndroidView v = new AndroidView();
+				return v;
 			}
+
 			public Parcelable[] newArray(int size) {
 				return new AndroidView[size];
 			}
 		};
+
 		void initFromParcel(Parcel in) {
 		}
 	}
@@ -369,36 +386,37 @@ public class AndroidActor {
 		Bitmap bm_base = null, bm_scaled = null;
 		Matrix matrix = new Matrix();
 
-		AndroidImageView() {
+		public AndroidImageView() {
 			super();
 		}
-		
+
 		public void setImage(Bitmap b) {
 			bm_base = b;
 			bm_scaled = bm_base;
-			_wp = new WorldPoint(100, 100);
+			setCenter(new WorldPoint(100, 100));
 		}
 
 		public void view_init() throws ChainException {
 			int resource;
 			while (bm_base == null) {
 				resource = (Integer) pull();
-				setImage(BitmapFactory.decodeResource(activity.getResources(), resource));
+				setImage(BitmapFactory.decodeResource(activity.getResources(),
+						resource));
 				break;
 			}
 		}
 
 		@Override
-		public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
-				int alpha) {
+		public boolean view_user(Canvas canvas, ScreenPoint sp,
+				WorldPoint size, int alpha) {
 			canvas.drawBitmap(bm_scaled, sp.x, sp.y, paint);
 			return true;
 		}
 
-		public AndroidImageView setPercent(WorldPoint persent) {
-			super.setPercent(persent);
-			matrix
-					.postScale(((float) _percent.x) / 100f, ((float) _percent.y) / 100f);
+		public AndroidImageView setPercent(WorldPoint percent) {
+			super.setPercent(percent);
+			matrix.postScale(((float) percent.x) / 100f,
+					((float) percent.y) / 100f);
 			bm_scaled = Bitmap.createBitmap(bm_base, 0, 0, bm_base.getWidth(),
 					bm_base.getHeight(), matrix, true);
 			return this;
@@ -417,17 +435,21 @@ public class AndroidActor {
 
 		public static final Parcelable.Creator<Parcelable> CREATOR = new Parcelable.Creator<Parcelable>() {
 			public Parcelable createFromParcel(Parcel in) {
-					AndroidView v = new AndroidImageView();
-					v.initFromParcel(in);
-					return v;
+				AndroidView v = new AndroidImageView();
+				v.initFromParcel(in);
+				return v;
 			}
+
 			public Parcelable[] newArray(int size) {
 				return new AndroidImageView[size];
 			}
 		};
+
 		void initFromParcel(Parcel in) {
-			bm_base = in.readParcelable(AndroidImageView.class.getClassLoader());
-			bm_scaled = in.readParcelable(AndroidImageView.class.getClassLoader());
+			bm_base = in
+					.readParcelable(AndroidImageView.class.getClassLoader());
+			bm_scaled = in.readParcelable(AndroidImageView.class
+					.getClassLoader());
 			setCenter(new WorldPoint(in.readInt(), in.readInt()));
 			setSize(new WorldPoint(in.readInt(), in.readInt()));
 			setColor(in.readInt());
@@ -444,8 +466,8 @@ public class AndroidActor {
 		}
 
 		@Override
-		public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
-				int alpha) {
+		public boolean view_user(Canvas canvas, ScreenPoint sp,
+				WorldPoint size, int alpha) {
 			paint.setColor(getColor());
 			canvas.drawArc(getScreenRectF(), start, end, true, paint);
 			// canvas.drawArc(getScreenRectF(), 180f, 360f, true, paint);
@@ -463,8 +485,8 @@ public class AndroidActor {
 	public static class AndroidWindow extends AndroidView {
 
 		@Override
-		public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
-				int alpha) {
+		public boolean view_user(Canvas canvas, ScreenPoint sp,
+				WorldPoint size, int alpha) {
 			return false;
 		}
 
@@ -482,7 +504,7 @@ public class AndroidActor {
 		public boolean quake_impl() {
 			Vibrator vibrator = (Vibrator) activity
 					.getSystemService(Context.VIBRATOR_SERVICE);
-			vibrator.vibrate(val);
+			vibrator.vibrate(getVal());
 			return true;
 		}
 
@@ -497,17 +519,17 @@ public class AndroidActor {
 		}
 	}
 
-		public static void intent_init(Intent i, int TAG, IntentHandler h) {
-			activity.addIntentHandler(TAG, h);
-		}
+	public static void intent_init(Intent i, int TAG, IntentHandler h) {
+		activity.addIntentHandler(TAG, h);
+	}
 
-		public static void intent_start(Intent i, int TAG) {
-			try {
-				activity.startActivityForResult(i, TAG); // Intentî≠çs
-			} catch (ActivityNotFoundException e) {
-				makeAlert("");
-			}
+	public static void intent_start(Intent i, int TAG) {
+		try {
+			activity.startActivityForResult(i, TAG); // IntentÔøΩÔøΩÔøΩs
+		} catch (ActivityNotFoundException e) {
+			makeAlert("");
 		}
+	}
 
 	public static abstract class AndroidIntentHandler implements IntentHandler {
 	}
@@ -515,6 +537,7 @@ public class AndroidActor {
 	public static class AndroidCamera extends AndroidImageView {
 		Intent i;
 		CountDownLatch c = new CountDownLatch(1);
+
 		public AndroidCamera() {
 			super();
 			i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -527,7 +550,7 @@ public class AndroidActor {
 					if (extras != null) {
 						Bitmap bitmap = (Bitmap) extras.get("data");
 						if ((bitmap != null)) {
-							Log.w("TapChain","Camera OK");
+							Log.w("TapChain", "Camera OK");
 							setImage(bitmap);
 							c.countDown();
 							// previewImage.setImageBitmap(bitmap);
@@ -539,9 +562,11 @@ public class AndroidActor {
 			};
 			intent_init(i, CAMERA_REQUEST, h);
 		}
+
 		public void init() {
 			intent_start(i, CAMERA_REQUEST);
 		}
+
 		public void view_init() throws ChainException {
 			try {
 				c.await();
@@ -555,13 +580,14 @@ public class AndroidActor {
 	public static class AndroidRecognizer extends Actor.Controllable {
 		CountDownLatch c = new CountDownLatch(1);
 		Intent i;
+
 		public AndroidRecognizer() {
 			super();
 			connectToPush(recognized);
 			i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 			i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 					RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-			i.putExtra(RecognizerIntent.EXTRA_PROMPT, "ÉTÉìÉvÉãâπê∫ì¸óÕ"); // É_ÉCÉAÉçÉOÇ…ï\é¶Ç≥ÇÍÇÈï∂éöóÒ
+			i.putExtra(RecognizerIntent.EXTRA_PROMPT, "test"); // 
 			intent_init(i, VOICE_REQUEST, new IntentHandler() {
 				@Override
 				public void onIntent(int resultCode, Intent data) {
@@ -578,12 +604,14 @@ public class AndroidActor {
 					}
 					AndroidActor.recognized.push(buffer.toString());
 					// show the value
-					Toast.makeText(activity, buffer.toString(), Toast.LENGTH_LONG).show();
+					Toast.makeText(activity, buffer.toString(),
+							Toast.LENGTH_LONG).show();
 					c.countDown();
 				}
 
 			});
 		}
+
 		public void init() {
 			intent_start(i, VOICE_REQUEST);
 			try {
@@ -592,17 +620,18 @@ public class AndroidActor {
 				makeAlert("Failed to init Camera");
 			}
 		}
+
 		// public AndroidRecognizer ctrlReset() {
 		// try {
 		// Intent intent = new Intent(
 		// RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		// intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
 		// RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-		// intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "ÉTÉìÉvÉãâπê∫ì¸óÕ"); //
-		// É_ÉCÉAÉçÉOÇ…ï\é¶Ç≥ÇÍÇÈï∂éöóÒ
-		// activity.startActivityForResult(intent, VOICE_REQUEST); // Intentî≠çs
+		// intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "test"); //
+		// test
+		// activity.startActivityForResult(intent, VOICE_REQUEST); // Intent
 		// } catch (ActivityNotFoundException e) {
-		// makeAlert("âπê∫ì¸óÕÇ…ëŒâûÇµÇƒÇ¢Ç‹ÇπÇÒÅB");
+		// makeAlert("test");
 		// }
 		// return this;
 		// }
@@ -620,25 +649,28 @@ public class AndroidActor {
 	public static class AndroidOverlayPopup extends Actor.Controllable {
 		View v = null;
 		PopupWindow p;
-		AndroidOverlayPopup () {
+
+		AndroidOverlayPopup() {
 			super();
-			p=new PopupWindow();
-			p.setWindowLayoutMode(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			p = new PopupWindow();
+			p.setWindowLayoutMode(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
 		}
+
 		public void setView(View v) {
 			this.v = v;
 			p.setContentView(v);
 		}
+
 		public void show(int x, int y) {
-			if(!p.isShowing())
-				p.showAtLocation(activity.findViewById(0x00001235), Gravity.NO_GRAVITY,
-					x-v.getWidth()/2, y-v.getHeight()/2
-					);
+			if (!p.isShowing())
+				p.showAtLocation(activity.findViewById(0x00001235),
+						Gravity.NO_GRAVITY, x - v.getWidth() / 2,
+						y - v.getHeight() / 2);
 			else
-				p.update(
-						x-v.getWidth()/2, y-v.getHeight()/2,
-						-1, -1);
+				p.update(x - v.getWidth() / 2, y - v.getHeight() / 2, -1, -1);
 		}
+
 		@Override
 		public Actor ctrlStart() throws ChainException, InterruptedException {
 			return this;
@@ -653,37 +685,41 @@ public class AndroidActor {
 		}
 
 		@Override
-		public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
-				int alpha) {
+		public boolean view_user(Canvas canvas, ScreenPoint sp,
+				WorldPoint size, int alpha) {
 			return false;
 		}
 
 	}
-	
-	public static class AndroidNumberView extends AndroidImageView implements IPathListener {
+
+	public static class AndroidNumberView extends AndroidImageView implements
+			IPathListener {
 		int __num = 1;
+
 		public AndroidNumberView() {
 			super();
-			setImage(BitmapFactory.decodeResource(
-					AndroidActor.getResources(), R.drawable.bubble4));
+			setImage(BitmapFactory.decodeResource(AndroidActor.getResources(),
+					R.drawable.bubble4));
 			getInPack(PackType.HEAP).setUserPathListener(this);
 		}
+
 		@Override
 		public void OnPushed(Connector p, Object obj)
 				throws InterruptedException {
 			__num++;// = (Integer)obj;
-//			validate();
+			// validate();
 		}
-		
+
 		@Override
 		public void view_init() throws ChainException {
-			__num = (Integer)pull();
+			__num = (Integer) pull();
 		}
+
 		@Override
-		public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
-				int alpha) {
-			for(int i = 0; i < __num; i++)
-				super.view_user(canvas, sp.plus(0, 50*i), size, alpha);
+		public boolean view_user(Canvas canvas, ScreenPoint sp,
+				WorldPoint size, int alpha) {
+			for (int i = 0; i < __num; i++)
+				super.view_user(canvas, sp.plus(0, 50 * i), size, alpha);
 			return false;
 		}
 

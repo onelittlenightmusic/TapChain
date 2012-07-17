@@ -25,17 +25,15 @@ import org.tapchain.core.PathPack.ChainInPathPack;
 public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	IWindow win = null;
 	IWindowCallback winCall = null;
-	ActorManager editorManager = new ActorManager();
-	ActorManager userManager = new ActorManager();
+	protected ActorManager editorManager = new ActorManager();
+	protected ActorManager userManager = new ActorManager();
 	Factory userFactory = null;
-	IPieceView nowPiece = null;
+	public IPieceView nowPiece = null;
 	WorldPoint nowPoint = null;
 	public TreeMap<IPiece,IPieceView> dictPiece = new TreeMap<IPiece, IPieceView>();
 	ConcurrentHashMap<IPath, IPathView> dictPath = new ConcurrentHashMap<IPath, IPathView>();
 	ArrayList<Actor> plist = new ArrayList<Actor>();
-	IErrorHandler errHandle = null;
-	IInteraction lInteract = null;
-	IEventHandler eh = null;
+	protected IErrorHandler errHandle = null;
 
 	//1.Initialization
 	protected TapChainEdit() {
@@ -57,27 +55,6 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		return;
 	}
 
-	//2.Getters and setters
-	@Override
-	public boolean onCalled() {
-		win.onDraw();
-		return true;
-	}
-	public void setWindow(IWindow v) {
-		win = v;
-		init();
-	}
-
-	public Factory getFactory() {
-		return getUserManager().getFactory();
-	}
-	
-	public void reset() {
-		TreeMap<IPiece, IPieceView> copy = new TreeMap<IPiece, IPieceView>(dictPiece);
-		for(IPiece bp : copy.keySet())
-			getUserManager().remove(bp);
-	}
-	
 	void init() {
 		Actor ptmp = null;
 		for(int c : Arrays.asList(0xff80ff80, 0xff80ff80, 0xffffffff, 0xff8080ff, 0xffff8080)) {
@@ -100,6 +77,36 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		}.initEffect(nowPoint==null?new WorldPoint(0,0):nowPoint, 1).setParentType(PackType.HEAP).boost())
 		.save();
 	}
+	
+	public void reset() {
+		TreeMap<IPiece, IPieceView> copy = new TreeMap<IPiece, IPieceView>(dictPiece);
+		for(IPiece bp : copy.keySet())
+			getUserManager().remove(bp);
+	}
+	
+	//2.Getters and setters
+	@Override
+	public boolean onCalled() {
+		win.onDraw();
+		return true;
+	}
+	public void setWindow(IWindow v) {
+		win = v;
+		init();
+	}
+
+	public Factory getFactory() {
+		return getUserManager().getFactory();
+	}
+	
+	public ActorManager getManager() {
+		return editorManager.newSession();
+	}
+
+	public ActorManager getUserManager() {
+		return userManager.newSession();
+	}
+
 	static Actor move = new Actor();
 	static Actor.Mover move_ef = null;
 	
@@ -489,14 +496,6 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	public boolean onClear() {
 		nowPoint = null;
 		return true;
-	}
-
-	public ActorManager getManager() {
-		return editorManager.newSession();
-	}
-
-	public ActorManager getUserManager() {
-		return userManager.newSession();
 	}
 
 
