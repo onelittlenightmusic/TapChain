@@ -38,7 +38,7 @@ public interface IBlueprint {
 	 * @return 
 	 * @throws ChainException
 	 */
-	Actor newInstance(Manager maker) throws ChainException;
+	Actor newInstance(PieceManager maker) throws ChainException;
 	Reservation newReservation(IPiece... args);
 	/** Add local blueprint into current blueprint
 	 * @param _pbp Local blueprint

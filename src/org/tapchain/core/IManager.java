@@ -1,5 +1,6 @@
 package org.tapchain.core;
 
+import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
 
 /** Manager.
@@ -68,6 +69,8 @@ public interface IManager<T> {
 	public IManager<T> _mark();
 
 	public IManager<T> _return(T point);
+	
+	public IManager<T> error(ChainException e);
 	
 	//4.Termination: none
 }

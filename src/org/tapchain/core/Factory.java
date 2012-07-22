@@ -10,26 +10,26 @@ public class Factory {
 	ArrayList<IBlueprint> collect;
 	HashMap<Class<? extends Actor>, ArrayList<Actor>> items = new 
 	HashMap<Class<? extends Actor>, ArrayList<Actor>>();
-	TapChainEdit editor = null;
-	public Factory(TapChainEdit e) {
+	ActorManager manager = null;
+	public Factory(ActorManager m/*TapChainEdit e*/) {
 		collect = new ArrayList<IBlueprint>();
-		editor = e;
+		manager = m;
 //		addClassTest(test_cls.class);
 	}
 	public Factory Register(IBlueprint root) {
 		collect.add(root);
 		return this;
 	}
-	public Actor getInstance(int num) {
-		IBlueprint pbp = collect.get(num);
-		ActorManager usermaker = editor.getUserManager();
+	public Actor instantiate(int num) {
+		IBlueprint blueprint = collect.get(num);
+		ActorManager usermaker = manager;//editor.getUserManager();
 		Actor rtn = null;
-		if(pbp == null)
+		if(blueprint == null)
 			return null;
 		try {
-			rtn = pbp.newInstance(usermaker);
+			rtn = blueprint.newInstance(usermaker);
 			rtn.setLogLevel(true);
-			Blueprint _view = createView(num);
+			Blueprint _view = getView(num);
 			if(_view != null)
 				usermaker.setPieceView(rtn, _view);
 			usermaker.save();
@@ -47,7 +47,7 @@ public class Factory {
 			return null;
 		return collect.get(n).getName();
 	}
-	public Blueprint createView(int n) throws ChainException {
+	public Blueprint getView(int n) throws ChainException {
 		if(n >= getSize()) {
 //			Log.w("PieceFactory", "Size Over, "+String.valueOf(n));
 			throw new ChainException(this, "TapChain#PieceBlueprint size over");

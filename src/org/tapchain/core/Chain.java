@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import org.tapchain.core.ChainPiece;
-import org.tapchain.core.ActorManager.ILogHandler;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.Connector.*;
 

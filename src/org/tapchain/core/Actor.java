@@ -1184,7 +1184,8 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 	 * 
 	 */
 	public static class ManagerPiece extends StaticPiece {
-		Manager maker;
+		BlueprintManager bm;
+		PieceManager maker;
 		IPiece parent;
 
 		//1.Initialization
@@ -1201,7 +1202,6 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		@Override
 		public void OnPushed(Connector p, Object obj)
 				throws InterruptedException {
-			BlueprintManager bm = maker.makeBlueprint();
 			if (parent != null)
 				bm.setOuterInstanceForInner(parent);
 			try {

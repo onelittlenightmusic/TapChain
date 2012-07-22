@@ -8,7 +8,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.tapchain.core.ActorChain.*;
-import org.tapchain.core.ActorManager.ILogHandler;
 import org.tapchain.core.ActorManager.IPathEdit;
 import org.tapchain.core.ActorManager.IPieceEdit;
 import org.tapchain.core.ActorManager.IStatusHandler;
@@ -27,6 +26,7 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	IWindowCallback winCall = null;
 	protected ActorManager editorManager = new ActorManager();
 	protected ActorManager userManager = new ActorManager();
+	protected BlueprintManager blueprintManager = null;;
 	Factory userFactory = null;
 	public IPieceView nowPiece = null;
 	WorldPoint nowPoint = null;
@@ -37,7 +37,6 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 
 	//1.Initialization
 	protected TapChainEdit() {
-		userFactory = new Factory(this);
 		if (winCall == null) {
 			winCall = new IWindowCallback() {
 				@Override
@@ -46,8 +45,10 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 				}
 			};
 		}
-		editorManager.setFactory(userFactory).createChain(20);
-		userManager.setFactory(userFactory).createChain(50).getChain().setAutoEnd(false);
+		userFactory = new Factory(userManager);
+		blueprintManager = new BlueprintManager(userFactory);
+		editorManager./*setFactory(userFactory).*/createChain(20);
+		userManager./*setFactory(userFactory).*/createChain(50).getChain().setAutoEnd(false);
 		editorManager.SetCallback(this);
 		userManager.SetCallback(this);
 		userManager.setPieceEdit(this);
@@ -96,7 +97,7 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	}
 
 	public Factory getFactory() {
-		return getUserManager().getFactory();
+		return userFactory;//blueprintManager;//getUserManager().getFactory();
 	}
 	
 	public ActorManager getManager() {
@@ -292,7 +293,7 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		public void init_animation(ActorManager maker, IEditAnimation a) {
 			if(bp != null) return;
 			bp = new Actor();
-			Manager manager = maker._func(bp);
+			PieceManager manager = maker._func(bp);
 			a.init_animation(manager);
 			manager._exit().save();
 			dump = maker.dump();
@@ -325,15 +326,6 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		return true;
 	}
 	
-	public boolean onDownClear() {
-		getManager().getChain().TouchClear();
-		return true;
-	}
-
-	public void freezeToggle() {
-		getUserManager().getChain().ctrl.Toggle();
-	}
-	
 	public IPieceView touchPiece(WorldPoint sp) {
 		for (IPieceView f : dictPiece.values()) {
 //			TapChainEditorView e = f.getValue();
@@ -343,6 +335,15 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		return null;
 	}
 
+	public boolean onDownClear() {
+		getManager().getChain().TouchClear();
+		return true;
+	}
+
+	public void freezeToggle() {
+		getUserManager().getChain().ctrl.Toggle();
+	}
+	
 	public boolean up() {
 		nowPiece = null;
 		return true;
@@ -759,7 +760,7 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	}
 	
 	public interface IEditAnimation {
-		public void init_animation(Manager maker);
+		public void init_animation(PieceManager maker);
 	}
 
 }

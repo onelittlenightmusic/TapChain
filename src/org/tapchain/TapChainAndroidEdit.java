@@ -11,15 +11,15 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ConnectorPath;
+import org.tapchain.core.IErrorHandler;
+import org.tapchain.core.ILogHandler;
 import org.tapchain.core.IPoint;
-import org.tapchain.core.Manager;
+import org.tapchain.core.PieceManager;
 import org.tapchain.core.ScreenPoint;
 import org.tapchain.core.TapChainEdit;
 import org.tapchain.core.TapMath;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.core.ActorChain.IErrorHandler;
 import org.tapchain.core.ActorChain.IView;
-import org.tapchain.core.ActorManager.ILogHandler;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
@@ -48,8 +48,9 @@ public class TapChainAndroidEdit extends TapChainEdit
 		super();
 		 setInteract(new LocalInteraction());
 		 eh = new LocalEventHandler();
-		 userManager
-		.makeBlueprint()
+//		 userManager
+//		.makeBlueprint()
+		 blueprintManager
 		.setOuterInstanceForInner(this)
 		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
 		.setView(Teststar.class)
@@ -162,6 +163,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 		errHandle = this;
 		editorManager.setError(errHandle);
 		userManager.setError(errHandle);
+		blueprintManager.setError(errHandle);
 		
 		//Initialization of View(touching effect)
 		editorManager
@@ -263,7 +265,6 @@ public class TapChainAndroidEdit extends TapChainEdit
 		return;
 	}
 
-	@Override
 	public boolean onDown(WorldPoint sp) {
 		super.onDown(sp);
 		onMoveView(circle);
@@ -271,6 +272,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 	}
 
 	final Actor p = new Actor();
+	
 	@Override
 	public ChainPiece onError(ChainPiece bp, ChainException e) {
 		p.push(e.getLocation() + "," + e.getError());
@@ -438,7 +440,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 				d = new ShapeDrawable(new RoundRectShape(new float[] { 10, 10, 10, 10,
 						10, 10, 10, 10 }, null, null));
 				d.getPaint().setAntiAlias(true);
-				d.getPaint().setColor(0xffbbbbbb);
+				d.getPaint().setColor(0xaabbbbbb);
 				d.getPaint().setStyle(Paint.Style.STROKE);
 	//			d.getPaint().setStyle(Paint.Style.FILL);
 	//			d.getPaint().setStyle(Paint.Style.FILL_AND_STROKE);
@@ -530,8 +532,8 @@ public class TapChainAndroidEdit extends TapChainEdit
 				Actor.Alphar alpha = new Actor.Alphar().alpha_init(20, 5);
 				getManager()._return(this)._child().add(move.disableLoop())
 						.add(size.disableLoop()).add(alpha.disableLoop())._exit().save();
-				d.getPaint().setColor(0x88bbbbbb);
-				d.getPaint().setStyle(Paint.Style.FILL_AND_STROKE);
+//				d.getPaint().setColor(0x33bbbbbb);
+//				d.getPaint().setStyle(Paint.Style.FILL_AND_STROKE);
 				open = true;
 				return this;
 	
@@ -546,8 +548,8 @@ public class TapChainAndroidEdit extends TapChainEdit
 				Actor.Alphar alpha = new Actor.Alphar().alpha_init(-20, 10);
 				getManager()._return(this)._child().add(move.disableLoop())
 						.add(size.disableLoop()).add(alpha.disableLoop())._exit().save();
-				d.getPaint().setColor(0xffbbbbbb);
-				d.getPaint().setStyle(Paint.Style.STROKE);
+//				d.getPaint().setColor(0xffbbbbbb);
+//				d.getPaint().setStyle(Paint.Style.STROKE);
 				open = false;
 				return this;
 			}
@@ -649,7 +651,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 						AndroidActor.getResources(), R.drawable.newframe);
 				setSize(new WorldPoint(bm_back.getWidth(), bm_back.getHeight()));
 			}
-			public void init_animation(Manager maker) {
+			public void init_animation(PieceManager maker) {
 	//			maker
 	//			.add(new BasicPiece.MoveViewEffect().initEffect(new WorldPoint(1,1).setDif(), 1));
 			}
@@ -668,7 +670,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 			WorldPoint offset1, offset2;
 			Paint paint;
 			ScreenPoint sp1, sp2, sp12, sp21;
-			Manager maker;
+			PieceManager maker;
 			public Connect1() {
 				super();
 			}
@@ -705,7 +707,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 				canvas.drawPath(p, paint);
 				return true;
 			}
-			public void init_animation(Manager maker) {
+			public void init_animation(PieceManager maker) {
 				this.maker = maker;
 	//			maker
 	//			._func(arg)

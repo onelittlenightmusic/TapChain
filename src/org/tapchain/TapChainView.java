@@ -388,13 +388,11 @@ public class TapChainView extends Activity implements SensorEventListener,
 		}
 	}
 
-	static OverlayPopup p = null;
+	static OverlayPopup p = new OverlayPopup();
 
 	public static class ActorButton extends PieceImage {
 		ActorButton(final Context c, final int j) {
 			super(c, j);
-			if (p == null)
-				p = new OverlayPopup(j);
 			setOnTouchListener(new View.OnTouchListener() {
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
@@ -439,7 +437,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 		View v = null;
 		Context cxt = null;
 
-		OverlayPopup(int j) {
+		OverlayPopup() {
 			super();
 			// setView(c, j);
 			setWindowLayoutMode(LayoutParams.WRAP_CONTENT,
@@ -468,7 +466,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 			Factory f = ((TapChainView) c).editor.getFactory();
 			AndroidView v = null;
 			try {
-				v = (AndroidView) f.createView(j).newInstance(null);
+				v = (AndroidView) f.getView(j).newInstance(null);
 			} catch (ChainException e) {
 				e.printStackTrace();
 			}
@@ -593,7 +591,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 
 	public void setCode(int code) {
 		if (code < editor.getFactory().getSize())
-			editor.getFactory().getInstance(code);
+			editor.getFactory().instantiate(code);
 	}
 
 	public class WritingView extends TapChainSurfaceView implements

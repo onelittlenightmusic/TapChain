@@ -1,45 +1,64 @@
 package org.tapchain.core;
 
+import java.lang.reflect.Modifier;
+
 import org.tapchain.core.Blueprint.*;
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 
 
 @SuppressWarnings("unchecked")
-public class BlueprintManager implements IManager<IBlueprint> {
-	ActorManager parentMaker = null;
-	IBlueprint root = null;
+public class BlueprintManager extends Manager<IBlueprint> {
+	BlueprintManager parentMaker = null;
+	private IBlueprint root = null;
 	Reservation marked = null;
 	Reservation reserved = null;
+	Factory factory = null;
 	private Object outer;
 	//1.Initialization
 	public BlueprintManager() {
 	}
 	
+	public BlueprintManager(Factory _factory) {
+		this();
+		factory = _factory;
+	}
+	
 	//2.Getters and setters
-	public BlueprintManager setParent(ActorManager _parent) {
+	public BlueprintManager setParent(BlueprintManager _parent) {
 		parentMaker = _parent;
 		return this;
 	}
-	public ActorManager getParent() {
+	public BlueprintManager getParent() {
 		return parentMaker;
 	}
 	
-	public BlueprintManager Error(ChainException e) {
-		if(parentMaker != null)
-			parentMaker.error(e);
-//		Log.e("Error ACM", e.err);
+	/**
+	 * @return the root
+	 */
+	public IBlueprint getRoot() {
+		return root;
+	}
+
+	/**
+	 * @param root the root to set
+	 */
+	public BlueprintManager setRoot(IBlueprint root) {
+		this.root = root;
 		return this;
 	}
+
 	
 	public BlueprintManager setOuterInstanceForInner(Object outer) {
 		this.outer = outer;
 		return this;
 	}
 	@Override
-	public IManager<IBlueprint> newSession() {
-		return this;
+	public BlueprintManager newSession() {
+		return new BlueprintManager(factory).setOuterInstanceForInner(outer);
+	}
+	public BlueprintManager _child() {
+		return newSession().setRoot(root);
 	}
 	@Override
 	public IManager<IBlueprint> log(String... s) {
@@ -48,24 +67,29 @@ public class BlueprintManager implements IManager<IBlueprint> {
 	
 	//3.Changing state
 	public BlueprintManager New(Class<? extends Actor> _cls, Actor... args) {
-		return New(new Blueprint(_cls, args));
+		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
+				|| _cls.isLocalClass()
+				|| _cls.isAnonymousClass())
+			return New(new Blueprint(_cls, args).setLocalClass(outer.getClass(), outer));
+		else
+			return New(new Blueprint(_cls, args));
 	}
 	public BlueprintManager addArg(Class<?>[] type, Object[] obj) {
-		root.addArgs(type, obj);
+		getRoot().addArgs(type, obj);
 		return this;
 	}
 	public BlueprintManager NewLocal(Class<? extends Actor> _cls, Object parent, Actor... args) {
 		return New(new Blueprint(_cls, args).setLocalClass(parent.getClass(), parent));
 	}
 	public BlueprintManager New(IBlueprint pbp) {
-		root = pbp;
-		marked = root.This();
-		reserved = root.This();
+		setRoot(pbp);
+		marked = getRoot().This();
+		reserved = getRoot().This();
 		return this;
 	}
 	@Override
 	public BlueprintManager add(IBlueprint _pbp, IPiece... args) {
-		reserved = root.addLocal(_pbp, args);
+		reserved = getRoot().addLocal(_pbp, args);
 		return this;
 	}
 	public BlueprintManager add(Class<? extends Actor> _cls, Actor... args) {
@@ -139,11 +163,11 @@ public class BlueprintManager implements IManager<IBlueprint> {
 	}
 	@Override
 	public BlueprintManager save() {
-		parentMaker.getFactory().Register(root);
+		factory.Register(getRoot());
 		return this;
 	}
 	public IBlueprint getBlueprint() {
-		return root;
+		return getRoot();
 	}
 	@Override
 	public BlueprintManager _mark() {
@@ -156,39 +180,19 @@ public class BlueprintManager implements IManager<IBlueprint> {
 		return this;
 	}
 	public BlueprintManager setView(Class<? extends Actor.ViewActor> _cls, Actor... args) {
-		if(_cls.isMemberClass())
-			root.setView(new Blueprint(_cls, args).setLocalClass(outer.getClass(), outer));
+		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
+				|| _cls.isLocalClass()
+				|| _cls.isAnonymousClass())
+			getRoot().setView(new Blueprint(_cls, args).setLocalClass(outer.getClass(), outer));
 		else
-			root.setView(new Blueprint(_cls, args));
+			getRoot().setView(new Blueprint(_cls, args));
 		return this;
 	}
-//	public BlueprintManager setviewLocal(Class<? extends BasicView> _cls, BasicPiece... args) {
-//		if(_cls.isMemberClass())
-//			root.setview(new PieceBlueprint(_cls, args).setLocalClass(outer.getClass(), outer));
-//		return this;
-//	}
-	/*	@Override
-	public BlueprintManager reset(Blueprint _pbp, IPiece... args) {
-		Reservation past = reserved;
-		add(_pbp, args);
-		past.Append(PackType.FAMILY, reserved, PackType.EVENT);
-		return this;
-	}
-*/
-	/*	public BlueprintManager reset(Class<? extends Actor> _cls, Actor... args) {
-	return reset(new Blueprint(_cls), args);
-}
-*/
-	/*	public BlueprintManager reset(Actor bp, Actor... args) {
-	return reset(new PieceBlueprintStatic(bp), args);
-}
-*/
-
-
 	@Override
 	public IManager<IBlueprint> _return(IBlueprint point) {
-		root = point;
+		setRoot(point);
 		return this;
 	}
+
 
 }

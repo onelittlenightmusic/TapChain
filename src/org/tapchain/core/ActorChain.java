@@ -166,10 +166,5 @@ public class ActorChain extends Chain {
 		public Actor ctrlStop();
 		public Actor ctrlReset() throws ChainException, InterruptedException;
 	}
-
-	public interface IErrorHandler {
-		public ChainPiece onError(ChainPiece chainPiece, ChainException e);
-		public ChainPiece onCancel(ChainPiece bp, ChainException e);
-	}
 	
 }

@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.tapchain.core.ActorChain.IErrorHandler;
 import org.tapchain.core.ActorManager.IStatusHandler;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;

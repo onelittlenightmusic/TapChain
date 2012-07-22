@@ -13,12 +13,9 @@ import org.tapchain.core.TapChainEdit.IPathView;
 import org.tapchain.core.TapChainEdit.IPieceView;
 
 
-public class ActorManager extends Manager {
+public class ActorManager extends PieceManager {
 	ChainPiece root = null;
 	ActorManager parent = null;
-	Factory factory = null;
-	IErrorHandler error = null;
-	ILogHandler log = null;
 	IPathEdit pathEdit = null;
 	IPieceEdit pieceEdit = null;
 	IStatusHandler statusHandle = null;
@@ -30,7 +27,6 @@ public class ActorManager extends Manager {
 	}
 	
 	public ActorManager(
-			Factory _factory, 
 			IErrorHandler _error, 
 			ILogHandler _log,
 			IPathEdit _pathEdit,
@@ -39,17 +35,17 @@ public class ActorManager extends Manager {
 			Blueprint _connect) {
 		this();
 		this
-		.setFactory(_factory)
 		.setPathEdit(_pathEdit)
 		.setPieceEdit(_pieceEdit)
 		.setStatusHandler(_pieces)
-		.setLog(_log)
 		.setPathBlueprint(_connect)
+		.setLog(_log)
+		.setError(_error)
 		;
 	}
 	
 	public ActorManager(ActorManager am) {
-		this(am.factory,
+		this(//am.factory,
 				am.error,
 				am.log,
 				am.pathEdit,
@@ -74,11 +70,6 @@ public class ActorManager extends Manager {
 			.setChain((ActorChain)chain);
 	}
 	
-	@Override
-	public BlueprintManager makeBlueprint() {
-		return new BlueprintManager().setParent(this);
-	}
-	
 	//2.Getters and setters
 	public ActorManager setChain(ActorChain c) {
 		super.setChain(c);
@@ -92,13 +83,6 @@ public class ActorManager extends Manager {
 		return (Actor)super.getPiece();
 	}
 	
-	public ActorManager setFactory(Factory _pf) {
-		factory = _pf;
-		return this;
-	}
-	public Factory getFactory() {
-		return factory;
-	}
 	public ActorManager setParentManager(ActorManager _parent) {
 		parent = _parent;
 		return this;
@@ -108,12 +92,9 @@ public class ActorManager extends Manager {
 			return parent;
 		throw new ChainException(this, "No Parent");
 	}
-	public ActorManager setError(IErrorHandler handle) {
-		error = handle;
-		return this;
-	}
+	@Override
 	public ActorManager setLog(ILogHandler _log) {
-		log = _log;
+		super.setLog(_log);
 		if(chain != null)
 			chain.setLog(_log);
 		return this;
@@ -141,8 +122,6 @@ public class ActorManager extends Manager {
 	}
 	@Override
 	public ActorManager log(String... s) {
-		if(log != null)
-			log.log(s);
 		return this;
 	}
 	
@@ -170,12 +149,6 @@ public class ActorManager extends Manager {
 		return (ActorChain)super.getChain();
 	}
 	
-	@Override
-	public ActorManager error(ChainException e) {
-		if(error != null)
-			error.onError(null, e);
-		return this;
-	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public ActorManager add(IPiece bp, IPiece... args) {
@@ -279,11 +252,6 @@ public class ActorManager extends Manager {
 		return rtn;
 	}
 	
-	//4.Termination: none
-	//5.Local classes: none
-	public interface ILogHandler {
-		public void log(String... s);
-	}
 	public interface IPathEdit {
 		public void setPathView(IPath second, Reservation vReserve);
 		public IPathView getView(IPath path);

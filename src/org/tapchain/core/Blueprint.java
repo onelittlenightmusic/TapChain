@@ -71,7 +71,7 @@ public class Blueprint implements IBlueprint {
 		return this;
 	}
 	
-	public Actor newInstance(Manager maker) throws ChainException {
+	public Actor newInstance(PieceManager maker) throws ChainException {
 //		if(parent != null) {
 //			Class<?>[] types = new Class<?>[]{};
 //			parent.keySet().toArray(types);
@@ -91,7 +91,7 @@ public class Blueprint implements IBlueprint {
 			return newInstance(maker, null, null);
 		return newInstance(maker, _types.toArray(new Class<?>[]{}), _obj.toArray());
 	}
-	public Actor newInstance(Manager maker, Class<?>[] types, Object[] args) throws ChainException {
+	public Actor newInstance(PieceManager maker, Class<?>[] types, Object[] args) throws ChainException {
 		Actor rtn = null;
 //		ChainException ex = null;
 		try {
@@ -110,9 +110,9 @@ public class Blueprint implements IBlueprint {
 		}
 		return rtn;
 	}
-	public void init_user(Actor newinstance, Manager maker) throws InterruptedException {
+	public void init_user(Actor newinstance, PieceManager maker) throws InterruptedException {
 	}
-	private Actor __init_children(Actor newinstance, Manager maker) throws IllegalAccessException, InstantiationException, ChainException, InterruptedException {
+	private Actor __init_children(Actor newinstance, PieceManager maker) throws IllegalAccessException, InstantiationException, ChainException, InterruptedException {
 		for(Reservation local: children) {
 			local.instantiate(maker);
 //			This.getInstance().addMember(local.getInstance());
@@ -155,10 +155,10 @@ public class Blueprint implements IBlueprint {
 			parent = _parent;
 			return this;
 		}
-		public Actor instantiate(Manager maker) throws IllegalAccessException, InstantiationException, ChainException, InterruptedException {
+		public Actor instantiate(PieceManager maker) throws IllegalAccessException, InstantiationException, ChainException, InterruptedException {
 			return setInstance( cls.newInstance(maker), maker);
 		}
-		public synchronized Actor setInstance(Actor bp, Manager maker) throws ChainException {
+		public synchronized Actor setInstance(Actor bp, PieceManager maker) throws ChainException {
 			instantiated = bp;
 			if(maker != null) {
 				maker._return(instantiated);
@@ -204,7 +204,7 @@ public class Blueprint implements IBlueprint {
 			appender_pack = stack;
 			appendee_pack = stack_target;
 		}
-		public void connect(Manager maker) throws ChainException, InterruptedException, IllegalAccessException, InstantiationException {
+		public void connect(PieceManager maker) throws ChainException, InterruptedException, IllegalAccessException, InstantiationException {
 			maker.append(Appender.getInstance(), appender_pack, Appendee.getInstance(), appendee_pack);
 			if(view != null)
 				maker.add(view.newInstance(null));
@@ -222,7 +222,7 @@ public class Blueprint implements IBlueprint {
 			instance = bp;
 		}
 		@Override
-		public Actor newInstance(Manager maker) throws ChainException {
+		public Actor newInstance(PieceManager maker) throws ChainException {
 			if(maker != null)
 				maker.add(instance);
 			return instance;
