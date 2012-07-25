@@ -53,6 +53,8 @@ public class TapChainAndroidEdit extends TapChainEdit
 		 blueprintManager
 		.setOuterInstanceForInner(this)
 		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
+//		.New(AndroidImageView.class).teacher(new Actor.Value(R.drawable.star))
+//		.setView(LocalView.class).addArg(int.class, R.drawable.star)
 		.setView(Teststar.class)
 		.save()
 //		.New(AndroidImageView.class, new BasicPiece.Value(R.drawable.star))
@@ -122,7 +124,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 //		.because(TouchFilter.class)
 //		._return()
 		.child(Actor.Sleeper.class)
-		.and(Actor.Resetter.class)
+		.young(Actor.Resetter.class)
 		.setView(TestRecord.class)
 		.save()
 		.New(AndroidActor.AndroidCamera.class)
@@ -142,8 +144,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 		.save()
 		.New(Actor.Resetter.class).setView(TestReset.class).save()
 		.New(Actor.Counter.class).setView(TestTime2.class).save()
-		.New(Actor.Value.class).addArg(new Class<?>[]{Object.class},
-				new Object[]{3}).setView(TestTime2.class).save()
+		.New(Actor.Value.class).addArg(Object.class,3).setView(TestTime2.class).save()
 		.New(AndroidActor.AndroidNumberView.class).setView(TestTime2.class).save()
 		;
 // .New(AndroidPiece.AndroidRecognizer.class)

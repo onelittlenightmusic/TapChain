@@ -26,6 +26,7 @@ import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -563,7 +564,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 		vibrator.vibrate(interval);
 	}
 
-	HashMap<Integer, IntentHandler> intentHandlers = new HashMap<Integer, IntentHandler>();
+	SparseArray<IntentHandler> intentHandlers = new SparseArray<IntentHandler>();
 
 	public TapChainView addIntentHandler(int requestCode, IntentHandler h) {
 		intentHandlers.put(requestCode, h);
@@ -575,7 +576,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode != RESULT_OK)
 			return;
-		if (intentHandlers.containsKey(requestCode))
+		if (intentHandlers.get(requestCode) != null)
 			intentHandlers.get(requestCode).onIntent(resultCode, data);
 		else
 			setCode(data.getIntExtra("TEST", 0));

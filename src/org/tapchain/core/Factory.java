@@ -4,34 +4,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.Chain.IPiece;
 
 
-public class Factory {
+public class Factory<T extends IPiece> {
 	ArrayList<IBlueprint> collect;
-	HashMap<Class<? extends Actor>, ArrayList<Actor>> items = new 
-	HashMap<Class<? extends Actor>, ArrayList<Actor>>();
-	ActorManager manager = null;
-	public Factory(ActorManager m/*TapChainEdit e*/) {
+	HashMap<Class<? extends T>, ArrayList<T>> items = new 
+	HashMap<Class<? extends T>, ArrayList<T>>();
+	IManager<IPiece> manager = null;
+	public Factory(IManager<IPiece> m/*TapChainEdit e*/) {
 		collect = new ArrayList<IBlueprint>();
 		manager = m;
 //		addClassTest(test_cls.class);
 	}
-	public Factory Register(IBlueprint root) {
+	public Factory<T> Register(IBlueprint root) {
 		collect.add(root);
 		return this;
 	}
-	public Actor instantiate(int num) {
+	public T instantiate(int num) {
 		IBlueprint blueprint = collect.get(num);
-		ActorManager usermaker = manager;//editor.getUserManager();
-		Actor rtn = null;
+		IManager<IPiece> usermaker = manager;//editor.getUserManager();
+		T rtn = null;
 		if(blueprint == null)
 			return null;
 		try {
-			rtn = blueprint.newInstance(usermaker);
-			rtn.setLogLevel(true);
+			rtn = (T) blueprint.newInstance(usermaker);
+//			rtn.setLogLevel(true);
 			Blueprint _view = getView(num);
 			if(_view != null)
-				usermaker.setPieceView(rtn, _view);
+				((ActorManager) usermaker).setPieceView(rtn, _view);
 			usermaker.save();
 			return rtn;
 		} catch (ChainException e) {

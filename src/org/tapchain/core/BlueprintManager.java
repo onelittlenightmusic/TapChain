@@ -11,8 +11,8 @@ import org.tapchain.core.Chain.PackType;
 public class BlueprintManager extends Manager<IBlueprint> {
 	BlueprintManager parentMaker = null;
 	private IBlueprint root = null;
-	Reservation marked = null;
-	Reservation reserved = null;
+	IBlueprint marked = null;
+	IBlueprint reserved = null;
 	Factory factory = null;
 	private Object outer;
 	//1.Initialization
@@ -74,17 +74,14 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		else
 			return New(new Blueprint(_cls, args));
 	}
-	public BlueprintManager addArg(Class<?>[] type, Object[] obj) {
-		getRoot().addArgs(type, obj);
+	public BlueprintManager addArg(Class<?> type, Object obj) {
+		getRoot().addArg(type, obj);
 		return this;
-	}
-	public BlueprintManager NewLocal(Class<? extends Actor> _cls, Object parent, Actor... args) {
-		return New(new Blueprint(_cls, args).setLocalClass(parent.getClass(), parent));
 	}
 	public BlueprintManager New(IBlueprint pbp) {
 		setRoot(pbp);
-		marked = getRoot().This();
-		reserved = getRoot().This();
+		marked = getRoot();
+		reserved = getRoot();
 		return this;
 	}
 	@Override
@@ -95,31 +92,31 @@ public class BlueprintManager extends Manager<IBlueprint> {
 	public BlueprintManager add(Class<? extends Actor> _cls, Actor... args) {
 		return add(new Blueprint(_cls), args);
 	}
-	public Reservation getLast() {
+	public IBlueprint getLast() {
 		return reserved;
 	}
 	@Override
 	public BlueprintManager teacher(IBlueprint _pbp, IPiece... args) {
-		Reservation past = reserved;
+		IBlueprint past = reserved;
 		add(_pbp, args);
 		past.Append(PackType.HEAP, reserved, PackType.HEAP);
 		return this;
 	}
 	@Override
 	public BlueprintManager young(IBlueprint _pbp, IPiece... args) {
-		Reservation past = reserved;
+		IBlueprint past = reserved;
 		add(_pbp, args);
 		reserved.Append(PackType.PASSTHRU, past, PackType.PASSTHRU);
 		return this;
 	}
 	public BlueprintManager parent(Blueprint _pbp, Actor... args) {
-		Reservation past = reserved;
+		IBlueprint past = reserved;
 		add(_pbp, args);
 		past.Append(PackType.HEAP, reserved, PackType.FAMILY);
 		return this;
 	}
 	public BlueprintManager child(Blueprint _pbp, Actor... args) {
-		Reservation past = reserved;
+		IBlueprint past = reserved;
 		add(_pbp, args);
 		reserved.Append(PackType.PASSTHRU, past, PackType.FAMILY);
 		return this;
@@ -128,7 +125,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 	public BlueprintManager args(Class<? extends Actor> _cls, Actor... args) {
 		return teacher(new Blueprint(_cls), args);
 	}
-	public BlueprintManager and(Class<? extends Actor> _cls, Actor... args) {
+	public BlueprintManager young(Class<? extends Actor> _cls, Actor... args) {
 		return young(new Blueprint(_cls), args);
 	}
 	public BlueprintManager parent(Class<? extends Actor> _cls, Actor... args) {
@@ -140,7 +137,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 	public BlueprintManager because(Class<? extends Actor> _cls, Actor... args) {
 		return because(new Blueprint(_cls), args);
 	}
-	public BlueprintManager args(Actor bp, Actor... args) {
+	public BlueprintManager teacher(Actor bp, Actor... args) {
 		return teacher(new PieceBlueprintStatic(bp), args);
 	}
 	public BlueprintManager and(Actor bp, Actor... args) {
@@ -156,7 +153,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		return because(new PieceBlueprintStatic(bp), args);
 	}
 	public BlueprintManager because(Blueprint _pbp, Actor... args) {
-		Reservation past = reserved;
+		IBlueprint past = reserved;
 		add(_pbp, args);
 		past.Append(PackType.EVENT, reserved, PackType.EVENT);
 		return this;
@@ -180,12 +177,15 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		return this;
 	}
 	public BlueprintManager setView(Class<? extends Actor.ViewActor> _cls, Actor... args) {
+		IBlueprint blueprint;
 		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
 				|| _cls.isLocalClass()
 				|| _cls.isAnonymousClass())
-			getRoot().setView(new Blueprint(_cls, args).setLocalClass(outer.getClass(), outer));
+			blueprint = new Blueprint(_cls, args).setLocalClass(outer.getClass(), outer);
 		else
-			getRoot().setView(new Blueprint(_cls, args));
+			blueprint = new Blueprint(_cls, args);
+		getRoot().setView(blueprint);
+//		reserved = blueprint.This();
 		return this;
 	}
 	@Override
@@ -193,6 +193,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		setRoot(point);
 		return this;
 	}
+
 
 
 }

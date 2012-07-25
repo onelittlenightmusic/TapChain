@@ -11,7 +11,7 @@ import org.tapchain.core.ActorChain.*;
 import org.tapchain.core.ActorManager.IPathEdit;
 import org.tapchain.core.ActorManager.IPieceEdit;
 import org.tapchain.core.ActorManager.IStatusHandler;
-import org.tapchain.core.Blueprint.Reservation;
+import org.tapchain.core.Blueprint.TmpInstance;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
@@ -198,11 +198,11 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	}
 
 	@Override
-	public void setPathView(IPath path, Reservation _vReserve) {
+	public void setPathView(IPath path, IBlueprint _vReserve) {
 		final IPathView _view;
 		try {
 			ActorManager manager = getManager();
-			_view = (IPathView) _vReserve.instantiate(manager);
+			_view = (IPathView) _vReserve.newInstance(manager);
 			manager.save();
 		} catch (Exception e) {
 			e.printStackTrace();

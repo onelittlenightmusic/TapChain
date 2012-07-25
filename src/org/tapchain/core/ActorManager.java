@@ -4,7 +4,6 @@ package org.tapchain.core;
 import java.util.List;
 
 import org.tapchain.core.ActorChain.*;
-import org.tapchain.core.Blueprint.Reservation;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.IPiece;
@@ -234,7 +233,7 @@ public class ActorManager extends PieceManager {
 		if(rtn != null) {
 			log("ACM","Chained");
 			if(con != null && pbp_connect != null) {
-					Reservation vReserve = pbp_connect.newReservation(pieceEdit.getView((Actor)y), pieceEdit.getView((Actor)x), new Actor.Value(yp), new Actor.Value(xp));
+					Blueprint vReserve = new Blueprint(pbp_connect, pieceEdit.getView((Actor)y), pieceEdit.getView((Actor)x), new Actor.Value(yp), new Actor.Value(xp));
 					if(pathEdit != null)
 						pathEdit.setPathView(rtn.getConnect(), vReserve);
 				save();
@@ -253,7 +252,7 @@ public class ActorManager extends PieceManager {
 	}
 	
 	public interface IPathEdit {
-		public void setPathView(IPath second, Reservation vReserve);
+		public void setPathView(IPath second, IBlueprint vReserve);
 		public IPathView getView(IPath path);
 		public void unsetPathView(IPath rtn);
 	}

@@ -47,7 +47,7 @@ public class ActorChain extends Chain {
 	//3.Changing state
 	public ActorChain TouchOn(WorldPoint wp) {
 		touchOn.push(wp);
-		touchSw.push(new Boolean(true));
+		touchSw.push(Boolean.valueOf(true));
 		return this;
 	}
 	
@@ -59,7 +59,7 @@ public class ActorChain extends Chain {
 
 	public ActorChain TouchOff() {
 		touchOff.push("");
-		touchSw.push(new Boolean(false));
+		touchSw.push(Boolean.valueOf(false));
 		return this;
 	}
 

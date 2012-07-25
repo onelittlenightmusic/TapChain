@@ -1,8 +1,9 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Blueprint.Reservation;
+import org.tapchain.core.Blueprint.TmpInstance;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
+import org.tapchain.core.Chain.PackType;
 
 /** Blueprint interface.
  * Blueprint interface is the template of mutable objects.
@@ -16,7 +17,7 @@ public interface IBlueprint {
 	 * Blueprint has a reservation of itself called "This". This method returns "This" reservation.
 	 * @return "This" Reservation
 	 */
-	Reservation This();
+	TmpInstance This();
 	/** Get the name of Blueprint.
 	 * @return Name String.
 	 */
@@ -34,24 +35,19 @@ public interface IBlueprint {
 	
 	//3.Changing state
 	/** Create new instance of this Blueprint.
-	 * @param maker Manager class.
+	 * @param usermaker Manager class.
 	 * @return 
 	 * @throws ChainException
 	 */
-	Actor newInstance(PieceManager maker) throws ChainException;
-	Reservation newReservation(IPiece... args);
+	IPiece newInstance(IManager<IPiece> usermaker) throws ChainException;
 	/** Add local blueprint into current blueprint
 	 * @param _pbp Local blueprint
 	 * @param args Options
 	 * @return 
 	 */
-	Reservation addLocal(IBlueprint _pbp, IPiece... args);
-	/** Add argument classes and objects for current blueprint instantiation
-	 * @param type Array of argument classes
-	 * @param obj Array of argument objects
-	 * @return
-	 */
-	IBlueprint addArgs(Class<?>[] type, Object[] obj);
+	IBlueprint addLocal(IBlueprint _pbp, IPiece... args);
 	//4.Termination: none
 	//5.Local classes: none
+	IBlueprint addArg(Class<?> type, Object obj);
+	IBlueprint Append(PackType heap, IBlueprint reserved, PackType heap2);
 }
