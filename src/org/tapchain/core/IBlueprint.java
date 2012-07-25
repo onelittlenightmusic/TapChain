@@ -50,4 +50,6 @@ public interface IBlueprint {
 	//5.Local classes: none
 	IBlueprint addArg(Class<?> type, Object obj);
 	IBlueprint Append(PackType heap, IBlueprint reserved, PackType heap2);
+	IBlueprint refresh();
+	IBlueprint copy(IPiece... args);
 }

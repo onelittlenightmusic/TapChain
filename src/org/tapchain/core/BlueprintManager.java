@@ -74,14 +74,14 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		else
 			return New(new Blueprint(_cls, args));
 	}
-	public BlueprintManager addArg(Class<?> type, Object obj) {
-		getRoot().addArg(type, obj);
-		return this;
-	}
 	public BlueprintManager New(IBlueprint pbp) {
 		setRoot(pbp);
 		marked = getRoot();
 		reserved = getRoot();
+		return this;
+	}
+	public BlueprintManager arg(Class<?> type, Object obj) {
+		reserved.addArg(type, obj);
 		return this;
 	}
 	@Override
@@ -90,7 +90,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		return this;
 	}
 	public BlueprintManager add(Class<? extends Actor> _cls, Actor... args) {
-		return add(new Blueprint(_cls), args);
+		return add(new Blueprint(_cls, args));
 	}
 	public IBlueprint getLast() {
 		return reserved;
@@ -98,7 +98,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 	@Override
 	public BlueprintManager teacher(IBlueprint _pbp, IPiece... args) {
 		IBlueprint past = reserved;
-		add(_pbp, args);
+		add(_pbp);
 		past.Append(PackType.HEAP, reserved, PackType.HEAP);
 		return this;
 	}
@@ -118,11 +118,11 @@ public class BlueprintManager extends Manager<IBlueprint> {
 	public BlueprintManager child(Blueprint _pbp, Actor... args) {
 		IBlueprint past = reserved;
 		add(_pbp, args);
-		reserved.Append(PackType.PASSTHRU, past, PackType.FAMILY);
+		reserved.Append(PackType.FAMILY, past, PackType.FAMILY);
 		return this;
 	}
 	
-	public BlueprintManager args(Class<? extends Actor> _cls, Actor... args) {
+	public BlueprintManager teacher(Class<? extends Actor> _cls, Actor... args) {
 		return teacher(new Blueprint(_cls), args);
 	}
 	public BlueprintManager young(Class<? extends Actor> _cls, Actor... args) {
@@ -185,7 +185,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		else
 			blueprint = new Blueprint(_cls, args);
 		getRoot().setView(blueprint);
-//		reserved = blueprint.This();
+		reserved = blueprint;
 		return this;
 	}
 	@Override

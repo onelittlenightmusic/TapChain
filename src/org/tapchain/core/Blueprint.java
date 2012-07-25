@@ -6,10 +6,12 @@ import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 
+import android.util.Log;
+
 public class Blueprint implements IBlueprint {
 	Class<? extends IPiece> cls = null;
 	ArrayList<ConnectionBlueprint> connect = new ArrayList<ConnectionBlueprint>();
-	ArrayList<Blueprint> children = new ArrayList<Blueprint>();
+	ArrayList<IBlueprint> children = new ArrayList<IBlueprint>();
 	IBlueprint view = null;
 	TmpInstance This = null;
 //	HashMap<Class<?>, Object> parent = null;
@@ -27,13 +29,13 @@ public class Blueprint implements IBlueprint {
 	public Blueprint(Class<? extends IPiece> _cls, Actor... _args) {
 		this();
 		setBPClass(_cls);
-		var = _args;
+		setVar(_args);
 	}
 	public Blueprint(Blueprint bp, IPiece... args) {
 		this();
 		setBPClass(bp.getBPClass());
 		This = bp.This();
-		var = args;
+		setVar(args);
 		params = bp.params;
 		parent_type = bp.parent_type;
 		parent_obj = bp.parent_obj;
@@ -41,10 +43,17 @@ public class Blueprint implements IBlueprint {
 		children = bp.children;
 		connect = bp.connect;
 	}
+	public IBlueprint copy(IPiece... args) {
+		return new Blueprint(this).setVar(args);
+	}
 	
 	//2.Getters and setters
 	public TmpInstance This() {
 		return This;
+	}
+	protected Blueprint setVar(IPiece... args) {
+		var = args;
+		return this;
 	}
 	protected Blueprint setBPClass(Class<? extends IPiece> _cls) {
 		cls = _cls;
@@ -78,9 +87,6 @@ public class Blueprint implements IBlueprint {
 			return cls.getConstructor(types).newInstance(args);
 		return cls.newInstance();
 	}
-	protected IPiece __newInstance() throws IllegalAccessException, InstantiationException {
-		return cls.newInstance();
-	}
 	public IPiece newInstance(IManager<IPiece> maker) throws ChainException {
 		return __newInstance(maker);
 	}
@@ -109,7 +115,7 @@ public class Blueprint implements IBlueprint {
 //		ChainException ex = null;
 		try {
 			rtn = __newInstance(types, args);
-			This.setInstance(rtn, maker);
+			This.setInstance(rtn);
 			__init_children(rtn, maker);
 			init_user(rtn, maker);
 			if(maker != null) {
@@ -136,16 +142,16 @@ public class Blueprint implements IBlueprint {
 	public void init_user(IPiece rtn, IManager<IPiece> maker) throws InterruptedException {
 	}
 	private IPiece __init_children(IPiece rtn, IManager<IPiece> maker) throws IllegalAccessException, InstantiationException, ChainException, InterruptedException {
-		for(Blueprint local: children) {
-			local.__newInstance(maker);
+		for(IBlueprint local: children) {
+			local.newInstance(maker);
 //			This.getInstance().addMember(local.getInstance());
 		}
 		for(ConnectionBlueprint cb: connect)
 			cb.connect(maker);
 		return rtn;
 	}
-	public Blueprint addLocal(IBlueprint bp, IPiece... args) {
-		Blueprint rtn = new Blueprint((Blueprint)bp, args);
+	public IBlueprint addLocal(IBlueprint bp, IPiece... args) {
+		IBlueprint rtn = bp.copy(args);
 		children.add(rtn);
 		return rtn;
 	}
@@ -154,12 +160,12 @@ public class Blueprint implements IBlueprint {
 		return this;
 	}
 	public Blueprint Append(PackType stack, IBlueprint target, PackType stack_target) {
-		append(new ConnectionBlueprint(This, target.This(), stack, stack_target));
+		append(new ConnectionBlueprint(this, target, stack, stack_target));
 		return this;
 	}
 	public Blueprint refresh() {
 		This.refresh();
-		for(Blueprint local: children)
+		for(IBlueprint local: children)
 			local.refresh();
 		return this;
 	}
@@ -186,7 +192,7 @@ public class Blueprint implements IBlueprint {
 			parent = _parent;
 			return this;
 		}
-		public synchronized IPiece setInstance(IPiece iPiece, IManager<IPiece> maker) throws ChainException {
+		public synchronized IPiece setInstance(IPiece iPiece) throws ChainException {
 			instantiated = iPiece;
 			notifyAll();
 			return instantiated;
@@ -198,10 +204,6 @@ public class Blueprint implements IBlueprint {
 		}
 		public TmpInstance refresh() {
 			instantiated = null;
-			return this;
-		}
-		public TmpInstance Append(PackType stack, TmpInstance target, PackType stack_target) {
-			parent.append(new ConnectionBlueprint(this, target, stack, stack_target));
 			return this;
 		}
 		
@@ -227,20 +229,20 @@ public class Blueprint implements IBlueprint {
 	}
 	
 	public static class ConnectionBlueprint {
-		TmpInstance Appender;
-		TmpInstance Appendee;
+		IBlueprint Appender;
+		IBlueprint Appendee;
 		PackType appender_pack;
 		PackType appendee_pack;
-		Blueprint view = null;
-		public ConnectionBlueprint(TmpInstance pieceBlueprint,
-				TmpInstance target, PackType stack, PackType stack_target) {
+		IBlueprint view = null;
+		public ConnectionBlueprint(IBlueprint pieceBlueprint,
+				IBlueprint target, PackType stack, PackType stack_target) {
 			Appender = pieceBlueprint;
 			Appendee = target;
 			appender_pack = stack;
 			appendee_pack = stack_target;
 		}
 		public void connect(IManager<IPiece> maker) throws ChainException, InterruptedException, IllegalAccessException, InstantiationException {
-			((PieceManager) maker).append(Appender.getInstance(), appender_pack, Appendee.getInstance(), appendee_pack);
+			((PieceManager) maker).append(Appender.This().getInstance(), appender_pack, Appendee.This().getInstance(), appendee_pack);
 			if(view != null)
 				maker.add(view.newInstance(null));
 		}
@@ -256,11 +258,18 @@ public class Blueprint implements IBlueprint {
 		public PieceBlueprintStatic(IPiece bp) {
 			super();
 			instance = bp;
+			Log.e("test","Blueprint initialized");
+		}
+		public PieceBlueprintStatic(Blueprint bp, Actor... args) {
+			super(bp, args);
+			instance = ((PieceBlueprintStatic)bp).instance;
+		}
+		public IBlueprint copy(IPiece... args) {
+			return new PieceBlueprintStatic(this).setVar(args);
 		}
 		@Override
-		public IPiece newInstance(IManager<IPiece> maker) throws ChainException {
-			if(maker != null)
-				maker.add(instance);
+		protected IPiece __newInstance(Class<?>[] types, Object[] args) {
+			Log.w("test","Blueprint new instance called");
 			return instance;
 		}
 	}

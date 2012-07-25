@@ -52,14 +52,19 @@ public class TapChainAndroidEdit extends TapChainEdit
 //		.makeBlueprint()
 		 blueprintManager
 		.setOuterInstanceForInner(this)
-		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
 //		.New(AndroidImageView.class).teacher(new Actor.Value(R.drawable.star))
-//		.setView(LocalView.class).addArg(int.class, R.drawable.star)
+//		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
+		.New(AndroidImageView.class)
+		.arg(Integer.class,R.drawable.star)
+		.setView(LocalView.class)
+		.arg(Integer.class, R.drawable.star)
+//		.setView(Teststar.class)
+		.save()
+		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
+		.child(Actor.Mover.class, new Actor.Value(new WorldPoint(3, 0).setDif()))
+//		.child(new Actor.Mover().initEffect(new WorldPoint(3, 0).setDif(),10))
 		.setView(Teststar.class)
 		.save()
-//		.New(AndroidImageView.class, new BasicPiece.Value(R.drawable.star))
-//		.setview(LocalViewFlower.class)
-//		.Save()
 		.New(AndroidImageView.class, new Actor.Value(R.drawable.heart_bright))
 		.setView(Testheartbright.class)
 		.save()
@@ -132,10 +137,14 @@ public class TapChainAndroidEdit extends TapChainEdit
 		.save()
 		.New(Actor.ShakeFilter.class).setView(Test2.class).save()
 		.New(AndroidQuaker.class).setView(Test3.class).save()
-		.New(TestSound2.class).setView(TestSound.class)//.Save()
-	 .because(Actor.ShakeFilter.class).save()
-		.New(TapChainAndroidEdit.TestSound3.class).setView(TestSound.class)//.Save()
-	 /*.because(ShakeFilter.class)*/.save()
+		.New(TestSound2.class)//.Save()
+	 .because(Actor.ShakeFilter.class)
+	 .setView(TestSound.class)
+	 .save()
+		.New(TapChainAndroidEdit.TestSound3.class)
+		.setView(TestSound.class)//.Save()
+	 /*.because(ShakeFilter.class)*/
+		.save()
 		.New(Actor.Stun.class)
 		.setView(LocalViewFlower.class)
 		.save()
@@ -144,9 +153,12 @@ public class TapChainAndroidEdit extends TapChainEdit
 		.save()
 		.New(Actor.Resetter.class).setView(TestReset.class).save()
 		.New(Actor.Counter.class).setView(TestTime2.class).save()
-		.New(Actor.Value.class).addArg(Object.class,3).setView(TestTime2.class).save()
+		.New(Actor.Value.class).arg(Object.class,3).setView(TestTime2.class).save()
 		.New(AndroidActor.AndroidNumberView.class).setView(TestTime2.class).save()
 		;
+			editorManager.setError(this);
+			userManager.setError(this);
+			blueprintManager.setError(this);
 // .New(AndroidPiece.AndroidRecognizer.class)
 // .setview(Test.class)
 // .Save();
@@ -161,10 +173,6 @@ public class TapChainAndroidEdit extends TapChainEdit
 		editorManager
 			.add(new AndroidActor.AndroidAlert())
 			.teacher(p).save();
-		errHandle = this;
-		editorManager.setError(errHandle);
-		userManager.setError(errHandle);
-		blueprintManager.setError(errHandle);
 		
 		//Initialization of View(touching effect)
 		editorManager

@@ -389,13 +389,18 @@ public class AndroidActor {
 		public AndroidImageView() {
 			super();
 		}
+		
+		public AndroidImageView(Integer resource) {
+			setImage(BitmapFactory.decodeResource(activity.getResources(),
+					resource));
+		}
 
 		public void setImage(Bitmap b) {
 			bm_base = b;
 			bm_scaled = bm_base;
 			setCenter(new WorldPoint(100, 100));
 		}
-
+		
 		public void view_init() throws ChainException {
 			int resource;
 			while (bm_base == null) {
