@@ -110,6 +110,9 @@ public class ActorManager extends PieceManager {
 		statusHandle = ps;
 		return this;
 	}
+	public IStatusHandler getStatusHandler() {
+		return statusHandle;
+	}
 	
 	public ChainPiece getRoot() {
 		return root;
@@ -199,15 +202,15 @@ public class ActorManager extends PieceManager {
 	
 	@Override
 	public ActorManager setPieceView(Blueprint v) throws ChainException {
-		return setPieceView(getPiece(), v);
+		return setPieceView(getPiece(), v, new WorldPoint(0, 0));
 	}
 	
 	@Override
-	public ActorManager setPieceView(IPiece bp, Blueprint _view) throws ChainException {
+	public ActorManager setPieceView(IPiece bp, Blueprint _view, WorldPoint nowPoint) throws ChainException {
 		if(pieceEdit!=null) {
 			IPieceView v = pieceEdit.onSetPieceView(bp, _view);
 			if(v!=null)
-				pieceEdit.onMoveView(v);
+				pieceEdit.onMoveView(v, nowPoint);
 		}
 		return this;
 	}
@@ -235,7 +238,7 @@ public class ActorManager extends PieceManager {
 			if(con != null && pbp_connect != null) {
 					Blueprint vReserve = new Blueprint(pbp_connect, pieceEdit.getView((Actor)y), pieceEdit.getView((Actor)x), new Actor.Value(yp), new Actor.Value(xp));
 					if(pathEdit != null)
-						pathEdit.setPathView(rtn.getConnect(), vReserve);
+						pathEdit.onSetPathView(rtn.getConnect(), vReserve);
 				save();
 			}
 		}
@@ -252,7 +255,7 @@ public class ActorManager extends PieceManager {
 	}
 	
 	public interface IPathEdit {
-		public void setPathView(IPath second, IBlueprint vReserve);
+		public void onSetPathView(IPath second, IBlueprint vReserve);
 		public IPathView getView(IPath path);
 		public void unsetPathView(IPath rtn);
 	}
@@ -261,7 +264,7 @@ public class ActorManager extends PieceManager {
 		public IPieceView getView(IPiece y);
 		public void onUnsetView(IPiece bp);
 		public void onRefreshView(IPiece bp, IPiece obj);
-		public void onMoveView(IView v);
+		public void onMoveView(IView v, WorldPoint wp);
 	}
 	public interface IStatusHandler {
 		public void getStateAndSetView(int state);

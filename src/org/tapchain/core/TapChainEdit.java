@@ -2,37 +2,25 @@ package org.tapchain.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.tapchain.core.ActorChain.*;
-import org.tapchain.core.ActorManager.IPathEdit;
-import org.tapchain.core.ActorManager.IPieceEdit;
-import org.tapchain.core.ActorManager.IStatusHandler;
-import org.tapchain.core.Blueprint.TmpInstance;
+import org.tapchain.core.Actor.Mover2;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.ChainController.IControlCallback;
-import org.tapchain.core.ChainPiece.PieceState;
-import org.tapchain.core.PathPack.ChainInPathPack;
 
 
 @SuppressWarnings("serial")
-public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
+public class TapChainEdit implements IControlCallback {
 	IWindow win = null;
 	IWindowCallback winCall = null;
 	protected ActorManager editorManager = new ActorManager();
-	protected ActorManager userManager = new ActorManager();
+	public EditorManager userManager = new EditorManager(editorManager);
 	protected BlueprintManager blueprintManager = null;;
-	Factory userFactory = null;
-	public IPieceView nowPiece = null;
-	WorldPoint nowPoint = null;
-	public TreeMap<IPiece,IPieceView> dictPiece = new TreeMap<IPiece, IPieceView>();
-	ConcurrentHashMap<IPath, IPathView> dictPath = new ConcurrentHashMap<IPath, IPathView>();
-	ArrayList<Actor> plist = new ArrayList<Actor>();
+	Factory<IPiece> userFactory = null;
+	public IPieceView startPiece = null;
+	protected WorldPoint nowPoint = null;
 	protected IErrorHandler errHandle = null;
 
 	//1.Initialization
@@ -45,42 +33,34 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 				}
 			};
 		}
-		userFactory = new Factory(userManager);
+		userFactory = new Factory<IPiece>(userManager);
 		blueprintManager = new BlueprintManager(userFactory);
 		editorManager./*setFactory(userFactory).*/createChain(20);
 		userManager./*setFactory(userFactory).*/createChain(50).getChain().setAutoEnd(false);
 		editorManager.SetCallback(this);
 		userManager.SetCallback(this);
-		userManager.setPieceEdit(this);
-		userManager.setPathEdit(this);
 		return;
 	}
 
 	void init() {
-		Actor ptmp = null;
-		for(int c : Arrays.asList(0xff80ff80, 0xff80ff80, 0xffffffff, 0xff8080ff, 0xffff8080)) {
-			editorManager.add(new Actor.Colorer().color_init(c).setParentType(PackType.HEAP).boost())
-			.teacher(ptmp = new Actor()).save();
-			plist.add(ptmp);
-		}
+		userManager.init();
 		
-		move.setName("MOVE_ENTRANCE");
-		editorManager
-		.add(move)
-		.student(move_ef = (Actor.Mover) new Actor.Mover() {
+		userManager.getSystemManager()
+		._return(userManager.move_ef)
+		.young(new Actor.Effecter() {
 			@Override
 			public boolean actorRun() throws ChainException {
-				super.actorRun();
 				if(getTarget() instanceof IPieceView)
 					checkAndAttach((IPieceView)getTarget(), null);
 				return false;
 			}
-		}.initEffect(nowPoint==null?new WorldPoint(0,0):nowPoint, 1).setParentType(PackType.HEAP).boost())
+		}.setParentType(PackType.HEAP).boost())
+		.teacher(userManager.move)
 		.save();
 	}
 	
 	public void reset() {
-		TreeMap<IPiece, IPieceView> copy = new TreeMap<IPiece, IPieceView>(dictPiece);
+		TreeMap<IPiece, IPieceView> copy = new TreeMap<IPiece, IPieceView>(userManager.dictPiece);
 		for(IPiece bp : copy.keySet())
 			getUserManager().remove(bp);
 	}
@@ -96,7 +76,7 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		init();
 	}
 
-	public Factory getFactory() {
+	public Factory<IPiece> getFactory() {
 		return userFactory;//blueprintManager;//getUserManager().getFactory();
 	}
 	
@@ -108,21 +88,10 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		return userManager.newSession();
 	}
 
-	static Actor move = new Actor();
-	static Actor.Mover move_ef = null;
-	
-	public static class AddPiece extends Actor {
-		AddPiece() {
-			super();
-			boost();
-			setInPackType(PackType.PASSTHRU, ChainInPathPack.Input.FIRST);
-		}
-
-		public boolean actorRun() throws ChainException, InterruptedException {
-			return false;
-		}
+	public WorldPoint getPoint() {
+		return (nowPoint==null)?new WorldPoint(0,0):nowPoint;
 	}
-
+	
 	public void setLog(ILogHandler l) {
 		editorManager.setLog(l);
 		userManager.setLog(l);
@@ -144,167 +113,6 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		return true;
 	}
 
-	@Override
-	public IPieceView getView(IPiece bp) {
-		if (dictPiece.get(bp) != null)
-			return dictPiece.get(bp);
-		return null;
-	}
-
-	@Override
-	public IPathView getView(IPath path) {
-		if (dictPath.get(path) != null)
-			return dictPath.get(path);
-		return null;
-	}
-
-	@Override
-	public IPieceView onSetPieceView(final IPiece cp2, final Blueprint bp) throws ChainException {
-		final IPieceView _view;
-			ActorManager manager = getManager();
-			_view = (IPieceView) bp.newInstance(manager);
-			if(_view == null)
-				throw new ChainException(cp2, "view not created");
-			manager.save();
-		dictPiece.put(cp2, _view);
-		_view.setMyTapChain(cp2);
-		final Initializer ia = new Initializer();
-		if(_view instanceof IEditAnimation) {
-			ia.init_animation(getManager(), (IEditAnimation)_view);
-		}
-		if(cp2 instanceof ChainPiece) {
-			ChainPiece c = ((ChainPiece)cp2);
-			c.setStatusHandler(new IStatusHandler() {
-				@Override
-				public synchronized void getStateAndSetView(int state) {
-					if(state < PieceState.values().length)
-						plist.get(state).push(_view);
-				}
-	
-				@Override
-				public void tickView() {
-					_view.onTick();
-					ia.start_animation(_view);
-				}
-	
-				@Override
-				public void end() {
-					ia.term_animation();
-				}
-			});
-			c.setError(errHandle);
-		}
-		return _view;
-	}
-
-	@Override
-	public void setPathView(IPath path, IBlueprint _vReserve) {
-		final IPathView _view;
-		try {
-			ActorManager manager = getManager();
-			_view = (IPathView) _vReserve.newInstance(manager);
-			manager.save();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-		dictPath.put(path, _view);
-		final Initializer ia = new Initializer();
-		if(_view instanceof IEditAnimation) {
-			ia.init_animation(getManager(), (IEditAnimation)_view);
-		}
-		path.setStatusHandler(new IStatusHandler() {
-			@Override
-			public void tickView() {
-				_view.onTick();
-				ia.start_animation(_view);
-			}
-			
-			@Override
-			public void getStateAndSetView(int state) {
-			}
-
-			@Override
-			public void end() {
-				ia.term_animation();
-			}
-		});
-		return;
-	}
-	
-	@Override
-	public void onMoveView(IView v) {
-		move_ef.initEffect(nowPoint==null?new WorldPoint(0,0):nowPoint, 1);
-		move.push(v);
-		kickDraw();
-		return;
-	}
-
-	@Override
-	public void onUnsetView(IPiece bp) {
-		if(bp == null) 
-			return;
-		if(bp instanceof ChainPiece) {
-			ChainPiece c = (ChainPiece)bp;
-			c.getStatusHandler().end();
-			c.setStatusHandler(null);
-		}
-//		ViewActor v = (ViewActor) getView(bp);
-//		if(v instanceof IEditPieceView)
-//			((IEditPieceView)v).unsetMyTapChain();
-		IPieceView v = getView(bp);
-		v.unsetMyTapChain();
-		dictPiece.remove(bp);
-//		if(v == null)
-//			return;
-		v.finish(false);
-		return;
-	}
-
-	@Override
-	public void unsetPathView(IPath path) {
-		if(path == null) 
-			return;
-		IPathView v = getView(path);
-		dictPath.remove(path);
-		if(v == null)
-			return;
-		v.finishPath(false);
-		return;
-	}
-
-	@Override
-	public void onRefreshView(IPiece bp, IPiece obj) {
-		IPieceView v = dictPiece.get(bp);
-		dictPiece.remove(bp);
-		if (((Actor)bp).compareTo((Actor)obj) > 0) {
-			((Actor)bp).mynum = ++ActorChain.num;
-		}
-		dictPiece.put(bp, v);
-	}
-
-	public static class Initializer {
-		Actor bp;
-		List<IPiece> dump;
-		static HashMap<Class<? extends IEditAnimation>, Actor>dict
-			= new HashMap<Class<? extends IEditAnimation>, Actor>();
-		public Initializer() {
-		}
-		public void init_animation(ActorManager maker, IEditAnimation a) {
-			if(bp != null) return;
-			bp = new Actor();
-			PieceManager manager = maker._func(bp);
-			a.init_animation(manager);
-			manager._exit().save();
-			dump = maker.dump();
-		}
-		public void start_animation(Object target) {
-			if(bp != null)
-				bp.push(target);
-		}
-		public void term_animation() {
-		}
-	}
 	
 
 	public enum EditMode {
@@ -321,14 +129,12 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	public boolean onDown(WorldPoint sp) {
 		nowPoint = sp;
 		getManager().getChain().TouchOn(nowPoint);
-		nowPiece = touchPiece(nowPoint);
-//		moveView(circle);
+		startPiece = touchPiece(nowPoint);
 		return true;
 	}
 	
 	public IPieceView touchPiece(WorldPoint sp) {
-		for (IPieceView f : dictPiece.values()) {
-//			TapChainEditorView e = f.getValue();
+		for (IPieceView f : userManager.getPieceViews()) {
 			if (f.contains(sp.x, sp.y))
 				return f;
 		}
@@ -345,28 +151,47 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	}
 	
 	public boolean up() {
-		nowPiece = null;
+		startPiece = null;
 		return true;
 	}
 
 	public boolean onUp() {
 		getManager().getChain().TouchOff();
-		if (nowPiece == null)
+		if (startPiece == null)
 			return false;
-		if(checkAndDelete(nowPiece)) return up();
-		checkAndAttach((IPieceView)nowPiece, null);
+		if(checkAndDelete(startPiece)) return up();
+		checkAndAttach((IPieceView)startPiece, null);
 		return up();
 	}
 	
 	private boolean checkAndAttach(IPieceView target, WorldPoint d) {
 		if(target == null)
 			return false;
-		for (IPieceView bp : dictPiece.values())
+		for (IPieceView bp : userManager.getPieceViews())
 			if (attack(target, bp, d))
 				return true;
 		return false;
 	}
 	
+	public boolean attack(IPieceView bp, IPieceView f, WorldPoint dir) {
+		if (bp == f) {
+			return false;
+		}
+		ConnectType t = checkAttackType(bp, f, dir);
+		if(t == ConnectType.NULL){
+			return false;
+		} else {
+			if(!connect(bp.getMyTapChain(), f.getMyTapChain(), t))
+				return false;
+//			BasicView _v = bp;
+			if (bp instanceof EventHandler) {
+				((EventHandler) bp).onFrameConnecting(bp, f);
+			}
+		}
+
+		return true;
+	}
+
 	private boolean checkAndDelete(IPieceView v) {
 		ScreenPoint sp = ((Actor.ViewActor)v).getCenter().getScreenPoint(win);
 		if(0< sp.x && win.getWindowPoint().y()-150 < sp.y && 150 > sp.x && win.getWindowPoint().y() > sp.y) {
@@ -377,8 +202,8 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	}
 
 	public boolean onFling(final int vx, final int vy) {
-		if (nowPiece != null) {
-			Actor v = (Actor) nowPiece;
+		if (startPiece != null) {
+			Actor v = (Actor) startPiece;
 			Actor.ValueLimited vl = new Actor.ValueLimited(1);
 			getManager()._return(v)._child()
 					.add(new Accel().disableLoop(), vl.disableLoop())._exit()
@@ -403,20 +228,20 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 
 	public boolean onLongPress() {
 //		GetManager().Get().LongPress();
-		if(nowPiece == null)
+		if(startPiece == null)
 			return up();
-		if(nowPiece.getEventHandler() == null)
+		if(startPiece.getEventHandler() == null)
 			return up();
-		nowPiece.getEventHandler().onSelected(nowPiece);
+		startPiece.getEventHandler().onSelected(startPiece);
 		return up();
 
 	}
 
 	public boolean onScroll(final WorldPoint vp, final WorldPoint wp) {
 		getManager().getChain().Move(vp);
-		if (nowPiece != null) {
+		if (startPiece != null) {
 			onClear();
-			nowPiece.setCenter(nowPiece.getCenter().plus(vp));
+			startPiece.setCenter(startPiece.getCenter().plus(vp));
 				
 		} else {
 			win.move(-vp.x(), -vp.y());
@@ -448,10 +273,29 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 			editmode = EditMode.ADD;
 			return false;
 		default:
+			onLongPress();
 		}
-		if (nowPiece == null)
+		if (startPiece == null)
 			return true;
 
+		return true;
+	}
+	
+	public boolean onAdd(int code) {
+		if (code < getFactory().getSize())
+			getFactory().newInstance(code, getPoint());
+		return true;
+	}
+	
+	public boolean onDummyAdd() {
+		return true;
+	}
+	
+	public boolean onDummyRemove() {
+		return true;
+	}
+	
+	public boolean onDummyMove(int x, int y) {
 		return true;
 	}
 
@@ -538,9 +382,9 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		@Override
 		public boolean actorRun() throws ChainException, InterruptedException {
 			// start reforming toward upper(prev) functions[recursive invocation]
-			reformTo((Actor)getView(f), true, pt);
+			reformTo((Actor)userManager.getView(f), true, pt);
 			// start reforming toward lower(next) functions[recursive invocation]
-			reformTo((Actor)getView(f), false, pt);
+			reformTo((Actor)userManager.getView(f), false, pt);
 			return false;
 		}
 	}
@@ -548,11 +392,11 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 	void reformTo(Actor bp, final boolean UpDown, final WorldPoint pt) {
 		WorldPoint pt_ = pt;
 		if (pt_ != null) {
-			getManager()._return(getView(bp))
+			getManager()._return(userManager.getView(bp))
 					._child().add(new Accel().disableLoop())._exit().save();
 
 		} else {
-			pt_ = getView(bp).getCenter();
+			pt_ = userManager.getView(bp).getCenter();
 			int i = 0, i_max = bp.getOutPack(PackType.FAMILY).size();
 			for (Connector.ChainOutConnector _cp : bp.getOutPack(PackType.FAMILY)) {
 				Connector.ChainInConnector cip = _cp.getPartner();
@@ -561,7 +405,7 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 				Actor part = (Actor) cip.getParent();
 				if (part == null)
 					break;
-				if (dictPiece.get(part) == null)
+				if (userManager.getView(part) == null)
 					break;
 				reformTo(part, UpDown, pt_.plus(new WorldPoint(30 * (-i_max + 2 * i++),
 						UpDown ? -50 : 50)));
@@ -642,25 +486,6 @@ public class TapChainEdit implements IPieceEdit, IPathEdit, IControlCallback {
 		}
 	}
 	
-	public boolean attack(IPieceView bp, IPieceView f, WorldPoint dir) {
-		if (bp == f) {
-			return false;
-		}
-		ConnectType t = checkAttackType(bp, f, dir);
-		if(t == ConnectType.NULL){
-			return false;
-		} else {
-			if(!connect(bp.getMyTapChain(), f.getMyTapChain(), t))
-				return false;
-//			BasicView _v = bp;
-			if (bp instanceof EventHandler) {
-				((EventHandler) bp).onFrameConnecting(bp, f);
-			}
-		}
-
-		return true;
-	}
-
 	public class Accel extends Actor.Mover {
 		float delta = 0.03f;
 		int j = 0;

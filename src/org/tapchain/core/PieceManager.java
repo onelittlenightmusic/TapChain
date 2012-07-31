@@ -6,7 +6,6 @@ import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.ChainController.IControlCallback;
 
-
 public class PieceManager extends Manager<IPiece> {
 	IPiece mark = null;
 	Chain chain = null;
@@ -17,10 +16,10 @@ public class PieceManager extends Manager<IPiece> {
 		}
 	};
 
-	//1.Initialization
+	// 1.Initialization
 	public PieceManager() {
 	}
-	
+
 	public PieceManager(PieceManager m) {
 		this();
 	}
@@ -29,11 +28,11 @@ public class PieceManager extends Manager<IPiece> {
 		return new PieceManager().setChain(chain);
 	}
 
-	//2.Getters and setters
+	// 2.Getters and setters
 	public IPiece getPiece() {
 		return pt;
 	}
-	
+
 	public PieceManager createChain() {
 		chain = new Chain();
 		if (cc_cache != null)
@@ -45,6 +44,7 @@ public class PieceManager extends Manager<IPiece> {
 		chain = c;
 		return this;
 	}
+
 	public Chain getChain() {
 		return chain;
 	}
@@ -56,7 +56,8 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	public PieceManager setPieceView(IPiece bp, Blueprint v) throws ChainException {
+	public PieceManager setPieceView(IPiece bp, Blueprint v, WorldPoint wp)
+			throws ChainException {
 		return this;
 	}
 
@@ -64,7 +65,7 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	//3.Changing state
+	// 3.Changing state
 	@SuppressWarnings("unchecked")
 	@Override
 	public PieceManager add(IPiece cp, IPiece... args) {
@@ -78,14 +79,15 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	ConnectionResultIO __connect(IPiece piece_from, PackType type_from, IPiece piece_to, PackType type_to) {
+	ConnectionResultIO __connect(IPiece piece_from, PackType type_from,
+			IPiece piece_to, PackType type_to) {
 		ConnectionResultIO rtn = null;
 		try {
-			if((rtn = piece_from.appendTo(type_from, piece_to, type_to))!=null) {
-				if(piece_from instanceof ChainPiece)
-					((ChainPiece)piece_from).postAppend();
-				if(piece_from instanceof ChainPiece)
-					((ChainPiece)piece_to).postAppend();
+			if ((rtn = piece_from.appendTo(type_from, piece_to, type_to)) != null) {
+				if (piece_from instanceof ChainPiece)
+					((ChainPiece) piece_from).postAppend();
+				if (piece_from instanceof ChainPiece)
+					((ChainPiece) piece_to).postAppend();
 			}
 		} catch (ChainException e) {
 			error(e);
@@ -102,7 +104,7 @@ public class PieceManager extends Manager<IPiece> {
 			return null;
 		}
 	}
-	
+
 	public PieceManager student(IPiece cp, IPiece... args) {
 		if (pt != null)
 			__side(pt, cp, PackType.HEAP);
@@ -110,10 +112,9 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-
 	PieceManager __then(IPiece cpbase, IPiece target) {
 		if (pt != null)
-			__connect(cpbase,PackType.EVENT, target, PackType.EVENT);
+			__connect(cpbase, PackType.EVENT, target, PackType.EVENT);
 		return this;
 	}
 
@@ -146,12 +147,13 @@ public class PieceManager extends Manager<IPiece> {
 	}
 
 	static int a = 0;
+
 	public PieceManager _mark() {
 		mark = pt;
 		return this;
 	}
 
-	public PieceManager _gomark() {
+	public PieceManager _gotomark() {
 		return _return(mark);
 	}
 
@@ -162,11 +164,11 @@ public class PieceManager extends Manager<IPiece> {
 		pt = bp;
 		return this;
 	}
-	
+
 	public PieceManager _exit() {
 		return this;
 	}
-	
+
 	public PieceManager _child() {
 		return this;
 	}
@@ -178,7 +180,7 @@ public class PieceManager extends Manager<IPiece> {
 	public PieceManager log(String... s) {
 		return this;
 	}
-	
+
 	public PieceManager _func(IPiece arg) {
 		add(new Actor.Function(), arg);
 		return _child();
@@ -192,12 +194,12 @@ public class PieceManager extends Manager<IPiece> {
 	public PieceManager refreshPieceView(IPiece bp, IPiece obj) {
 		return this;
 	}
-	
+
 	public PieceManager creater_student() {
 		student(new Actor.ManagerPiece(getPiece()));
 		return this;
 	}
-	
+
 	IPath __disconnect(IPiece x, IPiece y) {
 		return x.detach(y);
 	}
@@ -212,66 +214,60 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	//4.Termination: none
-	//5.Local classes: none
-	
-	/*	public Manager and(IPiece cp, IPiece... args) {
-	if (pt != null)
-		__next(pt, cp, PackType.PASSTHRU);
-	add(cp, args);
-	return this;
-}
+	// 4.Termination: none
+	// 5.Local classes: none
 
-*///	public ChainManager next2Heap(PieceBody cp) {
-//	if (pt != null)
-//		__next(pt, cp, PackType.EVENT);
-//	add(cp);
-//	return this;
-//}
+	/*
+	 * public Manager and(IPiece cp, IPiece... args) { if (pt != null)
+	 * __next(pt, cp, PackType.PASSTHRU); add(cp, args); return this; }
+	 */// public ChainManager next2Heap(PieceBody cp) {
+		// if (pt != null)
+	// __next(pt, cp, PackType.EVENT);
+	// add(cp);
+	// return this;
+	// }
 
-//public ChainManager child(PieceBody cp) {
-//	if (pt != null)
-//			__connect(cp, PackType.PASSTHRU, pt, PackType.FAMILY);
-//	add(cp);
-//	return this;
-//}
+	// public ChainManager child(PieceBody cp) {
+	// if (pt != null)
+	// __connect(cp, PackType.PASSTHRU, pt, PackType.FAMILY);
+	// add(cp);
+	// return this;
+	// }
 
-//	public ChainManager rightSync(PieceBody cp) {
-//		if (pt != null) {
-//			__side(pt, cp, PackType.HEAP);
-//			__side(cp, pt, PackType.HEAP);
-//		}
-//		add(cp);
-//		return this;
-//	}
+	// public ChainManager rightSync(PieceBody cp) {
+	// if (pt != null) {
+	// __side(pt, cp, PackType.HEAP);
+	// __side(cp, pt, PackType.HEAP);
+	// }
+	// add(cp);
+	// return this;
+	// }
 
-//	ChainManager __front(PieceBody cp, PieceBody target) {
-//		if (pt != null)
-//			__connect(cp, PackType.EVENT, pt, PackType.FAMILY);
-//		return this;
-//	}
-//
-//	public ChainManager front(PieceBody cp) {
-//		__front(cp, pt);
-//		add(cp);
-//		return this;
-//	}
-//	ChainManager prevFromHeap(PieceBody cp) {
-//	__connect(pt, PackType.PASSTHRU, cp, PackType.HEAP);
-//	add(cp);
-//	return this;
-//}
+	// ChainManager __front(PieceBody cp, PieceBody target) {
+	// if (pt != null)
+	// __connect(cp, PackType.EVENT, pt, PackType.FAMILY);
+	// return this;
+	// }
+	//
+	// public ChainManager front(PieceBody cp) {
+	// __front(cp, pt);
+	// add(cp);
+	// return this;
+	// }
+	// ChainManager prevFromHeap(PieceBody cp) {
+	// __connect(pt, PackType.PASSTHRU, cp, PackType.HEAP);
+	// add(cp);
+	// return this;
+	// }
 
-	/*	public Manager reset(IPiece cp, IPiece... args) {
-	__connect(pt,PackType.FAMILY, cp, PackType.EVENT);
-	add(cp, args);
-	return this;
-}
-
-*/
-//	public BlueprintManager makeBlueprint() {
-//	return null;
-//}
-//
+	/*
+	 * public Manager reset(IPiece cp, IPiece... args) {
+	 * __connect(pt,PackType.FAMILY, cp, PackType.EVENT); add(cp, args); return
+	 * this; }
+	 */
+	// public BlueprintManager makeBlueprint() {
+	// return null;
+	// }
+	//
 
 }

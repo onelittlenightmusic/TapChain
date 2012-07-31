@@ -115,17 +115,17 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 
 	}
 
-	protected ChainPiece setError(IErrorHandler er) {
+	public ChainPiece setError(IErrorHandler er) {
 		_error = er;
 		return this;
 	}
 
-	protected ChainPiece setStatusHandler(IStatusHandler st) {
+	public ChainPiece setStatusHandler(IStatusHandler st) {
 		_statush = st;
 		return this;
 	}
 
-	protected IStatusHandler getStatusHandler() {
+	public IStatusHandler getStatusHandler() {
 		return _statush;
 	}
 

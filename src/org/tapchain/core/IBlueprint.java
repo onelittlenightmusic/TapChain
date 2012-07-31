@@ -14,7 +14,8 @@ public interface IBlueprint {
 	//1.Initialization
 	//2.Getters and setters
 	/** Get a reservation of this blueprint.
-	 * Blueprint has a reservation of itself called "This". This method returns "This" reservation.
+	 * Blueprint has a reservation of itself called "This". 
+	 * This method returns "This" reservation.
 	 * @return "This" Reservation
 	 */
 	TmpInstance This();

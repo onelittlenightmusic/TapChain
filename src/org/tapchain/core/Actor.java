@@ -136,6 +136,11 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 	// 3.Changing state
 	int mynum = ++ActorChain.num;
 
+	public Actor initNum() {
+		mynum = ++ActorChain.num;
+		return this;
+	}
+	
 	@Override
 	public int compareTo(Actor obj) {
 		return -mynum + obj.mynum;
@@ -592,6 +597,104 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		}
 	}
 
+	public static class Effecter extends Actor.Loop {
+		private Controllable t;
+		PackType parent_type = PackType.FAMILY;
+
+		public Effecter setParentType(PackType type) {
+			parent_type = type;
+			return this;
+		}
+
+		@Override
+		public boolean actorReset() throws ChainException {
+			try {
+				setTarget((Controllable) (getParent(parent_type)));
+			} catch (ClassCastException e) {
+				throw new ChainException(this,
+						"EffectSkelton: Failed to get Parent",
+						LoopableError.LOCK);
+			}
+			getTarget().waitWake();
+			return true;
+		}
+
+		@Override
+		public boolean actorRun() throws ChainException {
+			return false;
+		}
+
+		public void setTarget(Controllable t) {
+			this.t = t;
+		}
+
+		public Controllable getTarget() {
+			return t;
+		}
+	}
+
+	public static class EffecterSkelton<T> extends Effecter {
+		private ViewActor target_view = null, target_cache = null;
+		private int _i = 0, _duration = 0;
+		T effect_val = null, cache = null;
+
+		@Override
+		public boolean actorReset() throws ChainException {
+			super.actorReset();
+			// setTargetView((BasicView)getTarget());
+			resetTargetView();
+			setCounter(0);
+			resetEffectValue();
+			return true;
+		}
+
+		public EffecterSkelton<T> setCounter(int _i) {
+			this._i = _i;
+			return this;
+		}
+
+		public int getCounter() {
+			return _i;
+		}
+
+		public boolean increment() {
+			return ++_i < _duration;
+		}
+
+		public EffecterSkelton<T> setTargetView(ViewActor target_view) {
+			this.target_view = target_view;
+			return this;
+		}
+
+		public ViewActor getTargetView() {
+			return target_cache;
+		}
+
+		public EffecterSkelton<T> resetTargetView() throws ChainException {
+			target_cache = (target_view != null) ? target_view
+					: (ViewActor) getTarget();
+			return this;
+		}
+
+		public EffecterSkelton<T> initEffect(T val, int duration) {
+			effect_val = val;
+			_duration = duration;
+			if (effect_val != null)
+				cache = effect_val;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public EffecterSkelton<T> resetEffectValue() throws ChainException {
+			cache = (effect_val != null) ? effect_val : (T) pull();
+			return this;
+		}
+
+		public T getEffectValue() throws ChainException {
+			return cache;
+		}
+	}
+
 	public static abstract class Txn<T> extends Actor.EffecterSkelton<T> {
 		@Override
 		public boolean actorRun() throws ChainException {
@@ -629,6 +732,23 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		}
 	}
 
+	public static class Mover2 extends Txn<WorldPoint> {
+		@Override
+		public void txn(ViewActor _t) throws ChainException {
+			WorldPoint _dir = getEffectValue();// (_direction != null)?
+			// _direction:(WorldPoint)
+			// pull();
+			switch (_dir.getEffect()) {
+			case POS:
+				__exec(_t.setCenter(_dir), "MVE#run#set");
+				break;
+			case DIF:
+				__exec(_t.addCenter(_dir), "MVE#run#add");
+				break;
+			}
+			
+		}
+	}
 	public static class Sizer extends Txn<WorldPoint> {
 		public Sizer size_init(WorldPoint direction, int duration) {
 			initEffect(direction, duration);
@@ -714,42 +834,6 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		}
 	}
 
-	public static class Effecter extends Actor.Loop {
-		private Controllable t;
-		PackType parent_type = PackType.FAMILY;
-
-		public Effecter setParentType(PackType type) {
-			parent_type = type;
-			return this;
-		}
-
-		@Override
-		public boolean actorReset() throws ChainException {
-			try {
-				setTarget((Controllable) (getParent(parent_type)));
-			} catch (ClassCastException e) {
-				throw new ChainException(this,
-						"EffectSkelton: Failed to get Parent",
-						LoopableError.LOCK);
-			}
-			getTarget().waitWake();
-			return true;
-		}
-
-		@Override
-		public boolean actorRun() throws ChainException {
-			return false;
-		}
-
-		public void setTarget(Controllable t) {
-			this.t = t;
-		}
-
-		public Controllable getTarget() {
-			return t;
-		}
-	}
-
 	public static class Alphar extends Txn<Integer> {
 		public Alphar alpha_init(int direction, int duration) {
 			initEffect(direction, duration);
@@ -819,68 +903,6 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		@Override
 		public boolean actorRun() throws ChainException, InterruptedException {
 			return ++counter < threshold;
-		}
-	}
-
-	public static class EffecterSkelton<T> extends Effecter {
-		private ViewActor target_view = null, target_cache = null;
-		private int _i = 0, _duration = 0;
-		T effect_val = null, cache = null;
-
-		@Override
-		public boolean actorReset() throws ChainException {
-			super.actorReset();
-			// setTargetView((BasicView)getTarget());
-			resetTargetView();
-			setCounter(0);
-			resetEffectValue();
-			return true;
-		}
-
-		public EffecterSkelton<T> setCounter(int _i) {
-			this._i = _i;
-			return this;
-		}
-
-		public int getCounter() {
-			return _i;
-		}
-
-		public boolean increment() {
-			return ++_i < _duration;
-		}
-
-		public EffecterSkelton<T> setTargetView(ViewActor target_view) {
-			this.target_view = target_view;
-			return this;
-		}
-
-		public ViewActor getTargetView() {
-			return target_cache;
-		}
-
-		public EffecterSkelton<T> resetTargetView() throws ChainException {
-			target_cache = (target_view != null) ? target_view
-					: (ViewActor) getTarget();
-			return this;
-		}
-
-		public EffecterSkelton<T> initEffect(T val, int duration) {
-			effect_val = val;
-			_duration = duration;
-			if (effect_val != null)
-				cache = effect_val;
-			return this;
-		}
-
-		@SuppressWarnings("unchecked")
-		public EffecterSkelton<T> resetEffectValue() throws ChainException {
-			cache = (effect_val != null) ? effect_val : (T) pull();
-			return this;
-		}
-
-		public T getEffectValue() throws ChainException {
-			return cache;
 		}
 	}
 

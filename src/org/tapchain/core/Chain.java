@@ -351,7 +351,7 @@ public class Chain {
 			location = cp.getName();
 		}
 
-		public ChainException(Factory pieceFactory, String str) {
+		public ChainException(Factory<?> pieceFactory, String str) {
 			super("ChainException: " + str);
 			err = str;
 			location = "Factory";

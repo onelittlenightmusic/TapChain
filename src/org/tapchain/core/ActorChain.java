@@ -15,7 +15,7 @@ public class ActorChain extends Chain {
 	// static PieceState globalState = new PieceState();
 	static int num = 0;
 
-	//1.Initialization
+	// 1.Initialization
 	public ActorChain(int time) {
 		super(Chain.AUTO_MODE, time);
 		touchOn.setControlled(false);
@@ -29,29 +29,29 @@ public class ActorChain extends Chain {
 		// shake.setOutDefaultType(PackType.EVENT, IOType.TOGGLE);
 		setCallback(null);
 	}
-	
+
 	public ActorChain() {
 		this(30);
 	}
 
-	//2.Getters and setters
+	// 2.Getters and setters
 	public int getViewNum() {
 		return vlist.getSize();
 	}
-	
+
 	public ActorChain Show(Object canvas) {
 		vlist.show(canvas);
 		return this;
 	}
 
-	//3.Changing state
+	// 3.Changing state
 	public ActorChain TouchOn(WorldPoint wp) {
 		touchOn.push(wp);
 		touchSw.push(Boolean.valueOf(true));
 		return this;
 	}
-	
-	public ActorChain TouchClear(){
+
+	public ActorChain TouchClear() {
 		touchOn.clearInputHeap();
 		touchOn.clearOutputHeap();
 		return this;
@@ -85,8 +85,8 @@ public class ActorChain extends Chain {
 		return this;
 	}
 
-	//4.Termination
-	//5.Local classes
+	// 4.Termination
+	// 5.Local classes
 	public class ViewList {
 		private TreeMap<IActor, IView> map = new TreeMap<IActor, IView>();
 
@@ -130,25 +130,33 @@ public class ActorChain extends Chain {
 
 	public interface IView {
 		public boolean view_impl(Object canvas);
+
 		public IView setCenter(WorldPoint point);
 	}
 
 	public interface ISound {
 		public boolean play_impl();
+
 		public boolean stop_impl();
+
 		public boolean wait_end_impl() throws InterruptedException;
+
 		public boolean reset_async_impl();
+
 		public boolean reset_sound_impl();
 	}
 
 	public interface IRecorder {
 		public boolean record_start() throws ChainException;
+
 		public boolean record_stop();
 	}
 
 	public interface TapChainLight {
 		public boolean turn_on();
+
 		public boolean turn_off();
+
 		public boolean change_color(int r, int g, int b, int a);
 	}
 
@@ -160,11 +168,12 @@ public class ActorChain extends Chain {
 		public Actor push(Object obj);
 	}
 
-
 	public interface TapChainControllable {
 		public Actor ctrlStart() throws ChainException, InterruptedException;
+
 		public Actor ctrlStop();
+
 		public Actor ctrlReset() throws ChainException, InterruptedException;
 	}
-	
+
 }

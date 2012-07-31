@@ -33,7 +33,7 @@ public class Manager<T> implements IManager<T> {
 	}
 
 	@Override
-	public IManager<T> _gomark() {
+	public IManager<T> _gotomark() {
 		return this;
 	}
 
@@ -49,10 +49,11 @@ public class Manager<T> implements IManager<T> {
 
 	@Override
 	public IManager<T> log(String... s) {
-		if(log != null)
+		if (log != null)
 			log.log(s);
 		return this;
 	}
+
 	public IManager<T> setLog(ILogHandler handle) {
 		log = handle;
 		return this;
@@ -60,7 +61,7 @@ public class Manager<T> implements IManager<T> {
 
 	@Override
 	public IManager<T> error(ChainException e) {
-		if(error != null)
+		if (error != null)
 			error.onError(null, e);
 		return this;
 	}
@@ -68,5 +69,9 @@ public class Manager<T> implements IManager<T> {
 	public IManager<T> setError(IErrorHandler handle) {
 		error = handle;
 		return this;
+	}
+	
+	protected IErrorHandler getErrorHandler() {
+		return error;
 	}
 }

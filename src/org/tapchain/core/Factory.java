@@ -21,24 +21,25 @@ public class Factory<T extends IPiece> {
 		collect.add(root);
 		return this;
 	}
-	public T instantiate(int num) {
+	@SuppressWarnings("unchecked")
+	public T newInstance(int num, WorldPoint wp) {
 		IBlueprint blueprint = collect.get(num);
 		IManager<IPiece> usermaker = manager;//editor.getUserManager();
-		T rtn = null;
+		IPiece rtn = null;
 		if(blueprint == null)
 			return null;
 		try {
-			rtn = (T) blueprint.newInstance(usermaker);
+			rtn = blueprint.newInstance(usermaker);
 //			rtn.setLogLevel(true);
 			Blueprint _view = getView(num);
 			if(_view != null)
-				((ActorManager) usermaker).setPieceView(rtn, _view);
+				((ActorManager) usermaker).setPieceView(rtn, _view, wp);
 			usermaker.save();
-			return rtn;
+			return (T)rtn;
 		} catch (ChainException e) {
 			usermaker.error(e);
 		}
-		return rtn;
+		return (T)rtn;
 	}
 	public int getSize() {
 		return collect.size();

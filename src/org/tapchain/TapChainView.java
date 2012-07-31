@@ -1,8 +1,6 @@
 package org.tapchain;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IntentHandler;
@@ -87,7 +85,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 		viewEditing.matrix.mapRect(r);
 		out.putParcelable(X, r);
 		out.putParcelableArray(V,
-				editor.dictPiece.values().toArray(new Parcelable[0]));
+				editor.userManager.getPieceViews().toArray(new Parcelable[0]));
 	}
 
 	/** Called when the activity is first created. */
@@ -112,7 +110,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 			viewEditing.matrix.invert(viewEditing.inverse);
 			Parcelable[] p = savedInstanceState.getParcelableArray(V);
 			int i = 0;
-			for (IPieceView v : editor.dictPiece.values()) {
+			for (IPieceView v : editor.userManager.getPieceViews()) {
 				v.setCenter(((AndroidView) p[i++]).getCenter());
 			}
 		}
@@ -402,6 +400,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 					switch (action) {
 					case MotionEvent.ACTION_DOWN:
 					case MotionEvent.ACTION_POINTER_DOWN:
+						((TapChainView)c).dummyAdd();
 						getParent().requestDisallowInterceptTouchEvent(true);
 						p.setView(c, j);
 						GridFragment f = (GridFragment) ((Activity) c)
@@ -413,11 +412,13 @@ public class TapChainView extends Activity implements SensorEventListener,
 						// LocalButton.this.clearFocus();
 						break;
 					case MotionEvent.ACTION_MOVE:
+						((TapChainView)c).dummyMove((int) event.getRawX(), (int) event.getRawY());
 						// p.getContentView().dispatchTouchEvent(event);
 						p.show((int) event.getRawX(), (int) event.getRawY());
 						break;
 					case MotionEvent.ACTION_POINTER_UP:
 					case MotionEvent.ACTION_UP:
+						((TapChainView)c).dummyRemove();
 						((TapChainView) c).viewEditing.sendDownEvent(
 								event.getRawX(), event.getRawY());
 						((TapChainView) c).setCode(j);
@@ -464,7 +465,7 @@ public class TapChainView extends Activity implements SensorEventListener,
 	public static class PieceImage extends ImageView {
 		PieceImage(Context c, final int j) {
 			super(c);
-			Factory f = ((TapChainView) c).editor.getFactory();
+			Factory<?> f = ((TapChainView) c).editor.getFactory();
 			AndroidView v = null;
 			try {
 				v = (AndroidView) f.getView(j).newInstance(null);
@@ -591,8 +592,19 @@ public class TapChainView extends Activity implements SensorEventListener,
 	}
 
 	public void setCode(int code) {
-		if (code < editor.getFactory().getSize())
-			editor.getFactory().instantiate(code);
+		editor.onAdd(code);
+	}
+	
+	public void dummyAdd() {
+		Log.w("test", "dummy added");
+	}
+	
+	public void dummyMove(int x, int y) {
+//		Log.w("test", "dummy moved");
+	}
+	
+	public void dummyRemove() {
+		Log.w("test", "dummy removed");
 	}
 
 	public class WritingView extends TapChainSurfaceView implements

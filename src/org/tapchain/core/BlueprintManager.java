@@ -13,13 +13,13 @@ public class BlueprintManager extends Manager<IBlueprint> {
 	private IBlueprint root = null;
 	IBlueprint marked = null;
 	IBlueprint reserved = null;
-	Factory factory = null;
+	Factory<IPiece> factory = null;
 	private Object outer;
 	//1.Initialization
 	public BlueprintManager() {
 	}
 	
-	public BlueprintManager(Factory _factory) {
+	public BlueprintManager(Factory<IPiece> _factory) {
 		this();
 		factory = _factory;
 	}
@@ -172,7 +172,7 @@ public class BlueprintManager extends Manager<IBlueprint> {
 		return this;
 	}
 	@Override
-	public BlueprintManager _gomark() {
+	public BlueprintManager _gotomark() {
 		reserved = marked;
 		return this;
 	}

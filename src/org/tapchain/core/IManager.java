@@ -60,7 +60,7 @@ public interface IManager<T> {
 	 * This method sets MARKED POINTER (the internal "current piece" pointer) to the piece previously marked with _mark() method.
 	 * @return Manager object (this).
 	 */
-	public IManager<T> _gomark();
+	public IManager<T> _gotomark();
 	
 	/** Mark current piece as MARKED POINTER.
 	 * This method sets the current piece to MARKED POINTER (the internal "current piece" pointer)

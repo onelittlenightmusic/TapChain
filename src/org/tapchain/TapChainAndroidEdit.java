@@ -187,7 +187,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 						} catch (Exception e) {
 							setCenter(new WorldPoint(100, 100));
 						}
-						setColor(nowPiece == null ? Color.BLACK : Color.WHITE);
+						setColor(startPiece == null ? Color.BLACK : Color.WHITE);
 						setSize(new WorldPoint(30, 100));
 						setAlpha(100);
 					}
@@ -213,7 +213,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 				}.initEffect(1, 10)/*.setLogLevel(true)*/)
 				.young(new Actor.Resetter().setContinue(true))
 				._exit()
-				._gomark()
+				._gotomark()
 				.add(circle)
 				._child()
 				.add(new Actor.Colorer().color_init(0xffffffff).disableLoop().boost())
@@ -276,7 +276,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 
 	public boolean onDown(WorldPoint sp) {
 		super.onDown(sp);
-		onMoveView(circle);
+		userManager.onMoveView(circle, nowPoint);
 		return true;
 	}
 
