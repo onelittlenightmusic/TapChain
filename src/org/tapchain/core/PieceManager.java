@@ -2,7 +2,6 @@ package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.ChainController.IControlCallback;
 

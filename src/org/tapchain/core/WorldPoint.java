@@ -34,6 +34,11 @@ public class WorldPoint implements IPoint {
 		if(b==null) return this;
 		return new WorldPoint(x+b.x, y+b.y);
 	}
+	public WorldPoint plus(int d) {
+		x += d;
+		y += d;
+		return this;
+	}
 	public WorldPoint divide(int n) {
 		return new WorldPoint(x/n, y/n);
 	}
@@ -78,4 +83,16 @@ public class WorldPoint implements IPoint {
 		return new WorldPoint(-wp.x(), -wp.y());
 	}
 	
+	public int getAbs() {
+		return (int)Math.sqrt(x * x + y * y);
+	}
+	
+	public WorldPoint round(int denominator) {
+		x -= x % denominator;
+		y -= y % denominator;
+		return this;
+	}
+	public boolean equals(WorldPoint p) {
+		return x == p.x && y == p.y;
+	}
 }

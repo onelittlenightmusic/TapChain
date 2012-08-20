@@ -2,7 +2,6 @@ package org.tapchain.core;
 
 import org.tapchain.core.Blueprint.TmpInstance;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 
 /** Blueprint interface.
@@ -49,8 +48,9 @@ public interface IBlueprint {
 	IBlueprint addLocal(IBlueprint _pbp, IPiece... args);
 	//4.Termination: none
 	//5.Local classes: none
-	IBlueprint addArg(Class<?> type, Object obj);
+	IBlueprint addArg(Object... objs);
 	IBlueprint Append(PackType heap, IBlueprint reserved, PackType heap2);
 	IBlueprint refresh();
 	IBlueprint copy(IPiece... args);
+	IBlueprint copyAndRenewParam();
 }

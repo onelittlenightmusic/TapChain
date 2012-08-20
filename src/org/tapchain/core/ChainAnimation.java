@@ -34,5 +34,9 @@ public class ChainAnimation implements IAnimation {
 	public IView setCenter(WorldPoint point) {
 		return null;
 	}
+	@Override
+	public IView setAlpha(int i) {
+		return null;
+	}
 	
 }

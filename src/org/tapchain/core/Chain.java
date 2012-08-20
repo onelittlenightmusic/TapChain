@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -231,11 +230,12 @@ public class Chain {
 			super(fImpl);
 		}
 
-		public ConnectionResultIO appendTo(PackType stack, IPiece cp, Class<?> cls,
+		@Override
+		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
 				PackType stack_target) throws ChainException {
 			super.appendTo(stack, cp, stack_target);
-			ChainInConnector i = addInPath(cls, stack);
-			ConnectionResultO o = cp.appended(cls, null, stack_target, this);
+			ChainInConnector i = addInPath(stack);
+			ConnectionResultO o = cp.appended(Object.class, null, stack_target, this);
 			if (i.connect(o.getConnect())) {
 				ConnectorPath p = new ConnectorPath((ChainPiece) o.getPiece(), this,
 						o.getConnect(), i);
@@ -244,16 +244,16 @@ public class Chain {
 			return null;
 		}
 
-		@Override
-		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
-				PackType stack_target) throws ChainException {
-			return appendTo(stack, cp, ChainPiece.class, stack_target);
-		}
+//		@Override
+//		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
+//				PackType stack_target) throws ChainException {
+//			return appendTo(stack, cp, ChainPiece.class, stack_target);
+//		}
 
 		@Override
 		public ConnectionResultO appended(Class<?> cls, Output type,
 				PackType stack_target, IPiece from) throws ChainException {
-			ChainOutConnector o = addOutPath(cls, type, stack_target);
+			ChainOutConnector o = addOutPath(type, stack_target);
 			// partner.setPartner(o, from);
 			return new ConnectionResultO(this, o);
 		}
@@ -264,44 +264,44 @@ public class Chain {
 		}
 	}
 
-	public static class FixedChainPiece extends ChainPiece {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		FixedChainPiece() {
-			super();
-		}
-
-		FixedChainPiece(IPieceHead fImpl) {
-			super(fImpl);
-		}
-
-		@Override
-		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
-				PackType stack_target) throws ChainException {
-			super.appendTo(stack, cp, stack_target);
-			for (ChainInConnector i : getInPack(PackType.PASSTHRU)) {
-				ConnectionResultO o = cp.appended(i.class_name, null, stack_target,
-						this);
-				if (i.connect(o.getConnect())) {
-					// used = !hasAnyUnusedConnect();
-					return new ConnectionResultIO(o.getPiece(), new ConnectorPath(
-							(ChainPiece) o.getPiece(), this, o.getConnect(), i));
-				}
-			}
-			return null;
-		}
-
-		protected ConnectionResultO appended(Class<?> cls) throws ChainException {
-			for (ChainOutConnector o : getOutPack(PackType.PASSTHRU))
-				if (o.class_name == cls)
-					return new ConnectionResultO(this, o);
-			return null;
-		}
-
-	}
+//	public static class FixedChainPiece extends ChainPiece {
+//		/**
+//		 * 
+//		 */
+//		private static final long serialVersionUID = 1L;
+//
+//		FixedChainPiece() {
+//			super();
+//		}
+//
+//		FixedChainPiece(IPieceHead fImpl) {
+//			super(fImpl);
+//		}
+//
+//		@Override
+//		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
+//				PackType stack_target) throws ChainException {
+//			super.appendTo(stack, cp, stack_target);
+//			for (ChainInConnector i : getInPack(PackType.PASSTHRU)) {
+//				ConnectionResultO o = cp.appended(i.class_name, null, stack_target,
+//						this);
+//				if (i.connect(o.getConnect())) {
+//					// used = !hasAnyUnusedConnect();
+//					return new ConnectionResultIO(o.getPiece(), new ConnectorPath(
+//							(ChainPiece) o.getPiece(), this, o.getConnect(), i));
+//				}
+//			}
+//			return null;
+//		}
+//
+//		protected ConnectionResultO appended(Class<?> cls) throws ChainException {
+//			for (ChainOutConnector o : getOutPack(PackType.PASSTHRU))
+//				if (o.class_name == cls)
+//					return new ConnectionResultO(this, o);
+//			return null;
+//		}
+//
+//	}
 
 	enum Output {
 		NORMAL, HIPPO, SYNC, TOGGLE
@@ -385,32 +385,6 @@ public class Chain {
 				ChainException;
 
 		abstract boolean pieceReset(IPiece f);
-	}
-
-	public interface IPiece {
-		public ConnectionResultO appended(Class<?> cls, Output type, PackType stack,
-				IPiece from) throws ChainException;
-
-		public ConnectionResultIO appendTo(PackType stack, IPiece piece_to,
-				PackType stack_target) throws ChainException;
-
-		public void detached(IPiece _cp_end);
-
-		public void setPartner(IPath chainPath, IPiece _cp_start);
-
-		public IPath detach(IPiece y);
-
-		public Collection<IPiece> getPartners();
-
-		public boolean isConnectedTo(IPiece target);
-
-		public IPiece signal();
-
-		public void end();
-
-		public String getName();
-
-		public <T> T __exec(T obj, String flg);
 	}
 
 	public enum PackType {

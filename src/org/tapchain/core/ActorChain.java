@@ -130,7 +130,7 @@ public class ActorChain extends Chain {
 
 	public interface IView {
 		public boolean view_impl(Object canvas);
-
+		public IView setAlpha(int i);
 		public IView setCenter(WorldPoint point);
 	}
 

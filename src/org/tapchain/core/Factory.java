@@ -1,43 +1,53 @@
 package org.tapchain.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
+
+import android.util.Log;
 
 
 public class Factory<T extends IPiece> {
 	ArrayList<IBlueprint> collect;
-	HashMap<Class<? extends T>, ArrayList<T>> items = new 
-	HashMap<Class<? extends T>, ArrayList<T>>();
-	IManager<IPiece> manager = null;
-	public Factory(IManager<IPiece> m/*TapChainEdit e*/) {
+	ValueChangeNotifier notif;
+	public Factory() {
 		collect = new ArrayList<IBlueprint>();
-		manager = m;
 //		addClassTest(test_cls.class);
 	}
 	public Factory<T> Register(IBlueprint root) {
 		collect.add(root);
+		if(notif != null)
+			notif.notifyView();
 		return this;
 	}
+	public IBlueprint get(int n) {
+		return collect.get(n);
+	}
+	public void clear() {
+		collect.clear();
+		if(notif != null)
+			notif.notifyView();
+	}
+	public void setNotifier(ValueChangeNotifier not) {
+		notif = not;
+	}
 	@SuppressWarnings("unchecked")
-	public T newInstance(int num, WorldPoint wp) {
-		IBlueprint blueprint = collect.get(num);
-		IManager<IPiece> usermaker = manager;//editor.getUserManager();
+	public T newInstance(int num, WorldPoint wp, IManager<IPiece> manager) {
+//		Log.w("test", String.format("Factory: new instance %d", num));
+		IBlueprint blueprint = get(num);
 		IPiece rtn = null;
 		if(blueprint == null)
 			return null;
 		try {
-			rtn = blueprint.newInstance(usermaker);
-//			rtn.setLogLevel(true);
+			rtn = blueprint.newInstance(manager);
+//			if(rtn instanceof Actor)
+//				((Actor)rtn).setLogLevel(true);
 			Blueprint _view = getView(num);
 			if(_view != null)
-				((ActorManager) usermaker).setPieceView(rtn, _view, wp);
-			usermaker.save();
+				((ActorManager) manager).setPieceView(rtn, _view, wp);
+			manager.save();
 			return (T)rtn;
 		} catch (ChainException e) {
-			usermaker.error(e);
+			manager.error(e);
 		}
 		return (T)rtn;
 	}
@@ -61,6 +71,10 @@ public class Factory<T extends IPiece> {
 			throw new ChainException(this, "TapChain#PieceBlueprint object has no view");
 		}
 		return (Blueprint) collect.get(n).getView();
+	}
+	public void relatives(IBlueprint b, Factory<T> rel) {
+		rel.clear();
+		rel.Register(b);
 	}
 //	ArrayList<Class<?>> collect_test  = new ArrayList<Class<?>>();
 //	public PieceFactory addClassTest(Class<?> _cls) {
@@ -87,4 +101,7 @@ public class Factory<T extends IPiece> {
 //			return "this is test_cls";
 //		}
 //	}
+	public interface ValueChangeNotifier {
+		public void notifyView();
+	}
 }

@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
 
 /** Manager.
  * Manager is model class in TapChain.

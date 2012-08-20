@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 import org.tapchain.core.ActorManager.IStatusHandler;
-import org.tapchain.core.Chain.IPiece;
 
 public interface IPath {
 	//1.Initialization

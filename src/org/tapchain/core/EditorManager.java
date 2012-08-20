@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.tapchain.core.Actor.Mover2;
 import org.tapchain.core.ActorChain.IView;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.TapChainEdit.IEditAnimation;
 import org.tapchain.core.TapChainEdit.IPathView;
@@ -21,7 +20,7 @@ import org.tapchain.core.ChainPiece.PieceState;
 
 
 public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit {
-	protected ActorManager editorManager;
+	protected ActorManager systemManager;
 	public TreeMap<IPiece,IPieceView> dictPiece = new TreeMap<IPiece, IPieceView>();
 	ConcurrentHashMap<IPath, IPathView> dictPath = new ConcurrentHashMap<IPath, IPathView>();
 	ArrayList<Actor> plist = new ArrayList<Actor>();
@@ -34,7 +33,7 @@ public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit
 	public void init() {
 		Actor ptmp = null;
 		for(int c : Arrays.asList(0xff80ff80, 0xff80ff80, 0xffffffff, 0xff8080ff, 0xffff8080)) {
-			editorManager.add(new Actor.Colorer().color_init(c).setParentType(PackType.HEAP).boost())
+			systemManager.add(new Actor.Colorer().color_init(c).setParentType(PackType.HEAP).boost())
 			.teacher(ptmp = new Actor()).save();
 			plist.add(ptmp);
 		}
@@ -56,10 +55,10 @@ public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit
 
 	}
 	public ActorManager getSystemManager() {
-		return editorManager;
+		return systemManager;
 	}
 	public EditorManager setSystemManager(ActorManager am) {
-		editorManager = am;
+		systemManager = am;
 		return this;
 	}
 	public Collection<IPieceView> getPieceViews() {

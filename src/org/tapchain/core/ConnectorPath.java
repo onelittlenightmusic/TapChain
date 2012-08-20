@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 import org.tapchain.core.ActorManager.IStatusHandler;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.Tickable;
 import org.tapchain.core.Connector.ChainInConnector;
 import org.tapchain.core.Connector.ChainOutConnector;

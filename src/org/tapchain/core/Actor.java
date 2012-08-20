@@ -18,7 +18,6 @@ import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
 import org.tapchain.core.Chain.FlexPiece;
 import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.IPieceHead;
 import org.tapchain.core.Chain.LoopableError;
 import org.tapchain.core.Chain.Output;
@@ -206,7 +205,7 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		ConnectionResultIO o = null;
 		if (_push != null) {
 			try {
-				o = appendTo(PackType.HEAP, _push, Object.class, PackType.HEAP);
+				o = appendTo(PackType.HEAP, _push, PackType.HEAP);
 			} catch (ChainException e) {
 				__exec(getName() + "/Connection to PushEvent : NG",
 						"BasicPiece#ConnectToPush");
@@ -220,7 +219,7 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		ConnectionResultIO o = null;
 		if (_kick != null) {
 			try {
-				o = appendTo(PackType.EVENT, _kick, Object.class,
+				o = appendTo(PackType.EVENT, _kick,
 						PackType.EVENT);
 			} catch (ChainException e) {
 				__exec(getName() + "/Connection to PushEvent : NG",
@@ -638,6 +637,10 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		private int _i = 0, _duration = 0;
 		T effect_val = null, cache = null;
 
+		public EffecterSkelton() {
+			super();
+		}
+		
 		@Override
 		public boolean actorReset() throws ChainException {
 			super.actorReset();
@@ -710,6 +713,15 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 	}
 
 	public static class Mover extends Actor.EffecterSkelton<WorldPoint> {
+		public Mover() {
+			super();
+		}
+		//Blueprint's getDeclaredConnstructor can not find super class' constructor other than default constructor.
+		//The following line can not be in super class.
+		public Mover(WorldPoint p) {
+			this();
+			initEffect(p, 0);
+		}
 
 		@Override
 		public boolean actorRun() throws ChainException {
@@ -733,6 +745,15 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 	}
 
 	public static class Mover2 extends Txn<WorldPoint> {
+		public Mover2() {
+			super();
+		}
+		//Blueprint's getDeclaredConnstructor can not find super class' constructor other than default constructor.
+		//The following line can not be in super class.
+		public Mover2(WorldPoint p) {
+			this();
+			initEffect(p, 0);
+		}
 		@Override
 		public void txn(ViewActor _t) throws ChainException {
 			WorldPoint _dir = getEffectValue();// (_direction != null)?
@@ -750,6 +771,13 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 		}
 	}
 	public static class Sizer extends Txn<WorldPoint> {
+		public Sizer() {
+			super();
+		}
+		public Sizer(WorldPoint p) {
+			this();
+			initEffect(p, 0);
+		}
 		public Sizer size_init(WorldPoint direction, int duration) {
 			initEffect(direction, duration);
 			return this;
@@ -1228,7 +1256,7 @@ public class Actor extends FlexPiece implements IActor, IPush, IFilter,
 				bm.setOuterInstanceForInner(parent);
 			try {
 				outputAllSimple(PackType.FAMILY,
-						bm.add((Class<? extends Actor>) obj).getBlueprint()
+						bm.addLocal((Class<? extends Actor>) obj).getBlueprint()
 								.newInstance(maker));
 			} catch (ChainException e) {
 				maker.log(e.err);

@@ -6,7 +6,6 @@ import java.util.List;
 import org.tapchain.core.ActorChain.*;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.TapChainEdit.IPathView;
 import org.tapchain.core.TapChainEdit.IPieceView;

@@ -1,6 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.IPiece;
 
 public class Packet<T> implements IPacket<T> {
 	T obj = null;

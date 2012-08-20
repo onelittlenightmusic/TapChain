@@ -3,7 +3,6 @@ package org.tapchain.core;
 import java.io.Serializable;
 
 import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.Output;
 import org.tapchain.core.PathPack.*;
 

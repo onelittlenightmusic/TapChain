@@ -8,11 +8,11 @@ import org.tapchain.AndroidActor.AndroidImageView;
 import org.tapchain.AndroidActor.AndroidQuaker;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Blueprint;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ConnectorPath;
 import org.tapchain.core.IErrorHandler;
 import org.tapchain.core.ILogHandler;
+import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.PieceManager;
 import org.tapchain.core.ScreenPoint;
@@ -21,7 +21,6 @@ import org.tapchain.core.TapMath;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.PathPack.ChainInPathPack;
 import org.tapchain.R;
@@ -46,98 +45,81 @@ public class TapChainAndroidEdit extends TapChainEdit
 	//1.Initialization
 	public TapChainAndroidEdit() {
 		super();
+		
+		//Setting styles
+		setStyle(this, new StyleCollection(LocalViewStyle.class, ConnectStyle.class, new LocalActionStyle()));
 		 setInteract(new LocalInteraction());
 		 eh = new LocalEventHandler();
-//		 userManager
-//		.makeBlueprint()
+		 
+		 //Making list of pieces
 		 blueprintManager
-		.setOuterInstanceForInner(this)
-//		.New(AndroidImageView.class).teacher(new Actor.Value(R.drawable.star))
-//		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
-		.New(AndroidImageView.class)
-		.arg(Integer.class,R.drawable.star)
-		.setView(LocalView.class)
-		.arg(Integer.class, R.drawable.star)
-//		.setView(Teststar.class)
-		.save()
-		.New(AndroidImageView.class, new Actor.Value(R.drawable.star))
-		.child(Actor.Mover.class, new Actor.Value(new WorldPoint(3, 0).setDif()))
-//		.child(new Actor.Mover().initEffect(new WorldPoint(3, 0).setDif(),10))
-		.setView(Teststar.class)
-		.save()
-		.New(AndroidImageView.class, new Actor.Value(R.drawable.heart_bright))
-		.setView(Testheartbright.class)
-		.save()
-		.New(AndroidImageView.class, new Actor.Value(R.drawable.heart))
-		.setView(Testheart.class)
-		.save()
-		.New(Actor.Mover.class, new Actor.Value(new WorldPoint(3, 0).setDif()))
-		.setView(Testright.class)
-		.save()
-		.New(Actor.Mover.class, new Actor.Value(new WorldPoint(0, 3).setDif()))
-		.setView(Testdown.class)
-		.save()
-		.New(Actor.Mover.class, new Actor.Value(new WorldPoint(-3, 0).setDif()))
-		.setView(Testleft.class)
-		.save()
-		.New(Actor.Mover.class, new Actor.Value(new WorldPoint(0, -3).setDif()))
-		.setView(Testtop.class)
-		.save()
-//		.New(MoveViewEffect.class, new ValueLimited(new WorldPoint(0, -10), 10))
-//		.setview(Test.class)
-//		.Save()
-		.New(Actor.Sizer.class, new Actor.Value(new WorldPoint(1, 1)))
-		.setView(TestWiden.class)
-		.save()
-		.New(Actor.Sizer.class, new Actor.Value(new WorldPoint(-1, -1)))
-		.setView(TestShrink.class)
-		.save()
-		.New(Actor.Rotater.class, new Actor.Value(10))
-		.setView(TestRotate.class)
-		.save()
-//		.New(BasicPiece.AlphaEffect.class, new BasicPiece.Value(1))
-//		.setview(Test.class)
-//		.Save()
-//		.New(BasicPiece.AlphaEffect.class, new BasicPiece.Value(-1))
-//		.setview(Test.class)
-//		.Save()
-//		.New(AndroidPiece.AndroidImageView.class, new BasicPiece.Value(R.drawable.star))
-//		.setview(Test.class)
-//		._return()
-//		.because(new TouchFilter() {
-//			public boolean filter(Object obj) {
-//				ScreenPoint __p = ((WorldPoint) obj)
-//						.getScreenPoint(AndroidPiece.getWindow());
-//				return __p.x < 30 && __p.y < 30;
-//			}
-//		})
-//		.Save()
-//		.New(new PieceBlueprint(BasicPiece.MoveViewEffect.class) {
-//			@Override
-//			public void init_user(BasicPiece newinstance,
-//					ChainManager maker)
-//					throws InterruptedException {
-//				((BasicPiece.EffectSkelton)newinstance).setParentType(PackType.HEAP);
-//				((BasicPiece.MoveViewEffect) newinstance).initEffect(new WorldPoint(10, 10).setDif(), 10);
-//				newinstance.setInPackType(PackType.FAMILY,
-//						ChainPiece.Input.FIRST);
-//			}
-//		})
-//		.and(BasicPiece.ResetEffect.class)
-//		.setview(Test.class).Save()
-		.New(AndroidActor.AndroidRecorder.class)
-//		.because(TouchFilter.class)
-//		._return()
-		.child(Actor.Sleeper.class)
-		.young(Actor.Resetter.class)
-		.setView(TestRecord.class)
-		.save()
-		.New(AndroidActor.AndroidCamera.class)
-		.setView(TestRecord.class)
-		.save()
-		.New(Actor.ShakeFilter.class).setView(Test2.class).save()
-		.New(AndroidQuaker.class).setView(Test3.class).save()
-		.New(TestSound2.class)//.Save()
+			.New(AndroidImageView.class)
+			.arg(R.drawable.star)
+			.viewStyleArg(R.drawable.star)
+			.save()
+		
+			.New(AndroidImageView.class).arg(R.drawable.star)
+			.child(Actor.Mover.class).arg(new WorldPoint(3, 0).setDif())
+			.viewStyleArg(R.drawable.star)
+			.save()
+			
+			.New(AndroidImageView.class).arg(R.drawable.heart_bright)
+			.viewStyleArg(R.drawable.heart_bright)
+			.save()
+			
+			.New(AndroidImageView.class).arg(R.drawable.heart)
+			.viewStyleArg(R.drawable.heart)
+			.save()
+			
+			.New(Actor.Mover.class).arg(new WorldPoint(3, 0).setDif())
+			.viewStyleArg(R.drawable.right)
+			.save()
+			
+			.New(Actor.Mover.class).arg(new WorldPoint(0, 3).setDif())
+			.viewStyleArg(R.drawable.down)
+			.save()
+			
+			.New(Actor.Mover.class).arg(new WorldPoint(-3, 0).setDif())
+			.viewStyleArg(R.drawable.left)
+			.save()
+			
+			.New(Actor.Mover.class).arg(new WorldPoint(0, -3).setDif())
+			.viewStyleArg(R.drawable.up)
+			.save()
+			
+			.New(Actor.Sizer.class).arg(new WorldPoint(1, 1))
+			.viewStyleArg(R.drawable.widen)
+			.save()
+			
+			.New(Actor.Sizer.class).arg(new WorldPoint(-1, -1))
+			.viewStyleArg(R.drawable.shrink)
+			.save()
+			
+			.New(Actor.Rotater.class, new Actor.Value(10))
+			.viewStyleArg(R.drawable.rotate)
+			.save()
+			
+			.New(AndroidActor.AndroidRecorder.class)
+			.child(Actor.Sleeper.class)
+			.young(Actor.Resetter.class)
+			.viewStyleArg(R.drawable.record)
+			.save()
+			
+			.New(AndroidActor.AndroidCamera.class)
+			.viewStyleArg(R.drawable.photo)
+//			.setView(TestRecord.class)
+			.save()
+			
+			.New(Actor.ShakeFilter.class)
+			.viewStyleArg(R.drawable.shake)
+//			.setView(Test2.class)
+			.save()
+			.New(AndroidQuaker.class)
+			.viewStyleArg(R.drawable.quake)
+//			.setView(Test3.class)
+			.save()
+			
+			.New(TestSound2.class)//.Save()
 	 .because(Actor.ShakeFilter.class)
 	 .setView(TestSound.class)
 	 .save()
@@ -153,29 +135,62 @@ public class TapChainAndroidEdit extends TapChainEdit
 		.save()
 		.New(Actor.Resetter.class).setView(TestReset.class).save()
 		.New(Actor.Counter.class).setView(TestTime2.class).save()
-		.New(Actor.Value.class).arg(Object.class,3).setView(TestTime2.class).save()
+		.New(Actor.Value.class).arg(3).setView(TestTime2.class).save()
 		.New(AndroidActor.AndroidNumberView.class).setView(TestTime2.class).save()
 		;
+			getSystemManager().setError(this);
 			editorManager.setError(this);
-			userManager.setError(this);
 			blueprintManager.setError(this);
-// .New(AndroidPiece.AndroidRecognizer.class)
-// .setview(Test.class)
-// .Save();
 
-		setPathBlueprint(new Blueprint(Connect1.class));
+//			.New(MoveViewEffect.class, new ValueLimited(new WorldPoint(0, -10), 10))
+//			.setview(Test.class)
+//			.Save()
+//			.New(BasicPiece.AlphaEffect.class, new BasicPiece.Value(1))
+//			.setview(Test.class)
+//			.Save()
+//			.New(BasicPiece.AlphaEffect.class, new BasicPiece.Value(-1))
+//			.setview(Test.class)
+//			.Save()
+//			.New(AndroidPiece.AndroidImageView.class, new BasicPiece.Value(R.drawable.star))
+//			.setview(Test.class)
+//			._return()
+//			.because(new TouchFilter() {
+//				public boolean filter(Object obj) {
+//					ScreenPoint __p = ((WorldPoint) obj)
+//							.getScreenPoint(AndroidPiece.getWindow());
+//					return __p.x < 30 && __p.y < 30;
+//				}
+//			})
+//			.Save()
+//			.New(new PieceBlueprint(BasicPiece.MoveViewEffect.class) {
+//				@Override
+//				public void init_user(BasicPiece newinstance,
+//						ChainManager maker)
+//						throws InterruptedException {
+//					((BasicPiece.EffectSkelton)newinstance).setParentType(PackType.HEAP);
+//					((BasicPiece.MoveViewEffect) newinstance).initEffect(new WorldPoint(10, 10).setDif(), 10);
+//					newinstance.setInPackType(PackType.FAMILY,
+//							ChainPiece.Input.FIRST);
+//				}
+//			})
+//			.and(BasicPiece.ResetEffect.class)
+//			.setview(Test.class).Save()
+//		setPathBlueprint(new Blueprint(Connect1.class));
+//			.because(TouchFilter.class)
+//			._return()
 		setLog(this);
 
 	}
+	
 	@Override
 	public void setWindow(IWindow v) {
 		super.setWindow(v);
-		editorManager
+		getSystemManager()
 			.add(new AndroidActor.AndroidAlert())
 			.teacher(p).save();
 		
 		//Initialization of View(touching effect)
-		editorManager
+		getSystemManager()
 				.add(new Actor.TouchFilter())
 				._mark()
 				.student(new AndroidView() {
@@ -276,7 +291,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 
 	public boolean onDown(WorldPoint sp) {
 		super.onDown(sp);
-		userManager.onMoveView(circle, nowPoint);
+		editorManager.onMoveView(circle, nowPoint);
 		return true;
 	}
 
@@ -295,116 +310,54 @@ public class TapChainAndroidEdit extends TapChainEdit
 	//3.Changing state
 	//4.Termination
 	//5.Local classes
-	public class Test extends LocalView {
-		public Test() {
-			super(R.drawable.gu);
-		}
-	}
 
-	public class Test2 extends LocalView {
+	public class Test2 extends LocalViewStyle {
 		public Test2() {
 			super(R.drawable.shake);
 		}
 	}
 
-	public class Test3 extends LocalView {
+	public class Test3 extends LocalViewStyle {
 		public Test3() {
 			super(R.drawable.quake);
 		}
 	}
 
-	public class Testdown extends LocalView {
-		public Testdown() {
-			super(R.drawable.move_down);
-		}
-	}
-
-	public class Testheart extends LocalView {
-		public Testheart() {
-			super(R.drawable.heart);
-		}
-	}
-
-	public class Testheartbright extends LocalView {
-		public Testheartbright() {
-			super(R.drawable.heart_bright);
-		}
-	}
-
-	public class Testleft extends LocalView {
-		public Testleft() {
-			super(R.drawable.move_left);
-		}
-	}
-
-	public class TestRecord extends LocalView {
-		public TestRecord() {
-			super(R.drawable.record);
-		}
-	}
-
-	public class TestReset extends LocalView {
+	public class TestReset extends LocalViewStyle {
 		public TestReset() {
 			super(R.drawable.stop);
 		}
 	}
 
-	public class Testright extends LocalView {
-		public Testright() {
-			super(R.drawable.move_right);
-		}
-	}
-
-	public class TestRotate extends LocalView {
-		public TestRotate() {
-			super(R.drawable.rotate);
-		}
-	}
-
-	public class TestShrink extends LocalView {
-		public TestShrink() {
-			super(R.drawable.shrink);
-		}
-	}
-
-	public class TestSound extends LocalView {
+	public class TestSound extends LocalViewStyle {
 		public TestSound() {
 			super(R.drawable.sound1);
 		}
 	}
 
-	public class Teststar extends LocalView {
-		public Teststar() {
-			super(R.drawable.star);
-		}
-	}
-
-	public class TestTime extends LocalView {
+	public class TestTime extends LocalViewStyle {
 		public TestTime() {
 			super(R.drawable.timer);
 		}
 	}
 
-	public class TestTime2 extends LocalView {
+	public class TestTime2 extends LocalViewStyle {
 		public TestTime2() {
 			super(R.drawable.timer_red);
 		}
 	}
+	
+	public class LocalActionStyle implements ActionStyle {
 
-	public class Testtop extends LocalView {
-		public Testtop() {
-			super(R.drawable.move_top);
+		@Override
+		public WorldPoint pointOnAdd(WorldPoint raw) {
+			return raw.round(100).plus(50);
 		}
-	}
-
-	public class TestWiden extends LocalView {
-		public TestWiden() {
-			super(R.drawable.wide);
-		}
+		
 	}
 
 	static Bitmap bm_bg;
-	public class LocalView extends TapChainAndroidEdit.EditorView implements
+	public class LocalViewStyle extends TapChainAndroidEdit.EditorView implements
 				Serializable {
 			Paint _paint = new Paint();
 			Paint paint2 = new Paint();
@@ -419,11 +372,11 @@ public class TapChainAndroidEdit extends TapChainEdit
 			float sweep = 0f;
 	
 			//1.Initialization
-			public LocalView() {
+			public LocalViewStyle() {
 				this(null);
 			}
 	
-			public LocalView(Integer _bm) {
+			public LocalViewStyle(Integer _bm) {
 				super();
 	//			editor = e;
 				setInteraction(getInteract());
@@ -457,7 +410,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 	//		d.getPaint().setShadowLayer(4, 4, 4, 0x80000000);
 			}
 	
-			public LocalView localview_init(Integer bit) {
+			public LocalViewStyle localview_init(Integer bit) {
 				bm_fg = BitmapFactory.decodeResource(
 						AndroidActor.getResources(), bit);
 				frontview = bit;
@@ -475,7 +428,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 			}
 	
 			//2.Getters and setters
-			public LocalView setError(boolean err) {
+			public LocalViewStyle setError(boolean err) {
 				error = err;
 				return this;
 			}
@@ -483,6 +436,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 			@Override
 			public boolean view_user(Canvas canvas, ScreenPoint sp, WorldPoint size,
 					int alpha) {
+				_paint.setAlpha(alpha);
 				//Draw a background view
 				if(open) {
 					d.setBounds(getScreenRect());
@@ -517,7 +471,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 			}
 	
 			@Override
-			public LocalView setPercent(WorldPoint wp) {
+			public LocalViewStyle setPercent(WorldPoint wp) {
 				super.setPercent(wp);
 				setSize(sizeOpened.multiply(0.01f * (float) getPercent().x).plus(sizeClosed)
 						.plus(sizeClosed));
@@ -525,21 +479,21 @@ public class TapChainAndroidEdit extends TapChainEdit
 			}
 	
 			@Override
-			public LocalView setColor(int _color) {
+			public LocalViewStyle setColor(int _color) {
 				super.setColor(_color);
 				d.getPaint().setColor(_color);
 				return this;
 			}
 	
 			//3.Changing state
-			public LocalView open() {
+			public LocalViewStyle open() {
 				if (open)
 					return this;
 				Actor.EffecterSkelton<WorldPoint> move = new Actor.Mover().initEffect(
 						new WorldPoint(2, 2).setDif(), 5);
 				Actor.Sizer size = new Actor.Sizer().size_init(new WorldPoint(20, 0).setDif(), 5);
 				Actor.Alphar alpha = new Actor.Alphar().alpha_init(20, 5);
-				getManager()._return(this)._child().add(move.disableLoop())
+				getSystemManager()._return(this)._child().add(move.disableLoop())
 						.add(size.disableLoop()).add(alpha.disableLoop())._exit().save();
 //				d.getPaint().setColor(0x33bbbbbb);
 //				d.getPaint().setStyle(Paint.Style.FILL_AND_STROKE);
@@ -548,14 +502,14 @@ public class TapChainAndroidEdit extends TapChainEdit
 	
 			}
 	
-			public LocalView close() {
+			public LocalViewStyle close() {
 				if (!open)
 					return this;
 				Actor.EffecterSkelton<WorldPoint> move = new Actor.Mover().initEffect(new WorldPoint(-2,
 						-2).setDif(), 10);
 				Actor.Sizer size = new Actor.Sizer().size_init(new WorldPoint(-10, 0), 10);
 				Actor.Alphar alpha = new Actor.Alphar().alpha_init(-20, 10);
-				getManager()._return(this)._child().add(move.disableLoop())
+				getSystemManager()._return(this)._child().add(move.disableLoop())
 						.add(size.disableLoop()).add(alpha.disableLoop())._exit().save();
 //				d.getPaint().setColor(0xffbbbbbb);
 //				d.getPaint().setStyle(Paint.Style.STROKE);
@@ -563,7 +517,7 @@ public class TapChainAndroidEdit extends TapChainEdit
 				return this;
 			}
 	
-			public LocalView toggle() {
+			public LocalViewStyle toggle() {
 				if (open)
 					close();
 				else
@@ -582,8 +536,8 @@ public class TapChainAndroidEdit extends TapChainEdit
 	public static class LocalEventHandler implements IEventHandler {
 		@Override
 		public void onSelected(IView v) {
-			if (v != null && v instanceof LocalView) {
-				((LocalView) v).toggle();
+			if (v != null && v instanceof LocalViewStyle) {
+				((LocalViewStyle) v).toggle();
 			}
 			
 		}
@@ -673,14 +627,14 @@ public class TapChainAndroidEdit extends TapChainEdit
 			}
 		}
 
-	public static class Connect1 extends TapChainAndroidEdit.Connect implements IEditAnimation {
+	public static class ConnectStyle extends TapChainAndroidEdit.Connect implements IEditAnimation {
 			Actor.ViewActor start, stop;
 			PackType starttype, stoptype;
 			WorldPoint offset1, offset2;
 			Paint paint;
 			ScreenPoint sp1, sp2, sp12, sp21;
 			PieceManager maker;
-			public Connect1() {
+			public ConnectStyle() {
 				super();
 			}
 			@Override

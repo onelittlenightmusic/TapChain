@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.Connector.*;
@@ -14,6 +13,7 @@ import org.tapchain.core.Connector.*;
 public class PathPack<T extends Connector> extends ArrayList<T> implements Serializable {
 	PackType ptype = PackType.EVENT;
 	IPiece parent;
+	Class<?> envelopeClass = Object.class;
 	PathPack(Piece _parent) {
 		parent = _parent;
 	}
@@ -41,6 +41,13 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 	public boolean hasPath() {
 		return !isEmpty();
 	}
+	public boolean setPathClass(Class<?> cls) {
+		envelopeClass = cls;
+		return true;
+	}
+	public Class<?> getPathClass() {
+		return envelopeClass;
+	}
 	public static class ChainOutConnectorPack extends PathPack<ChainOutConnector> {
 	//			Queue<ChainOutConnector> array;
 				SyncQueue<Object> queue;
@@ -58,8 +65,8 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					defaultType = type;
 					return this;
 				}
-				public ChainOutConnector addNewPath(Class<?> c, Output type) {
-					ChainOutConnector rtn = new ChainOutConnector(parent, c, this, (type!=null)?type:defaultType);
+				public ChainOutConnector addNewPath(Output type) {
+					ChainOutConnector rtn = new ChainOutConnector(parent, envelopeClass, this, (type!=null)?type:defaultType);
 					parent.__exec(String.format("NewPath = %s", rtn.type), "COPP#addNewPath");
 					addPath(rtn);
 					for(Object o : queue) {
@@ -150,8 +157,8 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					order_first = new SyncQueue<Connector>();
 					inputType = ChainInPathPack.Input.ALL;
 				}
-				public ChainInConnector addNewPath(Class<?> c)  {
-					ChainInConnector rtn = new ChainInConnector(parent, c, this);
+				public ChainInConnector addNewPath()  {
+					ChainInConnector rtn = new ChainInConnector(parent, envelopeClass, this);
 					rtn.setListener(new IPathListener() {
 						@Override
 						public void OnPushed(Connector p, Object obj) throws InterruptedException {

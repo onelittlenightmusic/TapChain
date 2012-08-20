@@ -3,7 +3,6 @@ package org.tapchain.core;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.PackType;
 
 import android.util.Log;
@@ -42,9 +41,20 @@ public class Blueprint implements IBlueprint {
 		children = bp.children;
 		connect = bp.connect;
 	}
+	
+	private IBlueprint renewParam() {
+		params = new ParamArray();
+		return this;
+	}
 
+	@Override
 	public IBlueprint copy(IPiece... args) {
 		return new Blueprint(this).setVar(args);
+	}
+	
+	@Override
+	public IBlueprint copyAndRenewParam() {
+		return new Blueprint(this).renewParam();
 	}
 
 	// 2.Getters and setters
@@ -141,6 +151,7 @@ public class Blueprint implements IBlueprint {
 					}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw /* ex = */new ChainException(maker,
 					"PieceFactory: cant create new instance");
 		}
@@ -199,8 +210,9 @@ public class Blueprint implements IBlueprint {
 	 *            Array of argument objects
 	 * @return
 	 */
-	public Blueprint addArg(Class<?> type, Object arg) {
-		params.add(type, arg);
+	public Blueprint addArg(Object... objs) {
+		for(Object obj : objs)
+			params.add(obj.getClass(), obj);
 		return this;
 	}
 

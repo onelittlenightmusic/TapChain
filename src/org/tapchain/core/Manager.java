@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
 
 public class Manager<T> implements IManager<T> {
 	IErrorHandler error = null;

@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.Connector.ChainInConnector;
@@ -125,12 +124,24 @@ public abstract class Piece implements IPiece {
 		return;
 	}
 	//3-2.PathPack setting functions
-	protected ChainInConnector addInPath(Class<?> c, PackType stack) {
-		return getInPack(stack).addNewPath(c);
+	protected ChainInConnector addInPath(PackType stack) {
+		return getInPack(stack).addNewPath();
 	}
-	protected ChainOutConnector addOutPath(Class<?> c, Output io, PackType stack) {
-		ChainOutConnector rtn = getOutPack(stack).addNewPath(c, io);
+	protected ChainOutConnector addOutPath(Output io, PackType stack) {
+		ChainOutConnector rtn = getOutPack(stack).addNewPath(io);
 		return rtn;
+	}
+	public Class<?> getInPathClass(PackType stack) {
+		return getInPack(stack).getPathClass();
+	}
+	public Class<?> getOutPathClass(PackType stack) {
+		return getOutPack(stack).getPathClass();
+	}
+	public boolean setInPathClass(PackType stack, Class<?> cls) {
+		return getInPack(stack).setPathClass(cls);
+	}
+	public boolean setOutPathClass(PackType stack, Class<?> cls) {
+		return getOutPack(stack).setPathClass(cls);
 	}
 	//3.Input/Output functions
 	public <T> T getCache(ChainInConnector i) throws InterruptedException {

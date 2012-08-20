@@ -12,7 +12,6 @@ import java.util.concurrent.Future;
 
 import org.tapchain.core.ActorManager.IStatusHandler;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPiece;
 import org.tapchain.core.Chain.IPieceHead;
 import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.Tickable;
@@ -70,7 +69,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 		addNewOutPack();// EVENT
 	}
 
-	public void init() {
+	public void init(Object... obj) {
 	}
 
 	//2.Getters and setters
@@ -172,7 +171,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 			return;
 		// _th = new Thread() {
 		if (!inited) {
-			init();
+//			init();
 			inited = true;
 		}
 		f = threadExecutor.submit(new Runnable() {
