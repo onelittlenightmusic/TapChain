@@ -35,6 +35,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -47,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabSpec;
 import android.widget.TabWidget;
 import android.content.Context;
@@ -127,12 +129,6 @@ public class TapChainView extends FragmentActivity implements SensorEventListene
 		viewControl = new FrameLayout(this);
 		LinearLayout view_bottom_left = new LinearLayout(this);
 		view_bottom_left.setGravity(Gravity.LEFT | Gravity.BOTTOM);
-//		addButton(view_bottom_left, ">", new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				getEditView().PressButton();
-//			}
-//		});
 		addButton(view_bottom_left, R.drawable.dust, new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -168,10 +164,10 @@ public class TapChainView extends FragmentActivity implements SensorEventListene
 				if (f != null) {
 					gridshow = f.toggle();
 				}
-				if(gridshow)
-					((ImageView)v).setImageResource(R.drawable.pulldown);
-				else
-					((ImageView)v).setImageResource(R.drawable.pullup);
+//				if(gridshow)
+//					((ImageView)v).setImageResource(R.drawable.pulldown);
+//				else
+//					((ImageView)v).setImageResource(R.drawable.pullup);
 			}
 		});
 		addButton(view_bottom_left, R.drawable.magnet, new View.OnClickListener() {
@@ -459,19 +455,22 @@ public class TapChainView extends FragmentActivity implements SensorEventListene
 					0xaa220000, R.drawable.history);
 			addTab(tabH, "TS3", "[ <=> ]", act.getEditor().getRelatives(),
 					0xaa000022, R.drawable.relatives);
-//			addTab(tabH, "TS4", "[  ]", act.getEditor().getRelatives(),
-//					0xaa000022, R.drawable.relatives);
-//			Button img = new Button(act);
-//			img.setOnClickListener(new View.OnClickListener() {
-//				@Override
-//				public void onClick(View v) {
-//					GridFragment f = act.getGrid();
-//					if(f != null)
-//						f.toggle();
-//				}
-//			});
-//			img.setBackgroundDrawable(getResources().getDrawable(R.drawable.pulldown));
-//			tabWidget.addView(img);
+//			addTab(tabH, "down", "[  ]", null,
+//					0xaa000000, R.drawable.pulldown);
+			ImageView img = new ImageView(act);
+			img.setImageDrawable(getResources().getDrawable(R.drawable.pulldown));
+			tabWidget.addView(img);
+			tabWidget.getChildAt(3).setOnClickListener(new OnClickListener() { 
+				@Override
+				public void onClick(View v) {
+						GridFragment f = act.getGrid();
+						if(f != null)
+							f.toggle();
+				  }
+				});
+			ImageView img2 = new ImageView(act);
+			img2.setImageDrawable(getResources().getDrawable(R.drawable.pin));
+			tabWidget.addView(img2);
 
 			darkMask = new FrameLayout(act);
 			darkMask.addView(tabH);
@@ -611,7 +610,8 @@ public class TapChainView extends FragmentActivity implements SensorEventListene
 			// return false;
 			// }
 			// });
-			setAdapter(new ViewAdapter(act, f));
+			if(f != null)
+				setAdapter(new ViewAdapter(act, f));
 		}
 
 	}
