@@ -17,7 +17,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 	PackType ptype = PackType.EVENT;
 	IPiece parent;
 	Collection<Class<?>> envelopeClass = new HashSet<Class<?>>();
-	private int COPY_QUEUE_MAX = 10;
+	private static int COPY_QUEUE_MAX = 10;
 	PathPack(Piece _parent) {
 		parent = _parent;
 	}
