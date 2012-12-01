@@ -12,9 +12,14 @@ import java.util.concurrent.Future;
 
 import org.tapchain.core.ActorManager.IStatusHandler;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPieceHead;
-import org.tapchain.core.Chain.Output;
+import org.tapchain.core.Chain.ConnectionResultIO;
+import org.tapchain.core.Chain.ConnectionResultO;
+import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.Chain.Tickable;
+import org.tapchain.core.Connector.ChainInConnector;
+import org.tapchain.core.Connector.ChainOutConnector;
+import org.tapchain.core.PathPack.ChainInPathPack;
+import org.tapchain.core.PathPack.ChainOutPathPack.Output;
 import org.tapchain.core.PathPack.*;
 
 @SuppressWarnings("serial")
@@ -22,7 +27,6 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 	public static ExecutorService threadExecutor = Executors
 			.newCachedThreadPool();
 	protected IPieceHead fImpl;
-	protected static CyclicBarrier signal = new CyclicBarrier(Integer.MAX_VALUE);
 	private Boolean _chainlive = false, controlled_by_ac = true,
 			inited = false;
 	// Thread _th = null;
@@ -38,7 +42,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 	}
 
 	//1.Initialization
-	ChainPiece.PieceState status = PieceState.NOTSTARTED,
+	PieceState status = PieceState.NOTSTARTED,
 			status_bak = PieceState.NOTSTARTED;
 
 	ChainPiece() {
@@ -56,20 +60,32 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 	}
 
 	ChainPiece(IPieceHead tmpFImpl) {
-		mynum = Chain.n++;
+		initNum();
 		fImpl = tmpFImpl;
-		addNewInPack().setInType(ChainInPathPack.Input.ALL);// PASSTHRU
-		addNewInPack().setInType(ChainInPathPack.Input.FIRST);// HEAP
-		addNewInPack().setInType(ChainInPathPack.Input.ALL);// FAMILY
-		addNewInPack().setInType(ChainInPathPack.Input.ALL);// .setUserPathListener(reset);//EVENT
+		for(PackType type: PackType.values()) {
+			ChainInPathPack pack = addNewInPack(type);
+			if(type == PackType.HEAP)
+				pack.setInType(ChainInPathPack.Input.FIRST);
+			else
+				pack.setInType(ChainInPathPack.Input.ALL);// PASSTHRU
+		}
 
-		addNewOutPack();// PASSTHRU
-		addNewOutPack();// HEAP
-		addNewOutPack().setOutType(Output.HIPPO);// FAMILY
-		addNewOutPack();// EVENT
+		for(PackType type: PackType.values()) {
+			ChainOutPathPack pack = addNewOutPack(type);
+			if(type == PackType.FAMILY)
+				pack.setOutType(Output.HIPPO);
+		}
 	}
 
 	public void init(Object... obj) {
+	}
+	
+	public void initNum() {
+		mynum = Chain.n++;
+	}
+	@Override
+	public int getId() {
+		return mynum;
 	}
 
 	//2.Getters and setters
@@ -109,7 +125,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 	public <T> T __log(T obj, String flg) {
 		if (_root_chain != null && _root_chain.log != null)
 			_root_chain.log.log(flg,
-					String.format("RTN: %s, CP: %s", obj, getName()));
+					String.format("RTN: %s, Actor: %s", obj, getName()));
 		return obj;
 
 	}
@@ -147,18 +163,8 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 		return;
 	}
 
-	@Override
-	public ChainPiece signal() {
-		signal.reset();
-		return this;
-	}
-
-	public boolean next() throws InterruptedException {
-		try {
-			signal.await();
-		} catch (BrokenBarrierException e) {
-			// throw new InterruptedException();
-		}
+	public boolean waitNext() throws InterruptedException {
+		_root_chain.waitNext();
 		return true;
 	}
 
@@ -187,7 +193,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 					try {
 						__exec(String.format("ID:%d Main[#0 ->SIG]", mynum),
 								"ChainPiece#impl");
-						if (controlled_by_ac && !cp_this.next()) {
+						if (controlled_by_ac && !cp_this.waitNext()) {
 							break main_loop;
 						}
 						__exec(String.format("ID:%d Main[#1 SIG->FUNC]", mynum),
@@ -197,7 +203,6 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 						}
 						__exec(String.format("ID:%d Main[#2 FUNC->OK]", mynum),
 								"ChainPiece#impl");
-						tick();
 					} catch (InterruptedException e) {
 						if (!_chainlive)
 							break main_loop;
@@ -246,9 +251,12 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 
 	private boolean _doAndLoopInError(IPieceHead head, ChainPiece cp)
 			throws InterruptedException {
+		boolean rtn = false;
 		while (true) {
 			try {
-				return head.pieceRun(cp);
+				rtn = head.pieceRun(cp);
+				tick();
+				return rtn;
 			} catch (ChainException e) {
 				onError(e);
 				switch (e.loop) {
@@ -283,7 +291,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 	protected boolean changeState(ChainPiece.PieceState state) {
 		__exec(state.toString(), "changeState");
 		if (_statush != null)
-			_statush.getStateAndSetView(state.ordinal());
+			_statush.getStateAndSetView(state);
 		status_bak = status;
 		status = state;
 		return true;
@@ -298,7 +306,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 	protected ChainPiece.PieceState restoreState() {
 		status = status_bak;
 		if (_statush != null)
-			_statush.getStateAndSetView(status.ordinal());
+			_statush.getStateAndSetView(status);
 		return status;
 	}
 
@@ -337,6 +345,77 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 
 	CountDownLatch lock = null;
 
+
+	public static class FlexPiece extends ChainPiece {
+		/** FlexPiece is a connection-size-flexible subclass of ChainPiece.
+		 * 
+		 */
+		ChainPiece firstPiece = null, lastPiece = null;
+		private static final long serialVersionUID = 1L;
+
+		FlexPiece() {
+			super();
+			setFirstPiece(this);
+			setLastPiece(this);
+		}
+
+		FlexPiece(IPieceHead fImpl) {
+			super(fImpl);
+			setFirstPiece(this);
+			setLastPiece(this);
+		}
+		
+		public void setFirstPiece(IPiece appended) {
+			firstPiece = (ChainPiece) appended;
+		}
+		
+		public void setLastPiece(IPiece appending) {
+			lastPiece = (ChainPiece) appending;
+		}
+		
+		public IPiece getFirstPiece() {
+			return firstPiece;
+		}
+		
+		public IPiece getLastPiece() {
+			return lastPiece;
+		}
+		
+		@Override
+		public Chain.ConnectionResultIO appendTo(Chain.PackType stack, IPiece target,
+				Chain.PackType stack_target) throws Chain.ChainException {
+			super.appendTo(stack, target, stack_target);
+			//Create new ChainInConnector.
+			ChainInConnector i = firstPiece.addInPath(stack);
+			//Get new connection with target piece.
+			Chain.ConnectionResultO o = target.appended(Object.class, null, stack_target, firstPiece);
+			//Check available connection between this piece and target piece.
+			if (i.connect(o.getConnect())) {
+				//Get path object
+				ConnectorPath p = new ConnectorPath((ChainPiece) o.getPiece(), firstPiece,
+						o.getConnect(), i);
+				//Return ConnectionResultIO object.
+				return new Chain.ConnectionResultIO(o.getPiece(), p);
+			}
+			//No connection
+			return null;
+		}
+
+		@Override
+		public Chain.ConnectionResultO appended(Class<?> cls, Output type,
+				Chain.PackType stack_target, IPiece from) throws Chain.ChainException {
+			//Create new ChainOutConnector.
+			ChainOutConnector o = lastPiece.addOutPath(type, stack_target);
+			// partner.setPartner(o, from);
+			//Return ConnectionResultO object.
+			return new Chain.ConnectionResultO(lastPiece, o);
+		}
+
+		@Override
+		public void detached(IPiece cp) {
+			super.detached(cp);
+		}
+	}
 
 
 }

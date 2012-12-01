@@ -12,12 +12,12 @@ public class Manager<T> implements IManager<T> {
 	}
 
 	@Override
-	public <F> F add(T obj, IPiece... args) {
+	public <F> F add(T obj) {
 		return null;
 	}
 
 	@Override
-	public IManager<T> save() {
+	public IManager<T> _save() {
 		return this;
 	}
 
@@ -27,7 +27,7 @@ public class Manager<T> implements IManager<T> {
 	}
 
 	@Override
-	public IManager<T> young(T obj, IPiece... args) {
+	public IManager<T> young(T obj) {
 		return this;
 	}
 

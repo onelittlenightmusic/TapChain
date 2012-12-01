@@ -5,15 +5,30 @@ import java.util.Collection;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
-import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.PackType;
+import org.tapchain.core.PathPack.ChainOutPathPack.Output;
 
 public interface IPiece {
-	public ConnectionResultO appended(Class<?> cls, Output type, PackType stack,
+	/** Check and accept connection from other piece.
+	 * @param cls Connection pipe class
+	 * @param output Output type
+	 * @param type PackType of this piece
+	 * @param from Piece from whom connection offered
+	 * @return ConnectionResultO object
+	 * @throws ChainException
+	 */
+	public ConnectionResultO appended(Class<?> cls, Output output, PackType type,
 			IPiece from) throws ChainException;
 
-	public ConnectionResultIO appendTo(PackType stack, IPiece piece_to,
-			PackType stack_target) throws ChainException;
+	/** Check and append this piece to target piece.
+	 * @param type Packtype of this piece
+	 * @param target_piece IPiece of target piece
+	 * @param type_target PackType of target piece
+	 * @return ConnectionResultIO object
+	 * @throws ChainException
+	 */
+	public ConnectionResultIO appendTo(PackType type, IPiece target_piece,
+			PackType type_target) throws ChainException;
 
 	public void detached(IPiece _cp_end);
 
@@ -23,13 +38,18 @@ public interface IPiece {
 
 	public Collection<IPiece> getPartners();
 
+	/** Check connection between this object and secondpiece.
+	 * @param target
+	 * @return True when this object and secondpiece are connected.
+	 */
 	public boolean isConnectedTo(IPiece target);
-
-	public IPiece signal();
 
 	public void end();
 
 	public String getName();
+	public int getId();
 
 	public <T> T __exec(T obj, String flg);
+
+	PackType getPackType(IPiece cp);
 }

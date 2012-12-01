@@ -31,12 +31,12 @@ public interface IManager<T> {
 	 * @param args Options
 	 * @return Manager object.
 	 */
-	public <F> F add(T obj, IPiece... args);
+	public <F> F add(T obj);
 //	public IManager<T> reset(T obj, IPiece... args);
 	/** Save all modifications to chains.
 	 * @return Manager object.
 	 */
-	public IManager<T> save();
+	public IManager<T> _save();
 	/** Add new teacher object to chain.
 	 * Teacher object means a piece that input information to current piece.
 	 * [Caution] Until save() is called, this modification
@@ -50,10 +50,9 @@ public interface IManager<T> {
 	 * Younger object means a subsequent piece after the current piece. 
 	 * [Caution] Until save() is called, this modification
 	 * @param obj 
-	 * @param args
 	 * @return Manager object (this).
 	 */
-	public IManager<T> young(T obj, IPiece... args);
+	public IManager<T> young(T obj);
 	
 	/** Go back to MARKED POINTER.
 	 * This method sets MARKED POINTER (the internal "current piece" pointer) to the piece previously marked with _mark() method.

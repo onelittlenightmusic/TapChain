@@ -3,7 +3,7 @@ package org.tapchain.core;
 import java.io.Serializable;
 
 import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Chain.Output;
+import org.tapchain.core.PathPack.ChainOutPathPack.Output;
 import org.tapchain.core.PathPack.*;
 
 @SuppressWarnings("serial")
@@ -150,15 +150,15 @@ public abstract class Connector implements IConnector, Serializable {
 	
 	//5.Local classes
 	public static class ChainOutConnector extends Connector {
-		ChainOutConnectorPack pack = null;
+		ChainOutPathPack pack = null;
 
 		public ChainOutConnector(IPiece parent, Class<?> c,
-				ChainOutConnectorPack _pack, Chain.Output _type) {
+				ChainOutPathPack _pack, Output _type) {
 			super(parent, c);
 			pack = _pack;
 			setType(_type);
 			IAxon<?> q;
-			if (_type == Chain.Output.NORMAL) {
+			if (_type == Output.NORMAL) {
 				// if(c == String.class) {
 				// q = new SyncQueue<Packet<String>>();
 				// } else if(c == Integer.class) {
@@ -167,7 +167,7 @@ public abstract class Connector implements IConnector, Serializable {
 				// q = new SyncQueue<Packet<String>>();
 				// }
 				q = new SyncQueue<Packet<?>>();
-			} else if (_type == Chain.Output.HIPPO) {
+			} else if (_type == Output.HIPPO) {
 				// if(c == String.class) {
 				// q = new Hippo<Packet<String>>();
 				// } else if(c == Integer.class) {
@@ -176,7 +176,7 @@ public abstract class Connector implements IConnector, Serializable {
 				// q = new Hippo<Packet<String>>();
 				// }
 				q = new Hippo<Packet<?>>();
-			} else if (_type == Chain.Output.TOGGLE) {
+			} else if (_type == Output.TOGGLE) {
 				// if(c == String.class) {
 				// q = new Toggle<Packet<String>>();
 				// } else if(c == Integer.class) {
@@ -202,7 +202,7 @@ public abstract class Connector implements IConnector, Serializable {
 		 * public Axon<?> compile(Chain c, Axon<?> q) {
 		 * super.setQueueImpl(q); return compile(c); }
 		 */
-		public ChainOutConnector setType(Chain.Output _type) {
+		public ChainOutConnector setType(Output _type) {
 			type = _type;
 			return this;
 		}
@@ -285,6 +285,27 @@ public abstract class Connector implements IConnector, Serializable {
 		public PathPack<?> getPack() {
 			return pack;
 		}
+	}
+	public static class DummyConnector extends Connector {
+		Object cache;
+		public DummyConnector(Object obj) {
+			super();
+			cache = obj;
+		}
+
+		@Override
+		public PathPack<?> getPack() {
+			return null;
+		}
+
+		@Override
+		public void end() {
+		}
+		@SuppressWarnings("unchecked")
+		public <T> T sync_pop() throws InterruptedException {
+			return (T)cache;
+		}
+
 	}
 
 }

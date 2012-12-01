@@ -8,7 +8,7 @@ import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.ChainException;
 
 
-public class ChainAnimation implements IAnimation {
+public class ChainAnimation /*implements IAnimation*/ {
 	List<IAnimation> q = new LinkedList<IAnimation>();
 	SyncQueue<String> queue = new SyncQueue<String>();
 	public ChainAnimation() {
@@ -17,7 +17,7 @@ public class ChainAnimation implements IAnimation {
 		q.add(ea);
 		return this;
 	}
-	@Override
+/*	@Override
 	public boolean actorRun() throws ChainException, InterruptedException {
 		if(!q.get(0).actorRun()) {
 			q.remove(0);
@@ -38,5 +38,10 @@ public class ChainAnimation implements IAnimation {
 	public IView setAlpha(int i) {
 		return null;
 	}
-	
+	@Override
+	public WorldPoint getCenter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+*/	
 }

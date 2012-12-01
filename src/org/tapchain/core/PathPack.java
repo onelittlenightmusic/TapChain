@@ -2,18 +2,22 @@ package org.tapchain.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.PackType;
+import org.tapchain.core.PathPack.ChainOutPathPack.Output;
 import org.tapchain.core.Connector.*;
 
 @SuppressWarnings("serial")
 public class PathPack<T extends Connector> extends ArrayList<T> implements Serializable {
+	public static interface Type {}
 	PackType ptype = PackType.EVENT;
 	IPiece parent;
-	Class<?> envelopeClass = Object.class;
+	Collection<Class<?>> envelopeClass = new HashSet<Class<?>>();
+	private int COPY_QUEUE_MAX = 10;
 	PathPack(Piece _parent) {
 		parent = _parent;
 	}
@@ -41,19 +45,61 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 	public boolean hasPath() {
 		return !isEmpty();
 	}
-	public boolean setPathClass(Class<?> cls) {
-		envelopeClass = cls;
+	public boolean addPathClass(Class<?> cls) {
+		envelopeClass.add(cls);
 		return true;
 	}
-	public Class<?> getPathClass() {
+	public Collection<Class<?>> getPathClasses() {
 		return envelopeClass;
 	}
-	public static class ChainOutConnectorPack extends PathPack<ChainOutConnector> {
-	//			Queue<ChainOutConnector> array;
+	public static class ChainOutPathPack extends PathPack<ChainOutConnector> {
+	//	public static class FixedChainPiece extends ChainPiece {
+		//		/**
+		//		 * 
+		//		 */
+		//		private static final long serialVersionUID = 1L;
+		//
+		//		FixedChainPiece() {
+		//			super();
+		//		}
+		//
+		//		FixedChainPiece(IPieceHead fImpl) {
+		//			super(fImpl);
+		//		}
+		//
+		//		@Override
+		//		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
+		//				PackType stack_target) throws ChainException {
+		//			super.appendTo(stack, cp, stack_target);
+		//			for (ChainInConnector i : getInPack(PackType.PASSTHRU)) {
+		//				ConnectionResultO o = cp.appended(i.class_name, null, stack_target,
+		//						this);
+		//				if (i.connect(o.getConnect())) {
+		//					// used = !hasAnyUnusedConnect();
+		//					return new ConnectionResultIO(o.getPiece(), new ConnectorPath(
+		//							(ChainPiece) o.getPiece(), this, o.getConnect(), i));
+		//				}
+		//			}
+		//			return null;
+		//		}
+		//
+		//		protected ConnectionResultO appended(Class<?> cls) throws ChainException {
+		//			for (ChainOutConnector o : getOutPack(PackType.PASSTHRU))
+		//				if (o.class_name == cls)
+		//					return new ConnectionResultO(this, o);
+		//			return null;
+		//		}
+		//
+		//	}
+		
+			public static enum Output implements Type {
+				NORMAL, HIPPO, SYNC, TOGGLE
+			}
+				//			Queue<ChainOutConnector> array;
 				SyncQueue<Object> queue;
 				Boolean lock = false;
 				Output defaultType = Output.NORMAL;
-				ChainOutConnectorPack(Piece _parent) {
+				ChainOutPathPack(Piece _parent) {
 					super(_parent);
 	//				array = new ConcurrentLinkedQueue<ChainOutConnector>();
 					queue = new SyncQueue<Object>();
@@ -61,12 +107,12 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 				public void reset() {
 					queue.reset();
 				}
-				protected ChainOutConnectorPack setOutType(Output type) {
+				protected ChainOutPathPack setOutType(Output type) {
 					defaultType = type;
 					return this;
 				}
-				public ChainOutConnector addNewPath(Output type) {
-					ChainOutConnector rtn = new ChainOutConnector(parent, envelopeClass, this, (type!=null)?type:defaultType);
+				public ChainOutConnector addNewConnector(Output type) {
+					ChainOutConnector rtn = new ChainOutConnector(parent, Object.class, this, (type!=null)?type:defaultType);
 					parent.__exec(String.format("NewPath = %s", rtn.type), "COPP#addNewPath");
 					addPath(rtn);
 					for(Object o : queue) {
@@ -107,7 +153,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					int size = size();
 					for(int i = 0; i < size; i++)
 						rtn.add(obj);
-					if(queue.size()==10)
+					if(queue.size()==COPY_QUEUE_MAX)
 						try {
 							queue.sync_pop();
 						} catch (IAxon.AxonException e) {
@@ -145,20 +191,21 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 				}
 			}
 	public static class ChainInPathPack extends PathPack<ChainInConnector> {
-		public static enum Input {
+		public static enum Input implements Type {
 			ALL, FIRST, COUNT
 		}
 				ChainInPathPack.Input inputType;
 				IPathListener listen, userlisten, resetHandler;
 				SyncQueue<Connector> order_first;
 				Iterator<ChainInConnector> now_count = null;
+				SyncQueue<Object> inner_request = new SyncQueue<Object>();
 				public ChainInPathPack(Piece _parent) {
 					super(_parent);
 					order_first = new SyncQueue<Connector>();
 					inputType = ChainInPathPack.Input.ALL;
 				}
-				public ChainInConnector addNewPath()  {
-					ChainInConnector rtn = new ChainInConnector(parent, envelopeClass, this);
+				public ChainInConnector addNewConnector()  {
+					ChainInConnector rtn = new ChainInConnector(parent, Object.class, this);
 					rtn.setListener(new IPathListener() {
 						@Override
 						public void OnPushed(Connector p, Object obj) throws InterruptedException {
@@ -186,8 +233,15 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					return rtn;
 				}
 				private ArrayList<Object> _inputPeekAll() throws InterruptedException {
-					if(isEmpty()) return null;
 					ArrayList<Object> rtn = new ArrayList<Object>();
+					if(isEmpty()) 
+						if(inner_request.isEmpty()) {
+							return null;
+						} else {
+							rtn.addAll(inner_request);
+//							inner_request.clear();
+							return rtn;
+						}
 					for(ChainInConnector a : this)
 						rtn.add(a.sync_peek());
 					return rtn;
@@ -218,14 +272,29 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					return rtn;
 				}
 				private ArrayList<Object> _inputAll() throws InterruptedException {
-					if(isEmpty()) return null;
 					ArrayList<Object> rtn = new ArrayList<Object>();
+					if(isEmpty()) 
+						if(inner_request.isEmpty()) {
+							return null;
+						} else {
+							rtn.addAll(inner_request);
+							inner_request.clear();
+							return rtn;
+						}
+//					if(isEmpty()) return null;
+//					ArrayList<Object> rtn = new ArrayList<Object>();
 					for(ChainInConnector a : this)
 						rtn.add(a.sync_pop());
 					return rtn;
 				}
 				
 				private ArrayList<Object> _inputFirst() throws InterruptedException {
+					ArrayList<Object> rtn = new ArrayList<Object>();
+//					if(!inner_request.isEmpty()) {
+//						rtn.addAll(inner_request);
+//						inner_request.clear();
+//						return rtn;
+//					}
 					SyncQueue<Connector> _pushedPath = order_first;
 					Connector p;
 					try {
@@ -233,7 +302,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					} catch (IAxon.AxonException e) {
 						return null;
 					}
-					ArrayList<Object> rtn = new ArrayList<Object>();
+//					ArrayList<Object> rtn = new ArrayList<Object>();
 					rtn.add(p.sync_pop());
 					parent.__exec(String.format("outputType = %s",p.type), "ChainPiece#_inputFirst");
 					if(p.type == Output.HIPPO) {
@@ -300,6 +369,12 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					for(ChainInConnector o: this) {
 						o.reset();
 					}
+				}
+				protected void _queueInnerRequest(Object obj) throws InterruptedException {
+					if(listen != null)
+						listen.OnPushed(new DummyConnector(obj), obj);
+					else
+						inner_request.sync_push(obj);
 				}
 	
 			}

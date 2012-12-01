@@ -7,8 +7,11 @@ import org.tapchain.core.ActorChain.*;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.PackType;
-import org.tapchain.core.TapChainEdit.IPathView;
-import org.tapchain.core.TapChainEdit.IPieceView;
+import org.tapchain.core.ChainPiece.PieceState;
+import org.tapchain.core.TapChainEdit.ISystemPath;
+import org.tapchain.core.TapChainEdit.ISystemPiece;
+
+import android.util.Log;
 
 
 public class ActorManager extends PieceManager {
@@ -138,7 +141,7 @@ public class ActorManager extends PieceManager {
 	}
 	List<IPiece> dump;
 	@Override
-	public ActorManager save() {
+	public ActorManager _save() {
 		dump = getChain().getOperator().save();
 		return this;
 	}
@@ -152,18 +155,17 @@ public class ActorManager extends PieceManager {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public ActorManager add(IPiece bp, IPiece... args) {
-		super.add(bp, args);
+	public ActorManager add(IPiece bp) {
+		super.add(bp);
 		if(bp == null) 
 			return this;
-		for(IPiece arg: args) {
-			_return(bp);
-			teacher(arg);
-		}
-		_return(bp);
+//		for(IPiece arg: args) {
+//			_return(bp);
+//			teacher(arg);
+//		}
+//		_return(bp);
 		getChain().getOperator().add(bp);
-		((Actor)bp).postRegister(this)
-			;
+		((Actor)bp).onAdd(newSession());
 		_return(bp);
 		if(getRoot() != null) {
 			super.append(bp, PackType.FAMILY, getRoot(), PackType.FAMILY);
@@ -171,16 +173,21 @@ public class ActorManager extends PieceManager {
 		return this;
 	}
 	
+	public ActorManager addActor(IActor actor) {
+		return add(new Actor().setActor(actor));
+	}
+	
 	@Override
-	public ActorManager remove(IPiece bp) {
-		if (bp == null)
+	public ActorManager remove(IPiece piece) {
+		if (piece == null)
 			return this;
-		unsetPieceView(bp);
-		bp.end();
-		for (IPiece cp : bp.getPartners()) {
-			__disconnect(bp, cp);
+		unsetPieceView(piece);
+		piece.end();
+		((Actor)piece).onRemove(newSession());
+		for (IPiece cp : piece.getPartners()) {
+			__disconnect(piece, cp);
 		}
-		super.remove(bp);
+		super.remove(piece);
 		return this;
 	}
 	
@@ -205,9 +212,9 @@ public class ActorManager extends PieceManager {
 	}
 	
 	@Override
-	public ActorManager setPieceView(IPiece bp, Blueprint _view, WorldPoint nowPoint) throws ChainException {
+	public ActorManager setPieceView(IPiece bp, Blueprint _view, IPoint nowPoint) throws ChainException {
 		if(pieceEdit!=null) {
-			IPieceView v = pieceEdit.onSetPieceView(bp, _view);
+			ISystemPiece v = pieceEdit.onSetPieceView(bp, _view);
 			if(v!=null)
 				pieceEdit.onMoveView(v, nowPoint);
 		}
@@ -235,10 +242,13 @@ public class ActorManager extends PieceManager {
 		if(rtn != null) {
 			log("ACM","Chained");
 			if(con != null && pbp_connect != null) {
-					Blueprint vReserve = new Blueprint(pbp_connect, pieceEdit.getView((Actor)y), pieceEdit.getView((Actor)x), new Actor.Value(yp), new Actor.Value(xp));
-					if(pathEdit != null)
+					IBlueprint vReserve = pbp_connect.copyAndRenewArg()
+					.addArg(pieceEdit.getView((Actor)y), pieceEdit.getView((Actor)x), yp, xp);
+					if(pathEdit != null) {
 						pathEdit.onSetPathView(rtn.getConnect(), vReserve);
-				save();
+//						Log.w("TEST",rtn.getConnect().toString());
+					}
+				_save();
 			}
 		}
 		
@@ -248,26 +258,29 @@ public class ActorManager extends PieceManager {
 	@Override
 	public IPath __disconnect(IPiece x, IPiece y) {
 		IPath rtn = super.__disconnect(x, y);
-		if(pathEdit != null)
-			pathEdit.unsetPathView(rtn);
+//		if(rtn == null) 
+//			Log.w("test", "disconnect detect null path");
+		if(pathEdit != null) {
+			pathEdit.onUnsetPathView(rtn);
+//			Log.w("TEST",rtn.toString());
+		}
 		return rtn;
 	}
 	
 	public interface IPathEdit {
 		public void onSetPathView(IPath second, IBlueprint vReserve);
-		public IPathView getView(IPath path);
-		public void unsetPathView(IPath rtn);
+		public ISystemPath getView(IPath path);
+		public void onUnsetPathView(IPath rtn);
 	}
 	public interface IPieceEdit {
-		public IPieceView onSetPieceView(IPiece bp, Blueprint _view) throws ChainException;
-		public IPieceView getView(IPiece y);
+		public ISystemPiece onSetPieceView(IPiece bp, Blueprint _view) throws ChainException;
+		public ISystemPiece getView(IPiece y);
 		public void onUnsetView(IPiece bp);
 		public void onRefreshView(IPiece bp, IPiece obj);
-		public void onMoveView(IView v, WorldPoint wp);
+		public void onMoveView(IView v, IPoint wp);
 	}
 	public interface IStatusHandler {
-		public void getStateAndSetView(int state);
+		public void getStateAndSetView(PieceState state);
 		public void tickView();
-		public void end();
 	}
 }

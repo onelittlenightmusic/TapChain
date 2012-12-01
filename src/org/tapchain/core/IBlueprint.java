@@ -42,15 +42,15 @@ public interface IBlueprint {
 	IPiece newInstance(IManager<IPiece> usermaker) throws ChainException;
 	/** Add local blueprint into current blueprint
 	 * @param _pbp Local blueprint
-	 * @param args Options
+	 * @param var Options
 	 * @return 
 	 */
-	IBlueprint addLocal(IBlueprint _pbp, IPiece... args);
+	IBlueprint addLocal(IBlueprint _pbp);
 	//4.Termination: none
 	//5.Local classes: none
 	IBlueprint addArg(Object... objs);
-	IBlueprint Append(PackType heap, IBlueprint reserved, PackType heap2);
+	IBlueprint append(PackType heap, IBlueprint reserved, PackType heap2);
 	IBlueprint refresh();
-	IBlueprint copy(IPiece... args);
-	IBlueprint copyAndRenewParam();
+	IBlueprint copy();
+	IBlueprint copyAndRenewArg();
 }

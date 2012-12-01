@@ -1,69 +1,56 @@
 package org.tapchain.core;
 
-import java.util.Collection;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.TreeMap;
-import org.tapchain.core.ActorChain.*;
-import org.tapchain.core.Actor.ViewActor;
+
+import org.tapchain.AndroidActor.AndroidDashRect;
+import org.tapchain.core.Actor.ControllableSignal;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.ConnectionResultIO;
-import org.tapchain.core.Chain.ConnectionResultO;
-import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.ChainController.IControlCallback;
 
 
 @SuppressWarnings("serial")
-public class TapChainEdit implements IControlCallback {
+public abstract class TapChainEdit implements IControlCallback, ILogHandler, IErrorHandler  {
 	IWindow win = null;
-	IWindowCallback winCall = null;
-	public EditorManager editorManager = new EditorManager(new ActorManager());
-	protected BlueprintManager blueprintManager = null;;
-	Factory<IPiece> factory = null, recent = null, relatives = null;
-	public IPieceView startPiece = null, dummy = null;
-	protected WorldPoint nowPoint = null;
+	public EditorManager editorManager = new EditorManager();
+	Factory<IPiece> factory = new Factory<IPiece>(),
+			recent = new Factory<IPiece>(),
+			relatives = new Factory<IPiece>(),
+			goalFactory = new Factory<IPiece>();
+	protected BlueprintManager blueprintManager = new BlueprintManager(factory),
+			goalBlueprintManager = null;
+	public ISystemPiece startPiece = null, previousPiece = null, dummy = null;
+//	protected WorldPoint nowPoint = null;
 	protected IErrorHandler errHandle = null;
 	protected StyleCollection styles = null;
 
 	//1.Initialization
-	protected TapChainEdit() {
-		if (winCall == null) {
-			winCall = new IWindowCallback() {
-				@Override
-				public boolean redraw(String str) {
-					return false;
-				}
-			};
-		}
-		factory = new Factory<IPiece>();
-		recent = new Factory<IPiece>();
-		relatives = new Factory<IPiece>();
-		blueprintManager = new BlueprintManager(factory);
-		editorManager.getSystemManager()./*setFactory(userFactory).*/createChain(20);
-		editorManager./*setFactory(userFactory).*/createChain(50).getChain().setAutoEnd(false);
-		editorManager.getSystemManager().SetCallback(this);
-		editorManager.SetCallback(this);
-		return;
-	}
-
-	void init() {
+	protected TapChainEdit(IWindow w) {
+		setWindow(w);
+		goalBlueprintManager = new BlueprintManager(goalFactory);
+		editorManager.setAllCallback(this);
 		editorManager.init();
 		editorManager.getSystemManager()
 		._return(editorManager.move_ef)
-		.young(new Actor.Effecter() {
+		.young(new Actor.Effector() {
 			@Override
-			public boolean actorRun() throws ChainException {
-				if(getTarget() instanceof IPieceView)
-					checkAndAttach((IPieceView)getTarget(), null);
+			public boolean actorRun(Actor act) throws ChainException {
+				if(getTarget() instanceof ISystemPiece)
+					checkAndAttach((ISystemPiece)getTarget(), false);
 				return false;
 			}
 		}.setParentType(PackType.HEAP).boost())
 		.teacher(editorManager.move)
-		.save();
+		._save();
+		setLog(this);
+		setError(this);
 	}
 	
 	public void reset() {
-		TreeMap<IPiece, IPieceView> copy = new TreeMap<IPiece, IPieceView>(editorManager.dictPiece);
+		TreeMap<IPiece, ISystemPiece> copy = new TreeMap<IPiece, ISystemPiece>(editorManager.dictPiece);
 		for(IPiece bp : copy.keySet())
 			getUserManager().remove(bp);
 	}
@@ -76,19 +63,22 @@ public class TapChainEdit implements IControlCallback {
 	}
 	public void setWindow(IWindow v) {
 		win = v;
-		init();
+//		init();
 	}
 
 	public Factory<IPiece> getFactory() {
 		return factory;//blueprintManager;//getUserManager().getFactory();
 	}
 	
-	public Factory<IPiece> getRecent() {
+	public Factory<IPiece> getRecentFactory() {
 		return recent;
 	}
 	
 	public Factory<IPiece> getRelatives() {
 		return relatives;
+	}
+	public Factory<IPiece> getGoal() {
+		return goalFactory;
 	}
 	public ActorManager getSystemManager() {
 		return editorManager.getSystemManager().newSession();
@@ -97,38 +87,51 @@ public class TapChainEdit implements IControlCallback {
 	public ActorManager getUserManager() {
 		return editorManager.newSession();
 	}
-
-	public WorldPoint getPoint() {
-		return (nowPoint==null)?new WorldPoint(0,0):nowPoint;
-	}
 	
+	public BlueprintManager getBlueprintManager() {
+		return blueprintManager;
+	}
+
+	/**
+	 * @return the lInteract
+	 */
+	public ActionStyle getInteract() {
+		return styles.getActionStyle();
+	}
+
 	public void setLog(ILogHandler l) {
 		editorManager.getSystemManager().setLog(l);
 		editorManager.setLog(l);
 	}
-	public void setPathBlueprint(Blueprint p) {
-		editorManager.getSystemManager().setPathBlueprint(p);
-		editorManager.setPathBlueprint(p);
+	public void setError(IErrorHandler err) {
+	 	editorManager.getSystemManager().setError(err);
+		editorManager.setError(err);
+		blueprintManager.setError(err);
+		goalBlueprintManager.setError(err);
 	}
-	public void setCallback(IWindowCallback ma) {
-		winCall = ma;
-	}
-	public void setStyle(Object context, StyleCollection s) {
+	public void setStyle(StyleCollection s) {
 		styles = s;
-		blueprintManager.setOuterInstanceForInner(context);
+		blueprintManager.setOuterInstanceForInner(s.getOuter());
 		blueprintManager.setDefaultView(s.getView());
-		setPathBlueprint(new Blueprint(s.getConnect()));
+		Blueprint connbp = blueprintManager.createBlueprint(s.getConnect());
+		editorManager.getSystemManager().setPathBlueprint(connbp);
+		editorManager.setPathBlueprint(connbp);
+		goalBlueprintManager.setOuterInstanceForInner(s.getOuter());
 	}
 
 	public interface IWindowCallback {
 		public boolean redraw(String str);
 	}
 
-	public boolean kickDraw() {
-		editorManager.getSystemManager().getChain().kick();
+	public boolean kickSystemDraw(IPiece pc) {
+		editorManager.getSystemManager().getChain().kick(pc);
 		return true;
 	}
 
+	public boolean kickUserDraw(IPiece pc) {
+		editorManager.getChain().kick(pc);
+		return true;
+	}
 	
 
 	public enum EditMode {
@@ -141,16 +144,32 @@ public class TapChainEdit implements IControlCallback {
 		editmode = mode;
 		return true;
 	}
+	
+	public boolean onDown(WorldPoint wp) {
+		getSystemManager().getChain().TouchOn(wp);
+		return capturePiece(wp);
+	}
 
-	public boolean onDown(WorldPoint sp) {
-		nowPoint = sp;
-		getSystemManager().getChain().TouchOn(nowPoint);
-		startPiece = touchPiece(nowPoint);
+	public boolean capturePiece(WorldPoint sp) {
+		capturePiece(searchTouchedPiece(sp));
 		return true;
 	}
 	
-	public IPieceView touchPiece(WorldPoint sp) {
-		for (IPieceView f : editorManager.getPieceViews()) {
+	public boolean capturePiece(ISystemPiece pv) {
+		startPiece = pv;
+		return true;
+	}
+	
+	public boolean isNotCapturing() {
+		return startPiece == null;
+	}
+	
+	public ISystemPiece getCapturedPiece() {
+		return startPiece;
+	}
+	
+	public ISystemPiece searchTouchedPiece(WorldPoint sp) {
+		for (ISystemPiece f : editorManager.getSystemPieces()) {
 			if (f.contains(sp.x, sp.y))
 				return f;
 		}
@@ -166,162 +185,155 @@ public class TapChainEdit implements IControlCallback {
 		return getUserManager().getChain().ctrl.Toggle();
 	}
 	
-	public boolean up() {
+	public boolean releasePiece() {
+		previousPiece = startPiece;
 		startPiece = null;
+		getInteract().onRelease();
 		return true;
 	}
 
 	public boolean onUp() {
 		getSystemManager().getChain().TouchOff();
-		if (startPiece == null)
+		if (isNotCapturing())
 			return false;
-		if(checkAndDelete(startPiece)) return up();
-		checkAndAttach((IPieceView)startPiece, null);
-		return up();
+		if(checkAndDelete(startPiece)) return releasePiece();
+		checkAndAttach((ISystemPiece)startPiece, false);
+		return releasePiece();
 	}
 	
-	private boolean checkAndAttach(IPieceView target, WorldPoint velocity) {
-		if(target == null)
-			return false;
-		for (IPieceView bp : editorManager.getPieceViews())
-			if (attack(target, bp, velocity))
-				return true;
-		return false;
-	}
-	
-	public boolean attack(IPieceView bp, IPieceView f, WorldPoint velocity) {
-		if (bp == f) {
-			return false;
-		}
-		ConnectType t = checkAttackType(bp, f, velocity);
-		if(t == ConnectType.NULL){
-			return false;
-		} else {
-			if(!connect(bp.getMyTapChain(), f.getMyTapChain(), t))
-				return false;
-//			BasicView _v = bp;
-			if (bp instanceof EventHandler) {
-				((EventHandler) bp).onFrameConnecting(bp, f);
-			}
-		}
-
-		return true;
-	}
-
-	private boolean checkAndDelete(IPieceView v) {
-		ScreenPoint sp = ((Actor.ViewActor)v).getCenter().getScreenPoint(win);
-		if(0< sp.x && win.getWindowPoint().y()-150 < sp.y && 150 > sp.x && win.getWindowPoint().y() > sp.y) {
-			getSystemManager().remove(v.getMyTapChain());
-			return true;
-		}
-		return false;
-	}
 
 	public boolean onFling(final int vx, final int vy) {
 		if (startPiece != null) {
 			//Target piece starts moving and slows down gradually.
 			Actor v = (Actor) startPiece;
-			Actor.ValueLimited vl = new Actor.ValueLimited(1);
 			getSystemManager()._return(v)._child()
-					.add(new Accel().disableLoop(), vl.disableLoop())._exit()
-					.save();
-			vl.setValue(new WorldPoint(vx, vy).setDif());
-			return up();
+					.add(new Accel(new WorldPoint(vx, vy).setDif()).disableLoop())._exit()
+					._save();
+			return releasePiece();
 		}
 		//Background center starts moving and slows down gradually.
-		getSystemManager().add(new Actor() {
+		getSystemManager().addActor(new IActor() {
 			float delta = 0.03f;
 			int t = 0;
 
 			@Override
-			public boolean actorRun() {
+			public boolean actorRun(Actor act) {
 				win.move((int) (delta * -vx), (int) (delta * -vy));
 				delta -= 0.003f;
-				invalidate();
+				act.invalidate();
 				return ++t < 10;
 			}
-		}.disableLoop()).save();
-		return up();
+		})._save();
+		return releasePiece();
 	}
 
 	public boolean onLongPress() {
 //		GetManager().Get().LongPress();
-		if(startPiece == null)
+//		AndroidActor.makeAlert("onLongPress");
+/*		if(startPiece == null)
 			//Background no longer reacts.
-			return up();
+			return releasePiece();
 		if(startPiece.getEventHandler() == null)
 			//Target piece without handler no logner reacts.
-			return up();
+			return releasePiece();
 		//Target piece with handler calls handler onSelected;
 		startPiece.getEventHandler().onSelected(startPiece);
-		return up();
-
+		return releasePiece();
+*/
+		if(startPiece == null)
+			return false;
+		getSystemManager()
+		.add(new AndroidDashRect().setCenter(startPiece.get()).setSize(new WorldPoint(200,200)).setColor(0xffffffff))
+		._child()
+		.add(new Actor.Sleeper(2000))
+		.young(new Actor.Ender())
+		._exit()
+		._save();
+		return false;
+	}
+	
+	public boolean onSecondTouch(final WorldPoint wp) {
+//		AndroidActor.makeAlert("onSecondTouch");
+		if(startPiece == null)
+			return false;
+		startPiece.setMyTapChainValue(wp.sub(startPiece.getCenter()).multiply(0.1f).setDif());
+		return true;
 	}
 
 	public boolean onScroll(final WorldPoint vp, final WorldPoint wp) {
-		getSystemManager().getChain().Move(vp);
+//		getSystemManager().getChain().Move(vp);
 		if (startPiece != null) {
-			onClear();
+//			onClear();
 			startPiece.setCenter(startPiece.getCenter().plus(vp));
-				
+			//Check disconnection
+			if(!checkAndAttach(startPiece, true))
+				checkAndDetach(startPiece);
 		} else {
 			win.move(-vp.x(), -vp.y());
 		}
-		kickDraw();
+		kickSystemDraw(startPiece);
 		return true;
 	}
 
 	public boolean onShowPress() {
-		return up();
+		return false;
 	}
 
 	public boolean onSingleTapConfirmed() {
-		IPieceView touchPiece = touchPiece(nowPoint);
+		ISystemPiece touchPiece = startPiece;//touchPiece(nowPoint);
 		if(touchPiece == null)
+			touchPiece = previousPiece;
+		//Invalid status: startPiece and previousPiece are null
+		if(touchPiece/*touchPiece*/ == null)
 			return false;
-		IPiece p = touchPiece(nowPoint).getMyTapChain();
+		IPiece p = /*touchPiece(nowPoint)*/touchPiece.getMyTapChain();
 		switch (editmode) {
 		case REMOVE:
 			getUserManager().remove(p);
-			up();
+			releasePiece();
 			editmode = EditMode.ADD;
 			return false;
 		case RENEW:
 			getUserManager().restart(p);
-			up();
+			releasePiece();
 			editmode = EditMode.ADD;
 			return false;
 		default:
 			touchPiece.getEventHandler().onSelected(touchPiece);
 		}
-		if (startPiece == null)
-			return true;
-
 		return true;
 	}
 	
-	public boolean onAdd(Factory<IPiece> f, int num) {
-		if (num < f.getSize())
-			f.newInstance(num, getPointOnAdd(getPoint()), getUserManager());
-		//addition to history.
+	public Map.Entry<IPiece, ISystemPiece> onAdd(Factory<IPiece> f, int num, IPoint pos) {
+		ISystemPiece rtn = null;
+		//Invalid parameter
+		if (num >= f.getSize())
+			return null;
+		//Create new instance piece
+		IPiece p = f.newInstance(num, getPointOnAdd(pos), getUserManager());
+		//Get PieceView
+		rtn = editorManager.getView(p);
+//			Log.w("TEST", String.format("Position %s", getPoint()));
+//			Log.w("TEST", String.format("Position %s", getPointOnAdd(getPoint())));
+		//Add to history factory.
 		if(f==getFactory())
-			getRecent().Register(f.get(num));
-		//search for relatives.
+			getRecentFactory().Register(f.get(num));
+		//Change relatives factory.
 		getFactory().relatives(f.get(num), relatives);
-		return true;
+		return new AbstractMap.SimpleEntry(p, rtn);
 	}
 	
-	private WorldPoint getPointOnAdd(WorldPoint p) {
-		return (styles==null||styles.getActionStyle()==null)
-				?p
-				:styles.getActionStyle().pointOnAdd(p);
+	private IPoint getPointOnAdd(IPoint iPoint) {
+		return (styles==null||getInteract()==null)
+				?iPoint
+				:getInteract().pointOnAdd(iPoint);
 	}
 	
 	public boolean onDummyAdd(Factory<IPiece> f, int num, WorldPoint p) {
 		if (num < f.getSize())
 			try {
-				dummy = (IPieceView) f.getView(num).newInstance(getSystemManager());
-				getSystemManager().save();
+				dummy = (ISystemPiece) f.getView(num).newInstance(getSystemManager());
+				getSystemManager()._save();
 				dummy.setCenter(p);
 				dummy.setAlpha(100);
 			} catch (ChainException e) {
@@ -339,7 +351,7 @@ public class TapChainEdit implements IControlCallback {
 	public boolean onDummyMoveTo(WorldPoint vp) {
 		if(!getPointOnAdd(vp).equals(dummy.getCenter())) {
 			dummy.setCenter(vp);
-			kickDraw();
+			kickSystemDraw(dummy);
 		}
 		return true;
 	}
@@ -383,17 +395,12 @@ public class TapChainEdit implements IControlCallback {
 		return DirOffset.NULL;
 	}
 	*/
-	public boolean onClear() {
-		nowPoint = null;
-		return true;
-	}
-
 
 	public void Compile() {
 		editorManager.getChain().getOperator().reset();
 		editorManager.getChain().setCallback(new IControlCallback() {
 			public boolean onCalled() {
-				kickDraw();
+//				kickUserDraw();
 				return true;
 			}
 		});
@@ -410,66 +417,150 @@ public class TapChainEdit implements IControlCallback {
 
 	public void show(Object canvas) {
 		getSystemManager().getChain().Show(canvas);
+	}
+	
+	public void userShow(Object canvas) {
 		getUserManager().getChain().Show(canvas);
 	}
 
 
-	public class Reform extends Actor.Loop {
-		Actor f = null;
-		WorldPoint pt = null;
+//	public class Reform extends Actor.Loop {
+//		Actor f = null;
+//		WorldPoint pt = null;
+//
+//		Reform(Actor _f, WorldPoint _pt) {
+//			super();
+//			f = _f;
+//			pt = _pt;
+//		}
+//
+//		@Override
+//		public boolean actorRun() throws ChainException, InterruptedException {
+//			// start reforming toward upper(prev) functions[recursive invocation]
+//			reformTo((Actor)editorManager.getView(f), true, pt);
+//			// start reforming toward lower(next) functions[recursive invocation]
+//			reformTo((Actor)editorManager.getView(f), false, pt);
+//			return false;
+//		}
+//	}
+//
+//	void reformTo(Actor bp, final boolean UpDown, final WorldPoint pt) {
+//		WorldPoint pt_ = pt;
+//		if (pt_ != null) {
+//			getSystemManager()._return(editorManager.getView(bp))
+//					._child().add(new Accel().disableLoop())._exit().save();
+//
+//		} else {
+//			pt_ = editorManager.getView(bp).getCenter();
+//			int i = 0, i_max = bp.getOutPack(PackType.FAMILY).size();
+//			for (Connector.ChainOutConnector _cp : bp.getOutPack(PackType.FAMILY)) {
+//				Connector.ChainInConnector cip = _cp.getPartner();
+//				if (cip == null)
+//					break;
+//				Actor part = (Actor) cip.getParent();
+//				if (part == null)
+//					break;
+//				if (editorManager.getView(part) == null)
+//					break;
+//				reformTo(part, UpDown, pt_.plus(new WorldPoint(30 * (-i_max + 2 * i++),
+//						UpDown ? -50 : 50)));
+//			}
+//		}
+//		return;
+//	}
 
-		Reform(Actor _f, WorldPoint _pt) {
-			super();
-			f = _f;
-			pt = _pt;
+	/** Check if selected piece is now attaching to other pieces, and when it is true, connect it to them.
+	 * @param selected Selected piece view
+	 * @param velocity Velocity of selected piece view
+	 * @return True when selected piece was attached.
+	 */
+	private boolean checkAndAttach(ISystemPiece selected, boolean onlyInclude) {
+		if(selected == null)
+			return false;
+		for (ISystemPiece bp : editorManager.getSystemPieces()) {
+			// Not to check connection between pieces already connected each other.
+			if(attach(selected, bp, onlyInclude))
+				return true;
 		}
-
-		@Override
-		public boolean actorRun() throws ChainException, InterruptedException {
-			// start reforming toward upper(prev) functions[recursive invocation]
-			reformTo((Actor)editorManager.getView(f), true, pt);
-			// start reforming toward lower(next) functions[recursive invocation]
-			reformTo((Actor)editorManager.getView(f), false, pt);
+		return false;
+	}
+	
+	/** Connect selected piece to another target piece.
+	 * When two are already connected, disconnect two into pieces.
+	 * @param selected
+	 * @param target
+	 * @param velocity
+	 * @return True when selected piece was attached.
+	 */
+	public boolean attach(ISystemPiece selected, ISystemPiece target, boolean onlyInclude) {
+		if (selected == target) {
 			return false;
 		}
-	}
-
-	void reformTo(Actor bp, final boolean UpDown, final WorldPoint pt) {
-		WorldPoint pt_ = pt;
-		if (pt_ != null) {
-			getSystemManager()._return(editorManager.getView(bp))
-					._child().add(new Accel().disableLoop())._exit().save();
-
+		// Check attack type.
+		ConnectType t = _checkConnectType(selected, target, onlyInclude);
+		// If CheckType is null, this means no connection/disconnection in moving and target.
+		if(t == ConnectType.NONE){
+			return false;
+		// If CheckType is not null, a connection/disconnection can be made.
 		} else {
-			pt_ = editorManager.getView(bp).getCenter();
-			int i = 0, i_max = bp.getOutPack(PackType.FAMILY).size();
-			for (Connector.ChainOutConnector _cp : bp.getOutPack(PackType.FAMILY)) {
-				Connector.ChainInConnector cip = _cp.getPartner();
-				if (cip == null)
-					break;
-				Actor part = (Actor) cip.getParent();
-				if (part == null)
-					break;
-				if (editorManager.getView(part) == null)
-					break;
-				reformTo(part, UpDown, pt_.plus(new WorldPoint(30 * (-i_max + 2 * i++),
-						UpDown ? -50 : 50)));
+			if(selected.getMyTapChain().isConnectedTo(target.getMyTapChain()) && t != ConnectType.DISCONNECT)
+				return false;
+			// Connect/disconnect moving to/from target;
+			if(!connect(selected.getMyTapChain(), target.getMyTapChain(), t))
+				return false;
+			// Call EventHandler's onFrameConnection Handler. 
+			if (selected instanceof EventHandler) {
+				((EventHandler) selected).onFrameConnecting(selected, target);
 			}
 		}
-		return;
-	}
 
+		return true;
+	}
+	
+	public boolean checkAndDetach(ISystemPiece selected) {
+		for(IPiece parent : startPiece.getMyTapChain().getPartners()) {
+			ISystemPiece v2 = editorManager.getView(parent);
+			ConnectType t = getInteract().checkDisconnect(startPiece, editorManager.getView(parent),
+					startPiece.getMyTapChain().getPackType(parent));
+			// If CheckType is null, this means no disconnection occurs.
+			if(t == ConnectType.NONE){
+				return false;
+			// If CheckType is not null, a disconnection can be made.
+			} else {
+				// Disconnect moving from target;
+				if(!connect(selected.getMyTapChain(), parent, t))
+					return false;
+			}
+		}
+		//Disconnection occurred
+		return true;
+	}
+	
+	/** Check if selected piece is now in position for deletion, and when it is true, delete this piece.
+	 * @param selected Selected piece view.
+	 * @return True when selected piece was deleted.
+	 */
+	private boolean checkAndDelete(ISystemPiece selected) {
+		IPoint sp = ((Actor.ViewActor)selected).getCenter();
+		if(0< sp.x() && win.getWindowSize().y()-150 < sp.y() && 150 > sp.x() && win.getWindowSize().y() > sp.y()) {
+			getSystemManager().remove(selected.getMyTapChain());
+			return true;
+		}
+		return false;
+	}
 	public enum ConnectType {
-		INCLUDED, INCLUDING, TOUCH_LEFT, TOUCH_RIGHT, TOUCH_TOP, TOUCH_BOTTOM, NULL, RELEASING, DISCONNECT
+		GETINCLUDED, INCLUDING, TOUCH_LEFT, TOUCH_RIGHT, TOUCH_TOP, TOUCH_BOTTOM, NONE, RELEASING, DISCONNECT
 	}
 	public boolean connect(IPiece chainPiece, IPiece chainPiece2, ConnectType type) {
 		switch(type) {
-		case INCLUDED:
+		case GETINCLUDED:
+			// this converts the view order of firstpiece and secondpiece.
+			getUserManager().refreshPieceView(chainPiece, chainPiece2);
 			return null != getUserManager()
-			.append(chainPiece, PackType.FAMILY, chainPiece2, PackType.FAMILY);
+			.append(chainPiece, PackType.FAMILY, chainPiece2, PackType.FAMILY, true);
 		case INCLUDING:
 			return null != getUserManager()
-			.append(chainPiece2, PackType.FAMILY, chainPiece, PackType.FAMILY);
+			.append(chainPiece2, PackType.FAMILY, chainPiece, PackType.FAMILY, true);
 		case TOUCH_TOP:
 			return null != getUserManager()
 			.append(chainPiece2, PackType.EVENT, chainPiece, PackType.EVENT, true);
@@ -486,50 +577,47 @@ public class TapChainEdit implements IControlCallback {
 			getUserManager().__disconnect(chainPiece, chainPiece2);
 			return true;
 		}
-		return true;
+		return false;
 	}
 	
-	public ConnectType checkAttackType(IPieceView v1, IPieceView v2, WorldPoint dir) {
-		IPiece bp = v1.getMyTapChain();
-		IPiece target = v2.getMyTapChain();
-		// #20111011 Connected/or-not judgment
-		if (bp.isConnectedTo(target)) {
-			if (v1.getInteraction().checkLeave(v1, v2)) {
-				return ConnectType.DISCONNECT;
-//			} else if (bp.isAppendedTo(target, PackType.FAMILY) && !interact.checkInclude(v1, v2)) {
-//				return ConnectType.RELEASING;
-			}
-			return ConnectType.NULL;
+	ConnectType _checkConnectType(ISystemPiece v1, ISystemPiece v2, boolean onlyInclude) {
+		IPiece firstpiece = v1.getMyTapChain();
+		IPiece secondpiece = v2.getMyTapChain();
+		ActionStyle style = getInteract();
+		// Connected/or-not judgment
+		if (firstpiece.isConnectedTo(secondpiece)) {
+			return style.checkDisconnect(v1, v2, firstpiece.getPackType(secondpiece));
 		} else {
-			// #20111011
-			if (v1.getInteraction().checkIn(v1, v2)) {
-				// containing and not connected
-				getUserManager().refreshPieceView(bp, target);
-				return ConnectType.INCLUDED;
-			}
-	
 			// neither containing nor colliding
-			if (!v1.getInteraction().checkTouch(v1, v2)) {
-				return ConnectType.NULL;
-			}
+			return style.checkConnect(v1, v2, onlyInclude);
 		}
-	
-		return getConnectType(dir);
 	}
 	
-	public static ConnectType getConnectType(WorldPoint dir) {
-		if (null == dir)
-			return ConnectType.NULL;
-		int dxy = dir.x + dir.y;
-		int d_xy = -dir.x + dir.y;
-		if (dxy > 0) {
-			if(d_xy > 0) return ConnectType.TOUCH_TOP;
-			else return ConnectType.TOUCH_LEFT;
+	ConnectType _checkDisconnect(ISystemPiece v1, ISystemPiece v2) {
+		IPiece firstpiece = v1.getMyTapChain();
+		IPiece secondpiece = v2.getMyTapChain();
+		ActionStyle style = getInteract();
+		// Connected/or-not judgment
+		if (firstpiece.isConnectedTo(secondpiece)) {
+			return style.checkDisconnect(v1, v2, firstpiece.getPackType(secondpiece));
 		} else {
-			if(d_xy > 0) return ConnectType.TOUCH_RIGHT;
-			else return ConnectType.TOUCH_BOTTOM;
+			return ConnectType.NONE;
 		}
 	}
+	
+//	ConnectType _getCollisionConnectType(WorldPoint dir) {
+//		if (null == dir)
+//			return ConnectType.NULL;
+//		int dxy = dir.x + dir.y;
+//		int d_xy = -dir.x + dir.y;
+//		if (dxy > 0) {
+//			if(d_xy > 0) return ConnectType.TOUCH_TOP;
+//			else return ConnectType.TOUCH_LEFT;
+//		} else {
+//			if(d_xy > 0) return ConnectType.TOUCH_RIGHT;
+//			else return ConnectType.TOUCH_BOTTOM;
+//		}
+//	}
 	
 	public class Accel extends Actor.Mover {
 		float delta = 0.03f;
@@ -537,12 +625,17 @@ public class TapChainEdit implements IControlCallback {
 		WorldPoint wp = null;
 		WorldPoint initial = null;
 		Actor bp = null;
+		
+		public Accel(WorldPoint _wp) {
+			super();
+			initial = wp = _wp;
+		}
 
 		@Override
-		public boolean actorReset() throws ChainException {
+		public boolean actorInit() throws ChainException {
 			WorldPoint dummy = new WorldPoint();
 			initEffect(dummy,1);
-			super.actorReset();
+			super.actorInit();
 			j = 0;
 			delta = 0.03f;
 			if (initial == null)
@@ -551,37 +644,37 @@ public class TapChainEdit implements IControlCallback {
 		}
 
 		@Override
-		public boolean actorRun() throws ChainException {
+		public boolean actorRun(Actor act) throws ChainException {
 			WorldPoint d = new WorldPoint((int) (wp.x * delta), (int) (wp.y * delta)).setDif();
 			initEffect(d,1);
 			delta -= 0.003f;
 			boolean rtn = ++j < 10 || d.getAbs() > 20;
-			super.actorRun();
-			if(checkAndAttach(((IPieceView)getTarget()), d)){
+			super.actorRun(act);
+			if(checkAndAttach(((ISystemPiece)getTarget()), false)){
 //				clearInputHeap();
+//				ViewActor v = getTargetView();
+//				v.setCenter(getPointOnAdd(v.getCenter()/*.add(0, -100)*/));
 				return false;
 			}
+//			checkAndDetach((ISystemPiece)getTarget());
 //			if (!rtn)
 //				push(null);
 			if(!rtn) {
 				ViewActor v = getTargetView();
-				v.getCenter().round(100).plus(50);
+				getPointOnAdd(v.getCenter());
+				checkAndAttach(((ISystemPiece)getTarget()),false);
+				return false;
 			}
 			return rtn;
 		}
 	}
 
 	public interface IWindow {
-		public WorldPoint getWindowPoint();
+		public IPoint getWindowSize();
 		public void move(int vx, int vy);
 		void onDraw();
 	}
 
-	public WorldPoint getOrientAsWorld(IWindow i) {
-		return (new ScreenPoint(i.getWindowPoint().x / 2,
-				i.getWindowPoint().y / 2)).getWorldPoint(i);
-	}
-	
 	public interface FrameEventHandler {
 		public boolean onFrameConnecting(IView bp, IView f);
 
@@ -599,147 +692,27 @@ public class TapChainEdit implements IControlCallback {
 	public interface EventHandler extends FrameEventHandler/*, ConnectEventHandler*/ {
 	}
 	
-	public interface IPieceView extends IView, IPiece, Tickable {
+	public interface ISystemPiece extends IView, IPiece, Tickable {
 		public void setMyTapChain(IPiece cp2);
-		public IPiece finish(boolean b);
-		public WorldPoint getCenter();
+		public void interrupt(ControllableSignal end);
+		public IPoint getCenter();
 		public void unsetMyTapChain();
 		public IPiece getMyTapChain();
-		public IInteraction getInteraction();
 		public IEventHandler getEventHandler();
 		public boolean contains(int x, int y);
+		public boolean setMyTapChainValue(Object obj);
 	}
 	
-	public static class SimplePieceView implements IPieceView {
-		@Override
-		public boolean view_impl(Object canvas) {
-			return false;
-		}
-
-		@Override
-		public IView setCenter(WorldPoint point) {
-			return null;
-		}
-
-		@Override
-		public ConnectionResultO appended(Class<?> cls, Output type,
-				PackType stack, IPiece from) throws ChainException {
-			return null;
-		}
-
-		@Override
-		public ConnectionResultIO appendTo(PackType stack, IPiece piece_to,
-				PackType stack_target) throws ChainException {
-			return null;
-		}
-
-		@Override
-		public void detached(IPiece _cp_end) {
-		}
-
-		@Override
-		public void setPartner(IPath chainPath, IPiece _cp_start) {
-		}
-
-		@Override
-		public IPath detach(IPiece y) {
-			return null;
-		}
-
-		@Override
-		public Collection<IPiece> getPartners() {
-			return null;
-		}
-
-		@Override
-		public boolean isConnectedTo(IPiece target) {
-			return false;
-		}
-
-		@Override
-		public IPiece signal() {
-			return null;
-		}
-
-		@Override
-		public void end() {
-		}
-
-		@Override
-		public String getName() {
-			return null;
-		}
-
-		@Override
-		public <T> T __exec(T obj, String flg) {
-			return null;
-		}
-
-		@Override
-		public void onTick() {
-		}
-
-		@Override
-		public void setMyTapChain(IPiece cp2) {
-		}
-
-		@Override
-		public IPiece finish(boolean b) {
-			return null;
-		}
-
-		@Override
-		public WorldPoint getCenter() {
-			return null;
-		}
-
-		@Override
-		public void unsetMyTapChain() {
-		}
-
-		@Override
-		public IPiece getMyTapChain() {
-			return null;
-		}
-
-		@Override
-		public IInteraction getInteraction() {
-			return null;
-		}
-
-		@Override
-		public IEventHandler getEventHandler() {
-			return null;
-		}
-
-		@Override
-		public boolean contains(int x, int y) {
-			return false;
-		}
-
-		@Override
-		public IView setAlpha(int i) {
-			return null;
-		}
-	}
 	
-	public interface IInteraction {
-		public boolean checkTouch(IView v1, IView v2);
-		public boolean checkLeave(IView f1, IView f2);
-		public boolean checkSplit(Actor.ViewActor f1, Actor.ViewActor f2);
-		public boolean checkIn(IView v1, IView v2);
-		public boolean checkOut(IView v1, IView v2);
-	}
-
 	public interface IEventHandler {
 		public void onSelected(IView v);
 	}
 	
-	public interface IPathView extends IView, Tickable {
+	public interface ISystemPath extends IView, Tickable {
 		public void setMyTapPath(ConnectorPath p);
 		public void unsetMyTapPath();
 		public ConnectorPath getMyTapPath();
-		public void finishPath(boolean cnt);
+		public void interrupt(ControllableSignal end);
 	}
 	
 	public interface Tickable {
@@ -751,30 +724,10 @@ public class TapChainEdit implements IControlCallback {
 	}
 	
 	public interface ActionStyle {
-		public WorldPoint pointOnAdd(WorldPoint raw);
-	}
-	
-	public static class StyleCollection {
-		Class<? extends ViewActor> view;
-		Class<? extends IPiece> connect;
-		ActionStyle actionStyle;
-		public StyleCollection(Class<? extends ViewActor> v, Class<? extends IPiece> c, ActionStyle action) {
-			view = v;
-			connect = c;
-			actionStyle = action;
-		}
-		public Class<? extends IPiece> getConnect() {
-			return connect;
-		}
-		public Class<? extends ViewActor> getView() {
-			return view;
-		}
-		public ActionStyle getActionStyle() {
-			return actionStyle;
-		}
+		public ConnectType checkConnect(IView v1, IView v2, boolean onlyInclude);
+		public ConnectType checkDisconnect(IView v1, IView v2, PackType pt);
+		public IPoint pointOnAdd(IPoint iPoint);
+		public void onRelease();
 	}
 
-	public boolean magnetToggle() {
-		return false;
-	}
 }

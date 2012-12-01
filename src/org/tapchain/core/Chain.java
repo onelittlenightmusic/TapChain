@@ -8,16 +8,20 @@ import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.Connector.*;
 
+import android.util.Log;
+
 public class Chain {
 	static int n = 0;
 	ConcurrentSkipListSet<IPiece> aFunc;
 	ChainController ctrl;
 	private ChainPieceOperator operator = null;
 	int mode = 0;// 0: Run-as-a-thread mode, 1: Automatic mode
-	public static int THREAD_MODE = 0;
-	public static int AUTO_MODE = 1;
+	public static final int THREAD_MODE = 0;
+	public static final int AUTO_MODE = 1;
 	public boolean AUTO_END = true;
 	ILogHandler log = null;
+	String name = "";
+	protected CyclicBarrier signal = new CyclicBarrier(Integer.MAX_VALUE);
 
 	// 1.Initialization
 	Chain(int _mode, int time) {
@@ -68,17 +72,38 @@ public class Chain {
 		return this;
 	}
 
-	public Chain kick() {
+	public Chain kick(IPiece pc) {
 		ctrl.kick();
+//		if(log != null)
+//			log.log("test", ((pc==null)?"system":pc.getName())+" kicked "+getId());
 		return this;
 	}
+	
+	public void setName(String _name) {
+		name = _name;
+	}
 
+	public String getName() {
+		return name;
+	}
 	public enum Flex {
 		FIXED, FLEX
 	}
 
 	public ChainPieceOperator getOperator() {
 		return operator;
+	}
+
+	public void signal() {
+		signal.reset();
+	}
+	
+	public void waitNext() throws InterruptedException {
+		try {
+			signal.await();
+		} catch (BrokenBarrierException e) {
+			// throw new InterruptedException();
+		}
 	}
 
 	// 3.Changing state
@@ -90,10 +115,10 @@ public class Chain {
 			if (cp instanceof ChainPiece) {
 				((ChainPiece) cp).start();
 			}
-			kick();
+			kick(cp);
 		}
 		if (log != null)
-			log.log("Chain", String.format("RTN: ADD, CP: %s", cp.getName()));
+			log.log("Chain", String.format("+%s(%d) added->%s", cp.getName(), cp.getId(), getName()));
 		return cp;
 
 	}
@@ -103,19 +128,14 @@ public class Chain {
 		if (aFunc.isEmpty())
 			return false;
 		else
-			aFunc.first().signal();
+			signal();
 		return true;
-	}
-
-	public ChainPiece _addPiece(ChainPiece cp) {
-		aFunc.add(cp);
-		return cp;
 	}
 
 	public IPiece removePiece(IPiece bp) {
 		bp.end();
 		if (log != null)
-			log.log("Chain", String.format("RTN: REM, CP: %s", bp.getName()));
+			log.log("Chain", String.format("-%s(%d) removed<-%s", bp.getName(), bp.getId(), getName()));
 		aFunc.remove(bp);
 		return bp;
 	}
@@ -124,8 +144,6 @@ public class Chain {
 	// 5.Local classes
 	public class ChainOperator {
 		List<IPiece> q = new ArrayList<IPiece>();
-		List<IPiece> q2 = new ArrayList<IPiece>();
-		IAxon<String> revolver = new Toggle<String>();
 		Chain _p = null;
 
 		// 1.Initialization
@@ -145,7 +163,7 @@ public class Chain {
 
 		public synchronized IPiece add(IPiece bp) {
 			q.add(bp);
-			kick();
+			kick(bp);
 			return bp;
 		}
 
@@ -153,7 +171,7 @@ public class Chain {
 			aFunc.addAll(q);
 			for (IPiece cp : q)
 				addPiece(cp);
-			q = new ArrayList<IPiece>();
+			q.clear();
 			return q;
 		}
 
@@ -216,53 +234,7 @@ public class Chain {
 		}
 	}
 
-	public static class FlexPiece extends ChainPiece {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		FlexPiece() {
-			super();
-		}
-
-		FlexPiece(IPieceHead fImpl) {
-			super(fImpl);
-		}
-
-		@Override
-		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
-				PackType stack_target) throws ChainException {
-			super.appendTo(stack, cp, stack_target);
-			ChainInConnector i = addInPath(stack);
-			ConnectionResultO o = cp.appended(Object.class, null, stack_target, this);
-			if (i.connect(o.getConnect())) {
-				ConnectorPath p = new ConnectorPath((ChainPiece) o.getPiece(), this,
-						o.getConnect(), i);
-				return new ConnectionResultIO(o.getPiece(), p);
-			}
-			return null;
-		}
-
-//		@Override
-//		public ConnectionResultIO appendTo(PackType stack, IPiece cp,
-//				PackType stack_target) throws ChainException {
-//			return appendTo(stack, cp, ChainPiece.class, stack_target);
-//		}
-
-		@Override
-		public ConnectionResultO appended(Class<?> cls, Output type,
-				PackType stack_target, IPiece from) throws ChainException {
-			ChainOutConnector o = addOutPath(type, stack_target);
-			// partner.setPartner(o, from);
-			return new ConnectionResultO(this, o);
-		}
-
-		@Override
-		public void detached(IPiece cp) {
-			super.detached(cp);
-		}
-	}
+	
 
 //	public static class FixedChainPiece extends ChainPiece {
 //		/**
@@ -303,10 +275,6 @@ public class Chain {
 //
 //	}
 
-	enum Output {
-		NORMAL, HIPPO, SYNC, TOGGLE
-	}
-
 	public static class ChainException extends Exception {
 
 		/**
@@ -319,6 +287,11 @@ public class Chain {
 
 		ChainException() {
 			super("ChainException: Unknown Error");
+			err = "Unknown";
+		}
+		
+		ChainException(String str) {
+			super(str);
 			err = "Unknown";
 		}
 
@@ -380,14 +353,14 @@ public class Chain {
 		boolean tick();
 	}
 
-	public interface IPieceHead {
-		abstract boolean pieceRun(IPiece f) throws InterruptedException,
-				ChainException;
-
-		abstract boolean pieceReset(IPiece f);
-	}
-
 	public enum PackType {
-		PASSTHRU, HEAP, FAMILY, EVENT
+		PASSTHRU("passthru"), HEAP("heap"), FAMILY("family"), EVENT("event");
+		private String typeString;
+		PackType(String str) {
+			typeString = str;
+		}
+		public String toString() {
+			return typeString;
+		}
 	}
 }

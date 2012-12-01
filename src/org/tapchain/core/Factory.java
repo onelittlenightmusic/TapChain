@@ -2,8 +2,7 @@ package org.tapchain.core;
 
 import java.util.ArrayList;
 import org.tapchain.core.Chain.ChainException;
-
-import android.util.Log;
+import org.tapchain.core.TapChainEdit.ISystemPiece;
 
 
 public class Factory<T extends IPiece> {
@@ -31,7 +30,7 @@ public class Factory<T extends IPiece> {
 		notif = not;
 	}
 	@SuppressWarnings("unchecked")
-	public T newInstance(int num, WorldPoint wp, IManager<IPiece> manager) {
+	public T newInstance(int num, IPoint iPoint, IManager<IPiece> manager) {
 //		Log.w("test", String.format("Factory: new instance %d", num));
 		IBlueprint blueprint = get(num);
 		IPiece rtn = null;
@@ -43,8 +42,8 @@ public class Factory<T extends IPiece> {
 //				((Actor)rtn).setLogLevel(true);
 			Blueprint _view = getView(num);
 			if(_view != null)
-				((ActorManager) manager).setPieceView(rtn, _view, wp);
-			manager.save();
+				((ActorManager)manager).setPieceView(rtn, _view, iPoint);
+			manager._save();
 			return (T)rtn;
 		} catch (ChainException e) {
 			manager.error(e);

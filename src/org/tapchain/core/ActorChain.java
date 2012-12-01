@@ -2,6 +2,8 @@ package org.tapchain.core;
 
 import java.util.TreeMap;
 
+import org.tapchain.core.Actor.IValue;
+
 public class ActorChain extends Chain {
 	ViewList vlist = null;
 	static Actor touchOn = new Actor();
@@ -13,7 +15,6 @@ public class ActorChain extends Chain {
 	static Actor error = new Actor();
 	static Actor touchSw = new Actor();
 	// static PieceState globalState = new PieceState();
-	static int num = 0;
 
 	// 1.Initialization
 	public ActorChain(int time) {
@@ -98,7 +99,7 @@ public class ActorChain extends Chain {
 			if (map.containsKey(ef)) {
 				map.remove(ef);
 			}
-			kick();
+			kick((IPiece)ef);
 			return true;
 		}
 
@@ -112,7 +113,7 @@ public class ActorChain extends Chain {
 
 		public synchronized boolean add(IAnimation a) {
 			map.put(a, a);
-			kick();
+			kick((IPiece)a);
 			return true;
 		}
 
@@ -124,14 +125,16 @@ public class ActorChain extends Chain {
 	public interface IAnimation extends IActor, IView {
 	}
 
-	public interface IActorReset {
-		public boolean actorReset() throws ChainException;
+	public interface IActorInit {
+		public boolean actorInit() throws ChainException, InterruptedException;
 	}
 
-	public interface IView {
+	public interface IView extends IValue<IPoint> {
 		public boolean view_impl(Object canvas);
 		public IView setAlpha(int i);
-		public IView setCenter(WorldPoint point);
+		public IView setCenter(IPoint iPoint);
+		public IPoint getCenter();
+		public String getName();
 	}
 
 	public interface ISound {
@@ -152,7 +155,7 @@ public class ActorChain extends Chain {
 		public boolean record_stop();
 	}
 
-	public interface TapChainLight {
+	public interface ILight {
 		public boolean turn_on();
 
 		public boolean turn_off();
@@ -160,20 +163,15 @@ public class ActorChain extends Chain {
 		public boolean change_color(int r, int g, int b, int a);
 	}
 
-	public interface IFilter {
-		public boolean filter(Object obj) throws ChainException;
-	}
-
 	public interface IPush {
 		public Actor push(Object obj);
 	}
 
-	public interface TapChainControllable {
-		public Actor ctrlStart() throws ChainException, InterruptedException;
+	public interface IControllable {
+		public void ctrlStart() throws ChainException, InterruptedException;
 
-		public Actor ctrlStop();
+		public void ctrlStop();
 
-		public Actor ctrlReset() throws ChainException, InterruptedException;
 	}
 
 }

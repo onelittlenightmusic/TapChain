@@ -37,10 +37,6 @@ public class ScreenPoint implements IPoint {
 	}
 
 	
-	public WorldPoint getWorldPoint(IWindow v) {
-		return new WorldPoint(this.x , this.y );
-	}
-
 	@Override
 	public ScreenPoint sub(IPoint sizeClosed) {
 		return new ScreenPoint(this.x - sizeClosed.x(), this.y - sizeClosed.y());
@@ -66,5 +62,46 @@ public class ScreenPoint implements IPoint {
 
 	public ScreenPoint multiply(float coeff) {
 		return new ScreenPoint(coeff*this.x, coeff*this.y);
+	}
+
+	@Override
+	public WPEffect getEffect() {
+		return null;
+	}
+
+	@Override
+	public IPoint setDif() {
+		return null;
+	}
+
+	@Override
+	public IPoint round(int denominator) {
+		if(x < 0)
+			x -= denominator;
+		x -= x % denominator;
+		if(y < 0)
+			y -= denominator;
+		y -= y % denominator;
+		return this;
+	}
+
+	@Override
+	public IPoint add(int d, int dy) {
+		x += d;
+		y += dy;
+		return this;
+	}
+
+	@Override
+	public IPoint add(IPoint wp) {
+		x += wp.x();
+		y += wp.y();
+		return this;
+	}
+	@Override
+	public IPoint set(IPoint p) {
+		this.x = p.x();
+		this.y = p.y();
+		return this;
 	}
 }

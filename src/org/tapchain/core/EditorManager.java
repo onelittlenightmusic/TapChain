@@ -1,19 +1,19 @@
 package org.tapchain.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
-import org.tapchain.core.Actor.Mover2;
+import org.tapchain.core.Actor.Mover;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.PackType;
-import org.tapchain.core.TapChainEdit.IEditAnimation;
-import org.tapchain.core.TapChainEdit.IPathView;
-import org.tapchain.core.TapChainEdit.IPieceView;
+import org.tapchain.core.ChainController.IControlCallback;
+import org.tapchain.core.TapChainEdit.ISystemPath;
+import org.tapchain.core.TapChainEdit.ISystemPiece;
 import org.tapchain.core.ActorManager.*;
 import org.tapchain.core.Chain.*;
 import org.tapchain.core.ChainPiece.PieceState;
@@ -21,96 +21,91 @@ import org.tapchain.core.ChainPiece.PieceState;
 
 public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit {
 	protected ActorManager systemManager;
-	public TreeMap<IPiece,IPieceView> dictPiece = new TreeMap<IPiece, IPieceView>();
-	ConcurrentHashMap<IPath, IPathView> dictPath = new ConcurrentHashMap<IPath, IPathView>();
-	ArrayList<Actor> plist = new ArrayList<Actor>();
-	public EditorManager(ActorManager am) {
+	//dictPiece must have object ordering and allow concurrent modification
+	public ConcurrentSkipListMap<IPiece,ISystemPiece> dictPiece = new ConcurrentSkipListMap<IPiece, ISystemPiece>();
+	
+	//dictPiece must allow concurrent modification
+	ConcurrentHashMap<IPath, ISystemPath> dictPath = new ConcurrentHashMap<IPath, ISystemPath>();
+	
+	Map<PieceState, Actor> plist = new EnumMap<PieceState, Actor>(PieceState.class);
+	Actor move = new Actor();
+	Actor.Mover move_ef = (Mover) new Actor.Mover().initEffect(new WorldPoint(0,0), 1).setParentType(PackType.HEAP).boost();
+	
+	public EditorManager() {
 		super();
 		setPieceEdit(this);
 		setPathEdit(this);
-		setSystemManager(am);
+		systemManager = new ActorManager();
+		getSystemManager().createChain(20).getChain().setName("System");
+		createChain(50).getChain().setAutoEnd(false).setName("User");
 	}
 	public void init() {
 		Actor ptmp = null;
-		for(int c : Arrays.asList(0xff80ff80, 0xff80ff80, 0xffffffff, 0xff8080ff, 0xffff8080)) {
-			systemManager.add(new Actor.Colorer().color_init(c).setParentType(PackType.HEAP).boost())
-			.teacher(ptmp = new Actor()).save();
-			plist.add(ptmp);
+		List<Integer> colors = Arrays.asList(0xff80ff80, 0xff80ff80, 0xffffffff, 0xff8080ff, 0xffff8080);
+		for(PieceState state: PieceState.values()) {
+			ptmp = new Actor.Colorer().color_init(colors.get(state.ordinal())).setParentType(PackType.HEAP).boost();
+			systemManager.add(ptmp)
+			/*.teacher(ptmp = new Actor())*/._save();
+			plist.put(state, ptmp);
 		}
-		move.setName("MOVE_ENTRANCE");
+//		move.setName("MOVE_ENTRANCE");
 		getSystemManager()
 		.add(move)
-/*		.student(userManager.move_ef = (Actor.Mover) new Actor.Mover() {
-			@Override
-			public boolean actorRun() throws ChainException {
-				super.actorRun();
-				if(getTarget() instanceof IPieceView)
-					checkAndAttach((IPieceView)getTarget(), null);
-				return false;
-			}
-		}.initEffect(getPoint(), 1).setParentType(PackType.HEAP).boost())
-*/
-		.student(move_ef = (Mover2) new Actor.Mover2().initEffect(new WorldPoint(0,0), 1).setParentType(PackType.HEAP).boost())
-		.save();
+		.student(move_ef)
+//		.add(move_ef)
+		._save();
 
+	}
+	public void setAllCallback(IControlCallback control) {
+		getSystemManager().SetCallback(control);
+		SetCallback(control);
 	}
 	public ActorManager getSystemManager() {
 		return systemManager;
 	}
-	public EditorManager setSystemManager(ActorManager am) {
-		systemManager = am;
-		return this;
-	}
-	public Collection<IPieceView> getPieceViews() {
+	public Collection<ISystemPiece> getSystemPieces() {
 		return dictPiece.values();
 	}
+	public Collection<IPiece> getUserPieces() {
+		return dictPiece.keySet();
+	}
 	@Override
-	public IPieceView getView(IPiece bp) {
+	public ISystemPiece getView(IPiece bp) {
 		if (dictPiece.get(bp) != null)
 			return dictPiece.get(bp);
 		return null;
 	}
 
 	@Override
-	public IPathView getView(IPath path) {
+	public ISystemPath getView(IPath path) {
 		if (dictPath.get(path) != null)
 			return dictPath.get(path);
 		return null;
 	}
 
 	@Override
-	public IPieceView onSetPieceView(final IPiece cp2, final Blueprint bp) throws ChainException {
-		final IPieceView _view;
+	public ISystemPiece onSetPieceView(final IPiece cp2, final Blueprint bp) throws ChainException {
+		final ISystemPiece _view;
 			ActorManager manager = getSystemManager();
-			_view = (IPieceView) bp.newInstance(manager);
+			_view = (ISystemPiece) bp.newInstance(manager);
 			if(_view == null)
 				throw new ChainException(cp2, "view not created");
-			manager.save();
+			manager._save();
 		dictPiece.put(cp2, _view);
 		_view.setMyTapChain(cp2);
-		final Initializer ia = new Initializer();
-		if(_view instanceof IEditAnimation) {
-			ia.init_animation(getSystemManager(), (IEditAnimation)_view);
-		}
 		if(cp2 instanceof ChainPiece) {
 			ChainPiece c = ((ChainPiece)cp2);
 			c.setStatusHandler(new IStatusHandler() {
 				@Override
-				public synchronized void getStateAndSetView(int state) {
-					if(state < PieceState.values().length)
-						plist.get(state).push(_view);
+				public synchronized void getStateAndSetView(PieceState state) {
+					plist.get(state).innerRequest(PackType.HEAP, _view);
 				}
 	
 				@Override
 				public void tickView() {
 					_view.onTick();
-					ia.start_animation(_view);
 				}
 	
-				@Override
-				public void end() {
-					ia.term_animation();
-				}
 			});
 			c.setError(getErrorHandler());
 		}
@@ -119,47 +114,39 @@ public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit
 
 	@Override
 	public void onSetPathView(IPath path, IBlueprint _vReserve) {
-		final IPathView _view;
+		final ISystemPath _view;
 		try {
 			ActorManager manager = getSystemManager();
-			_view = (IPathView) _vReserve.newInstance(manager);
-			manager.save();
+			_view = (ISystemPath) _vReserve.newInstance(manager);
+			manager._save();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
+		if(_view == null)
+			return;
 		dictPath.put(path, _view);
-		final Initializer ia = new Initializer();
-		if(_view instanceof IEditAnimation) {
-			ia.init_animation(getSystemManager(), (IEditAnimation)_view);
-		}
 		path.setStatusHandler(new IStatusHandler() {
 			@Override
 			public void tickView() {
 				_view.onTick();
-				ia.start_animation(_view);
+//				ia.start_animation(_view);
 			}
 			
 			@Override
-			public void getStateAndSetView(int state) {
-			}
-
-			@Override
-			public void end() {
-				ia.term_animation();
+			public void getStateAndSetView(PieceState state) {
 			}
 		});
 		return;
 	}
 	
-	static Actor move = new Actor();
-	static Actor.Mover2 move_ef = null;
 	
 	@Override
-	public void onMoveView(IView v, WorldPoint wp) {
+	public void onMoveView(IView v, IPoint wp) {
 		move_ef.initEffect(wp==null?new WorldPoint(0,0):wp, 1);
 		move.push(v);
-//		kickDraw();
+//		move_ef.innerRequest(v);
+//		v.setCenter(wp);
 		return;
 	}
 
@@ -167,33 +154,36 @@ public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit
 	public void onUnsetView(IPiece bp) {
 		if(bp == null) 
 			return;
-		if(bp instanceof ChainPiece) {
-			ChainPiece c = (ChainPiece)bp;
-			c.getStatusHandler().end();
-			c.setStatusHandler(null);
-		}
-		IPieceView v = getView(bp);
+//		if(bp instanceof ChainPiece) {
+//			ChainPiece c = (ChainPiece)bp;
+//			c.setStatusHandler(null);
+//		}
+		ISystemPiece v = getView(bp);
+		if(v == null)
+			return;
 		v.unsetMyTapChain();
 		dictPiece.remove(bp);
-		v.finish(false);
+//		v.finish(Continue.END);
+		getSystemManager().remove(v);
 		return;
 	}
 
 	@Override
-	public void unsetPathView(IPath path) {
+	public void onUnsetPathView(IPath path) {
 		if(path == null) 
 			return;
-		IPathView v = getView(path);
+		ISystemPath v = getView(path);
 		dictPath.remove(path);
 		if(v == null)
 			return;
-		v.finishPath(false);
+//		v.finish(Continue.END);
+		getSystemManager().remove((IPiece)v);
 		return;
 	}
 
 	@Override
 	public void onRefreshView(IPiece bp, IPiece obj) {
-		IPieceView v = dictPiece.get(bp);
+		ISystemPiece v = dictPiece.get(bp);
 		dictPiece.remove(bp);
 		if (((Actor)bp).compareTo((Actor)obj) > 0) {
 			((Actor)bp).initNum();
@@ -201,27 +191,27 @@ public class EditorManager extends ActorManager implements IPieceEdit, IPathEdit
 		dictPiece.put(bp, v);
 	}
 
-	public static class Initializer {
-		Actor bp;
-		List<IPiece> dump;
-		static HashMap<Class<? extends IEditAnimation>, Actor>dict
-			= new HashMap<Class<? extends IEditAnimation>, Actor>();
-		public Initializer() {
-		}
-		public void init_animation(ActorManager maker, IEditAnimation a) {
-			if(bp != null) return;
-			bp = new Actor();
-			PieceManager manager = maker._func(bp);
-			a.init_animation(manager);
-			manager._exit().save();
-			dump = maker.dump();
-		}
-		public void start_animation(Object target) {
-			if(bp != null)
-				bp.push(target);
-		}
-		public void term_animation() {
-		}
-	}
+//	public static class Initializer {
+//		Actor bp;
+//		List<IPiece> dump;
+//		static HashMap<Class<? extends IEditAnimation>, Actor>dict
+//			= new HashMap<Class<? extends IEditAnimation>, Actor>();
+//		public Initializer() {
+//		}
+//		public void init_animation(ActorManager maker, IEditAnimation a) {
+//			if(bp != null) return;
+//			bp = new Actor();
+//			PieceManager manager = maker._func(bp);
+//			a.init_animation(manager);
+//			manager._exit().save();
+//			dump = maker.dump();
+//		}
+//		public void start_animation(Object target) {
+//			if(bp != null)
+//				bp.push(target);
+//		}
+//		public void term_animation() {
+//		}
+//	}
 
 }

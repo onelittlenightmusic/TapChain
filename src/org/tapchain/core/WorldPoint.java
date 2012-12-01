@@ -5,7 +5,6 @@ import org.tapchain.core.TapChainEdit.IWindow;
 
 public class WorldPoint implements IPoint {
 	public int x, y;
-	public static enum WPEffect { POS, DIF }
 	private WPEffect effect = WPEffect.POS;
 
 	public WorldPoint() {
@@ -30,13 +29,24 @@ public class WorldPoint implements IPoint {
 	public WorldPoint clone() {
 		return new WorldPoint(this);
 	}
-	public WorldPoint plus(WorldPoint b) {
-		if(b==null) return this;
-		return new WorldPoint(x+b.x, y+b.y);
+	public WorldPoint plus(IPoint pos) {
+		if(pos==null) return this;
+		return new WorldPoint(x+pos.x(), y+pos.y());
 	}
-	public WorldPoint plus(int d) {
-		x += d;
-		y += d;
+	public WorldPoint add(int d) {
+		add(d, d);
+		return this;
+	}
+	@Override
+	public WorldPoint add(int dx, int dy) {
+		x += dx;
+		y += dy;
+		return this;
+	}
+	@Override
+	public WorldPoint add(IPoint wp) {
+		x += wp.x();
+		y += wp.y();
 		return this;
 	}
 	public WorldPoint divide(int n) {
@@ -49,14 +59,9 @@ public class WorldPoint implements IPoint {
 		if(b==null) return this;
 		return new WorldPoint(x-b.x(), y-b.y());
 	}
-	public ScreenPoint getScreenPoint(IWindow v) {
-		if(v == null) 
-			return new ScreenPoint(x, y);
-		return new ScreenPoint(this.x, this.y);
-	}
 	@Override
 	public String toString() {
-		return ""+x+"/"+y;
+		return String.format("%d/%d", x, y);
 	}
 
 	@Override
@@ -87,12 +92,23 @@ public class WorldPoint implements IPoint {
 		return (int)Math.sqrt(x * x + y * y);
 	}
 	
+	@Override
 	public WorldPoint round(int denominator) {
+		if(x < 0)
+			x -= denominator;
 		x -= x % denominator;
+		if(y < 0)
+			y -= denominator;
 		y -= y % denominator;
 		return this;
 	}
 	public boolean equals(WorldPoint p) {
 		return x == p.x && y == p.y;
+	}
+	@Override
+	public IPoint set(IPoint p) {
+		this.x = p.x();
+		this.y = p.y();
+		return this;
 	}
 }

@@ -8,6 +8,13 @@ public interface IPath {
 	public IConnector getOutConnector();
 	public IPath setStatusHandler(IStatusHandler statusHandler);
 	//3.Changing state
+	/** Create Path object from start Piece object and end Piece object.
+	 * @param cp_start Start Piece object
+	 * @param cp_end End Piece object
+	 * @param out Out IConnector object
+	 * @param in In IConnector object
+	 * @return
+	 */
 	public IPath attach(IPiece cp_start, IPiece cp_end,
 			IConnector out, IConnector in);
 	//4.Termination

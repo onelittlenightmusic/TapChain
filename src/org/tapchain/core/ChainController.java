@@ -4,6 +4,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import android.util.Log;
+
 
 public class ChainController {
 	IControlCallback local_cb = null;
@@ -63,6 +65,7 @@ public class ChainController {
 				c.await();
 				c = new CountDownLatch(1);
 				/*rtn = */local_cb.onCalled();
+//				Log.i("test","____");
 			}
 			catch (InterruptedException e1) {
 				e1.printStackTrace();

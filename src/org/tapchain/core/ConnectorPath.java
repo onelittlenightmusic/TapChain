@@ -11,11 +11,18 @@ public class ConnectorPath implements Tickable, IPath {
 	IConnector _in;
 	private IStatusHandler h = null;
 
+	/** Create ConnectorPath from start ChainPiece and end ChainPiece objects.
+	 * @param cp_start Start ChainPiece
+	 * @param cp_end End ChainPiece
+	 * @param out ChainOutConnector object
+	 * @param in ChainInConnector object
+	 */
 	ConnectorPath(ChainPiece cp_start, ChainPiece cp_end,
 			ChainOutConnector out, ChainInConnector in) {
 		attach(cp_start, cp_end, out, in);
 	}
 
+	@Override
 	public ConnectorPath attach(IPiece cp_start, IPiece cp_end,
 			IConnector out, IConnector in) {
 		_out = out;

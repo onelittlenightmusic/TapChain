@@ -3,22 +3,25 @@ package org.tapchain.core;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
-import org.tapchain.core.Chain.Output;
 import org.tapchain.core.Chain.PackType;
 import org.tapchain.core.Connector.ChainInConnector;
 import org.tapchain.core.Connector.ChainOutConnector;
 import org.tapchain.core.PathPack.ChainInPathPack;
-import org.tapchain.core.PathPack.ChainOutConnectorPack;
+import org.tapchain.core.PathPack.ChainOutPathPack;
+import org.tapchain.core.PathPack.ChainOutPathPack.Output;
 
 public abstract class Piece implements IPiece {
 	protected PartnerList partners = new PartnerList();
-	protected ArrayList<ChainInPathPack> inPack = new ArrayList<ChainInPathPack>();
-	protected ArrayList<ChainOutConnectorPack> outPack = new ArrayList<ChainOutConnectorPack>();
+//	protected ArrayList<ChainInPathPack> inPack = new ArrayList<ChainInPathPack>();
+	protected Map<PackType, ChainInPathPack> inPack = new EnumMap<PackType, ChainInPathPack>(PackType.class);
+	protected Map<PackType, ChainOutPathPack> outPack = new EnumMap<PackType, ChainOutPathPack>(PackType.class);
 
 	//1.Initialization
 	@Override
@@ -46,33 +49,26 @@ public abstract class Piece implements IPiece {
 	public String getName() {
 		if(name != null)
 			return name;
-		return getClass().getName();
+		return getClass().getSimpleName();
 	}
 
-
-
-	@Override
-	public IPiece signal() {
-		return null;
+	protected ChainOutPathPack getOutPack(PackType stack) {
+		return outPack.get(stack);
 	}
-
-	protected ChainOutConnectorPack getOutPack(PackType stack) {
-		return outPack.get(stack.ordinal());
-	}
-	protected ChainOutConnectorPack getOutPack(int num) {
-		if(num >= outPack.size())
-			return null;
-		return outPack.get(num);
-	}
+//	protected ChainOutPathPack getOutPack(int num) {
+//		if(num >= outPack.size())
+//			return null;
+//		return outPack.get(num);
+//	}
 	protected ChainInPathPack getInPack(PackType packtype) {
-		return inPack.get(packtype.ordinal());
+		return inPack.get(packtype);
 	}
 	
-	protected ChainInPathPack getInPack(int num) {
-		if(num >= inPack.size())
-			return null;
-		return inPack.get(num);
-	}
+//	protected ChainInPathPack getInPack(int num) {
+//		if(num >= inPack.size())
+//			return null;
+//		return inPack.get(num);
+//	}
 	public Piece setOutPackType(PackType pack, Output type) {
 		getOutPack(pack).setOutType(type);
 		return this;
@@ -105,17 +101,25 @@ public abstract class Piece implements IPiece {
 	public boolean isConnectedTo(IPiece cp) {
 		return partners.isConnectedTo(cp);
 	}
+	public boolean isConnectedTo(IPiece cp, PackType pt) {
+		return partners.isConnectedTo(cp, pt);
+	}
+	@Override
+	public PackType getPackType(IPiece cp) {
+		return partners.getPackType(cp);
+	}
 	//3.Changing state
 	
-	protected ChainInPathPack addNewInPack() {
+	protected ChainInPathPack addNewInPack(PackType type) {
 		ChainInPathPack rtn = new ChainInPathPack(this);
-		inPack.add(rtn);
+		inPack.put(type, rtn);
 		return rtn;
 	}
 	
-	protected ChainOutConnectorPack addNewOutPack() {
-		ChainOutConnectorPack rtn = new ChainOutConnectorPack(this);
-		outPack.add(rtn);
+	protected ChainOutPathPack addNewOutPack(PackType type) {
+		ChainOutPathPack rtn = new ChainOutPathPack(this);
+		outPack.put(type, rtn);
+		rtn.setPtype(type);
 		return rtn;
 	}
 
@@ -125,23 +129,23 @@ public abstract class Piece implements IPiece {
 	}
 	//3-2.PathPack setting functions
 	protected ChainInConnector addInPath(PackType stack) {
-		return getInPack(stack).addNewPath();
+		return getInPack(stack).addNewConnector();
 	}
 	protected ChainOutConnector addOutPath(Output io, PackType stack) {
-		ChainOutConnector rtn = getOutPack(stack).addNewPath(io);
+		ChainOutConnector rtn = getOutPack(stack).addNewConnector(io);
 		return rtn;
 	}
-	public Class<?> getInPathClass(PackType stack) {
-		return getInPack(stack).getPathClass();
+	public Collection<Class<?>> getInPathClasses(PackType stack) {
+		return getInPack(stack).getPathClasses();
 	}
-	public Class<?> getOutPathClass(PackType stack) {
-		return getOutPack(stack).getPathClass();
+	public Collection<Class<?>> getOutPathClasses(PackType stack) {
+		return getOutPack(stack).getPathClasses();
 	}
-	public boolean setInPathClass(PackType stack, Class<?> cls) {
-		return getInPack(stack).setPathClass(cls);
+	public boolean addInPathClass(PackType stack, Class<?> cls) {
+		return getInPack(stack).addPathClass(cls);
 	}
-	public boolean setOutPathClass(PackType stack, Class<?> cls) {
-		return getOutPack(stack).setPathClass(cls);
+	public boolean addOutPathClass(PackType stack, Class<?> cls) {
+		return getOutPack(stack).addPathClass(cls);
 	}
 	//3.Input/Output functions
 	public <T> T getCache(ChainInConnector i) throws InterruptedException {
@@ -229,9 +233,6 @@ public abstract class Piece implements IPiece {
 	public ArrayList<Object> input(PackType type) throws InterruptedException {
 		return getInPack(type).input();
 	}
-	public boolean isAppendedTo(ChainPiece cp, PackType pt) {
-		return partners.isAppendedTo(cp, pt);
-	}
 	//4.Termination
 	@Override
 	public IPath detach(IPiece cp) {
@@ -248,6 +249,13 @@ public abstract class Piece implements IPiece {
 		PartnerList() {
 			partner = new ConcurrentHashMap<IPiece, IPath>();
 		}
+		public PackType getPackType(IPiece cp) {
+			IPath _path = null;
+			if((_path = partner.get(cp)) == null)
+				return null;
+			else
+				return _path.getOutConnector().getPack().getPtype();
+		}
 		public ChainPiece.PartnerList setPartner(IPath o, IPiece cp) {
 			partner.put(cp, o);
 			return this;
@@ -262,10 +270,10 @@ public abstract class Piece implements IPiece {
 		public boolean isConnectedTo(IPiece cp) {
 			return partner.containsKey(cp);
 		}
-		public boolean isAppendedTo(ChainPiece cp, PackType pt) {
+		public boolean isConnectedTo(IPiece cp, PackType pt) {
 			IPath _path = null;
 			if((_path = partner.get(cp)) != null)
-				if(_path.getOutConnector().getPack() == cp.getOutPack(pt))
+				if(_path.getOutConnector().getPack().getPtype() == pt)
 					return true;
 			return false;
 		}

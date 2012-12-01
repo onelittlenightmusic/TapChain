@@ -42,19 +42,34 @@ public class Blueprint implements IBlueprint {
 		connect = bp.connect;
 	}
 	
-	private IBlueprint renewParam() {
+	/**
+	 * Add argument classes and objects for current blueprint instantiation
+	 * 
+	 * @param type
+	 *            Array of argument classes
+	 * @param obj
+	 *            Array of argument objects
+	 * @return
+	 */
+	public Blueprint addArg(Object... objs) {
+		for(Object obj : objs)
+			params.add(obj.getClass(), obj);
+		return this;
+	}
+
+	private IBlueprint renewArg() {
 		params = new ParamArray();
 		return this;
 	}
 
 	@Override
-	public IBlueprint copy(IPiece... args) {
-		return new Blueprint(this).setVar(args);
+	public IBlueprint copy() {
+		return new Blueprint(this);
 	}
 	
 	@Override
-	public IBlueprint copyAndRenewParam() {
-		return new Blueprint(this).renewParam();
+	public IBlueprint copyAndRenewArg() {
+		return new Blueprint(this).renewArg();
 	}
 
 	// 2.Getters and setters
@@ -62,10 +77,10 @@ public class Blueprint implements IBlueprint {
 		return This;
 	}
 
-	protected Blueprint setVar(IPiece... args) {
-		var = args;
-		return this;
-	}
+		protected Blueprint setVar(IPiece... args) {
+			var = args;
+			return this;
+		}
 
 	protected Blueprint setBPClass(Class<? extends IPiece> _cls) {
 		cls = _cls;
@@ -177,8 +192,8 @@ public class Blueprint implements IBlueprint {
 		return rtn;
 	}
 
-	public IBlueprint addLocal(IBlueprint bp, IPiece... args) {
-		IBlueprint rtn = bp.copy(args);
+	public IBlueprint addLocal(IBlueprint bp) {
+		IBlueprint rtn = bp.copy();
 		children.add(rtn);
 		return rtn;
 	}
@@ -188,7 +203,7 @@ public class Blueprint implements IBlueprint {
 		return this;
 	}
 
-	public Blueprint Append(PackType stack, IBlueprint target,
+	public Blueprint append(PackType stack, IBlueprint target,
 			PackType stack_target) {
 		append(new ConnectionBlueprint(this, target, stack, stack_target));
 		return this;
@@ -198,21 +213,6 @@ public class Blueprint implements IBlueprint {
 		This.refresh();
 		for (IBlueprint local : children)
 			local.refresh();
-		return this;
-	}
-
-	/**
-	 * Add argument classes and objects for current blueprint instantiation
-	 * 
-	 * @param type
-	 *            Array of argument classes
-	 * @param obj
-	 *            Array of argument objects
-	 * @return
-	 */
-	public Blueprint addArg(Object... objs) {
-		for(Object obj : objs)
-			params.add(obj.getClass(), obj);
 		return this;
 	}
 
@@ -331,4 +331,5 @@ public class Blueprint implements IBlueprint {
 			return instance;
 		}
 	}
+	
 }

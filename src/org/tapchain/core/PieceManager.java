@@ -55,7 +55,7 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	public PieceManager setPieceView(IPiece bp, Blueprint v, WorldPoint wp)
+	public PieceManager setPieceView(IPiece bp, Blueprint v, IPoint wp)
 			throws ChainException {
 		return this;
 	}
@@ -67,20 +67,22 @@ public class PieceManager extends Manager<IPiece> {
 	// 3.Changing state
 	@SuppressWarnings("unchecked")
 	@Override
-	public PieceManager add(IPiece cp, IPiece... args) {
+	public PieceManager add(IPiece cp) {
 		pt_b = pt;
 		pt = cp;
 		return this;
 	}
 
 	@Override
-	public PieceManager save() {
+	public PieceManager _save() {
 		return this;
 	}
 
-	ConnectionResultIO __connect(IPiece piece_from, PackType type_from,
+	synchronized ConnectionResultIO __connect(IPiece piece_from, PackType type_from,
 			IPiece piece_to, PackType type_to) {
 		ConnectionResultIO rtn = null;
+		if(piece_from.isConnectedTo(piece_to))
+			return null;
 		try {
 			if ((rtn = piece_from.appendTo(type_from, piece_to, type_to)) != null) {
 				if (piece_from instanceof ChainPiece)
@@ -117,7 +119,8 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	public PieceManager young(IPiece cp, IPiece... args) {
+	@Override
+	public PieceManager young(IPiece cp) {
 		__then(cp, pt);
 		add(cp);
 		return this;
@@ -135,9 +138,9 @@ public class PieceManager extends Manager<IPiece> {
 		return this;
 	}
 
-	public PieceManager teacher(IPiece cp, IPiece... args) {
+	public PieceManager teacher(IPiece cp) {
 		__side(cp, pt, PackType.HEAP);
-		add(cp, args);
+		add(cp);
 		return this;
 	}
 
@@ -181,7 +184,7 @@ public class PieceManager extends Manager<IPiece> {
 	}
 
 	public PieceManager _func(IPiece arg) {
-		add(new Actor.Function(), arg);
+		add(new Actor.Function());
 		return _child();
 	}
 

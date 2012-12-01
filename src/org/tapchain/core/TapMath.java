@@ -2,11 +2,28 @@ package org.tapchain.core;
 
 import java.util.List;
 
+import org.tapchain.core.Actor.Filter;
+
+@SuppressWarnings("serial")
 public class TapMath {
-	public static ScreenPoint getCurvePoint(float alpha, List<ScreenPoint> sp) {
-		ScreenPoint rtn = new ScreenPoint();
+	public static class Round extends Filter {
+		@Override
+		public boolean filter(Object obj) {
+			return true;
+		}
+	}
+	
+	public static class Sin extends Filter {
+		@Override
+		public boolean filter(Object obj) {
+			return false;
+		}
+	}
+	
+	public static IPoint getCurvePoint(float alpha, List<IPoint> list) {
+		IPoint rtn = new ScreenPoint();
 		int i = 0;
-		for(ScreenPoint pt: sp) {
+		for(IPoint pt: list) {
 //			float c;
 			rtn = rtn.plus(pt.multiply(/*c = */bezier_coeff(alpha,i++)));
 //			Log.w("TapChain", String.format("%f ^ %d = %f", alpha, i-1, c));
