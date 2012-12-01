@@ -284,7 +284,7 @@ public class Actor extends ChainPiece.FlexPiece implements Comparable<Actor>,
 	Object pull(PathPack.ChainInPathPack in) throws ChainException {
 		try {
 			ArrayList<Object> rtn = in.input();
-			if (rtn == null)
+			if (rtn.isEmpty())
 				throw new ChainException(this, "Please Connect!",
 						LoopableError.LOCK);
 			return rtn.get(0);
@@ -1213,7 +1213,7 @@ public class Actor extends ChainPiece.FlexPiece implements Comparable<Actor>,
 		BasicSplit(Class<?> _cls) {
 			super();
 			try {
-				o = super.appended(_cls, Output.SYNC, PackType.HEAP, this);
+				o = super.appended(Output.SYNC, PackType.HEAP, this);
 			} catch (ChainException e) {
 				e.printStackTrace();
 			}
@@ -1221,8 +1221,8 @@ public class Actor extends ChainPiece.FlexPiece implements Comparable<Actor>,
 		}
 
 		@Override
-		public ConnectionResultO appended(Class<?> _cls, Output type,
-				PackType stack_target, IPiece from) throws ChainException {
+		public ConnectionResultO appended(Output type, PackType stack_target,
+				IPiece from) throws ChainException {
 			if (stack_target == PackType.EVENT)
 				return o;
 			return null;

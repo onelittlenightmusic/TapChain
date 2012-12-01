@@ -36,7 +36,7 @@ public abstract class Piece implements IPiece {
 	}
 	
 	@Override
-	public ConnectionResultO appended(Class<?> cls, Output type, Chain.PackType stack, IPiece from) throws ChainException {
+	public ConnectionResultO appended(Output type, Chain.PackType stack, IPiece from) throws ChainException {
 		return null;
 	}
 	
@@ -52,7 +52,8 @@ public abstract class Piece implements IPiece {
 		return getClass().getSimpleName();
 	}
 
-	protected ChainOutPathPack getOutPack(PackType stack) {
+	@Override
+	public ChainOutPathPack getOutPack(PackType stack) {
 		return outPack.get(stack);
 	}
 //	protected ChainOutPathPack getOutPack(int num) {
@@ -60,7 +61,8 @@ public abstract class Piece implements IPiece {
 //			return null;
 //		return outPack.get(num);
 //	}
-	protected ChainInPathPack getInPack(PackType packtype) {
+	@Override
+	public ChainInPathPack getInPack(PackType packtype) {
 		return inPack.get(packtype);
 	}
 	

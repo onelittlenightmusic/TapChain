@@ -220,23 +220,24 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					return rtn;
 				}
 				public ArrayList<Object> inputPeek() throws InterruptedException {
-					ArrayList<Object> rtn = null;
 					switch(inputType) {
 					case ALL:
-						rtn = _inputPeekAll();
-						break;
+						return _inputPeekAll();
+//						break;
 					case FIRST:
-						rtn = _inputPeekFirst();
-						break;
+						return _inputPeekFirst();
+//						break;
 					case COUNT:
+					default:
+						return new ArrayList<Object>();
 					}
-					return rtn;
+//					return rtn;
 				}
 				private ArrayList<Object> _inputPeekAll() throws InterruptedException {
 					ArrayList<Object> rtn = new ArrayList<Object>();
 					if(isEmpty()) 
 						if(inner_request.isEmpty()) {
-							return null;
+							return rtn;
 						} else {
 							rtn.addAll(inner_request);
 //							inner_request.clear();
@@ -254,28 +255,27 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					return rtn;
 				}
 				public ArrayList<Object> input() throws InterruptedException {
-					ArrayList<Object> rtn = null;
 					parent.__exec("WAITING","ChainPiece#input@start");
 					switch(inputType) {
 					case ALL:
-						rtn = _inputAll();
-						break;
+						return _inputAll();
 					case FIRST:
-						rtn = _inputFirst();
-						break;
+						return _inputFirst();
 					case COUNT:
-						rtn = _inputCount();
-						parent.__exec("inputed COUNT","ChainPiece#input");
-						break;
+						return _inputCount();
+//						parent.__exec("inputed COUNT","ChainPiece#input");
+//						break;
+					default:
+						return new ArrayList<Object>();
 					}
-					parent.__exec("INPUTED","ChainPiece#input@end");
-					return rtn;
+//					parent.__exec("INPUTED","ChainPiece#input@end");
+//					return rtn;
 				}
 				private ArrayList<Object> _inputAll() throws InterruptedException {
 					ArrayList<Object> rtn = new ArrayList<Object>();
 					if(isEmpty()) 
 						if(inner_request.isEmpty()) {
-							return null;
+							return rtn;
 						} else {
 							rtn.addAll(inner_request);
 							inner_request.clear();
@@ -300,7 +300,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 					try {
 						p = _pushedPath.sync_pop();
 					} catch (IAxon.AxonException e) {
-						return null;
+						return rtn;
 					}
 //					ArrayList<Object> rtn = new ArrayList<Object>();
 					rtn.add(p.sync_pop());
@@ -312,8 +312,8 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
 				}
 				
 				private ArrayList<Object> _inputCount() throws InterruptedException {
-					if(isEmpty()) return null;
 					ArrayList<Object> rtn = new ArrayList<Object>();
+					if(isEmpty()) return rtn;
 					if(now_count == null || !now_count.hasNext()) {
 						now_count = iterator();
 					}

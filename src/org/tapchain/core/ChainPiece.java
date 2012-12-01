@@ -64,6 +64,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 		fImpl = tmpFImpl;
 		for(PackType type: PackType.values()) {
 			ChainInPathPack pack = addNewInPack(type);
+			pack.addPathClass(Object.class);
 			if(type == PackType.HEAP)
 				pack.setInType(ChainInPathPack.Input.FIRST);
 			else
@@ -72,6 +73,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 
 		for(PackType type: PackType.values()) {
 			ChainOutPathPack pack = addNewOutPack(type);
+			pack.addPathClass(Object.class);
 			if(type == PackType.FAMILY)
 				pack.setOutType(Output.HIPPO);
 		}
@@ -388,7 +390,7 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 			//Create new ChainInConnector.
 			ChainInConnector i = firstPiece.addInPath(stack);
 			//Get new connection with target piece.
-			Chain.ConnectionResultO o = target.appended(Object.class, null, stack_target, firstPiece);
+			Chain.ConnectionResultO o = target.appended(null, stack_target, firstPiece);
 			//Check available connection between this piece and target piece.
 			if (i.connect(o.getConnect())) {
 				//Get path object
@@ -402,8 +404,8 @@ public class ChainPiece extends Piece implements IPiece, Serializable, Tickable 
 		}
 
 		@Override
-		public Chain.ConnectionResultO appended(Class<?> cls, Output type,
-				Chain.PackType stack_target, IPiece from) throws Chain.ChainException {
+		public Chain.ConnectionResultO appended(Output type, Chain.PackType stack_target,
+				IPiece from) throws Chain.ChainException {
 			//Create new ChainOutConnector.
 			ChainOutConnector o = lastPiece.addOutPath(type, stack_target);
 			// partner.setPartner(o, from);

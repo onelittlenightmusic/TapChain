@@ -1,5 +1,7 @@
 package org.tapchain.core;
 
+import java.util.Collection;
+
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.PackType;
@@ -77,11 +79,24 @@ public class PieceManager extends Manager<IPiece> {
 	public PieceManager _save() {
 		return this;
 	}
+	
+	public boolean __canConnect(IPiece piece_from, PackType type_from,
+			IPiece piece_to, PackType type_to) {
+		Collection<Class<?>> from_classes = piece_from.getOutPack(type_from).getPathClasses();
+		Collection<Class<?>> to_classes = piece_to.getInPack(type_to).getPathClasses();
+		for (Class<?> from_cls: from_classes)
+			for (Class<?> to_cls : to_classes)
+				if(from_cls.isAssignableFrom(to_cls))
+					return true;
+		return false;
+	}
 
 	synchronized ConnectionResultIO __connect(IPiece piece_from, PackType type_from,
 			IPiece piece_to, PackType type_to) {
 		ConnectionResultIO rtn = null;
 		if(piece_from.isConnectedTo(piece_to))
+			return null;
+		if(!__canConnect(piece_from, type_from, piece_to, type_to))
 			return null;
 		try {
 			if ((rtn = piece_from.appendTo(type_from, piece_to, type_to)) != null) {

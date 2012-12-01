@@ -6,19 +6,19 @@ import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
 import org.tapchain.core.Chain.PackType;
+import org.tapchain.core.PathPack.ChainInPathPack;
+import org.tapchain.core.PathPack.ChainOutPathPack;
 import org.tapchain.core.PathPack.ChainOutPathPack.Output;
 
 public interface IPiece {
 	/** Check and accept connection from other piece.
-	 * @param cls Connection pipe class
 	 * @param output Output type
 	 * @param type PackType of this piece
 	 * @param from Piece from whom connection offered
 	 * @return ConnectionResultO object
 	 * @throws ChainException
 	 */
-	public ConnectionResultO appended(Class<?> cls, Output output, PackType type,
-			IPiece from) throws ChainException;
+	public ConnectionResultO appended(Output output, PackType type, IPiece from) throws ChainException;
 
 	/** Check and append this piece to target piece.
 	 * @param type Packtype of this piece
@@ -52,4 +52,8 @@ public interface IPiece {
 	public <T> T __exec(T obj, String flg);
 
 	PackType getPackType(IPiece cp);
+
+	ChainOutPathPack getOutPack(PackType stack);
+
+	ChainInPathPack getInPack(PackType packtype);
 }
