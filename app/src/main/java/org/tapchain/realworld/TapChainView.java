@@ -30,7 +30,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -83,12 +82,9 @@ import org.tapchain.editor.TapChainEditor;
 import org.tapchain.game.ISensorView;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -109,6 +105,7 @@ public class TapChainView extends FragmentActivity implements
 //	Handler mq = new Handler();
 	SparseArray<IntentHandler> intentHandlers = new SparseArray<IntentHandler>();
 	static Activity now;
+	public static int tapOffset = 10000;
 
 	public static Activity getNow() {
 		return now;
@@ -128,24 +125,14 @@ public class TapChainView extends FragmentActivity implements
 	/** Called when the activity is first created. */
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		now = this;
-		// if(savedInstanceState != null) {
-		// view_edit.setXY(savedInstanceState.getInt(X),
-		// savedInstanceState.getInt(Y));
-		// for(Parcelable p : savedInstanceState.getParcelableArray(V)) {
-		// Log.w("TapChain", String.format("%s => %s",
-		// ((AndroidView)p).getName(),editor.dictionary.containsValue(p)?"OK":"NG"));
-		// }
-		// }
-//		AndroidActor.setActivity(this);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		// Writing Window Initialization
 		viewCanvas = new CanvasViewImpl2(this);
 		viewUser = new UserView(this);
 		if (savedInstanceState != null) {
@@ -165,7 +152,6 @@ public class TapChainView extends FragmentActivity implements
 		setContentView(root);
 		viewControl = new FrameLayout(this);
 		RelativeLayout view_bottom_left = new RelativeLayout(this);
-		// view_bottom_left.setGravity(Gravity.LEFT | Gravity.BOTTOM);
 		addButton(view_bottom_left, R.drawable.dust, true,
 				new View.OnClickListener() {
 					@Override
@@ -173,13 +159,6 @@ public class TapChainView extends FragmentActivity implements
 						getEditor().reset();
 					}
 				});
-		// addButton(view_bottom_left, R.drawable.dust, true,
-		// new View.OnClickListener() {
-		// @Override
-		// public void onClick(View v) {
-		// getEditor().getMode(EditMode.REMOVE);
-		// }
-		// });
 		addButton(view_bottom_left, R.drawable.stop, true,
 				new View.OnClickListener() {
 					@Override
@@ -190,13 +169,6 @@ public class TapChainView extends FragmentActivity implements
 							((ImageView) v).setImageResource(R.drawable.start);
 					}
 				});
-		// addButton(view_bottom_left, R.drawable.reload, true,
-		// new View.OnClickListener() {
-		// @Override
-		// public void onClick(View v) {
-		// getEditor().getMode(EditMode.RENEW);
-		// }
-		// });
 		addButton(view_bottom_left, R.drawable.magnet, true,
 				new View.OnClickListener() {
 					@Override
@@ -240,20 +212,6 @@ public class TapChainView extends FragmentActivity implements
 						viewCanvas.deleteRegistration();
 					}
 				});
-//		addButton(view_bottom_left, R.drawable.pencil2, true,
-//				new View.OnClickListener() {
-//					@Override
-//					public void onClick(View v) {
-//						View v1 = TapChainView.this.getViewByTag("Mail");
-//						int[] pos = new int[2];
-//						if(v1==null) {
-//							Log.w("test","no view");
-//						} else {
-//							v1.getLocationOnScreen(pos);
-//							Log.w("test",String.format("%d %d", pos[0], pos[1]));
-//						}
-//					}
-//				});
 		addButton(view_bottom_left, R.drawable.config, true,
 				new View.OnClickListener() {
 					@Override
@@ -267,8 +225,6 @@ public class TapChainView extends FragmentActivity implements
 				});
 		viewControl.addView(view_bottom_left, new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		// LinearLayout view_bottom_right = new LinearLayout(this);
-		// view_bottom_right.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
 		addButton(view_bottom_left, R.drawable.no, false,
 				new View.OnClickListener() {
 					@Override
@@ -276,8 +232,6 @@ public class TapChainView extends FragmentActivity implements
 						finish();
 					}
 				});
-		// viewControl.addView(view_bottom_right, new LayoutParams(
-		// LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		rootview.addView(viewUser, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
 		rootview.addView(getCanvas(), new LayoutParams(
@@ -365,9 +319,6 @@ public class TapChainView extends FragmentActivity implements
 	// 2.Getters and setters
 	public GridFragment getGrid() {
 		// [APIv11]
-		// GridFragment f = (GridFragment)
-		// getFragmentManager().findFragmentByTag(
-		// VIEW_SELECT);
 		GridFragment f = (GridFragment) getSupportFragmentManager()
 				.findFragmentByTag(VIEW_SELECT);
 		return f;
@@ -376,10 +327,6 @@ public class TapChainView extends FragmentActivity implements
 	public WritingView getCanvas() {
 		return viewCanvas;
 	}
-
-//	public void postMQ(Runnable r) {
-//		mq.post(r);
-//	}
 
 	@Override
 	protected void onStop() {
@@ -395,7 +342,6 @@ public class TapChainView extends FragmentActivity implements
 		super.onConfigurationChanged(newConfig);
 		if (getGrid() != null)
 			getGrid().show();
-		// Log.v("TEST", "onConfigrationChanged was called!!");
 	}
 
 	public Pair<Integer, Integer> checkDisplayAndRotate() {
@@ -422,7 +368,6 @@ public class TapChainView extends FragmentActivity implements
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		recoverFactory();
 	}
 	
 	@Override
@@ -434,36 +379,17 @@ public class TapChainView extends FragmentActivity implements
 	private float[] currentAccelerationValues = { 0.0f, 0.0f, 0.0f };
 
 	@Override
+	public void onSensorChanged(SensorEvent event) {
+
+	}
+
+	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
 
 	float targetValue = 0;
 
-	@Override
-	public void onSensorChanged(SensorEvent event) {
-		Sensor sensor = event.sensor;
-		if (sensor == accelerometer) {
-			float tmp = targetValue;
-			currentAccelerationValues[0] = event.values[0];// -
-			currentAccelerationValues[1] = event.values[1];// -
-			currentAccelerationValues[2] = event.values[2];// -
-//			targetValue = Math.abs(currentAccelerationValues[0])
-//					+ Math.abs(currentAccelerationValues[1])
-//					+ Math.abs(currentAccelerationValues[2]);
-//			if (tmp > targetValue)
-//				return;
-//			// shake if absolute value of accelerometer is more than threshold.
-//			if (targetValue > 20.0f) {
-//				Float rtn = targetValue / 60f;
-//				if (rtn > 2f)
-//					rtn = 2f;
-//				if (rtn < 0.5f)
-//					rtn = 0.5f;
-				// getEditor().editTap().getChain().Shake(rtn);
-//			}
-		}
-	}
-	
+
 	WorldPoint gravity = new WorldPoint();
 	
 	@Override
@@ -603,7 +529,6 @@ public class TapChainView extends FragmentActivity implements
 			tabWidget.setId(android.R.id.tabs);
 			tabWidget.setPadding(0, 10, 0, 0);
 			scrollTitle.addView(tabWidget);
-			// tabView.addView(tabWidget);
 
 			// the tabhost needs a frame layout for the views associated with
 			// each visible tab
@@ -620,8 +545,6 @@ public class TapChainView extends FragmentActivity implements
 					0xaa220000, R.drawable.history);
 			addTab(tabH, "TS3", "[ <=> ]", act.getEditor().getRelatives(),
 					0xaa000022, R.drawable.relatives);
-			// addTab(tabH, "down", "[  ]", null,
-			// 0xaa000000, R.drawable.pulldown);
 			ImageView img = new ImageView(act);
 			img.setImageDrawable(getResources()
 					.getDrawable(R.drawable.pulldown));
@@ -634,19 +557,6 @@ public class TapChainView extends FragmentActivity implements
 						f.toggle();
 				}
 			});
-			// ImageView img2 = new ImageView(act);
-			// img2.setImageDrawable(getResources().getDrawable(R.drawable.pin));
-			// tabWidget.addView(img2);
-			// tabWidget.getChildAt(4).setOnClickListener(new OnClickListener()
-			// {
-			// @Override
-			// public void onClick(View v) {
-			// GridFragment f = act.getGrid();
-			// if(f != null)
-			// f.setAutohide();
-			// }
-			// });
-			//
 			darkMask = new FrameLayout(act);
 			darkMask.addView(tabH);
 			darkMask.setLayoutParams(new FrameLayout.LayoutParams(_width,
@@ -674,11 +584,6 @@ public class TapChainView extends FragmentActivity implements
 
 		}
 
-		// public void invalidateTab() {
-		// adapter.addFocusable(new ActorButton(a, a.editor.getRecent(),
-		// a.editor.getRecent().getSize()-1)); //
-		// adapter.notifyDataSetChanged(); // tabH.postInvalidate(); }
-		// }
 
 		public void setSize(int w, int h) {
 			_width = w;
@@ -703,18 +608,11 @@ public class TapChainView extends FragmentActivity implements
 		}
 
 		public void show(GridShow _show) {
-			// Log.i("TapChain", "GridFragment#show called");
 			show = _show;
-			// [APIv11]
-			// FragmentTransaction ft = act.getFragmentManager()
-			// .beginTransaction();
-			// if (this != act.getFragmentManager().findFragmentByTag(tag)) {
 			FragmentTransaction ft = act.getSupportFragmentManager()
 					.beginTransaction();
 			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//			ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left);
 			if (this != act.getSupportFragmentManager().findFragmentByTag(tag)) {
-				// Log.w("TapChain", "GridFragment#show fragment replaced");
 				ft.replace(0x00001234, this, tag);
 			}
 			switch (_show) {
@@ -772,10 +670,6 @@ public class TapChainView extends FragmentActivity implements
 			tabH.setCurrentTab(tabNum);
 		}
 
-//		public ActorSelector getCurrentActorSelector() {
-//			int tabNum = tabH.getCurrentTab();
-//			return (ActorSelector)tabH.getChildAt(tabNum);
-//		}
 	}
 
 	public static class ActorSelector extends GridView {
@@ -815,7 +709,7 @@ public class TapChainView extends FragmentActivity implements
 
 	}
 
-	HashMap<String,ActorButton> buttons = new HashMap<String,ActorButton>();
+	HashMap<String, ActorImageButton> buttons = new HashMap<String, ActorImageButton>();
 	public static class ViewAdapter extends BaseAdapter {
 		private Factory<Actor> f;
 		private TapChainView act;
@@ -823,14 +717,6 @@ public class TapChainView extends FragmentActivity implements
 		public ViewAdapter(Context c, Factory<Actor> f) {
 			act = (TapChainView) c;
 			this.f = f;
-//			f.setNotifier(new ValueChangeNotifier() {
-//				@Override
-//				public void notifyView() {
-//					invalidate();
-//				}
-//			});
-//			for(int i = 0; i < f.getSize(); i++)
-//				buttons.addFocusable(new ActorButton(act, f, i));
 		}
 		
 		public void notifyView() {
@@ -844,15 +730,12 @@ public class TapChainView extends FragmentActivity implements
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// Judging convertView is valid.
-			// convertView always returns another existing View.
 			if (convertView == null || convertView.getTag() == null
 					|| !convertView.getTag().equals(f.get(position).getTag())) {
-					ActorButton v = new ActorButton(act, f, position);
+					ActorImageButton v = new ActorImageButton(act, f, position);
 					((TapChainView)act).buttons.put((String)v.getTag(), v);
 					convertView = v;
 			}
-			// convertView.setTag(f.get(position).getTag());
 			convertView.setId(300 + position);
 			return convertView;
 		}
@@ -873,17 +756,15 @@ public class TapChainView extends FragmentActivity implements
 		}
 	}
 
-	public static class ActorButton extends PieceImage implements
+	public static class ActorImageButton extends ActorImage implements
 			View.OnTouchListener, OnGestureListener {
-		// float offsetx = 0f;
-		// float offsety = 0f;
 		OverlayPopup p;
 		final TapChainView act;
 		final Factory<Actor> factory;
 		final int num;
 		private GestureDetector touchDetector;
 
-		ActorButton(Context c, Factory<Actor> f, final int j) {
+		ActorImageButton(Context c, Factory<Actor> f, final int j) {
 			super(c, f, j);
 			registerToFactory();
 			act = (TapChainView) c;
@@ -892,6 +773,13 @@ public class TapChainView extends FragmentActivity implements
 			num = j;
 			setOnTouchListener(this);
 		}
+
+        private GridFragment returnPaletteAble() {
+            act.dummyRemove();
+            GridFragment f1 = act.getGrid();
+            f1.enable();
+            return f1;
+        }
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -902,9 +790,7 @@ public class TapChainView extends FragmentActivity implements
 			switch (action) {
 			case MotionEvent.ACTION_POINTER_UP:
 			case MotionEvent.ACTION_UP:
-				act.dummyRemove();
-				GridFragment f1 = act.getGrid();
-				f1.enable();
+                GridFragment f1 = returnPaletteAble();
 				if (f1 != null
 						&& f1.contains((int) event.getRawX(),
 								(int) event.getRawY())) {
@@ -948,9 +834,7 @@ public class TapChainView extends FragmentActivity implements
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 				float velocityY) {
-			act.dummyRemove();
-			GridFragment f1 = act.getGrid();
-			f1.enable();
+            GridFragment f1 = returnPaletteAble();
 			if (f1 != null
 					&& f1.contains((int) e2.getRawX(), (int) e2.getRawY())) {
 				p.dismiss();
@@ -970,14 +854,11 @@ public class TapChainView extends FragmentActivity implements
 
 		@Override
 		public void onShowPress(MotionEvent e) {
-
 		}
 
 		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
-			act.dummyRemove();
-			GridFragment f1 = act.getGrid();
-			f1.enable();
+            returnPaletteAble();
 			act.add(factory, num);
 			p.dismiss();
 			return true;
@@ -999,7 +880,7 @@ public class TapChainView extends FragmentActivity implements
 		}
 
 		public void setPopupView(Factory<?> f, int i) {
-			v = new PieceImage(cxt, f, i);
+			v = new ActorImage(cxt, f, i);
 			setContentView(v);
 			// The following line is to prevent PopupWindow from drawing odd
 			// background.
@@ -1024,55 +905,29 @@ public class TapChainView extends FragmentActivity implements
 			lowx = x;
 			lowy = y;
 		}
-
-		public float getLowX() {
-			return lowx;
-		}
-
-		public float getLowY() {
-			return lowy;
-		}
-
-		public float getHighX() {
-			return lowx + v.getWidth();
-		}
-
-		public float getHighY() {
-			return lowy + v.getHeight();
-		}
 	}
 
-	public static class PieceImage extends ImageView {
+	public static class ActorImage extends ImageView {
 		AndroidView v;
 		IBlueprint b;
 		Drawable a;
-		PieceImage(Context c, Factory<?> f, final int j) {
+		ActorImage(Context c, Factory<?> f, final int j) {
 			super(c);
-//			AndroidView v = null;
 			try {
 				if (f == null)
 					f = ((TapChainView) c).getEditor().getFactory();
 				v = (AndroidView) f.getViewBlueprint(j).newInstance(null);
 				b = f.get(j);
-//						new IBlueprintNotification() {
-//					@Override
-//					public void onChange(boolean highlight) {
-//						if(highlight)
-//							enlight();
-//						else
-//							unlight();
-//					}
-//				});
 			} catch (ChainException e) {
-//				e.printStackTrace();
+				e.printStackTrace();
 			}
 			a = (v != null) ? v.getDrawable() : getResources()
 					.getDrawable(R.drawable.cancel);
 			setImageDrawable(a);
 			if (v != null) {
 				setTag(v.getTag());
-				// Log.w("test",v.getTag());
 			}
+            setId(tapOffset+j);
 		}
 
 		public void registerToFactory() {
@@ -1087,41 +942,7 @@ public class TapChainView extends FragmentActivity implements
 			a.setBounds(0, 0, (int)size.x(), (int)size.y());
 			a.draw(canvas);
 		}
-
-//		public void enlight() {
-//			v.setColorFilter(colorTransformYellow);
-//			Log.w("test", String.format("%s enlighted", b.getBlueprintClass().getSimpleName()));
-//		}
-//		public void unlight() {
-//			v.setColorFilter(colorTransform);
-//			Log.w("test", String.format("%s unlighted", b.getBlueprintClass().getSimpleName()));
-//		}
-
-//		@Override
-//		protected void onDraw(Canvas canvas) {
-//			if(b.getFocused())
-//				enlight();
-//			else
-//				unlight();
-//			super.onDraw(canvas);
-//		}
 	}
-
-	public static class PieceImage2 extends View {
-		AndroidView v;
-		IBlueprint b;
-		PieceImage2(Context c, Factory<?> f, final int j) {
-			super(c);
-//			AndroidView v = null;
-		}
-
-
-		@Override
-		public void onDraw(Canvas canvas) {
-			v.view_user(canvas, WorldPoint.zero(), WorldPoint.zero(), 255, 0);
-		}
-	}
-
 
     public class WritingViewImplLattice extends WritingView {
         private Bitmap b = BitmapFactory.decodeResource(
@@ -1326,16 +1147,12 @@ public class TapChainView extends FragmentActivity implements
 //				f.Register(f.get(0));
 				IBlueprintInitialization i = getEditor().standbyRegistration(f);
 				if(i != null) {
-//					File fileDir = getFilesDir();
-//					Log.w("test", fileDir.getPath());
 					try {
 					    FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
 						Log.w("test", String.format("num = %d, tag = %s", initNum, i.getTag()));
 					    inclementInitNum();
 					    ObjectOutputStream oos = new ObjectOutputStream(fos);
-//					    oos.writeObject(i);
 					    oos.close();
-//						FileInputStream inputStream = openFileInput("SaveData.dat");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -1352,8 +1169,6 @@ public class TapChainView extends FragmentActivity implements
 		
 		public void inclementInitNum() {
 			initNum++;
-//			if(initNum == 10)
-//				initNum = 0;
 		}
 		
 		public void registerBlueprint(IBlueprintInitialization bi) {
@@ -1364,12 +1179,6 @@ public class TapChainView extends FragmentActivity implements
 			}
 		}
 		
-		public boolean PressButton() {
-			getEditor().Compile();
-			getEditor().start();
-			return true;
-		}
-
 		@Override
 		public void move(float vx, float vy) {
 			IPoint v = getScreenVector(-vx, -vy);
@@ -1402,12 +1211,6 @@ public class TapChainView extends FragmentActivity implements
 		public boolean onSecondTouch(final IPoint wp) {
 			return getEditor().onLockedScroll(wp);
 		}
-
-		// @Override
-		// public void onDraw() {
-		// viewUser.onDraw();
-		// super.onDraw();
-		// }
 	}
 
 	public class UserView extends TapChainSurfaceView {
@@ -1426,8 +1229,6 @@ public class TapChainView extends FragmentActivity implements
 
 		@Override
 		public void paintBackground(Canvas canvas) {
-//			mGradient.draw(canvas);
-//			mGradient2.draw(canvas);
 			 canvas.drawRect(r,
 			 paint);
 			return;
@@ -1477,27 +1278,6 @@ public class TapChainView extends FragmentActivity implements
 			requestFocus();
 		}
 
-		// @Override
-		// public void onSurfaceTextureAvailable(SurfaceTexture surface,
-		// int width, int height) {
-		// }
-		//
-		// @Override
-		// public void onSurfaceTextureSizeChanged(SurfaceTexture surface,
-		// int width, int height) {
-		// // Ignored
-		// }
-		//
-		// @Override
-		// public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-		// return true;
-		// }
-		//
-		// @Override
-		// public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-		// // Ignored
-		// }
-
 		@Override
 		public WorldPoint getWindowSize() {
 			return window_size;
@@ -1509,51 +1289,47 @@ public class TapChainView extends FragmentActivity implements
 
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
-					Canvas canvas = null;
-					try {
-						canvas = getHolder().lockCanvas();
-						// canvas = lockCanvas(null);
-						if (canvas != null) {
-							paintBackground(canvas);
-							myDraw(canvas);
-							canvas.drawText(
-									"View = "
-											+ Integer.toString(getEditor()
-													.editTap().getChain()
-													.getViewNum()), 20, 20,
-									paint_text);
-							canvas.drawText(
-									"Effect = "
-											+ Integer.toString(getEditor()
-													.editTap().getChain()
-													.getPieces().size()), 20,
-									40, paint_text);
-							canvas.drawText(
-									"UserView = "
-											+ Integer.toString(getEditor()
-													.edit()
-													.getChain().getViewNum()),
-									20, 60, paint_text);
-							canvas.drawText(
-									"UserEffect = "
-											+ Integer.toString(getEditor()
-											.edit()
-											.getChain().getPieces()
-											.size()), 20, 80,
-									paint_text);
-							canvas.drawText("Log = "+log, 20, 120, paint_text);
-						}
-					} finally {
-						if (canvas != null)
-							getHolder().unlockCanvasAndPost(canvas);
-						// unlockCanvasAndPost(canvas);
+				Canvas canvas = null;
+				try {
+					canvas = getHolder().lockCanvas();
+					if (canvas != null) {
+						paintBackground(canvas);
+						myDraw(canvas);
+						canvas.drawText(
+								"View = "
+										+ Integer.toString(getEditor()
+												.editTap().getChain()
+												.getViewNum()), 20, 20,
+								paint_text);
+						canvas.drawText(
+								"Effect = "
+										+ Integer.toString(getEditor()
+												.editTap().getChain()
+												.getPieces().size()), 20,
+								40, paint_text);
+						canvas.drawText(
+								"UserView = "
+										+ Integer.toString(getEditor()
+												.edit()
+												.getChain().getViewNum()),
+								20, 60, paint_text);
+						canvas.drawText(
+								"UserEffect = "
+										+ Integer.toString(getEditor()
+										.edit()
+										.getChain().getPieces()
+										.size()), 20, 80,
+								paint_text);
+						canvas.drawText("Log = "+log, 20, 120, paint_text);
 					}
+				} finally {
+					if (canvas != null)
+						getHolder().unlockCanvasAndPost(canvas);
+				}
 
 				}
 
 			});
-			// Log.w("TapChainView", "writing view locked");
 		}
 
 		public abstract void myDraw(Canvas canvas);
@@ -1566,15 +1342,12 @@ public class TapChainView extends FragmentActivity implements
 		}
 
 		public void paintBackground(Canvas canvas) {
-			// canvas.drawRect(new Rect(0, 0, window_size.x, window_size.y),
-			// paint);
 			return;
 		}
 
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width,
 				int height) {
-			// Log.w("test", "surfaceChanged");
 			window_size.x = getWidth();
 			window_size.y = getHeight();
 			getEditor().kickTapDraw(null);
@@ -1582,10 +1355,6 @@ public class TapChainView extends FragmentActivity implements
 
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
-			// int xmax = getWidth(), ymax = getHeight();
-			// int xcenter = xmax / 2;
-			// mGradient.setBounds(new Rect(0, 0, xcenter, ymax));
-			// mGradient2.setBounds(new Rect(xcenter, 0, xmax, ymax));
 			window_size.x = getWidth();
 			window_size.y = getHeight();
 			getEditor().kickTapDraw(null);
@@ -1634,17 +1403,12 @@ public class TapChainView extends FragmentActivity implements
 				if (mode == ZOOM) {
 					float newDist = spacing(ev);
 					matrix.set(savedMatrix);
-					// If you want to tweak font scaling, this is the place to
-					// go.
 					if (newDist > 10f) {
 						float scale = newDist / oldDist;
 						midPoint(mid, ev);
-						// Log.d(TAG, "scale=" + String.valueOf(scale));
-						// oldDist = newDist;
 						matrix.postScale(scale, scale, mid.x, mid.y);
 					}
 				} else if (mode == CAPTURED) {
-					// if(ev.getPointerCount() > 1)
 					onSecondTouch(getPosition(ev.getX(), ev.getY()));
 					break;
 				}
@@ -1683,12 +1447,10 @@ public class TapChainView extends FragmentActivity implements
 		}
 
 		public IPoint getScreenVector(float x, float y) {
-			// return new WorldPoint(x, y).setDif();
 			return TapChainView.getVector(x, y, matrix);
 		}
 
 		public IPoint getScreenPosition(float x, float y) {
-			// return new WorldPoint(x, y);
 			return TapChainView.getPosition(x, y, matrix);
 		}
 
@@ -1743,26 +1505,7 @@ public class TapChainView extends FragmentActivity implements
 			    	break;
 			    }
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-//	BufferedReader reader = new BufferedReader(
-//			new InputStreamReader(inputStream));
-//	String line;
-//	StringBuilder lines = new StringBuilder();
-//	while ((line = reader.readLine()) != null) {
-//		lines.append(line).append('\n');
-//	}
-//	reader.close();
-		catch (StreamCorruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
