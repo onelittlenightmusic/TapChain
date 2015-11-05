@@ -1,8 +1,6 @@
 package org.tapchain.core;
 
 
-import java.util.List;
-
 import org.tapchain.core.Actor.IConsumer;
 import org.tapchain.core.Actor.IDesigner;
 import org.tapchain.core.Actor.IEffector;
@@ -10,6 +8,8 @@ import org.tapchain.core.Actor.IFunc;
 import org.tapchain.core.Actor.IGenerator;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.ChainPiece.PieceState;
+
+import java.util.List;
 
 
 public class ActorManager extends PieceManager<Actor> {
@@ -161,7 +161,7 @@ public class ActorManager extends PieceManager<Actor> {
 		if(designer instanceof IFunc)
 			adding = new Actor.Filter<VALUE, INPUT, OUTPUT>() {
 				@Override
-				public OUTPUT func(IValue<VALUE> val, INPUT in) throws ChainException {
+				public OUTPUT func(IValue<VALUE> val, INPUT in) {
 					return ((IFunc<VALUE, INPUT, OUTPUT>)designer).func(val, in);
 				}
 

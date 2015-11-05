@@ -917,7 +917,8 @@ public class TapChainView extends FragmentActivity implements
 				if (f == null)
 					f = ((TapChainView) c).getEditor().getFactory();
 				v = (AndroidView) f.getViewBlueprint(j).newInstance(null);
-				b = f.get(j);
+                if(f.size() > j)
+    				b = f.get(j);
 			} catch (ChainException e) {
 				e.printStackTrace();
 			}
@@ -932,7 +933,8 @@ public class TapChainView extends FragmentActivity implements
 
 		public void registerToFactory() {
 			if(v instanceof IBlueprintFocusNotification)
-				b.setNotification(
+                if(b != null)
+    				b.setNotification(
 						(IBlueprintFocusNotification) v);
 		}
 

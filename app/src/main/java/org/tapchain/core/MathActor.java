@@ -3,8 +3,8 @@ package org.tapchain.core;
 import org.tapchain.core.Chain.ChainException;
 
 @SuppressWarnings("serial")
-public class MathActor extends Actor {
-	public static class MathEffector<EFFECT> extends ValueEffector<EFFECT> {
+public class MathActor {
+	public static class MathEffector<EFFECT> extends Actor.ValueEffector<EFFECT> {
 		public MathEffector(Class<? extends EFFECT> cls) {
 			super();
 			once();
@@ -59,7 +59,7 @@ public class MathActor extends Actor {
 			return rtn;
 		}
 	}
-	public abstract static class IntegerVerb<V> extends OriginalEffector<V, Integer> implements IStep {
+	public abstract static class IntegerVerb<V> extends Actor.OriginalEffector<V, Integer> implements IStep {
 		public IntegerVerb() {
 			super();
 			setDuration(1);

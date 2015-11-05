@@ -42,7 +42,7 @@ public class CarEngineer {
 //			setPull(true);
 		}
 		@Override
-		public RotationAcceleration func(IValue<RotationAcceleration> val, BrakeAngle input) throws ChainException {
+		public RotationAcceleration func(IValue<RotationAcceleration> val, BrakeAngle input) {
 			Float angleSpeed = -input.get();
 			val._valueGet().set(angleSpeed < 0f ? angleSpeed : 0f);
 //			input.increment();
@@ -68,7 +68,7 @@ public class CarEngineer {
 //			setPull(true);
 		}
 		@Override
-		public RotationAcceleration func(IValue<RotationAcceleration> val, AccelAngle input) throws ChainException {
+		public RotationAcceleration func(IValue<RotationAcceleration> val, AccelAngle input) {
 			Float angleSpeed = input.get();
 			val._valueGet().set(angleSpeed > 0f ? angleSpeed : 0f);
 //			input.increment();
@@ -95,7 +95,7 @@ public class CarEngineer {
 			super._valueSet(new Speed());
 		}
 		@Override
-		public Void func(IValue<Speed> val, RotationAcceleration input) throws ChainException {
+		public Void func(IValue<Speed> val, RotationAcceleration input) {
 			float nextSpeed = val._valueGet().get() + tireRadius*input.get();
 			if(nextSpeed < 0f) nextSpeed = 0f;
 			else if(nextSpeed > maxSpeed) nextSpeed = maxSpeed;

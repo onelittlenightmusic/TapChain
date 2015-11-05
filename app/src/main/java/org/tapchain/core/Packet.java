@@ -44,4 +44,12 @@ public class Packet<T> implements IPacket<T>, Delayed {
 
 	static Packet Error = new Packet(null, null) {{ tag = "Error"; }};
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String _tag) {
+        tag = _tag;
+    }
+
 }

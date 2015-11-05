@@ -1,7 +1,6 @@
 package org.tapchain;
 
 import org.tapchain.core.Actor.FloatFilter;
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.IValue;
 import org.tapchain.core.IValueLog;
 
@@ -17,7 +16,7 @@ public class QueueingTheory {
 		}
 
 		@Override
-		public Float func(IValue<Float> val, Float in) throws ChainException {
+		public Float func(IValue<Float> val, Float in) {
 			count ++;
 			float elapsedTime = - _valueGet() * (float)Math.log(Math.random());
 			if(lastOutput < in) {

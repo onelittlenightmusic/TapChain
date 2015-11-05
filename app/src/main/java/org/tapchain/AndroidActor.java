@@ -1060,7 +1060,7 @@ public class AndroidActor {
 		@Override
 		public void OnPushed(Connector p, Object obj)
 				throws InterruptedException {
-			__num++;// = (Integer)obj;
+			__num++;// = (Integer)objcache;
 			// validate();
 		}
 

@@ -22,6 +22,7 @@ import org.tapchain.core.Actor.WordGenerator;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.Convert;
 import org.tapchain.core.D2Point;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IActorCollideHandler;
@@ -128,7 +129,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
                 .add(new Actor.IFunc<String, String, String>() {
                     @Override
-                    public String func(IValue<String> val, String _in) throws ChainException {
+                    public String func(IValue<String> val, String _in) {
                         return _in + " " + val._valueGet();
                     }
 
@@ -141,7 +142,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
                 .add(new Actor.IFunc<Integer, String, String>() {
                     @Override
-                    public String func(IValue<Integer> val, String _in) throws ChainException {
+                    public String func(IValue<Integer> val, String _in) {
                         StringBuilder stringBuilder = new StringBuilder();
                         int value = val._valueGet();
                         for (int i = 0; i < value; i++) {
@@ -159,8 +160,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
                 .add(new Actor.IFunc<String, String, String>() {
                     @Override
-                    public String func(IValue<String> val, String _in) throws ChainException {
-                        val._valueSet(val._valueGet()+_in);
+                    public String func(IValue<String> val, String _in) {
+                        val._valueSet(val._valueGet() + _in);
                         return val._valueGet();
                     }
 
@@ -168,7 +169,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
                     public void init(IValue<String> val) {
                         val._valueSet("");
                     }
-                }).setViewArg(R.drawable.plus2).setTag("Cumulate Word")/*.setLogLevel()*/.save()
+                }).setViewArg(R.drawable.plus2).setTag("Accumulate Word")/*.setLogLevel()*/.save()
 
                 .add(AndroidActor.AndroidMail.class, act, "mailto:heretic55@docomo.ne.jp")
                 .setViewArg(R.drawable.mail2)
@@ -176,15 +177,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //                .setLogLevel()
                 .save()
 
-//				.addFocusable(Actor.Sizer.class)
-//				.arg(new WorldPoint(1, 1), 3)
-//				.setViewArg(R.drawable.widen2)
-//				.setTag("Sizer")
-//
-//				.addFocusable(Actor.Accelerator.class)
-//				.arg(new WorldPoint(100, 100))
-//				.setViewArg(R.drawable.pin)
-//				.setTag("Accel")
 
                 .add(AndroidActor.AndroidRecognizer.class, act)
                 .setViewArg(R.drawable.mic)
@@ -204,9 +196,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //                .add(Actor.PlusIntegerFilter.class).setViewArg(R.drawable.plus2).setTag("Plus").save()
 //                .add(Actor.MultiIntegerFilter.class).setViewArg(R.drawable.multi2).setTag("Multiply").save()
 
+                .add(Convert.IntegerConvert.class)
+                .setViewArg(R.drawable.boost1)
+                .setTag("Convert")
+                .save()
+
                 .add(new Actor.IFunc<Integer, Integer, Integer>() {
                     @Override
-                    public Integer func(IValue<Integer> val, Integer _in) throws ChainException {
+                    public Integer func(IValue<Integer> val, Integer _in) {
                         return _in + val._valueGet();
                     }
 
@@ -218,7 +215,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
                 .add(new Actor.IFunc<Integer, Integer, Integer>() {
                     @Override
-                    public Integer func(IValue<Integer> val, Integer _in) throws ChainException {
+                    public Integer func(IValue<Integer> val, Integer _in) {
                         return _in - val._valueGet();
                     }
 
@@ -230,7 +227,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
                 .add(new Actor.IFunc<Integer, Integer, Integer>() {
                     @Override
-                    public Integer func(IValue<Integer> val, Integer _in) throws ChainException {
+                    public Integer func(IValue<Integer> val, Integer _in) {
                         return _in * val._valueGet();
                     }
 
@@ -244,6 +241,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .add(Actor.IntegerCounter.class)
                 .setViewArg(R.drawable.rotate).setTag("Counter").save()
 
+                .add(Actor.SumIntegerFilter.class)
+                .setViewArg(R.drawable.rotate2).setTag("Counter").save()
 //				.addFocusable(FloatValue.class)
 //				.arg(1f, false)
 //				.setViewArg(R.drawable.f123)

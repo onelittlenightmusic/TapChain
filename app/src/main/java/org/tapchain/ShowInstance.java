@@ -48,6 +48,11 @@ public class ShowInstance {
 //			npd_word  = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.paper);
 //		if(npd_inside == null)
 //			npd_inside  = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.shadow2);
+        //Show Background Color Circle
+        circlePaintFill.setColor(0x80000000+val.hashCode()%0x01000000);
+        canvas.drawCircle(cp.x(), cp.y(), 30, circlePaintFill);
+        circlePaintFill.setColor(0xccffffff);
+
 		if (val instanceof Integer) {
 			float r = 25f;
 			showInteger(canvas, r, (Integer) val, cp.x(), cp.y());

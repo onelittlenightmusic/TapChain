@@ -149,7 +149,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 //					_valueSet(init);
 				}
 				@Override
-				public OUTPUT func(IValue<VALUE> val, INPUT in) throws ChainException {
+				public OUTPUT func(IValue<VALUE> val, INPUT in) {
 					return ((IFunc<VALUE, INPUT, OUTPUT>)designer).func(val, in);
 				}
 
