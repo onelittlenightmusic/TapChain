@@ -57,7 +57,7 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.PathType;
 import org.tapchain.core.PhysicalPoint;
 import org.tapchain.core.Self;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IWindow;
 import org.tapchain.game.ISensorView;

@@ -42,7 +42,8 @@ import org.tapchain.core.IValue;
 import org.tapchain.core.IValueArray;
 import org.tapchain.core.LinkBooleanSet;
 import org.tapchain.core.LinkType;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.Packet;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
@@ -229,7 +230,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			} else if (getActor() instanceof IValue) {
 				dummy = true;
 				Object val = ((IValue<?>) getActor())._valueGet();
-				ShowInstance.showInstance(canvas, val, cp, textPaint, _paint);
+                String tag = "";
+                if(getActor() instanceof Controllable)
+                    tag = ((Controllable)getActor()).getNowTag();
+                if(val != null)
+				    ShowInstance.showInstance(canvas, val, cp, textPaint, _paint, tag);
 			}
 
 
@@ -296,7 +301,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	// 3.Changing state
 
 	@Override
-	public int onTick(Actor p, Object obj) {
+	public int onTick(Actor p, Packet obj) {
 		sweep += 20f;
 		return 1;
 	}

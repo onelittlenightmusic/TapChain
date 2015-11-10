@@ -367,8 +367,9 @@ public class Chain implements JSONSerializable {
 	}
 
 	public interface Tickable {
-		int tick(Object obj);
-		public int getTickInterval();
+        int tick(Packet packet);
+
+        public int getTickInterval();
 	}
 
 	@Override

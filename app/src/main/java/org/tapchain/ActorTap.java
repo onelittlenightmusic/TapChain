@@ -1,24 +1,25 @@
 package org.tapchain;
 
-import java.util.Collection;
-import java.util.HashMap;
-
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
-import org.tapchain.core.IActorSharedHandler;
-import org.tapchain.core.LinkType;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IActorBlueprint;
+import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
+import org.tapchain.core.LinkType;
+import org.tapchain.core.Packet;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.ITapControlInterface;
 import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.ITapControlInterface;
+
+import java.util.Collection;
+import java.util.HashMap;
 
 public class ActorTap extends AndroidView implements IActorTap, ITapControlInterface {
 	IActorSharedHandler event = null;
@@ -48,7 +49,7 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	}
 
 	@Override
-	public int onTick(Actor p, Object obj) {
+	public int onTick(Actor p, Packet obj) {
 		return 1;
 	}
 

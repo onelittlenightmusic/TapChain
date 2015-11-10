@@ -1,12 +1,5 @@
 package org.tapchain.core;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
@@ -15,6 +8,13 @@ import org.tapchain.core.Connector.OutConnector;
 import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 	protected PartnerList partnerList = new PartnerList();
@@ -165,11 +165,11 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 		return null;
 	}
 
-	public boolean outputAll(PathType type, ArrayList<?> ar) throws InterruptedException {
+	public boolean outputAll(PathType type, ArrayList<Packet> ar) throws InterruptedException {
 		return getOutPack(type).outputAll(ar);
 	}
 
-	public boolean outputAllSimple(PathType type, Object obj) throws InterruptedException {
+	public boolean outputAllSimple(PathType type, Packet obj) throws InterruptedException {
 		return getOutPack(type).outputAllSimple(obj);
 	}
 
@@ -190,10 +190,10 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 	}
 
 
-	public void waitOutput(ArrayList<Object> rtn) throws InterruptedException {
+	public void waitOutput(ArrayList<Packet> rtn) throws InterruptedException {
 		getOutPack(PathType.PASSTHRU).waitOutput(rtn);
 	}
-	public void waitOutputAll(Object rtn) throws InterruptedException {
+	public void waitOutputAll(Packet rtn) throws InterruptedException {
 		getOutPack(PathType.PASSTHRU).waitOutputAll(rtn);
 	}
 
@@ -215,10 +215,10 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 				return true;
 		return false;
 	}
-	public ArrayList<Object> inputPeek(PathType type) throws InterruptedException, IAxon.AxonException {
+	public ArrayList<Packet> inputPeek(PathType type) throws InterruptedException, IAxon.AxonException {
 		return getInPack(type).inputPeek();
 	}
-	public ArrayList<Object> input(PathType type) throws InterruptedException {
+	public ArrayList<Packet> input(PathType type) throws InterruptedException {
 		return getInPack(type).input();
 	}
 	//4.Termination

@@ -41,7 +41,7 @@ public class ShowInstance {
 		smallText.setTextAlign(Paint.Align.CENTER);
 		smallText.setTypeface(Typeface.DEFAULT_BOLD);
 	}
-	static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint innerPaint2*/) {
+	static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint innerPaint2*/, String tag) {
 //		if(npd_num == null)
 //			npd_num = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.bubble5);
 //		if(npd_word == null)
@@ -49,7 +49,7 @@ public class ShowInstance {
 //		if(npd_inside == null)
 //			npd_inside  = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.shadow2);
         //Show Background Color Circle
-        circlePaintFill.setColor(0x80000000+val.hashCode()%0x01000000);
+        circlePaintFill.setColor(0x80000000+tag.hashCode()+val.hashCode()%0x01000000);
         canvas.drawCircle(cp.x(), cp.y(), 30, circlePaintFill);
         circlePaintFill.setColor(0xccffffff);
 

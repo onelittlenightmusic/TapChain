@@ -13,9 +13,10 @@ import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.ISelectable;
+import org.tapchain.core.Packet;
 import org.tapchain.core.PathType;
 import org.tapchain.core.TapMath;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IEditor;
 import org.tapchain.realworld.R;
@@ -41,6 +42,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
     ClassEnvelope cls = null;
     Object objcache;
     float gamma = 0.3f;
+    private String objtag;
 
 
     public BubblePathTap(ViewActor start, ViewActor stop,
@@ -121,7 +123,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
         }
         IPoint center = getPoint(0.5f);
         if (objcache != null)
-            ShowInstance.showInstance(canvas, objcache, center, paint2, paint2);
+            ShowInstance.showInstance(canvas, objcache, center, paint2, paint2, objtag);
         return true;
     }
 
@@ -182,14 +184,17 @@ public class BubblePathTap extends PathTap implements ISelectable {
     }
 
     @Override
-    public int onTick(IPath p, final Object _obj) {
-        this.objcache = _obj;
+    public int onTick(IPath p, final Packet _obj) {
+        this.objcache = _obj.getObject();
+        this.objtag = _obj.getTag();
+        final Object tmp_obj = objcache;
+        final String tmp_objtag = objtag;
         AndroidActor.AndroidView view
                 = new AndroidActor.AndroidView(TapChainView.getNow()) {
             @Override
             public boolean view_user(Canvas canvas, IPoint sp, IPoint iPoint,
                                      int alpha) {
-                ShowInstance.showInstance(canvas, _obj, sp, paint2, paint2);
+                ShowInstance.showInstance(canvas, tmp_obj, sp, paint2, paint2, tmp_objtag);
                 return true;
             }
 

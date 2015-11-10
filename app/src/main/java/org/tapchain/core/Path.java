@@ -1,7 +1,5 @@
 package org.tapchain.core;
 
-import android.util.Log;
-
 import org.tapchain.core.ActorManager.IStatusHandler;
 import org.tapchain.core.Chain.Tickable;
 import org.tapchain.core.Connector.InConnector;
@@ -73,9 +71,9 @@ public class Path implements Tickable, IPath {
 	}
 
 	@Override
-	public int tick(Object obj) {
+	public int tick(Packet packet) {
 		if (h != null) {
-			return h.tickView(this, obj);
+			return h.tickView(this, packet);
 		}
 		return 1;
 	}

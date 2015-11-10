@@ -9,6 +9,7 @@ import org.tapchain.core.Actor.IFunc;
 import org.tapchain.core.Actor.IGenerator;
 import org.tapchain.core.Blueprint.PieceBlueprintStatic;
 import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.actors.ViewActor;
 
 import android.util.Log;
 

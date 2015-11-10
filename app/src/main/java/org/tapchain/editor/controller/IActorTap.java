@@ -49,7 +49,7 @@ public interface IActorTap extends TapChainEditor.Tickable<Actor> {
     //
 	boolean onPush(Actor t, Object obj);
 
-	//	ActorManager manager;
+	//	ActorManager editorManager;
 	void onAdd(ActorManager maker);
 
 	ActorTap end();

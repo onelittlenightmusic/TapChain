@@ -1,6 +1,7 @@
 package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.actors.ViewActor;
 
 @SuppressWarnings("serial")
 public class MathActor {

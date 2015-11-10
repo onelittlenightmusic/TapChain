@@ -22,7 +22,7 @@ import org.tapchain.core.Actor.WordGenerator;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Convert;
+import org.tapchain.core.actors.PushOut;
 import org.tapchain.core.D2Point;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IActorCollideHandler;
@@ -32,8 +32,9 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
+import org.tapchain.core.actors.PathThru;
 import org.tapchain.core.StyleCollection;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.Geometry;
 import org.tapchain.editor.IActorTap;
@@ -88,7 +89,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setTag("Heart")
                 .save()
 
-                .add(AndroidImageMovable.class, act, R.drawable.carframe, R.drawable.carframe)
+                .add(AndroidImageMovable.class, act, R.drawable.carframe,
+                        R.drawable.carframe)
                 .setViewArg(R.drawable.carframe)
                 .setTag("Car Frame")
                 .save()
@@ -196,9 +198,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //                .add(Actor.PlusIntegerFilter.class).setViewArg(R.drawable.plus2).setTag("Plus").save()
 //                .add(Actor.MultiIntegerFilter.class).setViewArg(R.drawable.multi2).setTag("Multiply").save()
 
-                .add(Convert.IntegerConvert.class)
+                .add(PushOut.IntegerPushOut.class)
                 .setViewArg(R.drawable.boost1)
                 .setTag("Convert")
+                .save()
+
+                .add(PathThru.IntegerPathThru.class)
+                .setViewArg(R.drawable.right2)
+                .setTag("Path Through")
                 .save()
 
                 .add(new Actor.IFunc<Integer, Integer, Integer>() {
@@ -242,7 +249,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setViewArg(R.drawable.rotate).setTag("Counter").save()
 
                 .add(Actor.SumIntegerFilter.class)
-                .setViewArg(R.drawable.rotate2).setTag("Counter").save()
+                .setViewArg(R.drawable.plus).setTag("Sum").save()
 //				.addFocusable(FloatValue.class)
 //				.arg(1f, false)
 //				.setViewArg(R.drawable.f123)
@@ -316,7 +323,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
                     Paint paint_ = new Paint();
 
                     public void view_init() throws ChainException {
-                        IPoint p = (WorldPoint) pullInActor();
+                        IPoint p = (WorldPoint) pullInActor().getObject();
                         setCenter(p);
                         Collection<IActorTap> t = searchRoomPieces(p);
                         int c = Color.BLACK;
@@ -350,30 +357,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 }.initEffectValue(1, 10))
                 .next(new Actor.Reset().setContinue(true))._out()
                 .save();
-        freezeToggle();
-//        WorldPoint wp = new WorldPoint((int) (400 * Math.random()), (int) (400 * Math
-//                .random()));
-//        Actor sp = onAdd(
-//                getGoal(),
-//                0,
-//                wp).getKey();
-//        AndroidActor.AndroidImageView a = new AndroidActor.AndroidImageView(act, R.drawable.congratulation);
-//        a.setSize(new WorldPoint(500f, 100f));
-//        a.setCenter(wp);
-//        editTap()
-//                ._move(sp)
-//                .next(new AndroidActor.AndroidImageView(act, R.drawable.star1).setCenter(wp))
-//                ._in()
-//                .add(new Actor.NewSizer(new WorldPoint(30f, 30f), 10))
-//                .next(new Actor.Reset(false))
-//                ._out()
-//                ._move(sp)
-//                .next(a)
-//                ._move(sp)
-//                .next(new AndroidActor.AndroidSound2(act, R.raw.people093))
-//                ._out()
-//                .save();
-        freezeToggle();
+//        freezeToggle();
+//        freezeToggle();
     }
 
     public class TapChainGoalView extends AndroidActor.AndroidImageView implements ICollidable<Actor> {
@@ -402,7 +387,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
         public void onCollide(IEditor edit, IView v1, Collection<Actor> v2, IPoint pos) {
             Collection<Actor> pieces;
             if (v2 == null)
-                pieces = manager.getActors();
+                pieces = editorManager.getActors();
             else {
                 pieces = v2;
             }
@@ -515,7 +500,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
             c.await();
             c = new CountDownLatch(1);
             pushInActor(a.getCenter().multiplyNew(0.5f)
-                    .plusNew(b.getCenter().multiplyNew(0.5f)));
+                    .plusNew(b.getCenter().multiplyNew(0.5f)), "");
             return true;// checkTouch(a, b);
         }
 

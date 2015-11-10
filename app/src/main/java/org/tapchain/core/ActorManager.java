@@ -23,34 +23,19 @@ public class ActorManager extends PieceManager<Actor> {
 	
 	public ActorManager(
 			IErrorHandler _error, 
-			ILogHandler _log)//,
-//			IPathEdit _pathEdit,
-//			IPieceEdit _pieceEdit,
-//			IActorConnectHandler _actorConnectHandler,
-//			IStatusHandler _pieces,
-//			Blueprint _connect)
+			ILogHandler _log)
 	{
 		this();
 		this
-//		.setPathEdit(_pathEdit)
-//		.setPieceEdit(_pieceEdit)
-//		.setActorConnectHandler(_actorConnectHandler)
-//		.setPathBlueprint(_connect)
 		.setLog(_log)
 		.setError(_error)
 		;
 	}
 	
 	public ActorManager(ActorManager am) {
-		this(//am.factory,
+		this(
 				am.error,
 				am.log
-//				,
-//				am.pathEdit,
-//				am.pieceEdit,
-//				am.actorConnectHandler,
-//				am.statusHandle,
-//				am.pbp_connect
 		);
 
 	}
@@ -239,16 +224,6 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 
 	@Override
-	public ActorManager setPieceView(Blueprint v) throws ChainException {
-		return installView(getPiece(), v, new WorldPoint(0f, 0f));
-	}
-	
-	@Override
-	public ActorManager installView(Actor bp, Blueprint _view, IPoint nowPoint) throws ChainException {
-		return this;
-	}
-	
-	@Override
 	public ActorManager unsetPieceView(Actor bp) {
 		return this;
 	}
@@ -259,8 +234,8 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 
 	public interface IStatusHandler<T> {
-		void changeViewState(PieceState state);
-		int tickView(T t, Object obj);
+        void changeViewState(PieceState state);
+		int tickView(T t, Packet obj);
 		void pushView(T t, Object obj);
 
 		int getTickInterval();

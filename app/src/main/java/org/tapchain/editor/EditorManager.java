@@ -1,12 +1,5 @@
 package org.tapchain.editor;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.tapchain.ActorTap;
 import org.tapchain.PathTap;
 import org.tapchain.core.Actor;
@@ -15,16 +8,24 @@ import org.tapchain.core.ActorManager;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.Chain;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.IActorConnectHandler;
-import org.tapchain.core.LinkType;
-import org.tapchain.core.PathType;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ChainPiece.PieceState;
+import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
+import org.tapchain.core.LinkType;
+import org.tapchain.core.Packet;
+import org.tapchain.core.PathType;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unchecked")
 public class EditorManager extends ActorManager {
@@ -109,12 +110,16 @@ public class EditorManager extends ActorManager {
 		return;
 	}
 
-	@Override
-	public ActorManager installView(Actor bp, Blueprint _view, IPoint nowPoint) throws ChainException {
-		ActorTap v = __setPieceView(bp, _view);
-		if(v!=null)
-			onMoveView(v, nowPoint);
-		return this;
+	public EditorReturn addAndInstallView(IBlueprint<Actor> blueprint, IPoint nowPoint) throws ChainException {
+        Actor rtn = blueprint.newInstance(this);
+        Blueprint view = (Blueprint)blueprint.getView();
+        if (view != null) {
+            ActorTap v = __setPieceView(rtn, view);
+            if (v != null)
+                onMoveView(v, nowPoint);
+            return new EditorReturn(rtn, v);
+        }
+        return new EditorReturn(rtn, null);
 	}
 
 	ActorTap __setPieceView(Actor cp2, final Blueprint bp)
@@ -141,8 +146,8 @@ public class EditorManager extends ActorManager {
 				}
 
 				@Override
-				public int tickView(IPiece p, Object obj) {
-					return _view.onTick((Actor) p, obj);
+				public int tickView(IPiece p, Packet packet) {
+					return _view.onTick((Actor) p, packet);
 				}
 
 				@Override
@@ -203,24 +208,24 @@ public class EditorManager extends ActorManager {
 		dictPath.put(path, _view);
 		_view.setMyPath(path);
 		path.setStatusHandler(new IStatusHandler<IPath>() {
-			@Override
-			public int tickView(IPath path, Object obj) {
-				return _view.onTick(path, obj);
-			}
+            @Override
+            public int tickView(IPath path, Packet obj) {
+                return _view.onTick(path, obj);
+            }
 
-			@Override
-			public void changeViewState(PieceState state) {
-			}
+            @Override
+            public void changeViewState(PieceState state) {
+            }
 
-			@Override
-			public void pushView(IPath t, Object obj) {
-			}
+            @Override
+            public void pushView(IPath t, Object obj) {
+            }
 
-			@Override
-			public int getTickInterval() {
-				return intervalMs;
-			}
-		});
+            @Override
+            public int getTickInterval() {
+                return intervalMs;
+            }
+        });
 		return _view;
 	}
 

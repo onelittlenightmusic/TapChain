@@ -17,7 +17,7 @@ public class Packet<T> implements IPacket<T>, Delayed {
 	Packet(T _obj, IPiece _source, long delayMs) {
 		obj = _obj;
 		source = _source;
-		delay = System.currentTimeMillis() + delayMs;
+        setDelay(delayMs);
 	}
 
 	@Override
@@ -35,6 +35,11 @@ public class Packet<T> implements IPacket<T>, Delayed {
 		return unit.convert(delay - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
+    public Packet setDelay(long delayMs) {
+        delay = System.currentTimeMillis() + delayMs;
+        return this;
+    }
+
 	@Override
 	public int compareTo(Delayed another) {
 		long thisTime = delay;
@@ -43,13 +48,15 @@ public class Packet<T> implements IPacket<T>, Delayed {
 	}
 
 	static Packet Error = new Packet(null, null) {{ tag = "Error"; }};
+    static Packet HeartBeat = new Packet(null, null) {{ tag = "HeartBeat"; }};
 
     public String getTag() {
         return tag;
     }
 
-    public void setTag(String _tag) {
+    public Packet setTag(String _tag) {
         tag = _tag;
+        return this;
     }
 
 }

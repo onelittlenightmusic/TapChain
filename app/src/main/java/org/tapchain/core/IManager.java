@@ -96,14 +96,14 @@ public interface IManager<T, U> {
 	 * @return Manager object (this).
 	 */
 	public IManager<T, U> error(ChainException e);
-	/** Exit from this manager back to the parent manager.
-	 * @return Parent manager object.
+	/** Exit from this editorManager back to the parent editorManager.
+	 * @return Parent editorManager object.
 	 */
 	public IManager<T, U> _out();
-	/** Go into child manager. The returned manager copes with current pointer object.
-	 * To exit back to previous manager which is called "parent manager",
+	/** Go into child editorManager. The returned editorManager copes with current pointer object.
+	 * To exit back to previous editorManager which is called "parent editorManager",
 	 * you can call _out().
-	 * @return Child manager object.
+	 * @return Child editorManager object.
 	 */
 	public IManager<T, U> _in();
 	//4.Termination: none

@@ -1,10 +1,10 @@
 package org.tapchain.core;
 
+import org.tapchain.core.Chain.ChainException;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-
-import org.tapchain.core.Chain.ChainException;
 
 public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 	ValueChangeNotifier notif;
@@ -41,7 +41,7 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 
 	public void notifyView() {
 		if (notif != null)
-			notif.notifyView();
+			notif.notifyChange();
 	}
 
 	public void invalidate() {
@@ -49,25 +49,6 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 			notif.invalidate();
 	}
 
-	@SuppressWarnings("unchecked")
-	public PIECE newInstance(int num, IPoint iPoint, IManager<PIECE, PIECE> manager) {
-		IBlueprint<PIECE> blueprint = get(num);
-		PIECE PIECE = null;
-		if (blueprint == null) {
-			log("Chain", "No blueprint to instantiate");
-			return null;
-		}
-		try {
-			PIECE = blueprint.newInstance(manager);
-			Blueprint view = getViewBlueprint(num);
-			if (view != null)
-				((PieceManager<PIECE>) manager).installView(PIECE, view, iPoint);
-			return (PIECE) PIECE;
-		} catch (ChainException e) {
-			manager.error(e);
-		}
-		return (PIECE) PIECE;
-	}
 
 	public int getSize() {
 		return size();
@@ -97,7 +78,7 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 	}
 
 	public interface ValueChangeNotifier {
-		public void notifyView();
+		public void notifyChange();
 
 		public void invalidate();
 	}

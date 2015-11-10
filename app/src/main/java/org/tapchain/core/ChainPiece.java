@@ -1,13 +1,5 @@
 package org.tapchain.core;
 
-import java.io.Serializable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import org.tapchain.core.ActorManager.IStatusHandler;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IErrorCode;
@@ -15,8 +7,16 @@ import org.tapchain.core.Chain.Tickable;
 import org.tapchain.core.Connector.InConnector;
 import org.tapchain.core.Connector.OutConnector;
 import org.tapchain.core.PathPack.InPathPack;
+import org.tapchain.core.PathPack.OutPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
-import org.tapchain.core.PathPack.*;
+
+import java.io.Serializable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @SuppressWarnings("serial")
 public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements Serializable, Tickable, Runnable {
@@ -251,7 +251,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	}
 	
 	public ChainPiece invalidate() {
-		tick(1);//1 is dummy data for onTick handlers
+		tick(Packet.HeartBeat);//1 is dummy data for onTick handlers
 		if (getParentChain() != null)
 			getParentChain().kick(this);
 		return this;
@@ -383,9 +383,9 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	}
 
 	@Override
-	public int tick(Object obj) {
+	public int tick(Packet packet) {
 		if (_statusHandler != null)
-			return _statusHandler.tickView(this, obj);
+			return _statusHandler.tickView(this, packet);
 		return 0;
 	}
 

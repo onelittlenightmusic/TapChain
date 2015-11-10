@@ -8,7 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
 import org.tapchain.realworld.TapChainView;
+
+import static java.lang.Thread.sleep;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -29,13 +32,31 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
     @Test
     public void testSomeFunction2() {
 //        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
-        view.add(view.getEditor().getFactory(), 0, 100, 300);
-        view.add(view.getEditor().getFactory(), 4);
-        assertEquals("result", "result");
+        view.add(FACTORY_KEY.ALL, 0, 100, 300);
+        sleepSecond();
+        view.add(FACTORY_KEY.ALL, 4, 250, 300);
         assertTrue(true);
     }
 
+    @Test
+    public void testSomeFunction() {
+//        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
+        view.add(FACTORY_KEY.ALL, 13, 100, 300);
+        sleepSecond();
+        view.add(FACTORY_KEY.ALL, 14, 250, 300);
+        sleepSecond();
+        view.add(FACTORY_KEY.ALL, 26, 400, 200);
+        assertTrue(true);
+    }
     @After
     public void end() {
+    }
+
+    public void sleepSecond() {
+        try {
+            sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

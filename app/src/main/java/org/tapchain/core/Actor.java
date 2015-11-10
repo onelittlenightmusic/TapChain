@@ -16,6 +16,7 @@ import org.tapchain.core.Chain.PieceErrorCode;
 import org.tapchain.core.ClassLib.ClassLibReturn;
 import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
 import org.tapchain.editor.TapChainEditor.InteractionType;
@@ -233,7 +234,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
 	private void _preInit() throws InterruptedException, ChainException {
 		if (outthis)
-			L("Family pushed").go(outputAllSimple(PathType.FAMILY, this));
+			L("Family pushed").go(outputAllSimple(PathType.FAMILY, new Packet(this, this)));
 		L("Event pulled").go(input(PathType.EVENT));
 	}
 
@@ -246,7 +247,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 	}
 
 	private void _postEnd() throws InterruptedException {
-		L("Actor.postEnd()").go(outputAllSimple(PathType.EVENT, this));
+		L("Actor.postEnd()").go(outputAllSimple(PathType.EVENT, new Packet(this, this)));
 	}
 
 	public Actor setKickFamily(boolean out) {
@@ -270,7 +271,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 	}
 
 	public Actor getParent(PathType type, boolean wait) throws ChainException {
-		Actor.Controllable rtn = (Actor.Controllable) __pull(getInPack(type));
+		Actor.Controllable rtn = (Actor.Controllable) __pull(getInPack(type)).getObject();
 		if (rtn == null)
 			throw new ChainException(this, "getParent(): null", type.getErrorCode());
 		if (wait)
@@ -350,11 +351,12 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		removeMember((Actor) cp);
 	}
 
-	protected Actor pushInActor(Object obj) {
+	protected Actor pushInActor(Object obj, String pushTag) {
 		if (obj == null)
 			return this;
 		try {
-			L("Actor.pushInActor(" + obj.toString()).go(getOutPack(PathType.OFFER).outputAllSimple(obj));
+			L("Actor.pushInActor(" + obj.toString()).go(getOutPack(PathType.OFFER).outputAllSimple(
+                    new Packet(obj, this).setTag(pushTag)));
 			if (_statusHandler != null)
 				_statusHandler.pushView(this, obj);
 		} catch (InterruptedException e) {
@@ -365,14 +367,14 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
 	protected void kick() {
 		try {
-			L("Actor.kick()").go(getOutPack(PathType.EVENT).outputAllSimple(""));
+			L("Actor.kick()").go(getOutPack(PathType.EVENT).outputAllSimple(new Packet("", this)));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 
-	Object __pull(InPathPack in) throws ChainException {
-        ArrayList<Object> rtn;
+	Packet __pull(InPathPack in) throws ChainException {
+        ArrayList<Packet> rtn;
         try {
     		rtn = in.input();
         } catch (InterruptedException e) {
@@ -387,11 +389,10 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 					"No connection for PULL()"
 			);
 		}
-		Object obj = rtn.get(0);
-		return obj;
+		return rtn.get(0);
 	}
 
-    protected Object pullInActor() throws ChainException {
+    protected Packet pullInActor() throws ChainException {
         return __pull(getInPack(PathType.OFFER));
     }
 
@@ -480,6 +481,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		boolean autoend = false;
 		// boolean auto = false;
 		boolean error = false;
+
 		final static Map<LinkType, String> linkType = new HashMap<LinkType, String>() {
 			{
 				put(LinkType.TO_CHILD, "VALUE");
@@ -488,8 +490,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 				put(LinkType.FROM_PARENT, "PARENT");
 			}
 		};
+        String nowTag = Integer.toString(getId());
+        String pullTag = "";
+        String pushTag = nowTag;
 
-		// 1.Initialization
+        // 1.Initialization
 		public Controllable() {
 			super();
 		}
@@ -526,12 +531,18 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		}
 
 		public INPUT pull() throws ChainException {
-			return L("pull()").go((INPUT) super.pullInActor());
+			Packet input = L("pull()").go(super.pullInActor());
+            pullTag = input.getTag();
+            return (INPUT)input.getObject();
 		}
 
-		public void push(OUTPUT obj) {
-			super.pushInActor(obj);
+		public void push(OUTPUT output) {
+			super.pushInActor(output, pushTag);
 		}
+
+        public void push(OUTPUT output, String pushTag) {
+            super.pushInActor(output, pushTag);
+        }
 
 		@Override
 		protected boolean preRun() throws ChainException, InterruptedException {
@@ -711,7 +722,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 			continueSignalQueue.clear();
 			return true;
 		}
-	}
+
+        public String getNowTag() {
+            return nowTag;
+        }
+    }
 
 	public enum ControllableSignal {
 		END(false, true, false), RESTART(true, true, false), USER(null, false,
@@ -1505,7 +1520,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		@Override
 		public void OnPushed(Connector p, Object obj)
 				throws InterruptedException {
-			outputAllSimple(PathType.FAMILY, obj);
+			outputAllSimple(PathType.FAMILY, new Packet(obj, this));
 		}
 	}
 
@@ -1635,7 +1650,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		VALUE o;
 		INPUT event;
 
-		public Filter() {
+        public Filter() {
 			super();
 			setAutoStart();
 			setAutoEnd();
@@ -1645,7 +1660,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
 		public Filter(Object obj, Class<?> target) {
 			super(obj, target);
-			setLoop(null);
+            setLoop(null);
 			setAutoStart();
 			setAutoEnd();
 			setControlled(false);
@@ -1656,7 +1671,9 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		public boolean actorRun(Actor act) throws InterruptedException,
 				ChainException {
 			event = pull();
+            String tmp_pushTag = funcTag(pullTag);
 			OUTPUT rtn = func(this, event);
+            pushTag = tmp_pushTag;
 			if (rtn != null) {
 				push(rtn);
 				invalidate();
@@ -1689,7 +1706,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		@Override
 		public abstract OUTPUT func(IValue<VALUE> val, INPUT in);
 
-        public String funcTac(String self, String input) {
+        public String funcTag(String input) {
             return input;
         }
 
@@ -2142,34 +2159,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		}
 	}
 
-	public static class ViewGenerator extends Generator<ViewActor> {
-		Factory<ViewActor> f = new Factory<ViewActor>();
-		BlueprintManager<ViewActor> bpmanager = new BlueprintManager<ViewActor>(
-				f);
-
-		public ViewGenerator() {
-			super();
-		}
-
-		public ViewGenerator(Blueprint b) {
-			super();
-			bpmanager.add(b);
-		}
-
-		public ViewGenerator(Class<? extends ViewActor> vcls, Object... args) {
-			super();
-			bpmanager.add(vcls).arg(args);
-		}
-
-		public void createInstance(IManager manager) {
-			f.newInstance(0, null, manager);
-		}
-
-		@Override
-		public void init(IValue<ViewActor> val) {
-			val._valueSet(new ViewActor());
-		}
-	}
 
 	public static class Exp extends FloatGenerator {
 		int count = 1;
@@ -2435,8 +2424,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 				bm.setOuterInstanceForInner(parent);
 			try {
 				outputAllSimple(PathType.FAMILY,
-						bm.addLocal((Class<? extends Actor>) obj)
-								.getBlueprint().newInstance(maker));
+						new Packet(bm.addLocal((Class<? extends Actor>) obj)
+								.getBlueprint().newInstance(maker), this));
 			} catch (ChainException e) {
 				maker.log(e.errorMessage);
 			}

@@ -8,7 +8,7 @@ import org.tapchain.core.LinkBooleanSet;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IBlueprintFocusNotification;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IEditor;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;

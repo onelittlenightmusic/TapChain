@@ -1,11 +1,12 @@
 package org.tapchain.core;
 
-import java.io.Serializable;
-
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPathListener;
+import org.tapchain.core.PathPack.InPathPack;
+import org.tapchain.core.PathPack.OutPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
-import org.tapchain.core.PathPack.*;
+
+import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public abstract class Connector implements IConnector, Serializable {
@@ -19,7 +20,7 @@ public abstract class Connector implements IConnector, Serializable {
 	IPathListener listen = null, resetHandler = null;
 	boolean end = false;
 	Hippo<Path> parentPath = new Hippo<Path>();
-	SyncQueue<Object> pushWithNoPath = new SyncQueue<Object>();
+	SyncQueue<Packet> pushWithNoPath = new SyncQueue<>();
 
 	//1.Initialization
 	public Connector() {
@@ -53,7 +54,7 @@ public abstract class Connector implements IConnector, Serializable {
 		return parentPath.isEmpty() ? null : parentPath.sync_pop();
 	}
 
-	public void setPushWithNoPath(Object obj) {
+	public void setPushWithNoPath(Packet obj) {
 		try {
 			pushWithNoPath.sync_push(obj);
 		} catch (InterruptedException e) {
@@ -126,9 +127,9 @@ public abstract class Connector implements IConnector, Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T sync_pop() throws InterruptedException {
+	public <T> Packet<T> sync_pop() throws InterruptedException {
 		try {
-			T rtn2 = ((IAxon<Packet<T>>) getQueue()).sync_pop().getObject();
+			Packet<T> rtn2 = ((IAxon<Packet<T>>) getQueue()).sync_pop();
 			return rtn2;
 		} catch (IAxon.AxonException e) {
 			return null;
@@ -136,22 +137,22 @@ public abstract class Connector implements IConnector, Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T sync_peek() throws InterruptedException, IAxon.AxonException {
-		return ((IAxon<Packet<T>>) getQueue()).sync_peek().getObject();
+	public <T> Packet<T> sync_peek() throws InterruptedException, IAxon.AxonException {
+		return ((IAxon<Packet<T>>) getQueue()).sync_peek();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> boolean sync_push(T obj) throws InterruptedException {
+	public <T> boolean sync_push(Packet<T> packet) throws InterruptedException {
 		Path parent = getParentPathNoWait();
 		if(parent != null) {
-			parent.tick(obj);
+			parent.tick(packet);
 			int intervalMs = parent.getTickInterval();
 			if (intervalMs != 0)
-				return __sync_push(new Packet<T>(obj, null, intervalMs), obj);
+				return __sync_push(((Packet)packet).setDelay(intervalMs), packet.getObject());
 		} else {
-			setPushWithNoPath(obj);
+			setPushWithNoPath(packet);
 		}
-		return __sync_push(new Packet<T>(obj, null), obj);
+		return __sync_push(packet, packet.getObject());
 	}
 
 	<T> boolean __sync_push(Packet<T> packet, T obj) throws InterruptedException {
@@ -162,17 +163,17 @@ public abstract class Connector implements IConnector, Serializable {
 		return rtn;
 	}
 
-	public <T> boolean async_push(T obj) throws InterruptedException {
+	public <T> boolean async_push(Packet<T> packet) throws InterruptedException {
 		Path parent = getParentPathNoWait();
 		if(parent != null) {
-			parent.tick(obj);
+			parent.tick(packet);
 			int intervalMs = parent.getTickInterval();
 			if (intervalMs != 0)
-				return __async_push(new Packet<T>(obj, null, intervalMs), obj);
+				return __async_push(((Packet)packet).setDelay(intervalMs), packet.getObject());
 		} else {
-			setPushWithNoPath(obj);
+			setPushWithNoPath(packet);
 		}
-		return __async_push(new Packet<T>(obj, null), obj);
+		return __async_push(packet, packet.getObject());
 	}
 
 	public <T> boolean __async_push(Packet<T> packet, T obj) throws InterruptedException {
@@ -319,8 +320,8 @@ public abstract class Connector implements IConnector, Serializable {
 		public void end() {
 		}
 		@SuppressWarnings("unchecked")
-		public <T> T sync_pop() throws InterruptedException {
-			return (T)cache;
+		public <T> Packet<T> sync_pop() throws InterruptedException {
+			return new Packet((T)cache, null);
 		}
 
 	}

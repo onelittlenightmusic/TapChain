@@ -1,17 +1,17 @@
 package org.tapchain.core;
 
+import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.Chain.IPathListener;
+import org.tapchain.core.Connector.DummyConnector;
+import org.tapchain.core.Connector.InConnector;
+import org.tapchain.core.Connector.OutConnector;
+import org.tapchain.core.PathPack.OutPathPack.Output;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-
-import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Connector.InConnector;
-import org.tapchain.core.Connector.OutConnector;
-import org.tapchain.core.Connector.DummyConnector;
-import org.tapchain.core.PathPack.OutPathPack.Output;
 
 @SuppressWarnings("serial")
 public class PathPack<T extends Connector> extends ArrayList<T> implements Serializable {
@@ -78,17 +78,17 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
     }
 
     public static class OutPathPack extends PathPack<OutConnector> {
-        public static enum Output implements PathPackType {
+        public enum Output implements PathPackType {
             NORMAL, HIPPO, SYNC, TOGGLE
         }
 
-        SyncQueue<Object> queue;
+        SyncQueue<Packet> queue;
         Boolean lock = false;
         Output defaultType = Output.NORMAL;
 
         OutPathPack(Piece _parent) {
             super(_parent);
-            queue = new SyncQueue<Object>();
+            queue = new SyncQueue<Packet>();
         }
 
         public void reset() {
@@ -107,7 +107,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             OutConnector rtn = new OutConnector(parent, Object.class, this, (type != null) ? type : defaultType);
             parent.L("COPP#addNewPath").go(String.format("NewPath = %s", rtn.type));
             addPath(rtn);
-            for (Object o : queue) {
+            for (Packet o : queue) {
                 try {
                     rtn.sync_push(o);
                 } catch (InterruptedException e) {
@@ -133,14 +133,14 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             return;
         }
 
-        public boolean outputAllSimple(Object obj) throws InterruptedException {
+        public boolean outputAllSimple(Packet packet) throws InterruptedException {
             synchronized (lock) {
                 while (lock) lock.wait();
             }
-            ArrayList<Object> rtn = new ArrayList<Object>();
+            ArrayList<Packet> rtn = new ArrayList<>();
             int size = size();
             for (int i = 0; i < size; i++)
-                rtn.add(obj);
+                rtn.add(packet);
             if (queue.size() == COPY_QUEUE_MAX)
                 try {
                     queue.sync_pop();
@@ -148,12 +148,12 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
                     e.printStackTrace();
                     return false;
                 }
-            if (obj != null)
-                queue.sync_push(obj);
+            if (packet != null)
+                queue.sync_push(packet);
             return outputAll(rtn);
         }
 
-        public boolean outputAll(ArrayList<?> ar) throws InterruptedException {
+        public boolean outputAll(ArrayList<Packet> ar) throws InterruptedException {
             if (isEmpty()) return false;
             int i = 0;
             boolean rtn = false;
@@ -162,7 +162,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             return rtn;
         }
 
-        public void waitOutput(ArrayList<Object> rtn) throws InterruptedException {
+        public void waitOutput(ArrayList<Packet> rtn) throws InterruptedException {
             while (!outputAll(rtn)) {
                 synchronized (this) {
                     wait();
@@ -170,7 +170,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             }
         }
 
-        public void waitOutputAll(Object rtn) throws InterruptedException {
+        public void waitOutputAll(Packet rtn) throws InterruptedException {
             while (!outputAllSimple(rtn)) {
                 synchronized (this) {
                     wait();
@@ -188,7 +188,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
         IPathListener listen, userlisten, resetHandler;
         SyncQueue<Connector> order_first;
         Iterator<InConnector> now_count = null;
-        SyncQueue<Object> inner_request = new SyncQueue<Object>();
+        SyncQueue<Packet> inner_request = new SyncQueue<>();
 
         public InPathPack(Piece _parent) {
             super(_parent);
@@ -212,7 +212,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             return rtn;
         }
 
-        public ArrayList<Object> inputPeek() throws InterruptedException, IAxon.AxonException {
+        public ArrayList<Packet> inputPeek() throws InterruptedException, IAxon.AxonException {
             switch (inputType) {
                 case ALL:
                     return _inputPeekAll();
@@ -220,12 +220,12 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
                     return _inputPeekFirst();
                 case COUNT:
                 default:
-                    return new ArrayList<Object>();
+                    return new ArrayList<Packet>();
             }
         }
 
-        private ArrayList<Object> _inputPeekAll() throws InterruptedException, IAxon.AxonException {
-            ArrayList<Object> rtn = new ArrayList<Object>();
+        private ArrayList<Packet> _inputPeekAll() throws InterruptedException, IAxon.AxonException {
+            ArrayList<Packet> rtn = new ArrayList<>();
             if (isEmpty())
                 if (inner_request.isEmpty()) {
                     return rtn;
@@ -238,14 +238,14 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             return rtn;
         }
 
-        private ArrayList<Object> _inputPeekFirst() throws InterruptedException, IAxon.AxonException {
+        private ArrayList<Packet> _inputPeekFirst() throws InterruptedException, IAxon.AxonException {
             Connector p = order_first.sync_peek();
-            ArrayList<Object> rtn = new ArrayList<Object>();
+            ArrayList<Packet> rtn = new ArrayList<>();
             rtn.add(p.sync_peek());
             return rtn;
         }
 
-        public ArrayList<Object> input() throws InterruptedException {
+        public ArrayList<Packet> input() throws InterruptedException {
             parent.L(String.format("InPack(%s)@input Start", ptype.toString())).go("WAITING");
             switch (inputType) {
                 case ALL:
@@ -255,13 +255,13 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
                 case COUNT:
                     return _inputCount();
                 default:
-                    return new ArrayList<Object>();
+                    return new ArrayList<Packet>();
             }
         }
 
-        private ArrayList<Object> _inputAll() throws InterruptedException {
+        private ArrayList<Packet> _inputAll() throws InterruptedException {
             parent.L(String.format("InPack(%s)@inputAll Start", ptype.toString())).go("WAITING");
-            ArrayList<Object> rtn = new ArrayList<Object>();
+            ArrayList<Packet> rtn = new ArrayList<Packet>();
             if (isEmpty()) {
                 rtn.addAll(inner_request);
                 inner_request.clear();
@@ -272,9 +272,9 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             return rtn;
         }
 
-        private ArrayList<Object> _inputFirst() throws InterruptedException {
+        private ArrayList<Packet> _inputFirst() throws InterruptedException {
             parent.L(String.format("InPack(%s)@inputFirst Start", ptype.toString())).go("WAITING");
-            ArrayList<Object> rtn = new ArrayList<Object>();
+            ArrayList<Packet> rtn = new ArrayList<>();
             if (isEmpty() && order_first.isEmpty())
                 return rtn;
             SyncQueue<Connector> _pushedPath = order_first;
@@ -292,8 +292,8 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             return rtn;
         }
 
-        private ArrayList<Object> _inputCount() throws InterruptedException {
-            ArrayList<Object> rtn = new ArrayList<Object>();
+        private ArrayList<Packet> _inputCount() throws InterruptedException {
+            ArrayList<Packet> rtn = new ArrayList<>();
             if (isEmpty()) return rtn;
             if (now_count == null || !now_count.hasNext()) {
                 now_count = iterator();
@@ -357,7 +357,7 @@ public class PathPack<T extends Connector> extends ArrayList<T> implements Seria
             if (listen != null)
                 listen.OnPushed(new DummyConnector(obj), obj);
             else
-                inner_request.sync_push(obj);
+                inner_request.sync_push(new Packet(obj, null));
         }
 
     }

@@ -1,6 +1,7 @@
 package org.tapchain;
 
 import org.tapchain.core.Actor;
+import org.tapchain.core.Packet;
 import org.tapchain.core.WorldPoint;
 @SuppressWarnings("serial")
 public class TapChainGoalTap extends ActorTap {
@@ -10,7 +11,7 @@ public class TapChainGoalTap extends ActorTap {
 		setCenter(new WorldPoint(-300f, -300f));
 	}
 	@Override
-	public int onTick(Actor p, Object obj) {
+	public int onTick(Actor p, Packet obj) {
 		status++;
 		interrupt(ControllableSignal.END);
 		return 1;

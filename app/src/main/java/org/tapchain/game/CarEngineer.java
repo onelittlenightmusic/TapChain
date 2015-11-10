@@ -8,7 +8,7 @@ import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.PathType;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IValue;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 
 public class CarEngineer {

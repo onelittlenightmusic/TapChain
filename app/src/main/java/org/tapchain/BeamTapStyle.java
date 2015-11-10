@@ -4,7 +4,7 @@ import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
 import org.tapchain.core.LinkType;
-import org.tapchain.core.ViewActor;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.WorldPoint;

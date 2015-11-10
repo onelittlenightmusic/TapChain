@@ -79,6 +79,7 @@ import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IWindow;
 import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
 import org.tapchain.game.ISensorView;
 
 import java.io.FileInputStream;
@@ -142,7 +143,7 @@ public class TapChainView extends FragmentActivity implements
 			getCanvas().matrix.invert(getCanvas().inverse);
 			Parcelable[] p = savedInstanceState.getParcelableArray(V);
 			int i = 0;
-			for (IActorTap v : getEditor().manager.getTaps()) {
+			for (IActorTap v : getEditor().editorManager.getTaps()) {
 				v.setCenter(((AndroidView) p[i++]).getCenter());
 			}
 		}
@@ -420,7 +421,7 @@ public class TapChainView extends FragmentActivity implements
                 e.printStackTrace();
             }
         else
-			add(getEditor().getFactory(), data.getIntExtra("TEST", 0), 0f, 0f);
+			add(FACTORY_KEY.ALL, data.getIntExtra("TEST", 0), 0f, 0f);
 		return;
 	}
 
@@ -431,22 +432,22 @@ public class TapChainView extends FragmentActivity implements
 			viewControl.setVisibility(View.VISIBLE);
 	}
 	
-	public void add(Factory<Actor> f, int code) {
-		getCanvas().onAdd(f, code);
+	public void add(TapChainEditor.FACTORY_KEY key, int code) {
+		getCanvas().onAdd(key, code);
 	}
 
-	public void add(Factory<Actor> f, int code, float x, float y) {
-		getCanvas().onAdd(f, code, x, y);
+	public void add(FACTORY_KEY key, int code, float x, float y) {
+		getCanvas().onAdd(key, code, x, y);
 	}
 
-	public void add(Factory<Actor> f, int code, float x, float y, float dx,
+	public void add(FACTORY_KEY key, int code, float x, float y, float dx,
 			float dy) {
 		// Log.w("test", "addFocusable(xy, dxy) called");
-		getCanvas().onAdd(f, code, x, y, dx, dy);
+		getCanvas().onAdd(key, code, x, y, dx, dy);
 	}
 
-	public void dummyAdd(Factory<Actor> f, int num, float x, float y) {
-		getCanvas().onDummyAdd(f, num, x, y);
+	public void dummyAdd(FACTORY_KEY key, int num, float x, float y) {
+		getCanvas().onDummyAdd(key, num, x, y);
 	}
 
 	public void dummyMoveTo(float x, float y) {
@@ -492,7 +493,7 @@ public class TapChainView extends FragmentActivity implements
 		ImageView ShowingDisabled;
 		TapChainView act = null;
 		TabHost tabH;
-		ArrayList<Factory<Actor>> factoryList = new ArrayList<Factory<Actor>>();
+		ArrayList<FACTORY_KEY> factoryList = new ArrayList<>();
 
 		public GridFragment() {
 			super();
@@ -539,11 +540,11 @@ public class TapChainView extends FragmentActivity implements
 
 			// setup must be called if the tabhost is programmatically created.
 			tabH.setup();
-			addTab(tabH, "TS1", "[ + ]", act.getEditor().getFactory(),
+			addTab(tabH, "TS1", "[ + ]", FACTORY_KEY.ALL,
 					0xaa000000, R.drawable.plus);
-			addTab(tabH, "TS2", "[ V ]", act.getEditor().getRecentFactory(),
+			addTab(tabH, "TS2", "[ V ]", FACTORY_KEY.RECENT,
 					0xaa220000, R.drawable.history);
-			addTab(tabH, "TS3", "[ <=> ]", act.getEditor().getRelatives(),
+			addTab(tabH, "TS3", "[ <=> ]", FACTORY_KEY.RELATIVES,
 					0xaa000022, R.drawable.relatives);
 			ImageView img = new ImageView(act);
 			img.setImageDrawable(getResources()
@@ -569,17 +570,17 @@ public class TapChainView extends FragmentActivity implements
 		}
 
 		public void addTab(TabHost h, String _tag, String label,
-				final Factory<Actor> f, final int color, int resource) {
+				final FACTORY_KEY key, final int color, int resource) {
 			TabSpec ts = h.newTabSpec(_tag);
 			ts.setIndicator(""/* label */, getResources().getDrawable(resource));
 			ts.setContent(new TabHost.TabContentFactory() {
 				public View createTabContent(String tag) {
-					return new ActorSelector(act, f, color);
+					return new ActorSelector(act, key, color);
 				}
 			});
 			// ts1.setContent(new Intent(this,Tab1.class));
 			h.addTab(ts);
-			factoryList.add(f);
+			factoryList.add(key);
 			return;
 
 		}
@@ -663,7 +664,7 @@ public class TapChainView extends FragmentActivity implements
 		
 		public Factory<Actor> getCurrentFactory() {
 			int tabNum = tabH.getCurrentTab();
-			return factoryList.get(tabNum);
+			return act.getEditor().getFactory(factoryList.get(tabNum));
 		}
 		
 		public void setCurrentFactory(int tabNum) {
@@ -673,52 +674,53 @@ public class TapChainView extends FragmentActivity implements
 	}
 
 	public static class ActorSelector extends GridView {
-		ActorSelector(final Activity act, Factory<Actor> f, int color) {
+		ActorSelector(final Activity act, FACTORY_KEY key, int color) {
 			super(act);
 			setBackgroundColor(color);
 			setColumnWidth(100);
 			setVerticalSpacing(0);
 			setHorizontalSpacing(0);
 			setNumColumns(GridView.AUTO_FIT);
-			if (f != null) {
-				final ViewAdapter va = new ViewAdapter(act, f);
-				setAdapter(va);
-				f.setNotifier(new ValueChangeNotifier() {
-
-					@Override
-					public void notifyView() {
-						va.notifyView();
-					}
-
-					@Override
-					public void invalidate() {
-						invalidateOwn();
-					}
-					
-				});
-			}
+            setAdapter(new ViewAdapter(act, this, key));
 		}
-		public void invalidateOwn() {
-			((Activity) getContext()).runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					invalidate();
-				}
-			});
-		}
-
 	}
 
 	HashMap<String, ActorImageButton> buttons = new HashMap<String, ActorImageButton>();
 	public static class ViewAdapter extends BaseAdapter {
 		private Factory<Actor> f;
+        private FACTORY_KEY key;
 		private TapChainView act;
+        private GridView _parent;
 
-		public ViewAdapter(Context c, Factory<Actor> f) {
+		public ViewAdapter(Context c, GridView parent, FACTORY_KEY k) {
 			act = (TapChainView) c;
-			this.f = f;
+            key = k;
+            _parent = parent;
+			f = ((TapChainView)c).getEditor().getFactory(key);
+            f.setNotifier(new ValueChangeNotifier() {
+
+                @Override
+                public void notifyChange() {
+                    notifyView();
+                }
+
+                @Override
+                public void invalidate() {
+                    invalidateOwn();
+                }
+
+            });
 		}
-		
+
+        public void invalidateOwn() {
+            act.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    _parent.invalidate();
+                }
+            });
+        }
+
 		public void notifyView() {
 			act.runOnUiThread(new Runnable() {
 				@Override
@@ -732,7 +734,7 @@ public class TapChainView extends FragmentActivity implements
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null || convertView.getTag() == null
 					|| !convertView.getTag().equals(f.get(position).getTag())) {
-					ActorImageButton v = new ActorImageButton(act, f, position);
+					ActorImageButton v = new ActorImageButton(act, key, position);
 					((TapChainView)act).buttons.put((String)v.getTag(), v);
 					convertView = v;
 			}
@@ -760,11 +762,11 @@ public class TapChainView extends FragmentActivity implements
 			View.OnTouchListener, OnGestureListener {
 		OverlayPopup p;
 		final TapChainView act;
-		final Factory<Actor> factory;
+		final FACTORY_KEY factory;
 		final int num;
 		private GestureDetector touchDetector;
 
-		ActorImageButton(Context c, Factory<Actor> f, final int j) {
+		ActorImageButton(Context c, FACTORY_KEY f, final int j) {
 			super(c, f, j);
 			registerToFactory();
 			act = (TapChainView) c;
@@ -879,7 +881,7 @@ public class TapChainView extends FragmentActivity implements
 					LayoutParams.WRAP_CONTENT);
 		}
 
-		public void setPopupView(Factory<?> f, int i) {
+		public void setPopupView(FACTORY_KEY f, int i) {
 			v = new ActorImage(cxt, f, i);
 			setContentView(v);
 			// The following line is to prevent PopupWindow from drawing odd
@@ -911,11 +913,10 @@ public class TapChainView extends FragmentActivity implements
 		AndroidView v;
 		IBlueprint b;
 		Drawable a;
-		ActorImage(Context c, Factory<?> f, final int j) {
+		ActorImage(Context c, FACTORY_KEY key, final int j) {
 			super(c);
 			try {
-				if (f == null)
-					f = ((TapChainView) c).getEditor().getFactory();
+                Factory<Actor> f = ((TapChainView) c).getEditor().getFactory(key);
 				v = (AndroidView) f.getViewBlueprint(j).newInstance(null);
                 if(f.size() > j)
     				b = f.get(j);
@@ -1098,31 +1099,24 @@ public class TapChainView extends FragmentActivity implements
 
 		int index = 0;
 
-		public void onAdd(Factory<Actor> f, int code) {
-			getEditor().onAdd(f, code, null);
+		public void onAdd(FACTORY_KEY key , int code) {
+			getEditor().onAdd(key, code, null);
 		}
 		
-		public void onAdd(Factory<Actor> f, int code, float x, float y) {
-			getEditor().onAdd(f, code, getPosition(x, y)).getValue();
+		public void onAdd(FACTORY_KEY key, int code, float x, float y) {
+			getEditor().onAdd(key, code, getPosition(x, y));
 		}
 
-		public void onAdd(Factory<Actor> f, int code, float x, float y,
+		public void onAdd(FACTORY_KEY key, int code, float x, float y,
 				float dx, float dy) {
-			IActorTap added = getEditor().onAdd(f, code, getPosition(x, y))
-					.getValue();
+			IActorTap added = getEditor().onAdd(key, code, getPosition(x, y))
+					.getTap();
 			getEditor().captureTap(added);
 			getEditor().onFling((int) dx, (int) dy);
 		}
 
-		public void onDummyAdd(Factory<Actor> f, int num, float x, float y) {
-			if (f.getSize() > num) {
-				try {
-					getEditor().onDummyAdd(getEditor().createView(f, num, getEditor().editTap()),
-							getPosition(x, y));
-				} catch (ChainException e) {
-					getEditor().editTap().error(e);
-				}
-			}
+		public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {
+					getEditor().onDummyAdd(key, num, getPosition(x, y));
 		}
 
 		public void onDummyMoveTo(float x, float y) {

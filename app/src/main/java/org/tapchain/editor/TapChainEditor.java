@@ -1,12 +1,6 @@
 package org.tapchain.editor;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import android.util.Log;
 
 import org.tapchain.ActorTap;
 import org.tapchain.PaletteSort;
@@ -14,26 +8,24 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Mover;
 import org.tapchain.core.ActorBlueprintManager;
 import org.tapchain.core.ActorInputException;
-import org.tapchain.core.ActorPullException;
-import org.tapchain.core.LinkType;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.ActorPullException;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.BlueprintInitialization;
 import org.tapchain.core.BlueprintManager;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.PathType;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IActor;
+import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintInitialization;
 import org.tapchain.core.IDown;
 import org.tapchain.core.IErrorHandler;
 import org.tapchain.core.ILockedScroll;
-import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.ILogHandler;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
@@ -42,21 +34,30 @@ import org.tapchain.core.IRelease;
 import org.tapchain.core.IScrollable;
 import org.tapchain.core.ISelectable;
 import org.tapchain.core.IValue;
+import org.tapchain.core.LinkType;
+import org.tapchain.core.Packet;
+import org.tapchain.core.PathType;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
 
-import android.util.Log;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		IErrorHandler, IActorEditor {
 	IWindow win = null;
-	public EditorManager manager = new EditorManager();
+	public EditorManager editorManager = new EditorManager();
+    HashMap<FACTORY_KEY, Factory<Actor>> factories = new HashMap<>();
 	Factory<Actor> factory = new Factory<Actor>(),
 			recent = new Factory<Actor>(), relatives = new Factory<Actor>(),
 			goalFactory = new Factory<Actor>();
-	protected ActorBlueprintManager<Actor> blueprintManager = new ActorBlueprintManager<Actor>(
+	protected ActorBlueprintManager<Actor> blueprintManager = new ActorBlueprintManager<>(
 			factory), goalBlueprintManager = null;
 	private ITap selectedTap = null;
 	private ITap previousTap = null;
@@ -70,14 +71,17 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	protected List<Geometry> geos = new ArrayList<Geometry>();
 	private IPoint nextConnectivityPoint = null;
     ArrayList<IActorTap> family = new ArrayList<IActorTap>();
+    public enum FACTORY_KEY {
+        ALL, RECENT, RELATIVES
+    }
 
 	// 1.Initialization
 	protected TapChainEditor(IWindow w) {
 		setWindow(w);
 		goalBlueprintManager = new ActorBlueprintManager<Actor>(goalFactory);
-		manager.setAllCallback(this);
-		manager.setPathInterval(1000);
-		manager.init();
+		editorManager.setAllCallback(this);
+		editorManager.setPathInterval(1000);
+		editorManager.init();
 		editTap()
 			.add(move)
 			.student(move_ef)
@@ -93,6 +97,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			.teacher(move).save();
 		setLog(this);
 		setError(this);
+        factories.put(FACTORY_KEY.ALL, factory);
+        factories.put(FACTORY_KEY.RECENT, recent);
+        factories.put(FACTORY_KEY.RELATIVES, relatives);
 	}
 
 	public void reset() {
@@ -140,6 +147,19 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return factory;
 	}
 
+    public Factory<Actor> getFactory(FACTORY_KEY key) {
+        switch(key) {
+            case ALL:
+                return factory;
+            case RECENT:
+                return recent;
+            case RELATIVES:
+                return relatives;
+            default:
+                return factory;
+        }
+    }
+
 	public Factory<Actor> getRecentFactory() {
 		return recent;
 	}
@@ -154,22 +174,22 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	@Override
 	public ActorManager editTap() {
-		return manager.getTapManager()/*.newSession()*/;
+		return editorManager.getTapManager()/*.newSession()*/;
 	}
 
 	@Override
 	public ActorManager edit() {
-		return manager/*.newSession()*/;
+		return editorManager/*.newSession()*/;
 	}
 
     @Override
 	public Collection<IActorTap> getTaps() {
-		return manager.getTaps();
+		return editorManager.getTaps();
 	}
 
     @Override
 	public Collection<Actor> getActors() {
-		return manager.getActors();
+		return editorManager.getActors();
 	}
 
 	public Collection<IActorTap> getTaps(IPoint pt) {
@@ -207,7 +227,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	@Override
 	public IActorTap toTap(Actor p) {
-		return manager.getTap(p);
+		return editorManager.getTap(p);
 	}
 
 	@Override
@@ -229,13 +249,13 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public void setLog(ILogHandler l) {
-		manager.getTapManager().setLog(l);
-		manager.setLog(l);
+		editorManager.getTapManager().setLog(l);
+		editorManager.setLog(l);
 	}
 
 	public void setError(IErrorHandler err) {
-		manager.getTapManager().setError(err);
-		manager.setError(err);
+		editorManager.getTapManager().setError(err);
+		editorManager.setError(err);
 		blueprintManager.setError(err);
 		goalBlueprintManager.setError(err);
 	}
@@ -245,8 +265,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		blueprintManager.setOuterInstanceForInner(s.getOuter());
 		blueprintManager.setDefaultView(s.getView());
 		Blueprint connbp = blueprintManager.createTapBlueprint(s.getConnect());
-		manager.setPathBlueprint(connbp);
-		manager.setActorConnectHandler(s.getConnectHandler());
+		editorManager.setPathBlueprint(connbp);
+		editorManager.setActorConnectHandler(s.getConnectHandler());
 		goalBlueprintManager.setOuterInstanceForInner(s.getOuter());
 	}
 
@@ -262,11 +282,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	@Override
 	public void kickTapDraw(ITap startTap2) {
-		manager.getTapManager().getChain().kick(startTap2);
+		editorManager.getTapManager().getChain().kick(startTap2);
 	}
 
 	public boolean kickUserDraw(IPiece pc) {
-		manager.getChain().kick(pc);
+		editorManager.getChain().kick(pc);
 		return true;
 	}
 
@@ -427,17 +447,17 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	private void _onFlingBackground(final float vx, final float vy) {
 		// Background center starts moving and slows down gradually.
 		editTap().addActor(new IActor() {
-			float delta = 0.03f;
-			int t = 0;
+            float delta = 0.03f;
+            int t = 0;
 
-			@Override
-			public boolean actorRun(Actor act) {
-				win.move(delta * -vx, delta * -vy);
-				delta -= 0.003f;
-				act.invalidate();
-				return ++t < 10;
-			}
-		}).save();
+            @Override
+            public boolean actorRun(Actor act) {
+                win.move(delta * -vx, delta * -vy);
+                delta -= 0.003f;
+                act.invalidate();
+                return ++t < 10;
+            }
+        }).save();
 	}
 
 	public boolean onSingleTapConfirmed() {
@@ -530,7 +550,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	/**
 	 * Create an IPiece instance and addFocusable to Chain.
 	 * 
-	 * @param f
+	 * @param key
 	 *            the factory in which IPiece blueprint is registered.
 	 * @param num
 	 *            the number of the IPiece blueprint
@@ -539,45 +559,52 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	 * @return the IPiece instance created and the Tap instance associated with
 	 *         the IPiece instance
 	 */
-	public Map.Entry<Actor, IActorTap> onAdd(Factory<Actor> f, int num,
+	public EditorReturn onAdd(FACTORY_KEY key, int num,
 			IPoint pos) {
-		IActorTap rtn = null;
+        Factory<Actor> f = factories.get(key);
 		// Invalid parameter
+        if (num >= f.getSize())
+            return null;
 		if (pos == null) {
 			pos = getNextPos();
 			if (pos == null)
 				return null;
 		}
-		if (num >= f.getSize())
-			return null;
+
 		// Create new instance piece
-		ActorManager man = manager;
 		IPoint setPos = checkRoom(pos);
-		Actor p = f.newInstance(num, setPos, man);
-		if (p == null) {
+        IBlueprint b = f.get(num);
+        EditorReturn rtn = add(b, setPos);
+        captureTap(rtn.getTap());
+		if (rtn == null) {
 			log("Chain", "Fatal Error: no instance");
 			return null;
 		}
-		IBlueprint b = f.get(num);
-		log("test", String.format("%s's onAdd started", b.getTag()));
 		// Get PieceView
-		rtn = toTap(p);
-		if (f == getFactory())
+		if (key == FACTORY_KEY.ALL)
 			getRecentFactory().Register(b);
-		captureTap(rtn);
-		if (rtn.getSharedHandler() != null)
-			rtn.getSharedHandler().onAdd(p, rtn, b, pos);
-		else
-			log("test", "EventHandler is null");
-		rtn.postAdd(p, rtn, b, pos);
 		touched = pos;
 		onUp();
-		man.save();
-		log("test", String.format("%s's onAdd ended", b.getTag()));
-		return new AbstractMap.SimpleEntry<Actor, IActorTap>(p, rtn);
+		return rtn;
 	}
 
-	public ActorTap createView(Factory<Actor> f, int num, ActorManager manager)
+    EditorReturn add(IBlueprint<Actor> blueprint, IPoint iPoint) {
+        try {
+            EditorReturn rtn = editorManager.addAndInstallView(blueprint, iPoint);
+            editorManager.save();
+            Actor actor = rtn.getActor();
+            IActorTap tap = rtn.getTap();
+            if (tap.getSharedHandler() != null)
+                tap.getSharedHandler().onAdd(actor, tap, blueprint, iPoint);
+            tap.postAdd(actor, tap, blueprint, iPoint);
+            return rtn;
+        } catch (ChainException e) {
+            editorManager.error(e);
+        }
+        return null;
+    }
+
+    public ActorTap createView(Factory<Actor> f, int num, ActorManager manager)
 			throws ChainException {
 		ActorTap tp = (ActorTap) f.getViewBlueprint(num).newInstance(manager);
 		return tp;
@@ -598,8 +625,14 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		kickTapDraw(startTap2);
 	}
 
-	public boolean onDummyAdd(ActorTap t, IPoint iPoint) {
-		dummyTap = t;
+	public boolean onDummyAdd(FACTORY_KEY key, int num, IPoint iPoint) {
+        ActorTap t = null;
+        try {
+            t = createView(getFactory(key), num, editTap());
+        } catch (ChainException e) {
+            editTap().error(e);
+        }
+        dummyTap = t;
 		editTap().save();
 		IPoint setPos = checkRoom(iPoint);
 		dummyTap.setCenter(setPos);
@@ -652,8 +685,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 
 	public void Compile() {
-		manager.getChain().getOperator().reset();
-		manager.getChain().setCallback(new IControlCallback() {
+		editorManager.getChain().getOperator().reset();
+		editorManager.getChain().setCallback(new IControlCallback() {
 			public boolean onCalled() {
 				return true;
 			}
@@ -662,10 +695,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public void start() {
-		if (manager.getChain() == null) {
+		if (editorManager.getChain() == null) {
 			return;
 		}
-		manager.getChain().getOperator().start();
+		editorManager.getChain().getOperator().start();
 		return;
 	}
 
@@ -820,7 +853,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 
 	public interface Tickable<T> {
-		public int onTick(T t, Object obj);
+		public int onTick(T t, Packet obj);
 	}
 
 	public interface Pushable<T> {

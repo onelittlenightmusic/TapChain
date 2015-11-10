@@ -1,15 +1,16 @@
 package org.tapchain;
 
+import android.util.Log;
+
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
+import org.tapchain.core.Packet;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IPathTap;
-
-import android.util.Log;
 
 public class PathTap extends AndroidView implements IPathTap {
 		IPath myPath = null;
@@ -21,20 +22,20 @@ public class PathTap extends AndroidView implements IPathTap {
 		}
 
 		@Override
-		public int onTick(IPath p, Object obj) {
+		public int onTick(IPath p, Packet obj) {
 			return 1;
 		}
 		
 		@Override
 		public void onAdd(ActorManager maker) {
-//			manager = maker;
+//			editorManager = maker;
 			TapLib.setTap(this);
 		}
 		
 		@Override
 		public PathTap end() {
 			super.end();
-//			manager.remove(this);
+//			editorManager.remove(this);
 			TapLib.removeTap(this);
 			return this;
 		}

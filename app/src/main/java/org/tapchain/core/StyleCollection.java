@@ -1,5 +1,7 @@
 package org.tapchain.core;
 
+import org.tapchain.core.actors.ViewActor;
+
 public class StyleCollection {
 	Class<? extends ViewActor> view;
 	Class<? extends IPiece> connect;

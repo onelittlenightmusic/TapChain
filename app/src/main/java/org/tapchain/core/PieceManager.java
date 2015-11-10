@@ -1,10 +1,10 @@
 package org.tapchain.core;
 
-import java.util.Collection;
-
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.ChainController.IControlCallback;
+
+import java.util.Collection;
 
 public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	PIECE mark = null;
@@ -56,15 +56,6 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return this;
 	}
 
-	public PieceManager installView(PIECE bp, Blueprint v, IPoint wp)
-			throws ChainException {
-		return this;
-	}
-
-	public PieceManager setPieceView(Blueprint v) throws ChainException {
-		return this;
-	}
-
 	// 3.Changing state
 	@SuppressWarnings("unchecked")
 	@Override
@@ -93,32 +84,10 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 			logLocal("__canConnect to-class is null");
 			return null;
 		}
-//		if(pIn == null || tIn == null || pOut == null || tOut == null) {
-//			logLocal("__canConnect a param is null %s");
-//			return null;
-//		}
-			
-//		for (ClassEnvelope clsIn : classesIn) {
-//			logLocal("Connection(Class check) Attempt: %s[%s](%s IN)",
-//					pIn.toString(),
-//					clsIn.toString(),
-//					tIn.toString());
-//		}
-//		for (ClassEnvelope clsOut : classesOut)
-//			logLocal("Connection(Class check) Attempt: %s[%s](%s OUT)",
-//					pOut.toString(),
-//					clsOut.toString(),
-//					tOut.toString());
+
 		for (ClassEnvelope from_cls : classesIn)
 			for (ClassEnvelope to_cls : classesOut) {
 				if (from_cls.isAssignableFrom(to_cls)) {
-					// Log.w("test",
-					// String.format("Connection succeeded: %s out %s %s==> %s in %s %s",
-					// piece_to.getClass().getSimpleName(), type_to.toString(),
-					// to_cls.getHeadClass().getSimpleName(),
-					// piece_from.getClass().getSimpleName(),
-					// type_from.toString(),
-					// from_cls.getHeadClass().getSimpleName()));
 					logLocal("__canConnect Succeeded %s",
 							toString(pIn, tIn, pOut, tOut));
 					return from_cls;
@@ -183,10 +152,6 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 
 			path.start();
 			return io;
-//		} catch (NullPointerException e1) {
-//			error(new ChainException(this, "Append: Null Appender"));
-//			return null;
-//		}
 	}
 
 	public PieceManager student(PIECE cp, PIECE... args) {
@@ -264,10 +229,6 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return this;
 	}
 
-//	public PieceManager _func(IPiece arg) {
-//		add(new Actor.HeapToFamily());
-//		return _in();
-//	}
 
 	@Override
 	public PieceManager remove(PIECE bp) {
@@ -278,11 +239,6 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	public PieceManager refreshPieceView(PIECE bp, PIECE obj) {
 		return this;
 	}
-
-//	public PieceManager creater_student() {
-//		student(new Actor.ManagerPiece(getPiece()));
-//		return this;
-//	}
 
 
 
@@ -312,58 +268,6 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	// 4.Termination: none
 	// 5.Local classes: none
 
-	/*
-	 * public Manager and(IPiece cp, IPiece... args) { if (pt != null)
-	 * __next(pt, cp, PackType.PASSTHRU); addFocusable(cp, args); return this; }
-	 */// public ChainManager next2Heap(PieceBody cp) {
-		// if (pt != null)
-	// __next(pt, cp, PackType.EVENT);
-	// addFocusable(cp);
-	// return this;
-	// }
-
-	// public ChainManager child(PieceBody cp) {
-	// if (pt != null)
-	// connect(cp, PackType.PASSTHRU, pt, PackType.FAMILY);
-	// addFocusable(cp);
-	// return this;
-	// }
-
-	// public ChainManager rightSync(PieceBody cp) {
-	// if (pt != null) {
-	// __side(pt, cp, PackType.OFFER);
-	// __side(cp, pt, PackType.OFFER);
-	// }
-	// addFocusable(cp);
-	// return this;
-	// }
-
-	// ChainManager __front(PieceBody cp, PieceBody target) {
-	// if (pt != null)
-	// connect(cp, PackType.EVENT, pt, PackType.FAMILY);
-	// return this;
-	// }
-	//
-	// public ChainManager front(PieceBody cp) {
-	// __front(cp, pt);
-	// addFocusable(cp);
-	// return this;
-	// }
-	// ChainManager prevFromHeap(PieceBody cp) {
-	// connect(pt, PackType.PASSTHRU, cp, PackType.OFFER);
-	// addFocusable(cp);
-	// return this;
-	// }
-
-	/*
-	 * public Manager reset(IPiece cp, IPiece... args) {
-	 * connect(pt,PackType.FAMILY, cp, PackType.EVENT); addFocusable(cp, args); return
-	 * this; }
-	 */
-	// public BlueprintManager makeBlueprint() {
-	// return null;
-	// }
-	//
 
 	public void logLocal(String format, String... l) {
 //		Log.w("PieceManager", String.format(format, l));
