@@ -1,8 +1,8 @@
 package org.tapchain.core;
 
-import java.util.List;
-
 import org.tapchain.core.Actor.Filter;
+
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class TapMath {
@@ -34,7 +34,8 @@ public class TapMath {
 		IPoint rtn = new WorldPoint();
 		int i = 0;
 		for(IPoint pt: list) {
-			rtn.plus(pt.multiplyNew(/*c = */bezier_coeff(alpha,i++)));
+            float f = bezier_coeff(alpha,i++);
+			rtn.plus(f*pt.x(), f*pt.y());
 		}
 		return rtn;
 	}

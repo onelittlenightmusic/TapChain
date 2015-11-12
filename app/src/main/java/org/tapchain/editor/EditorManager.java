@@ -43,8 +43,8 @@ public class EditorManager extends ActorManager {
 	public EditorManager() {
 		super();
 		tapManager = new ActorManager();
-		getTapManager().createChain(40).getChain().setName("System");
-		createChain(80).getChain().setAutoEnd(false).setName("User");
+		getTapManager().createChain(50).getChain().setName("System");
+		createChain(100).getChain().setAutoEnd(false).setName("User");
 	}
 
 	public EditorManager(EditorManager e) {

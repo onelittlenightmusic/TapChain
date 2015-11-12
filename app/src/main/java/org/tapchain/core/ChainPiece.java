@@ -337,7 +337,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 				return rtn;
 			} catch (ChainException e) {
 				onError(e);
-				L("ChainPiece").go("onError called");
+				//distinguish between interruption and error
 				IErrorCode code = e.getErrorCode();
 				if(code.isInterrupted())
 					throw new InterruptedException();
@@ -425,6 +425,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	
 	//4.Termination
 	protected void onTerminate() throws ChainException {
+        end();
 		return;
 	}
 

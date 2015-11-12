@@ -160,18 +160,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         }
     }
 
-	public Factory<Actor> getRecentFactory() {
-		return recent;
-	}
-
-	public Factory<Actor> getRelatives() {
-		return relatives;
-	}
-
-	public Factory<Actor> getGoal() {
-		return goalFactory;
-	}
-
 	@Override
 	public ActorManager editTap() {
 		return editorManager.getTapManager()/*.newSession()*/;
@@ -233,10 +221,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	@Override
 	public Actor toActor(IActorTap sp) {
 		return sp.getActor();
-	}
-
-	public boolean containsActor() {
-		return true;
 	}
 
 	/**
@@ -394,10 +378,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return rtn;
 	}
 
-    public void setSelectedTap(IActorTap tap) {
-
-    }
-
     public void clearSelectedTap() {
         family.clear();
         previousTap = selectedTap;
@@ -424,7 +404,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public boolean onDownClear() {
-		// editTap().getChain().TouchClear();
 		return true;
 	}
 
@@ -582,7 +561,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		}
 		// Get PieceView
 		if (key == FACTORY_KEY.ALL)
-			getRecentFactory().Register(b);
+			getFactory(FACTORY_KEY.RECENT).Register(b);
 		touched = pos;
 		onUp();
 		return rtn;
@@ -659,10 +638,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return true;
 	}
 
-	public boolean hasNoDummy() {
-		return dummyTap == null;
-	}
-
 	public IPoint checkRoom(IPoint basePos, IPiece... exclusive) {
 		IPoint setPos = getPointOnAdd(basePos);
 		while (true) {
@@ -675,14 +650,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		}
 		return setPos;
 	}
-
-	public static class DirOffset {
-		static WorldPoint TOP = new WorldPoint(0f, 50f).setDif(),
-				RIGHT = new WorldPoint(-50f, 0f).setDif(),
-				BOTTOM = new WorldPoint(0f, -50f).setDif(),
-				LEFT = new WorldPoint(50f, 0f).setDif(), NULL = null;
-	}
-
 
 	public void Compile() {
 		editorManager.getChain().getOperator().reset();

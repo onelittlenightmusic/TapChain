@@ -209,7 +209,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 	@Override
 	public boolean pieceRun(IPiece f) throws ChainException,
 			InterruptedException {
-		/* when this animation start */
 		if (!live) {
 			_preInit();
 			time = 0;
@@ -225,7 +224,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		if (!live) {
 			L("Actor.postRun()").go(postRun());
 			_postEnd();
-			/* when this animation end */
 		}
 		return L("Actor.pieceRun().exit").go(animation_loop || live);
 	}
@@ -360,6 +358,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 			if (_statusHandler != null)
 				_statusHandler.pushView(this, obj);
 		} catch (InterruptedException e) {
+//            throw new ChainException(this, "Interrupted.",PieceErrorCode.INTERRUPT);
 			e.printStackTrace();
 		}
 		return this;
@@ -378,7 +377,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         try {
     		rtn = in.input();
         } catch (InterruptedException e) {
-            throw new ChainException(this, "Interrupted.");
+            throw new ChainException(this, "Interrupted.",PieceErrorCode.INTERRUPT);
         }
 		if (rtn.isEmpty()) {
 			if (in.getPathMainClass() == null)
@@ -574,6 +573,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		@Override
 		public void onTerminate() throws ChainException {
 			_ctrlStop();
+            super.onTerminate();
 		}
 
 		private Controllable _wake(boolean stat) {
@@ -634,15 +634,14 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 			boolean noreset = true, error = false;
 			try {
 				if (emptywait) {
-					ControllableSignal finishCode2 = L("take()").go(continueSignalQueue.take());
-					if (!finishCode2.getContinueCode(this))
+					ControllableSignal signal = L("take()").go(continueSignalQueue.take());
+					if (!signal.getContinueCode(this))
 						once();
-					error |= finishCode2.getErrorCode();
-					// if reset code is true, noreset is set false and while
-					// loop breaks
-					noreset = !finishCode2.getResetCode();
+					error |= signal.getErrorCode();
+					// if reset is true, noreset is set false
+					noreset = !signal.getResetCode();
 				} else {
-					// {ERROR} Following lines generates some wait with no
+					// {ERROR} Following lines generate some wait with no
 					// queue.
 					while (true) {
 						ControllableSignal finishCode2 = L("poll()").go(continueSignalQueue
@@ -669,11 +668,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 			}
 		}
 
-		// public Controllable permitAutoRestart() {
-		// auto = true;
-		// return this;
-		// }
-		//
 		private Controllable _ctrlStart() throws ChainException,
 				InterruptedException {
 			ctrlStart();

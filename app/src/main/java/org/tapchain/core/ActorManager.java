@@ -34,9 +34,9 @@ public class ActorManager extends PieceManager<Actor> {
 	
 	public ActorManager(ActorManager am) {
 		this(
-				am.error,
-				am.log
-		);
+                am.error,
+                am.log
+        );
 
 	}
 	@Override
@@ -185,12 +185,12 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 	
 	public <PARENT, EFFECT> ActorManager addEffector(final IEffector<PARENT, EFFECT> effector) {
-		add(new Actor.OriginalEffector<PARENT,EFFECT>() {
-			@Override
-			public void effect(PARENT _t, EFFECT _e) throws ChainException {
-				effector.effect(_t, _e);
-			}
-		});
+		add(new Actor.OriginalEffector<PARENT, EFFECT>() {
+            @Override
+            public void effect(PARENT _t, EFFECT _e) throws ChainException {
+                effector.effect(_t, _e);
+            }
+        });
 		return this;
 	}
 	

@@ -34,7 +34,7 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
 //        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
         view.add(FACTORY_KEY.ALL, 0, 100, 300);
         sleepSecond();
-        view.add(FACTORY_KEY.ALL, 4, 250, 300);
+        view.add(FACTORY_KEY.ALL, 4);
         assertTrue(true);
     }
 

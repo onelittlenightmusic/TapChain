@@ -16,8 +16,8 @@ import org.tapchain.core.ISelectable;
 import org.tapchain.core.Packet;
 import org.tapchain.core.PathType;
 import org.tapchain.core.TapMath;
-import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
+import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IEditor;
 import org.tapchain.realworld.R;
 import org.tapchain.realworld.TapChainView;
@@ -43,6 +43,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
     Object objcache;
     float gamma = 0.3f;
     private String objtag;
+//    List<IPoint> ar;
 
 
     public BubblePathTap(ViewActor start, ViewActor stop,
@@ -61,6 +62,8 @@ public class BubblePathTap extends PathTap implements ISelectable {
         sp12 = ((MyTapStyle2)start).getOffsetVector(gamma);
         sp21 = ((MyTapStyle2)stop).getOffsetVector(-gamma);
         cls = p.getConnectionClass();
+//        ar = Arrays.asList(sp1/*.plusNew(wp1)*/, sp12/*.plusNew(wp1)*/,
+//                sp21/*.plusNew(wp2)*/, sp2/*.plusNew(wp2)*/);
     }
 
     @Override
@@ -129,30 +132,11 @@ public class BubblePathTap extends PathTap implements ISelectable {
 
     @Override
     public IPoint getPoint(float beta) {
-//        WorldPoint wp1 = new WorldPoint(((AndroidActor.AndroidView) start).getScreenRect().width()/2, 0f);
-//        WorldPoint wp2 = new WorldPoint(-((AndroidActor.AndroidView) stop).getScreenRect().width() / 2, 0f);
-        return TapMath.getCurvePoint(beta,
-                Arrays.asList(sp1/*.plusNew(wp1)*/, sp12/*.plusNew(wp1)*/,
-                        sp21/*.plusNew(wp2)*/, sp2/*.plusNew(wp2)*/));
+        return TapMath.getCurvePoint(beta, Arrays.asList(sp1, sp12, sp21, sp2));
     }
 
     public IPoint getCenter() {
         return getPoint(0.5f);
-    }
-
-    WorldPoint getOffset(IPoint iPoint, PathType type) {
-        WorldPoint offset = null;
-        switch (type) {
-            case FAMILY:
-                offset = new WorldPoint(30f, 30f);
-                break;
-            case OFFER:
-                offset = new WorldPoint(40f, 0f);
-                break;
-            default:
-                offset = new WorldPoint(0f, 40f);
-        }
-        return offset;
     }
 
     public class Pos {
@@ -205,8 +189,8 @@ public class BubblePathTap extends PathTap implements ISelectable {
         view.once();
         manager.add(view)
                 ._in()
-                .add(new PathMover(this, 0.04f))
-                .add(new Actor.Counter(25-1)/*.setLogLevel(true)*/)
+                .add(new PathMover(this, 0.04f, 24).once()/*.setLogLevel(true)*/)
+                .add(new Actor.Counter(25-1).once()/*.setLogLevel(true)*/)
                 .next(new Actor.Reset(false).once())
                 .save();
 

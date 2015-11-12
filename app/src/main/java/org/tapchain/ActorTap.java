@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class ActorTap extends AndroidView implements IActorTap, ITapControlInterface {
-	IActorSharedHandler event = null;
+	IActorSharedHandler eventHandler = null;
 	IPoint gridSize = new WorldPoint(1, 1);
 	IPoint recent = null;
 	private Actor mytapchain = null;
@@ -58,18 +58,18 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	}
 
 	protected ActorTap setEventHandler(IActorSharedHandler eh) {
-		event = eh;
+		eventHandler = eh;
 		return this;
 	}
 
 	@Override
 	public IActorSharedHandler getSharedHandler() {
-		return event;
+		return eventHandler;
 	}
 
 	@Override
 	public boolean hasEventHandler() {
-		return event != null;
+		return eventHandler != null;
 	}
 
 	@Override
@@ -130,8 +130,8 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	
 	@Override
 	public boolean onPush(Actor t, Object obj) {
-		if(event != null) {
-			event.onPush(this, LinkType.PUSH, obj);
+		if(eventHandler != null) {
+			eventHandler.onPush(this, LinkType.PUSH, obj);
 			return true;
 		}
 		return false;

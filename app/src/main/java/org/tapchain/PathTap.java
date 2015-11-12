@@ -91,18 +91,15 @@ public class PathTap extends AndroidView implements IPathTap {
 			return null;
 		}
 		
-	public PathMover getPathMover() {
-		return new PathMover(this, 0.01f);
-	}
-
 	public static class PathMover extends ValueEffector<IPoint> {
 		float beta = 0f;
 		float dif = 0.01f;
 		PathTap pathTap;
-		PathMover(PathTap pathTap, float dif) {
+		PathMover(PathTap pathTap, float dif, int duration) {
 			super();
 			this.pathTap = pathTap;
 			this.dif = dif;
+            setDuration(duration);
 		}
 
 		@Override

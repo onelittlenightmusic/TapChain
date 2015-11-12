@@ -1,15 +1,15 @@
 package org.tapchain.core;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.tapchain.core.ChainController.IControlCallback;
+import org.tapchain.core.Connector.OutConnector;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CyclicBarrier;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.tapchain.core.ChainController.IControlCallback;
-import org.tapchain.core.Connector.OutConnector;
 
 public class Chain implements JSONSerializable {
 	static int n = 0;
@@ -339,7 +339,7 @@ public class Chain implements JSONSerializable {
 		public PathType getPathTypeLocked();
 	}
 
-	public static enum PieceErrorCode implements IErrorCode {
+	public enum PieceErrorCode implements IErrorCode {
 		LOOPABLE, INTERRUPT, LOCK_OFFER(PathType.OFFER), LOCK_FAMILY(PathType.FAMILY), LOCK_OTHER;
 		PieceErrorCode() {
 		}
