@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -86,11 +87,13 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 	}
 
 	@Override
-	public Collection<PARTNER> getPartners(PathType pathType, boolean out) {
-		return partnerList.getPartners(pathType, out, this);
+	public Collection<PARTNER> getPartners(PathType pathType, boolean outOrIn) {
+		return partnerList.getPartners(pathType, outOrIn, this);
 	}
-	public void setPartner(IPath o, IPiece cp) {
-		partnerList.setPartner(o, cp);
+
+    @Override
+	public void setPartner(IPath o, IPiece cp, PathType type) {
+		partnerList.setPartner(o, cp, type);
 	}
 
 	@Override
@@ -238,6 +241,8 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 	@SuppressWarnings("serial")
 	public static class PartnerList<PARTNER extends IPiece> implements Serializable {
 		ConcurrentHashMap<PARTNER, IPath> partner;
+        PartnersByType partnersByTypeForOut = new PartnersByType();
+        PartnersByType partnersByTypeForIn = new PartnersByType();
 		PartnerList() {
 			partner = new ConcurrentHashMap<PARTNER, IPath>();
 		}
@@ -248,12 +253,17 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 			else
 				return _path.getOutConnector().getPack().getPathType();
 		}
-		public ChainPiece.PartnerList setPartner(IPath o, PARTNER cp) {
+		public ChainPiece.PartnerList setPartner(IPath o, PARTNER cp, PathType type) {
 			partner.put(cp, o);
+            boolean outOrIn = o.getOut(cp);
+            getPartnersByType(outOrIn).get(type).add(cp);
 			return this;
 		}
 		public ChainPiece.PartnerList unsetPartner(IPiece cp) {
-			partner.remove(cp);
+			IPath p = partner.remove(cp);
+            boolean outOrIn = p.getOut(cp);
+            for(PathType type: PathType.values())
+                getPartnersByType(outOrIn).get(type).remove(cp);
 			return this;
 		}
 		public boolean isConnectedTo(IPiece cp) {
@@ -281,16 +291,37 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 			return partner.keySet();
 		}
 
-		public Collection<PARTNER> getPartners(PathType pathType, boolean out, Piece piece) {
-			Collection<PARTNER> rtn = new ArrayList<PARTNER>();
-			if(getPartners().isEmpty())
-				return rtn;
-			for(Map.Entry<PARTNER, IPath> entry: partner.entrySet()) {
-				if (entry.getValue().getPathType() == pathType)
-					if(entry.getValue().getOut(piece) == out)
-						rtn.add(entry.getKey());
-			}
-			return rtn;
+        public PartnersByType getPartnersByType(boolean outOrIn) {
+            return outOrIn? partnersByTypeForOut : partnersByTypeForIn;
+        }
+
+		public Collection<PARTNER> getPartners(PathType pathType, boolean outOrIn, Piece piece) {
+//			Collection<PARTNER> rtn = new ArrayList<PARTNER>();
+//			if(getPartners().isEmpty())
+//				return rtn;
+//			for(Map.Entry<PARTNER, IPath> entry: partner.entrySet()) {
+//				if (entry.getValue().getPathType() == pathType)
+//					if(entry.getValue().getOut(piece) == outOrIn)
+//						rtn.add(entry.getKey());
+//			}
+//			return rtn;
+            return getPartnersByType(!outOrIn).get(pathType);
 		}
-	}
+
+        public class PartnersByType extends HashMap<PathType, ArrayList<PARTNER>>
+        {
+            PartnersByType() {
+                for(PathType type: PathType.values())
+                    put(type, new ArrayList<PARTNER>());
+            }
+        };
+    }
+
+    public class PartnersReturn<PARTNER extends IPiece> extends ArrayList<PARTNER> {
+        boolean changed;
+        public boolean isChanged() {
+            changed = false;
+            return changed;
+        }
+    }
 }

@@ -62,8 +62,6 @@ public class BubblePathTap extends PathTap implements ISelectable {
         sp12 = ((MyTapStyle2)start).getOffsetVector(gamma);
         sp21 = ((MyTapStyle2)stop).getOffsetVector(-gamma);
         cls = p.getConnectionClass();
-//        ar = Arrays.asList(sp1/*.plusNew(wp1)*/, sp12/*.plusNew(wp1)*/,
-//                sp21/*.plusNew(wp2)*/, sp2/*.plusNew(wp2)*/);
     }
 
     @Override
@@ -79,8 +77,6 @@ public class BubblePathTap extends PathTap implements ISelectable {
         paint2.setTextAlign(Paint.Align.CENTER);
         if (starttype == PathType.OFFER)
             paint.setColor(Color.argb(220, 100, 200, 255));
-//        offset1 = getOffset(start.getRawSize(), starttype);
-//        offset2 = getOffset(stop.getRawSize(), stoptype);
         paint2.setAntiAlias(true);
     }
 
@@ -116,8 +112,6 @@ public class BubblePathTap extends PathTap implements ISelectable {
             //Draw TickView
         } else {
             Path path = new Path();
-//				float xsize = sp1.x() < sp2.x() ? 50f : -50f;
-//				float xoffset = sp1.x() < sp2.x() ? 50f : -50f;
             float xsize = 0f;//r1.width() / 2;
             path.moveTo(sp1.x() + xsize, sp1.y());
             path.cubicTo(sp12.x() + xsize, sp12.y(), sp21.x(), sp21.y(),

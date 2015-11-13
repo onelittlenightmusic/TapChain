@@ -1,16 +1,14 @@
 package org.tapchain.core;
 
-import android.util.Pair;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class WorldPoint implements IPoint, Comparable, Serializable {
 	public float x, y;
 	private WPEffect effect = WPEffect.POS;
-	private List<Pair<IValue<IPoint>,Float>> offset = null;
+	private HashMap<IValue<IPoint>, Float> offset = null;
 
 	public WorldPoint() {
 		super();
@@ -31,8 +29,8 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		y = pt.y;
 		effect = pt.effect;
 		if(pt.offset != null) {
-			offset = new ArrayList<Pair<IValue<IPoint>,Float>>();
-			offset.addAll(pt.offset);
+			offset = new HashMap<>();
+			offset.putAll(pt.offset);
 		}
 	}
 
@@ -110,8 +108,8 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 	private float cumulateX() {
 		float rtn = 0;
 		if(offset != null) {
-			for (Pair<IValue<IPoint>,Float> pt: offset)
-				rtn += pt.first._valueGet().x() * pt.second;
+			for (Map.Entry<IValue<IPoint>, Float> pt: offset.entrySet())
+				rtn += pt.getKey()._valueGet().x() * pt.getValue();
 		}
 		return rtn;
 	}
@@ -119,8 +117,8 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 	private float cumulateY() {
 		float rtn = 0;
 		if(offset != null) {
-			for (Pair<IValue<IPoint>,Float> pt: offset)
-				rtn += pt.first._valueGet().y() * pt.second;
+			for (Map.Entry<IValue<IPoint>,Float> pt: offset.entrySet())
+				rtn += pt.getKey()._valueGet().y() * pt.getValue();
 		}
 		return rtn;
 	}
@@ -214,12 +212,12 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 
 	public IPoint setOffset(IValue<IPoint> pt, float alpha) {
 		if(offset == null)
-			offset = new ArrayList<Pair<IValue<IPoint>, Float>>();
-		if(offset.contains(pt))
+			offset = new HashMap<IValue<IPoint>, Float>();
+		if(offset.containsKey(pt))
 			return this;
 		if(pt._valueGet() == this)
 			return this;
-		offset.add(new Pair(pt, alpha));
+		offset.put(pt, alpha);
 		return this;
 	}
 	
@@ -258,13 +256,10 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		float oldx = x(), oldy = y();
 		if(offset == null)
 			return this;
-		if(offset.contains(pt)) {
+		if(offset.containsKey(pt)) {
 			offset.remove(pt);
 			if(keep)
 				set(oldx, oldy);
-//				set((WorldPoint) pt._valueGet().setDif());
-//			Log.w("test", String.format("unsetOffset %s", pt._valueGet().getDetails(), keep));
-//			Log.w("test", String.format("unsetOffset %s", getDetails(), keep));
 		}
 		return this;
 	}
@@ -274,8 +269,8 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		StringBuilder s = new StringBuilder();
 		s.append(String.format("(%f %f) raw(%f %f) eff %s", x(), y(), rawX(), rawY(), getEffect()));
 		if(offset != null)
-			for(Pair<IValue<IPoint>, Float> o: offset) {
-				s.append(String.format("Offset => (%s)", o.first._valueGet()));
+			for(Map.Entry<IValue<IPoint>, Float> o: offset.entrySet()) {
+				s.append(String.format("Offset => (%s)", o.getKey()._valueGet()));
 			}
 		return s.toString();
 	}

@@ -580,21 +580,16 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public void setOffsetVector() {
 //        if(!changed)
 //            return;
-        WorldPoint average = (WorldPoint)partnersOffsetAverage._valueGet();
+        WorldPoint average = (WorldPoint)partnersOffsetAverage._valueGet().clear();
         Collection<Actor> col1 = getActor().getPartners(LinkType.PULL);
         Collection<Actor> col2 = getActor().getPartners(LinkType.PUSH);
         float divCol1 = 1f/((float)col1.size());
         for(Actor vec1 : col1) {
-            IActorTap tap = edit.toTap(vec1);
-            average.unsetOffset(tap, false);
-            average.setOffset(tap, -divCol1);
+            average.setOffset(edit.toTap(vec1), -divCol1);
         }
         float divCol2 = 1f/((float)col2.size());
         for(Actor vec2 : col2) {
-            IActorTap tap = edit.toTap(vec2);
-            average.unsetOffset(tap, false);
-            average.setOffset(tap, divCol2);
-//            average.setOffset(edit.toTap(vec2), divCol2);
+            average.setOffset(edit.toTap(vec2), divCol2);
         }
     }
 
@@ -604,20 +599,20 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	public WorldPoint getOffsetVector(float alpha) {
 		if(getActor() == null)
 			return WorldPoint.zero();
-		offsetVector = new WorldPoint(WorldPoint.zero());
+        offsetVector = new WorldPoint(WorldPoint.zero());
         offsetVector.setOffset(this, false);
-//        setOffsetVector();
         Collection<Actor> col1 = getActor().getPartners(LinkType.PULL);
         Collection<Actor> col2 = getActor().getPartners(LinkType.PUSH);
         if(col1.isEmpty() || col2.isEmpty())
             return offsetVector;
-		float divCol1 = 1f/((float)col1.size());
-		for(Actor vec1 : col1)
-			offsetVector.setOffset(edit.toTap(vec1), - divCol1 * alpha);
-		float divCol2 = 1f/((float)col2.size());
-		for(Actor vec2 : col2)
-            offsetVector.setOffset(edit.toTap(vec2), divCol2 * alpha);
-//        offsetVector.setOffset(partnersOffsetAverage, alpha);
+//		float divCol1 = 1f/((float)col1.size());
+//		for(Actor vec1 : col1)
+//			offsetVector.setOffset(edit.toTap(vec1), - divCol1 * alpha);
+//		float divCol2 = 1f/((float)col2.size());
+//		for(Actor vec2 : col2)
+//            offsetVector.setOffset(edit.toTap(vec2), divCol2 * alpha);
+        setOffsetVector();
+        offsetVector.setOffset(partnersOffsetAverage, alpha);
 		return offsetVector;
 	}
 }

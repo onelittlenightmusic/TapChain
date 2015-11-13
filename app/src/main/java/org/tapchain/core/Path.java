@@ -14,26 +14,27 @@ public class Path implements Tickable, IPath {
 
 	/**
 	 * Create ConnectorPath from start ChainPiece and end ChainPiece objects.
-	 *
-	 * @param cp_start Start ChainPiece
+	 *  @param cp_start Start ChainPiece
 	 * @param cp_end   End ChainPiece
-	 * @param out      ChainOutConnector object
-	 * @param in       ChainInConnector object
-	 */
+     * @param out      ChainOutConnector object
+     * @param in       ChainInConnector object
+     * @param type_out
+     * @param type_in
+     */
 	Path(ChainPiece cp_start, ChainPiece cp_end,
-		 OutConnector out, InConnector in) {
-		attach(cp_start, cp_end, out, in);
+         OutConnector out, InConnector in, PathType type_out, PathType type_in) {
+		attach(cp_start, cp_end, out, in, type_out, type_in);
 	}
 
 	@Override
 	public Path attach(IPiece cp_start, IPiece cp_end,
-					   IConnector out, IConnector in) {
+                       IConnector out, IConnector in, PathType type_out, PathType type_in) {
 		_out = out;
 		_in = in;
 		_cp_start = cp_start;
 		_cp_end = cp_end;
-		_cp_end.setPartner(this, _cp_start);
-		_cp_start.setPartner(this, _cp_end);
+		_cp_end.setPartner(this, _cp_start, type_out);
+		_cp_start.setPartner(this, _cp_end, type_in);
 		return this;
 	}
 

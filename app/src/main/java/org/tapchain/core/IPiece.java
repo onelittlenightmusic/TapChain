@@ -1,13 +1,13 @@
 package org.tapchain.core;
 
-import java.util.Collection;
-
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultIO;
 import org.tapchain.core.Chain.ConnectionResultO;
 import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
+
+import java.util.Collection;
 
 public interface IPiece<PARTNER extends IPiece> {
 	/** Check and accept connection from other piece.
@@ -37,7 +37,7 @@ public interface IPiece<PARTNER extends IPiece> {
 
 	Collection<PARTNER> getPartners(PathType pathType, boolean out);
 
-	public void setPartner(IPath chainPath, IPiece _cp_start);
+	public void setPartner(IPath chainPath, IPiece _cp_start, PathType type_in);
 
 	public IPath detach(IPiece y);
 

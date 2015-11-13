@@ -442,7 +442,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 		Chain.ConnectionResultO o = target.appended(stack_target, this, null);
 		if (i.connect(o.getResult())) {
 			Path p = new Path((ChainPiece) o.getPiece(), this,
-					o.getResult(), i);
+					o.getResult(), i, stack_target, stack);
 			return new Chain.ConnectionResultIO(o.getPiece(), p);
 		}
 		//No connection

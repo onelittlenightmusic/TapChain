@@ -13,10 +13,11 @@ public interface IPath {
 	 * @param cp_end End Piece object
 	 * @param out Out IConnector object
 	 * @param in In IConnector object
-	 * @return
+	 * @param type_out
+     *@param type_in @return
 	 */
 	public IPath attach(IPiece cp_start, IPiece cp_end,
-			IConnector out, IConnector in);
+                        IConnector out, IConnector in, PathType type_out, PathType type_in);
 	//4.Termination
 	public IPath detach();
 	
