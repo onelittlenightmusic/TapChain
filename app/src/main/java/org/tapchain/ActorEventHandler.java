@@ -84,7 +84,10 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 						IFocusable spot = null;
 						if(v.getActor().getLinkClassFromLib(al) != null) {
 							if (al == LinkType.PUSH) {
-								spot = new MyBeamTapStyle(getResources(), this, v, al, clz);
+								MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), this, v, al, clz);
+								if(v instanceof MyTapStyle2)
+									beam.init(((MyTapStyle2)v).getOffsetVectorRaw());
+								spot = beam;
 							} else if (al == LinkType.TO_CHILD) {
 								spot = new MySpotOptionTapStyle(v, this, al, clz);
 							} else {

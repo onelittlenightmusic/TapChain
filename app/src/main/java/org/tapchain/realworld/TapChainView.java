@@ -75,6 +75,7 @@ import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.IBlueprintInitialization;
 import org.tapchain.core.IPoint;
+import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IWindow;
@@ -432,18 +433,22 @@ public class TapChainView extends FragmentActivity implements
 			viewControl.setVisibility(View.VISIBLE);
 	}
 	
-	public void add(TapChainEditor.FACTORY_KEY key, int code) {
-		getCanvas().onAdd(key, code);
+	public IActorTap add(TapChainEditor.FACTORY_KEY key, int code) {
+		return getCanvas().onAdd(key, code);
 	}
 
-	public void add(FACTORY_KEY key, int code, float x, float y) {
-		getCanvas().onAdd(key, code, x, y);
+	public IActorTap add(FACTORY_KEY key, int code, float x, float y) {
+		return getCanvas().onAdd(key, code, x, y);
 	}
 
-	public void add(FACTORY_KEY key, int code, float x, float y, float dx,
+	public IActorTap add(FACTORY_KEY key, int code, float x, float y, float dx,
 			float dy) {
 		// Log.w("test", "addFocusable(xy, dxy) called");
-		getCanvas().onAdd(key, code, x, y, dx, dy);
+		return getCanvas().onAdd(key, code, x, y, dx, dy);
+	}
+
+	public void connect(IActorTap t1, LinkType type, IActorTap t2) {
+		getEditor().connect(t1.getActor(), type, t2.getActor());
 	}
 
 	public void dummyAdd(FACTORY_KEY key, int num, float x, float y) {
@@ -1099,20 +1104,21 @@ public class TapChainView extends FragmentActivity implements
 
 		int index = 0;
 
-		public void onAdd(FACTORY_KEY key , int code) {
-			getEditor().onAdd(key, code, null);
+		public IActorTap onAdd(FACTORY_KEY key , int code) {
+			return getEditor().onAdd(key, code, null).getTap();
 		}
 		
-		public void onAdd(FACTORY_KEY key, int code, float x, float y) {
-			getEditor().onAdd(key, code, getPosition(x, y));
+		public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y) {
+			return getEditor().onAdd(key, code, getPosition(x, y)).getTap();
 		}
 
-		public void onAdd(FACTORY_KEY key, int code, float x, float y,
+		public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y,
 				float dx, float dy) {
 			IActorTap added = getEditor().onAdd(key, code, getPosition(x, y))
 					.getTap();
 			getEditor().captureTap(added);
 			getEditor().onFling((int) dx, (int) dy);
+			return added;
 		}
 
 		public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {

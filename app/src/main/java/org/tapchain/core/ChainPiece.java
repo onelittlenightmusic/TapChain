@@ -433,30 +433,30 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
 
 	@Override
-	public Chain.ConnectionResultIO appendTo(PathType stack, IPiece target,
+	public Chain.ConnectionResultPath appendTo(PathType stack, IPiece target,
 											 PathType stack_target) throws Chain.ChainException {
 		super.appendTo(stack, target, stack_target);
 		InConnector i = addInPath(stack);
 		if(i == null)
 			return null;
-		Chain.ConnectionResultO o = target.appended(stack_target, this, null);
+		Chain.ConnectionResultOutConnector o = target.appended(stack_target, this, null);
 		if (i.connect(o.getResult())) {
 			Path p = new Path((ChainPiece) o.getPiece(), this,
 					o.getResult(), i, stack_target, stack);
-			return new Chain.ConnectionResultIO(o.getPiece(), p);
+			return new Chain.ConnectionResultPath(o.getPiece(), p);
 		}
 		//No connection
 		return null;
 	}
 
 	@Override
-	public Chain.ConnectionResultO appended(PathType stack_target, IPiece from,
+	public Chain.ConnectionResultOutConnector appended(PathType stack_target, IPiece from,
 											Output type) throws Chain.ChainException {
 		OutConnector o = addOutPath(type, stack_target);
 		if(o == null)
 			return null;
 		//Return ConnectionResultO object.
-		return new Chain.ConnectionResultO(this, o);
+		return new Chain.ConnectionResultOutConnector(this, o);
 	}
 
 

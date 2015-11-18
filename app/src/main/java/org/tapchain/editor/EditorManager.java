@@ -13,6 +13,7 @@ import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ChainPiece.PieceState;
 import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IBlueprint;
+import org.tapchain.core.IConnectHandler;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
@@ -31,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EditorManager extends ActorManager {
 	ActorManager tapManager;
 	IActorConnectHandler actorConnectHandler;
-	Blueprint pbp_connect;
+	Blueprint bluepringForPathTap;
 
 	ConcurrentHashMap<Actor, IActorTap> dictPiece = new ConcurrentHashMap<Actor, IActorTap>();
 	ConcurrentHashMap<IPath, PathTap> dictPath = new ConcurrentHashMap<IPath, PathTap>();
@@ -55,7 +56,7 @@ public class EditorManager extends ActorManager {
 	}
 
 	public ActorManager setPathBlueprint(Blueprint p) {
-		pbp_connect = p;
+		bluepringForPathTap = p;
 		return this;
 	}
 
@@ -168,19 +169,26 @@ public class EditorManager extends ActorManager {
 	}
 
 	@Override
-	public Chain.ConnectionResultIO connect(Actor x, PathType xp, Actor y,
+	public Chain.ConnectionResultPath connect(Actor x, PathType xp, Actor y,
 											PathType yp, boolean addView) {
-		Chain.ConnectionResultIO rtn = super.connect(x, xp, y, yp, addView);
+		Chain.ConnectionResultPath rtn = super.connect(x, xp, y, yp, addView);
 		try {
 			if(rtn != null) {
-				if(addView && pbp_connect != null) {
-					IPathTap pathTap;
-					IBlueprint vReserve = pbp_connect.copyAndRenewArg()
-							.addArg(getTap(y), getTap(x), yp, xp, rtn.getResult());
-					pathTap = __setPathView(rtn.getResult(), vReserve);
+				if(addView && bluepringForPathTap != null) {
+					//PathTap instantiation
+					IActorTap xTap = getTap(x), yTap = getTap(y);
+					IBlueprint newBlueprintForPath = bluepringForPathTap.copyAndRenewArg()
+							.addArg(yTap, xTap, yp, xp, rtn.getResult());
+					IPathTap pathTap = __setPathView(rtn.getResult(), newBlueprintForPath);
+
+					//Post process 1 ( invoking common handler )
 					if(actorConnectHandler != null)
-						actorConnectHandler.onConnect(getTap(y), pathTap, getTap(x), LinkType.fromPathType(yp, true));
-//					}
+						actorConnectHandler.onConnect(yTap, pathTap, xTap, LinkType.fromPathType(yp, true));
+
+					//Post process 2 ( invoking individual handler if registered )
+					for(IActorTap iTap: Arrays.asList(xTap, yTap))
+						if(iTap instanceof IConnectHandler)
+							((IConnectHandler)iTap).onConnect(yTap, pathTap, xTap, LinkType.fromPathType(yp, true));
 					save();
 				}
 			}

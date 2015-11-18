@@ -80,11 +80,12 @@ public class BubblePathTap extends PathTap implements ISelectable {
         paint2.setAntiAlias(true);
     }
 
+    Path path = new Path();
     @Override
     public boolean view_user(Canvas canvas, IPoint sp, IPoint size,
                              int alpha) {
-        sp12 = ((MyTapStyle2)start).getOffsetVector(gamma);
-        sp21 = ((MyTapStyle2)stop).getOffsetVector(-gamma);
+//        sp12 = ((MyTapStyle2)start).getOffsetVector(gamma);
+//        sp21 = ((MyTapStyle2)stop).getOffsetVector(-gamma);
         Rect r1 = ((AndroidActor.AndroidView) start).getScreenRect();
         Rect r2 = ((AndroidActor.AndroidView) stop).getScreenRect();
         if (starttype == PathType.FAMILY) {
@@ -111,16 +112,16 @@ public class BubblePathTap extends PathTap implements ISelectable {
 
             //Draw TickView
         } else {
-            Path path = new Path();
+            path.reset();
             float xsize = 0f;//r1.width() / 2;
             path.moveTo(sp1.x() + xsize, sp1.y());
             path.cubicTo(sp12.x() + xsize, sp12.y(), sp21.x(), sp21.y(),
                     sp2.x() - xsize, sp2.y());
             canvas.drawPath(path, paint);
         }
-        IPoint center = getPoint(0.5f);
-        if (objcache != null)
-            ShowInstance.showInstance(canvas, objcache, center, paint2, paint2, objtag);
+//        IPoint center = getPoint(0.5f);
+//        if (objcache != null)
+//            ShowInstance.showInstance(canvas, objcache, center, paint2, paint2, objtag);
         return true;
     }
 

@@ -1,8 +1,8 @@
 package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.ConnectionResultIO;
-import org.tapchain.core.Chain.ConnectionResultO;
+import org.tapchain.core.Chain.ConnectionResultPath;
+import org.tapchain.core.Chain.ConnectionResultOutConnector;
 import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
@@ -17,7 +17,7 @@ public interface IPiece<PARTNER extends IPiece> {
 	 * @return ConnectionResultO object
 	 * @throws ChainException
 	 */
-	public ConnectionResultO appended(PathType type, IPiece from, Output output) throws ChainException;
+	public ConnectionResultOutConnector appended(PathType type, IPiece from, Output output) throws ChainException;
 
 	/** Check and append this piece to target piece.
 	 * @param type Packtype of this piece
@@ -26,7 +26,7 @@ public interface IPiece<PARTNER extends IPiece> {
 	 * @return ConnectionResultIO object
 	 * @throws ChainException
 	 */
-	public ConnectionResultIO appendTo(PathType type, IPiece target_piece,
+	public ConnectionResultPath appendTo(PathType type, IPiece target_piece,
 			PathType type_target) throws ChainException;
 
 	/** Check and detach this piece from target piece.

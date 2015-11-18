@@ -1,8 +1,8 @@
 package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.ConnectionResultIO;
-import org.tapchain.core.Chain.ConnectionResultO;
+import org.tapchain.core.Chain.ConnectionResultPath;
+import org.tapchain.core.Chain.ConnectionResultOutConnector;
 import org.tapchain.core.Connector.InConnector;
 import org.tapchain.core.Connector.OutConnector;
 import org.tapchain.core.PathPack.InPathPack;
@@ -24,7 +24,7 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 
 	//1.Initialization
 	@Override
-	public ConnectionResultIO appendTo(PathType stack, IPiece target, PathType stack_target) throws ChainException {
+	public ConnectionResultPath appendTo(PathType stack, IPiece target, PathType stack_target) throws ChainException {
 		//if user assigns PREV FUNCTION
 		if(target == null) {
 			throw new ChainException(this, "appendTo()/Invalid Target/Null");
@@ -35,7 +35,7 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 	}
 
 	@Override
-	public ConnectionResultO appended(PathType stack, IPiece from, Output type) throws ChainException {
+	public ConnectionResultOutConnector appended(PathType stack, IPiece from, Output type) throws ChainException {
 		return null;
 	}
 

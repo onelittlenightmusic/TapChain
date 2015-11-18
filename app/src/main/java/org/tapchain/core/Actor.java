@@ -9,8 +9,8 @@ import org.tapchain.core.ActorChain.IRecorder;
 import org.tapchain.core.ActorChain.ISound;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.ConnectionResultIO;
-import org.tapchain.core.Chain.ConnectionResultO;
+import org.tapchain.core.Chain.ConnectionResultPath;
+import org.tapchain.core.Chain.ConnectionResultOutConnector;
 import org.tapchain.core.Chain.IPathListener;
 import org.tapchain.core.Chain.PieceErrorCode;
 import org.tapchain.core.ClassLib.ClassLibReturn;
@@ -327,9 +327,9 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 	}
 
 	@Override
-	public ConnectionResultIO appendTo(PathType stack, IPiece cp,
+	public ConnectionResultPath appendTo(PathType stack, IPiece cp,
 									   PathType stack_target) throws ChainException {
-		ConnectionResultIO i = super.appendTo(stack, cp, stack_target);
+		ConnectionResultPath i = super.appendTo(stack, cp, stack_target);
         Actor target;
         try {
 			target = (Actor) (i.getPiece());
@@ -2218,7 +2218,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 	}
 
 	public static class BasicSplit extends LoopBoost {
-		ConnectionResultO o = null;
+		ConnectionResultOutConnector o = null;
 		Class<?> cls = null;
 
 		BasicSplit(Class<?> _cls) {
@@ -2232,7 +2232,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		}
 
 		@Override
-		public ConnectionResultO appended(PathType stack_target, IPiece from,
+		public ConnectionResultOutConnector appended(PathType stack_target, IPiece from,
 										  Output type) throws ChainException {
 			if (stack_target == PathType.EVENT)
 				return o;

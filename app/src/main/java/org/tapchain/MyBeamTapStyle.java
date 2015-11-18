@@ -7,6 +7,7 @@ import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.LinkType;
+import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
 import org.tapchain.realworld.R;

@@ -341,4 +341,9 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		return zero;
 	}
 
+	public float len() {
+		float x = x(), y = y();
+		return (float)Math.sqrt((double)(x*x+y*y));
+	}
+
 }

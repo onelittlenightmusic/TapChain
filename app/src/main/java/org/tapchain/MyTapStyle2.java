@@ -29,6 +29,7 @@ import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.ICommit;
+import org.tapchain.core.IConnectHandler;
 import org.tapchain.core.IDown;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPiece;
@@ -49,6 +50,7 @@ import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
+import org.tapchain.editor.IPathTap;
 import org.tapchain.editor.ITap;
 import org.tapchain.game.MyFloat;
 import org.tapchain.game.MySetPedalTapStyle;
@@ -60,7 +62,8 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
-		ISelectable, IRelease, IDown, ILockedScroll, IBlueprintFocusNotification {
+		ISelectable, IRelease, IDown, ILockedScroll, IBlueprintFocusNotification,
+		IConnectHandler<IActorTap, IPathTap> {
 	static {
 		__addLinkClass(MyTapStyle2.class, LinkType.PULL, Integer.class);
 	}
@@ -181,7 +184,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			bm_fg = BitmapFactory.decodeResource(act.getResources(),
 					fg);
 			bm_fg_mini = Bitmap.createScaledBitmap(BitmapFactory
-					.decodeResource(act.getResources(), fg), 70, 70,
+							.decodeResource(act.getResources(), fg), 70, 70,
 					true);
 		}
 		return true;
@@ -231,7 +234,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			if (getActor() instanceof IValueArray) {
 				showPath(canvas, (IValueArray<IPoint>) getActor());
 			} else if (getActor() instanceof IValue) {
-				dummy = true;
 				Object val = ((IValue<?>) getActor())._valueGet();
                 String tag = "";
                 if(getActor() instanceof Controllable)
@@ -418,6 +420,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		}
 	}
 
+	@Override
+	public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
+		setOffsetVector();
+	}
+
 	public class ExtensionButtonEnvelope implements IRelease {
 		ActorTap setter, exit, restart;
 		ViewActor setterText;
@@ -576,13 +583,13 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public IActorBlueprint getActorBlueprint() {
         return getActor().getBlueprint();
     }
-
+	boolean isZero = true;
     public void setOffsetVector() {
-//        if(!changed)
-//            return;
-        WorldPoint average = (WorldPoint)partnersOffsetAverage._valueGet().clear();
+		partnersOffsetAverage._valueGet().clear();
+		WorldPoint average = (WorldPoint)partnersOffsetAverageRaw._valueGet().clear();
         Collection<Actor> col1 = getActor().getPartners(LinkType.PULL);
         Collection<Actor> col2 = getActor().getPartners(LinkType.PUSH);
+		isZero = col1.isEmpty() || col2.isEmpty();
         float divCol1 = 1f/((float)col1.size());
         for(Actor vec1 : col1) {
             average.setOffset(edit.toTap(vec1), -divCol1);
@@ -591,28 +598,34 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         for(Actor vec2 : col2) {
             average.setOffset(edit.toTap(vec2), divCol2);
         }
+		if(!isZero)
+			partnersOffsetAverage._valueSet(average);
     }
 
-    private Value<IPoint> partnersOffsetAverage = new Value<IPoint>(new WorldPoint(0f, 0f));
+	private Value<IPoint> partnersOffsetAverage = new Value<IPoint>(new WorldPoint(0f, 0f));
+	private Value<IPoint> partnersOffsetAverageRaw = new Value<IPoint>(new WorldPoint(0f, 0f));
 
 	WorldPoint offsetVector = new WorldPoint(0, 0);
 	public WorldPoint getOffsetVector(float alpha) {
-		if(getActor() == null)
-			return WorldPoint.zero();
         offsetVector = new WorldPoint(WorldPoint.zero());
-        offsetVector.setOffset(this, false);
-        Collection<Actor> col1 = getActor().getPartners(LinkType.PULL);
-        Collection<Actor> col2 = getActor().getPartners(LinkType.PUSH);
-        if(col1.isEmpty() || col2.isEmpty())
-            return offsetVector;
-//		float divCol1 = 1f/((float)col1.size());
-//		for(Actor vec1 : col1)
-//			offsetVector.setOffset(edit.toTap(vec1), - divCol1 * alpha);
-//		float divCol2 = 1f/((float)col2.size());
-//		for(Actor vec2 : col2)
-//            offsetVector.setOffset(edit.toTap(vec2), divCol2 * alpha);
-        setOffsetVector();
+        offsetVector.setOffset(this);
         offsetVector.setOffset(partnersOffsetAverage, alpha);
 		return offsetVector;
+	}
+
+	public WorldPoint getOffsetVectorRaw() {
+		WorldPoint rtn = (WorldPoint)partnersOffsetAverageRaw._valueGet();
+		if(getActor().getPartners(LinkType.PULL).size() == 0) {
+			rtn = new WorldPoint(0f, 0f);
+			rtn.setOffset(partnersOffsetAverageRaw);
+			rtn.setOffset(this, -1.0f);
+		} else if(getActor().getPartners(LinkType.PUSH).size() == 0) {
+			rtn = new WorldPoint(0f, 0f);
+			rtn.setOffset(partnersOffsetAverageRaw);
+			rtn.setOffset(this);
+		}
+		if(rtn.len() == 0f)
+			rtn = new WorldPoint(200f, 0f);
+		return rtn;
 	}
 }

@@ -221,9 +221,9 @@ public class Chain implements JSONSerializable {
 
 	}
 
-	public static class ConnectionResultIO extends ConnectionResult<IPath> {
+	public static class ConnectionResultPath extends ConnectionResult<IPath> {
 		ClassEnvelope _class;
-		public ConnectionResultIO(IPiece piece, IPath t) {
+		public ConnectionResultPath(IPiece piece, IPath t) {
 			super(piece, t);
 		}
 
@@ -236,9 +236,9 @@ public class Chain implements JSONSerializable {
 		}
 	}
 
-	public static class ConnectionResultO extends
+	public static class ConnectionResultOutConnector extends
 			ConnectionResult<OutConnector> {
-		public ConnectionResultO(IPiece piece, OutConnector t) {
+		public ConnectionResultOutConnector(IPiece piece, OutConnector t) {
 			super(piece, t);
 		}
 	}

@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.tapchain.core.LinkType;
+import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
 import org.tapchain.realworld.TapChainView;
 
@@ -48,13 +50,29 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
         view.add(FACTORY_KEY.ALL, 26, 400, 200);
         assertTrue(true);
     }
-    @After
-    public void end() {
+
+    @Test
+    public void top() {
+//        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
+        view.add(FACTORY_KEY.ALL, 13, 100, 300);
+        sleepSecond();
+        IActorTap a = view.add(FACTORY_KEY.ALL, 14, 250, 300);
+        sleepSecond();
+        view.add(FACTORY_KEY.ALL, 15, 400, 400);
+        sleepSecond();
+        IActorTap b = view.add(FACTORY_KEY.ALL, 15, 250, 500);
+        sleepSecond();
+        view.connect(a, LinkType.PULL, b);
+        assertTrue(true);
     }
 
     public void sleepSecond() {
+        sleepSecond(1500);
+    }
+
+    public void sleepSecond(int intervalMs) {
         try {
-            sleep(1500);
+            sleep(intervalMs);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

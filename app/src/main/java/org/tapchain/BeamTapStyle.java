@@ -31,18 +31,25 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 
 	// IPoint offset = new WorldPoint(100, 100);
 
-	BeamTapStyle(Resources r, IActorTap _p, Bitmap bm_fg) {
+	BeamTapStyle(Resources r, IActorTap _p, Bitmap bm_fg, IPoint initPos) {
 		super(_p);
 		setSize(new WorldPoint(200f, 200f));
 		bitmap = new BitmapDrawable(r, bm_fg);
 		sizey = Math.max(bitmap.getIntrinsicHeight(), bitmap.getBitmap().getHeight());
 		sizex = Math.max(bitmap.getIntrinsicWidth(), bitmap.getBitmap().getWidth());
 		bitmap.setTileModeX(Shader.TileMode.REPEAT);
-		IPoint initPos = new WorldPoint(200f, 0f);
+		if(initPos == null)
+			initPos = new WorldPoint(200f, 0f);
+		init(initPos);
+	}
+
+	BeamTapStyle(Resources r, IActorTap _p, Bitmap bm_fg) {
+		this(r, _p, bm_fg, null);
+	}
+
+	public void init(IPoint initPos) {
 		setCenter(initPos);
-		calcTheta(initPos.plusNew(_p.getCenter()));
-//		bitmap.setTargetDensity(DisplayMetrics.DENSITY_MEDIUM);
-		// registerHandler(this);
+		calcTheta(initPos.plusNew(getParentTap().getCenter()));
 	}
 
 	@Override

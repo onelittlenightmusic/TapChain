@@ -1,7 +1,7 @@
 package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.ConnectionResultIO;
+import org.tapchain.core.Chain.ConnectionResultPath;
 import org.tapchain.core.ChainController.IControlCallback;
 
 import java.util.Collection;
@@ -97,9 +97,9 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return null;
 	}
 
-	public synchronized ConnectionResultIO connect(PIECE pIn, PathType tIn,
+	public synchronized ConnectionResultPath connect(PIECE pIn, PathType tIn,
 												   PIECE pOut, PathType tOut, boolean addView) {
-		ConnectionResultIO rtn = null;
+		ConnectionResultPath rtn = null;
 		logLocal("_connect started %s",
 				toString(pIn, tIn, pOut, tOut));
 		if (pIn.isConnectedTo(pOut)) {
@@ -132,12 +132,12 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 				(tFrom == null) ? "null" : tFrom.toString());
 	}
 
-	public ConnectionResultIO append(PIECE x, PathType xp, PIECE y,
+	public ConnectionResultPath append(PIECE x, PathType xp, PIECE y,
 			PathType yp, boolean addView) {
 //		try {
 			if(x == null || xp == null || y == null || yp == null)
 				return null;
-			ConnectionResultIO io = connect(x, xp, y, yp, addView);
+			ConnectionResultPath io = connect(x, xp, y, yp, addView);
 			if(io == null || io.getResult() == null)
 				return null;
 			if (x instanceof ChainPiece)
