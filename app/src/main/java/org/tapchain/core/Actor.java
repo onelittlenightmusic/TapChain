@@ -536,7 +536,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 		}
 
 		public void push(OUTPUT output) {
-			super.pushInActor(output, pushTag);
+			super.pushInActor(output, pushTag==null?output.toString()+getTag():pushTag);
+            pushTag = null;
 		}
 
         public void push(OUTPUT output, String pushTag) {
@@ -719,6 +720,9 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         public String getNowTag() {
             return nowTag;
+        }
+        protected void setNowTag(String now) {
+            nowTag = now;
         }
     }
 

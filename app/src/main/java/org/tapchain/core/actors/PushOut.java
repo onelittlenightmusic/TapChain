@@ -14,6 +14,13 @@ public abstract class PushOut<VALUE> extends Actor.Filter<VALUE, VALUE, VALUE> {
         return tmp;
     }
 
+    @Override
+    public String funcTag(String input) {
+        String nowtmp = getNowTag();
+        setNowTag(input);
+        return nowtmp;
+    }
+
     public static class IntegerPushOut extends PushOut<Integer> {
         @Override
         public void init(IValue<Integer> val) {

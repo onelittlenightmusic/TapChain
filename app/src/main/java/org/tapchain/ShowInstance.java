@@ -42,20 +42,15 @@ public class ShowInstance {
 		smallText.setTypeface(Typeface.DEFAULT_BOLD);
 	}
 	static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint innerPaint2*/, String tag) {
-//		if(npd_num == null)
-//			npd_num = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.bubble5);
-//		if(npd_word == null)
-//			npd_word  = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.paper);
-//		if(npd_inside == null)
-//			npd_inside  = (NinePatchDrawable) act.getResources().getDrawable(R.drawable.shadow2);
         //Show Background Color Circle
-        circlePaintFill.setColor(0x80000000+tag.hashCode()+val.hashCode()%0x01000000);
+        circlePaintFill.setColor(0xaa000000+tag.hashCode());
         canvas.drawCircle(cp.x(), cp.y(), 30, circlePaintFill);
         circlePaintFill.setColor(0xccffffff);
 
 		if (val instanceof Integer) {
-			float r = 25f;
-			showInteger(canvas, r, (Integer) val, cp.x(), cp.y());
+//			float r = 25f;
+//			showInteger(canvas, r, (Integer) val, cp.x(), cp.y());
+            DrawLib.drawStringCenter(canvas, cp, val.toString(), textPaint);
 		} else if (val instanceof Float) {
 			DrawLib.drawStringCenter(canvas, cp, String.format("%.2f",((Float)val)), textPaint);
 		} else if (val instanceof Speed) {
@@ -74,7 +69,8 @@ public class ShowInstance {
 			DrawLib.drawStringCenter(canvas, cp, val.toString(), textPaint);
 		} else if (val instanceof Calendar) {
 			showCalendar(canvas, (Calendar)val, cp, 60f);
-		}
+		} else if (val instanceof Void) {
+        }
 		return true;
 	}
 
@@ -148,7 +144,7 @@ public class ShowInstance {
 			int _hour = ((Calendar) obj).get(Calendar.HOUR);
 			float min = (float)_min;
 			float hour = (float)_hour+min/60f;
-			Log.w("test", String.format("TimeTapStyle was shown.%d:%d",(int)hour, (int)min));
+//			Log.w("test", String.format("TimeTapStyle was shown.%d:%d",(int)hour, (int)min));
 			canvas.drawLine(_point.x(), _point.y(), _point.x()+diah*(float)Math.sin(Math.PI/6f*hour), _point.y()-diah*(float)Math.cos(Math.PI/6f*hour), focuspaint);
 			canvas.drawLine(_point.x(), _point.y(), _point.x()+diam*(float)Math.sin(Math.PI/30f*min), _point.y()-diam*(float)Math.cos(Math.PI/30f*min), focuspaint);
 			DrawLib.drawStringCenter(canvas, _point, String.format("%02d:%02d", _hour, _min), focuspaint);

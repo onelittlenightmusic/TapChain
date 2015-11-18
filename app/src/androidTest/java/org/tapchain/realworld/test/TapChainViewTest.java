@@ -66,6 +66,12 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
         assertTrue(true);
     }
 
+    @After
+    public void end() {
+        view.finishThisFromOutside();
+        sleepSecond(2000);
+    }
+
     public void sleepSecond() {
         sleepSecond(1500);
     }
