@@ -77,8 +77,13 @@ public class Point implements IPoint {
 		public String toString() {
 			return String.format("%f/%f", x(), y());
 		}
-		
-		@Override
+
+    @Override
+    public IPoint setOffset(IValue<IPoint> pt) {
+        return setOffset(pt, false);
+    }
+
+    @Override
 		public float x() {
 			return x;
 		}
@@ -191,13 +196,6 @@ public class Point implements IPoint {
 			return this;
 		}
 
-		@Override
-		public String getDetails() {
-			StringBuilder s = new StringBuilder();
-			s.append(String.format("(%f %f) raw(%f %f) eff %s", x(), y(), rawX(), rawY(), getEffect()));
-			return s.toString();
-		}
-		
 		public IPoint setRaw(float px, float py) {
 			this.x = px;
 			this.y = py;

@@ -96,8 +96,13 @@ public class ScreenPoint implements IPoint {
 	public boolean equals(IPoint p) {
 		return x == p.x() && y == p.y();
 	}
-	
-	@Override
+
+    @Override
+    public IPoint setOffset(IValue<IPoint> pt) {
+        return setOffset(pt, false);
+    }
+
+    @Override
 	public IPoint setOffset(IValue<IPoint> pt, boolean keep) {
 		return null;
 	}
@@ -132,22 +137,12 @@ public class ScreenPoint implements IPoint {
 	}
 
 	@Override
-	public IPoint minus(float i, float j) {
-		return new ScreenPoint(x()-i, y()-j);
-	}
-
-	@Override
 	public IPoint multiply(float a) {
 		return this;
 	}
 
 	@Override
 	public IPoint unsetOffset(IValue<IPoint> pt, boolean keep) {
-		return null;
-	}
-
-	@Override
-	public String getDetails() {
 		return null;
 	}
 

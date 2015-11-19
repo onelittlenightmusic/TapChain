@@ -437,7 +437,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			if (val2 instanceof String) {
 				setterText = new AndroidActor.AndroidTextInput(
 						MyTapStyle2.this.act, (IValue) _p.getActor());
-				setterText._valueGet().setOffset(_p, false);
+				setterText._valueGet().setOffset(_p);
 				return;
 			} else if (val2 instanceof IValueArray) {
 				setter = new MySetPathTapStyle(_p, BitmapMaker.makeOrReuse(

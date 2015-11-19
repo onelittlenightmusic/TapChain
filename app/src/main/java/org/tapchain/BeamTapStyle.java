@@ -55,7 +55,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 	@Override
 	public void view_init() {
 		getPaint().setColor(0x77ffffff);
-		_valueGet().setOffset(getParentTap(), false);
+		_valueGet().setOffset(getParentTap());
 		focuspaint.setColor(0x40ffffff);
 		focuspaint.setAntiAlias(true);
 	}

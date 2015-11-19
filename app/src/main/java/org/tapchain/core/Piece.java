@@ -151,6 +151,10 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 	public Collection<ClassEnvelope> getOutPathClasses(PathType stack) {
 		return getOutPack(stack).getPathClasses();
 	}
+    public boolean setPathClass(PathType pathType, boolean OutOrIn, ClassEnvelope clz) {
+        PathPack pathPack = OutOrIn?getOutPack(pathType):getInPack(pathType);
+        return pathPack.addPathClass(clz);
+    }
 	public boolean setInPathClass(PathType stack, ClassEnvelope clz) {
 		return getInPack(stack).addPathClass(clz);
 	}

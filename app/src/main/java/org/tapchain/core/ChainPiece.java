@@ -69,7 +69,6 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 				pack.setInType(InPathPack.Input.FIRST);
 			} else {
 				pack.setInType(InPathPack.Input.ALL);// PASSTHRU
-//				pack.addPathClass(new ClassEnvelope(Object.class));
 			}
 			if(type == PathType.EVENT)
 				pack.addPathClass(new ClassEnvelope(Object.class));
@@ -77,11 +76,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
 		for(PathType type: PathType.values()) {
 			OutPathPack pack = addNewOutPack(type);
-			if(type == PathType.OFFER)
-				;
-//				pack.addPathClass(Object.class);
-			else if(type == PathType.FAMILY)  {
-//				pack.addPathClass(new ClassEnvelope(this.getClass()));
+			if(type == PathType.FAMILY)  {
 				pack.setOutType(Output.HIPPO);
 			} else if(type == PathType.EVENT)
 				pack.addPathClass(new ClassEnvelope(Object.class));

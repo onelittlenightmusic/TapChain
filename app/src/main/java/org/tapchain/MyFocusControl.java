@@ -53,7 +53,7 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 		return spotTargetActor;
 	}
 	
-	public LinkType getFocusedLinkType() {
+	public LinkType getLinkType() {
 		return selectedLinkType;
 	}
 	public void setSpotActorLink(LinkType al) {
@@ -63,7 +63,7 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 	@Override
 	public void init(IActorTap t) {
 		getSize()._valueGet().clear();
-		getSize()._valueGet().setOffset(t.getSize(), true);
+		getSize()._valueGet().setOffset(t.getSize());
 		parent = t;
 	}
 
@@ -81,7 +81,7 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 		default:
 		}
 		if(offset != null)
-			((IActorTap)spot).getCenter().setOffset(offset, false);
+			((IActorTap)spot).getCenter().setOffset(offset);
 	}
 	
 	public void save(IEditor edit) {

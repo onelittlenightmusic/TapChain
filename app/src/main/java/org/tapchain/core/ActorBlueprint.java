@@ -5,10 +5,6 @@ import org.tapchain.core.Chain.ChainException;
 
 public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint {
 
-	ClassEnvelope push;
-	ClassEnvelope pull;
-	ClassEnvelope parent;
-	ClassEnvelope appearance;
 	public ActorBlueprint() {
 		super();
 	}
@@ -45,55 +41,11 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 		if(Actor.class.isAssignableFrom(cls)) {
 			Class<? extends Actor> clsActor = (Class<? extends Actor>) cls;
 			Actor.classLoadToLib(clsActor, this);
-			setLinkClass(clsActor);
 		}
 	}
 
-	protected void setLinkClass(Class<? extends Actor> cls) {
-		for(LinkType ac: LinkType.values())
-			setLinkClass(ac, Actor.getLinkClassFromLib(cls, ac));
-	}
-
-	private void setLinkClass(LinkType ac, ClassEnvelope envelope) {
-		if(envelope == null)
-			return;
-//		ClassEnvelope envelope = new ClassEnvelope(classEnvelope);
-		switch(ac) {
-		case PUSH:
-			push = envelope;
-			break;
-		case PULL:
-			pull = envelope;
-			break;
-		case FROM_PARENT:
-			parent = envelope;
-			break;
-		case TO_CHILD:
-			appearance = envelope;
-			break;
-		}
-		log("%s's %s setLinkedClasses to %s", cls.getSimpleName(), ac.toString(), (envelope==null)?"null":envelope.getSimpleName());
-	}
-	
 	public ClassEnvelope getConnectClass(LinkType ac) {
-		ClassEnvelope rtn = null;
-		switch(ac) {
-		case PUSH:
-
-			rtn = push;
-			break;
-		case PULL:
-			rtn = pull;
-			break;
-		case FROM_PARENT:
-			rtn = parent;
-			break;
-		case TO_CHILD:
-			rtn = appearance;
-			break;
-		}
-		log(String.format("%s's %s getLinkedClasses is %s", getTag(), ac.toString(), (rtn==null)?"null":rtn.getSimpleName()));
-		return rtn;
+        return Actor.getLinkClassFromLib(cls, ac);
 	}
 
 	@Override
@@ -106,9 +58,8 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 	
 	@Override
 	public Actor __newInstance(IManager<Actor, Actor> maker) throws ChainException {
-		Actor rtn = (Actor) super.__newInstance(maker);
-		if(rtn instanceof Actor)
-			((Actor)rtn).setBlueprint(this);
+		Actor rtn = super.__newInstance(maker);
+        rtn.setBlueprint(this);
 		return rtn;
 	}
 	
@@ -123,10 +74,9 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 
     @Override
     public Actor newInstance(IManager<Actor, Actor> maker) throws ChainException {
-        Actor rtn = (Actor) super.newInstance(maker);
+        Actor rtn = super.newInstance(maker);
         if(logLevel)
-            if(rtn instanceof Actor)
-                ((Actor)rtn).setLogLevel(true);
+            rtn.setLogLevel(true);
         return rtn;
     }
 }

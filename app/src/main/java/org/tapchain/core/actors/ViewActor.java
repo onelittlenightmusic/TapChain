@@ -175,7 +175,7 @@ public class ViewActor extends
     public class ViewActorSize extends WorldPoint implements IValue<IPoint> {
         public ViewActorSize() {
             super();
-            setOffset(this, false);
+            setOffset(this);
         }
 
         @Override

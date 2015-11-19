@@ -32,7 +32,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	@Override
 	public void view_init() {
 		getPaint().setColor(0x77ffffff);
-		_valueGet().setOffset(getParentTap(), false);
+		_valueGet().setOffset(getParentTap());
 		standardpaint.setColor(0x40ffffff);
 		standardpaint.setAntiAlias(true);
 		standardpaint.setTextAlign(Paint.Align.CENTER);

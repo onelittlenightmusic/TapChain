@@ -180,7 +180,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
         };
         view.setColorCode(ColorLib.ColorCode.RED)
                 .setPercent(new WorldPoint(200f, 200f))/*.setLogLevel(true)*/;
-        view._valueGet().setOffset(this, false);
+        view._valueGet().setOffset(this);
         view.once();
         manager.add(view)
                 ._in()

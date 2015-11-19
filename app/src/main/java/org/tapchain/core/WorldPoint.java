@@ -206,6 +206,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		return new WorldPoint(this);
 	}
 
+    @Override
 	public IPoint setOffset(IValue<IPoint> pt) {
 		return setOffset(pt, 1f);
 	}
@@ -264,17 +265,6 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		return this;
 	}
 
-	@Override
-	public String getDetails() {
-		StringBuilder s = new StringBuilder();
-		s.append(String.format("(%f %f) raw(%f %f) eff %s", x(), y(), rawX(), rawY(), getEffect()));
-		if(offset != null)
-			for(Map.Entry<IValue<IPoint>, Float> o: offset.entrySet()) {
-				s.append(String.format("Offset => (%s)", o.getKey()._valueGet()));
-			}
-		return s.toString();
-	}
-	
 	public IPoint setRaw(float px, float py) {
 		this.x = px;
 		this.y = py;

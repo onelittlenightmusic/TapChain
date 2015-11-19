@@ -689,7 +689,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
         if (rtn) {
             AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
             a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
-            a._valueGet().setOffset(getCapturedTap(), false);
+            a._valueGet().setOffset(getCapturedTap());
             editTap()
                     .add(a)
                     ._in()

@@ -18,7 +18,7 @@ public interface IFocusControl {
 
     void setTargetActor(Actor actor, IActorTap spot);
 
-    LinkType getFocusedLinkType();
+    LinkType getLinkType();
 
     Actor getTargetActor();
 

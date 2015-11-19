@@ -333,8 +333,7 @@ public class TapChainView extends FragmentActivity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-        getEditor().reset();
-        Log.i("TapChainView.state", "onStop");
+		Log.i("TapChainView.state", "onStop");
 		if (sensorManager != null)
 			sensorManager.unregisterListener(this);
 		getEditor().onDownClear();
@@ -465,8 +464,6 @@ public class TapChainView extends FragmentActivity implements
 	}
 
     public void finishThisFromOutside() {
-        getEditor().reset();
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

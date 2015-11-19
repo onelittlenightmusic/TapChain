@@ -23,7 +23,7 @@ public class MySimpleOptionTapStyle extends OptionTapStyle implements IRelease {
 	}
 	@Override
 	public void view_init() {
-		_valueGet().setOffset(getParentTap(), false);
+		_valueGet().setOffset(getParentTap());
 	}
 
 	@Override
