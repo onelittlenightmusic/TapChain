@@ -361,53 +361,53 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //        freezeToggle();
     }
 
-    public class TapChainGoalView extends AndroidActor.AndroidImageView implements ICollidable<Actor> {
-        volatile boolean achieved = false;
-        Collection<IActorCollideHandler> handlers = new ConcurrentLinkedQueue<IActorCollideHandler>();
-        CollidableHandler h;
-
-        public TapChainGoalView() {
-            super(TapChainAndroidEditor.this.act, R.drawable.star);
-            setCenter(new WorldPoint((float) 400f * (float) Math.random(),
-                    400f * (float) Math.random()));
-            h = new CollidableHandler();
-            handlers.add(h);
-        }
-
-        @Override
-        public void onCollideInternal(IEditor edit, IView v1, Collection<Actor> v2,
-                                      IPoint pos) {
-            if (achieved)
-                return;
-            for (IActorCollideHandler h : handlers)
-                if (h.onCollide(TapChainAndroidEditor.this, v1, v2, pos))
-                    achieved = true;
-        }
-
-        public void onCollide(IEditor edit, IView v1, Collection<Actor> v2, IPoint pos) {
-            Collection<Actor> pieces;
-            if (v2 == null)
-                pieces = editorManager.getActors();
-            else {
-                pieces = v2;
-            }
-            for (IPiece o : pieces)
-                if (o instanceof IView)
-                    if (o != v1)
-                        if (getInteract().checkTouchType((IView) o, v1, false) != InteractionType.NONE) {
-                            ((Controllable) v1).interruptEnd();
-                            achieved = true;
-                        }
-        }
-
-        @Override
-        public void onAdd(ActorManager maker) {
-            super.onAdd(maker);
-            maker.add(h);
-        }
-
-
-    }
+//    public class TapChainGoalView extends AndroidActor.AndroidImageView implements ICollidable<Actor> {
+//        volatile boolean achieved = false;
+//        Collection<IActorCollideHandler> handlers = new ConcurrentLinkedQueue<IActorCollideHandler>();
+//        CollidableHandler h;
+//
+//        public TapChainGoalView() {
+//            super(TapChainAndroidEditor.this.act, R.drawable.star);
+//            setCenter(new WorldPoint((float) 400f * (float) Math.random(),
+//                    400f * (float) Math.random()));
+//            h = new CollidableHandler();
+//            handlers.add(h);
+//        }
+//
+//        @Override
+//        public void onCollideInternal(IEditor edit, IView v1, Collection<Actor> v2,
+//                                      IPoint pos) {
+//            if (achieved)
+//                return;
+//            for (IActorCollideHandler h : handlers)
+//                if (h.onCollide(TapChainAndroidEditor.this, v1, v2, pos))
+//                    achieved = true;
+//        }
+//
+//        public void onCollide(IEditor edit, IView v1, Collection<Actor> v2, IPoint pos) {
+//            Collection<Actor> pieces;
+//            if (v2 == null)
+//                pieces = editorManager.getActors();
+//            else {
+//                pieces = v2;
+//            }
+//            for (IPiece o : pieces)
+//                if (o instanceof IView)
+//                    if (o != v1)
+//                        if (getInteract().checkTouchType((IView) o, v1, false) != InteractionType.NONE) {
+//                            ((Controllable) v1).interruptEnd();
+//                            achieved = true;
+//                        }
+//        }
+//
+//        @Override
+//        public void onAdd(ActorManager maker) {
+//            super.onAdd(maker);
+//            maker.add(h);
+//        }
+//
+//
+//    }
 
     // 2.Getters and setters
 

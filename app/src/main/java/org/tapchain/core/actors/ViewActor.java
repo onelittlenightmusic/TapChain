@@ -40,11 +40,12 @@ public class ViewActor extends
     // 2.Getters and setters
     public void ctrlStop() {
         removeViewFromAnimation();
-        view_end();
+        super.ctrlStop();
     }
 
     @Override
-    public void ctrlStart() throws Chain.ChainException {
+    public void ctrlStart() throws Chain.ChainException, InterruptedException {
+        super.ctrlStart();
         view_init();
         addViewToAnimation();
     }
@@ -189,10 +190,6 @@ public class ViewActor extends
             return ViewActor.this.getRawSize();
         }
 
-    }
-
-    @Override
-    public void view_end() {
     }
 
 }

@@ -16,25 +16,22 @@ import org.tapchain.editor.TapChainEditor.Pushable;
 import org.tapchain.editor.TapChainEditor.Tickable;
 
 public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap<IActorEditor, Actor, IActorTap>, IPiece<Actor> {
-	public ControllableSignal interrupt(ControllableSignal end);
-	public Actor getActor();
-	public Object getMyActorValue();
-	public boolean setMyActorValue(Object obj);
-	public void commitMyActorValue();
-	public IPoint getGridSize();
-	public IPoint getMinGridSize();
-	public boolean setGridSize(IPoint add);
-	public IValue<IPoint> getSize();
-	public void changeState(IState state);
-	public IActorTap getAccessoryTap(Object key);
-	public Collection<IActorTap> getAccessoryTaps();
-	public IActorTap setAccessoryTap(Object key, IActorTap tap);
-	public IActorTap unsetAccessoryTap(Object key);
-	public IPoint getRecentPoint();
-	public void setRecentPoint(IPoint p);
-	public void setActorBlueprint(IActorBlueprint b);
-	public IActorBlueprint getActorBlueprint();
-	public void postAdd(IPiece p, IActorTap rtn, IBlueprint b, IPoint pos);
-
+	ControllableSignal interrupt(ControllableSignal end);
+	Actor getActor();
+	Object getMyActorValue();
+	boolean setMyActorValue(Object obj);
+	void commitMyActorValue();
+	IPoint getGridSize();
+	IPoint getMinGridSize();
+	boolean setGridSize(IPoint add);
+	IValue<IPoint> getSize();
+	void changeState(IState state);
+	IActorTap getAccessoryTap(Object key);
+	Collection<IActorTap> getAccessoryTaps();
+	IActorTap setAccessoryTap(Object key, IActorTap tap);
+	IActorTap unsetAccessoryTap(Object key);
+	IPoint getRecentPoint();
+	void setRecentPoint(IPoint p);
+	void postAdd(IPiece p, IActorTap rtn, IBlueprint b, IPoint pos);
     boolean isFamilyTo(IActorTap a);
 }

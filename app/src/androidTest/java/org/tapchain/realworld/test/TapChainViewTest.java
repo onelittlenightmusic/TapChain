@@ -63,6 +63,7 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
         IActorTap b = view.add(FACTORY_KEY.ALL, 15, 250, 500);
         sleepSecond();
         view.connect(a, LinkType.PULL, b);
+        sleepSecond(10000);
         assertTrue(true);
     }
 

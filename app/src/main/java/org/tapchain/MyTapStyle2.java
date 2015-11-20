@@ -579,10 +579,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	}
 
-    @Override
-    public IActorBlueprint getActorBlueprint() {
-        return getActor().getBlueprint();
-    }
 	boolean isZero = true;
     public void setOffsetVector() {
 		partnersOffsetAverage._valueGet().clear();

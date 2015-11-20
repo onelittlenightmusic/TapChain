@@ -3,6 +3,7 @@ package org.tapchain;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.Chain;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IActorBlueprint;
 import org.tapchain.core.IActorSharedHandler;
@@ -120,33 +121,29 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 			return null;
 		return tapSet.remove(key);
 	}
-	
-	@Override
-	public void view_end() {
+
+    @Override
+    public void ctrlStart() throws Chain.ChainException, InterruptedException {
+        super.ctrlStart();
+        TapLib.setTap(this);
+    }
+
+    @Override
+	public void ctrlStop() {
 		if(tapSet != null)
 			for(IActorTap accessory: tapSet.values()) 
 				accessory.end();
+        TapLib.removeTap(this);
+        super.ctrlStop();
 	}
-	
-	@Override
+
+    @Override
 	public boolean onPush(Actor t, Object obj) {
 		if(eventHandler != null) {
 			eventHandler.onPush(this, LinkType.PUSH, obj);
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void onAdd(ActorManager maker) {
-		TapLib.setTap(this);
-	}
-	
-	@Override
-	public ActorTap end() {
-		super.end();
-		TapLib.removeTap(this);
-		return this;
 	}
 
 	@Override
@@ -176,39 +173,22 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	}
 
 	@Override
-	public void setActorBlueprint(IActorBlueprint b) {
-	}
-
-	@Override
-	public IActorBlueprint getActorBlueprint() {
-		return null;
-	}
-
-	@Override
 	public void postAdd(IPiece p, IActorTap rtn, IBlueprint b, IPoint pos) {
 	}
 
     @Override
     public boolean isFamilyTo(IActorTap a) {
-        if(a instanceof ActorTap) {
-            ClassEnvelope clz;
-            IActorBlueprint ab = getActorBlueprint(), ab2 = a.getActorBlueprint();
-            if(ab != null && ab2 != null) {
-                clz = ab.getConnectClass(LinkType.FROM_PARENT);
-                if (clz != null) {
-                    if (clz.isAssignableFrom(ab2.getConnectClass(LinkType.TO_CHILD))) {
-                        return true;
-                    }
-                }
-                clz = ab2.getConnectClass(LinkType.FROM_PARENT);
-                if (clz != null) {
-                    if (clz.isAssignableFrom(ab.getConnectClass(LinkType.TO_CHILD))) {
-                        return true;
-                    }
-                }
-            }
+        Actor thisActor = getActor(), aActor = a.getActor();
+        if(thisActor == null || aActor == null)
+            return false;
+        return checkParent(thisActor, aActor) || checkParent(aActor, thisActor);
+    }
 
+    boolean checkParent(Actor child, Actor parent) {
+        ClassEnvelope clz = child.getLinkClassFromLib(LinkType.FROM_PARENT);
+        if (clz == null) {
+            return false;
         }
-        return false;
+        return clz.isAssignableFrom(parent.getLinkClassFromLib(LinkType.TO_CHILD));
     }
 }

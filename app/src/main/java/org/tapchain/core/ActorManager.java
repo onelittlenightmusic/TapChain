@@ -128,7 +128,7 @@ public class ActorManager extends PieceManager<Actor> {
 		if(bp == null) 
 			return this;
 		getChain().getOperator().add(bp);
-		((Actor)bp).onAdd(newSession());
+//		bp.onAdd(newSession());
 		_move(bp);
 		if(getRoot() != null) {
 			super.append(bp, PathType.FAMILY, getRoot(), PathType.FAMILY, false);
@@ -195,16 +195,16 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 	
 	@Override
-	public ActorManager remove(Actor piece) {
-		if (piece == null)
+	public ActorManager remove(Actor actor) {
+		if (actor == null)
 			return this;
-		unsetPieceView(piece);
-		((Actor)piece).onRemove(newSession());
-		for (Actor cp : piece.getPartners()) {
-			disconnect(piece, cp);
+		unsetPieceView(actor);
+		actor.onRemove(newSession());
+		for (Actor partner : actor.getPartners()) {
+			disconnect(actor, partner);
 		}
-		super.remove(piece);
-		piece.end();
+		super.remove(actor);
+		actor.end();
 		return this;
 	}
 	

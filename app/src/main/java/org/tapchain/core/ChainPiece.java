@@ -420,7 +420,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	
 	//4.Termination
 	protected void onTerminate() throws ChainException {
-        end();
+//        end();
 		return;
 	}
 

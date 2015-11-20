@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.Chain;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
@@ -27,17 +28,16 @@ public class PathTap extends AndroidView implements IPathTap {
 		}
 		
 		@Override
-		public void onAdd(ActorManager maker) {
-//			editorManager = maker;
+		public void ctrlStart() throws InterruptedException, Chain.ChainException {
+            super.ctrlStart();
 			TapLib.setTap(this);
 		}
 		
 		@Override
-		public PathTap end() {
-			super.end();
+		public void  onTerminate() throws Chain.ChainException {
 //			editorManager.remove(this);
 			TapLib.removeTap(this);
-			return this;
+            super.onTerminate();
 		}
 
 		@Override

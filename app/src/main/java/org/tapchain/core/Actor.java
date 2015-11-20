@@ -305,12 +305,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     }
 
     @Override
-    public Actor end() {
+    public void onTerminate() throws ChainException {
         for (Actor bp : members)
             if (bp != this)
                 bp.end();
-        L("Actor.end()").go(super.end());
-        return this;
+        super.onTerminate();
     }
 
     public Actor once() {
@@ -425,8 +424,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public void onAdd(ActorManager maker) {
-    }
+//    public void onAdd(ActorManager maker) {
+//    }
 
     public void onRemove(ActorManager newSession) {
     }
@@ -539,11 +538,10 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         protected boolean postRun() throws ChainException {
-            boolean rtn = true;
-            rtn &= super.postRun();
+            super.postRun();
             error = false;
             // if waitFinish returns false or error is true, kill this process
-            rtn = (_waitInterrupt(!autoend) & !error);
+            boolean rtn = (_waitInterrupt(!autoend) & !error);
             if (!rtn) {
                 _ctrlStop();
             }
@@ -596,24 +594,20 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         public ControllableSignal interruptError() {
-            interrupt(ControllableSignal.ERROR);
-            return ControllableSignal.ERROR;
+            return interrupt(ControllableSignal.ERROR);
         }
 
         public ControllableSignal interruptEnd() {
-            interrupt(ControllableSignal.END);
-            return ControllableSignal.END;
+            return interrupt(ControllableSignal.END);
         }
 
         public ControllableSignal interruptStep() {
-            interrupt(ControllableSignal.STEP);
             invalidate();
-            return ControllableSignal.STEP;
+            return interrupt(ControllableSignal.STEP);
         }
 
         public ControllableSignal interruptRestart() {
-            interrupt(ControllableSignal.RESTART);
-            return ControllableSignal.RESTART;
+            return interrupt(ControllableSignal.RESTART);
         }
 
         private boolean _waitInterrupt(boolean emptywait) throws ChainException {
@@ -665,14 +659,14 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             _wake(false);
             ctrlStop();
             return this;
-        }
 
+        }
         @Override
         public void ctrlStart() throws ChainException, InterruptedException {
         }
 
         @Override
-        public void ctrlStop() throws ChainException {
+        public void ctrlStop() {
         }
 
         @Override
@@ -1089,7 +1083,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void ctrlStop() throws ChainException {
+        public void ctrlStop() {
             super.ctrlStop();
             getParentChain().unregisterAdapter(a);
         }
@@ -2247,10 +2241,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             quake_impl();
         }
 
-        @Override
-        public void ctrlStop() {
-        }
-
         public int getVal() {
             return val;
         }
@@ -2381,46 +2371,46 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    /**
-     * @author hiro
-     */
-    public static class ManagerPiece<T extends IPiece> extends StandAlonePiece {
-        BlueprintManager bm;
-        PieceManager maker;
-        IPiece parent;
-
-        // 1.Initialization
-        public ManagerPiece() {
-            super();
-        }
-
-        public ManagerPiece(T pb) {
-            this();
-            parent = pb;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public void OnPushed(Connector p, Object obj)
-                throws InterruptedException {
-            if (parent != null)
-                bm.setOuterInstanceForInner(parent);
-            try {
-                outputAllSimple(PathType.FAMILY,
-                        new Packet(bm.addLocal((Class<? extends Actor>) obj)
-                                .getBlueprint().newInstance(maker), this));
-            } catch (ChainException e) {
-                maker.log(e.errorMessage);
-            }
-            clearPull();
-        }
-
-        @Override
-        public void onAdd(ActorManager maker) {
-            super.onAdd(maker);
-            this.maker = maker;
-        }
-    }
+//    /**
+//     * @author hiro
+//     */
+//    public static class ManagerPiece<T extends IPiece> extends StandAlonePiece {
+//        BlueprintManager bm;
+//        PieceManager maker;
+//        IPiece parent;
+//
+//        // 1.Initialization
+//        public ManagerPiece() {
+//            super();
+//        }
+//
+//        public ManagerPiece(T pb) {
+//            this();
+//            parent = pb;
+//        }
+//
+//        @SuppressWarnings("unchecked")
+//        @Override
+//        public void OnPushed(Connector p, Object obj)
+//                throws InterruptedException {
+//            if (parent != null)
+//                bm.setOuterInstanceForInner(parent);
+//            try {
+//                outputAllSimple(PathType.FAMILY,
+//                        new Packet(bm.addLocal((Class<? extends Actor>) obj)
+//                                .getBlueprint().newInstance(maker), this));
+//            } catch (ChainException e) {
+//                maker.log(e.errorMessage);
+//            }
+//            clearPull();
+//        }
+//
+//        @Override
+//        public void onAdd(ActorManager maker) {
+//            super.onAdd(maker);
+//            this.maker = maker;
+//        }
+//    }
 
     public interface IFunc<VALUE, INPUT, OUTPUT> extends
             IDesigner<VALUE, INPUT, OUTPUT> {

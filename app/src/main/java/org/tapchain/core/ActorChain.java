@@ -137,9 +137,8 @@ public class ActorChain extends Chain {
 	}
 	
 	public interface IViewCallback {
-		public void view_init() throws ChainException;
-		public boolean view_impl(Object canvas);
-		public void view_end();
+		void view_init() throws ChainException;
+		boolean view_impl(Object canvas);
 	}
 	
 	public interface IView extends IValue<IPoint> {
