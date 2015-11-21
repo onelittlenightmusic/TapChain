@@ -20,14 +20,10 @@ import org.tapchain.core.Actor.Exp;
 import org.tapchain.core.Actor.IntegerGenerator;
 import org.tapchain.core.Actor.WordGenerator;
 import org.tapchain.core.ActorChain.IView;
-import org.tapchain.core.ActorManager;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.actors.PushOut;
 import org.tapchain.core.D2Point;
 import org.tapchain.core.IActionStyle;
-import org.tapchain.core.IActorCollideHandler;
-import org.tapchain.core.ICollidable;
-import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
@@ -38,7 +34,6 @@ import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.Geometry;
 import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
 import org.tapchain.editor.IWindow;
 import org.tapchain.editor.TapChainEditor;
 import org.tapchain.game.CarEngineer;
@@ -47,7 +42,6 @@ import org.tapchain.game.Motor;
 import org.tapchain.realworld.R;
 
 import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
 @SuppressWarnings("serial")
@@ -449,14 +443,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     public class RoadTapStyle extends MyTapStyle2 {
         public RoadTapStyle() {
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.getEventHandler(), TapChainAndroidEditor.this.act);
+            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
             // set background image bitmap
             setBackground(road_init());
         }
 
         public RoadTapStyle(Integer bm) {
             // set foreground image resource
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.getEventHandler(), TapChainAndroidEditor.this.act, bm);
+            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act, bm);
             // set background image bitmap
             setBackground(road_init());
         }
@@ -469,12 +463,12 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     public class BubbleTapStyle extends MyTapStyle2 {
         public BubbleTapStyle() {
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.getEventHandler(), TapChainAndroidEditor.this.act);
+            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
             setBackground(bubble_init());
         }
 
         public BubbleTapStyle(Integer bm) {
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.getEventHandler(), TapChainAndroidEditor.this.act, bm);
+            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act, bm);
             setBackground(bubble_init());
         }
 

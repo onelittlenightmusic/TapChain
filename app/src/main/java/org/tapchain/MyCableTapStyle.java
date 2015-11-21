@@ -25,6 +25,7 @@ import org.tapchain.editor.IActorAttachHandler;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
+import org.tapchain.editor.IFocusControl;
 
 import java.io.Serializable;
 
@@ -101,26 +102,12 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 		paint.setTextAlign(Align.CENTER);
 		paint.setAntiAlias(true);
 		paint.setFilterBitmap(true);
-//		bm_plug_male = BitmapMaker.makeOrReuse("plug_male", R.drawable.plug_male);
-//		bm_plug_female = BitmapMaker.makeOrReuse("plug_female", R.drawable.plug_female);
-//		pt_plug_male.setOffset(t, false);
-//		pt_plug_female.setOffset(t, false);
-//		_valueGet().setOffset(t, true);
 	}
 	
-//	public MyBalloonTapStyle(ITap t, Bitmap fg, String tag) {
-//		this(t);
-//		//Set my actor to parent tap's actor for heap connection
-//		setMyActorValue(fg);
-//		this.tag = tag;
-//	}
-//	
 	public MyCableTapStyle(IActorTap t, LinkType al, ClassEnvelope c, String tag) {
 		this(t);
 		ce = c;
 		setLink(al);
-//		Bitmap i = BitmapMaker.getClassImage(c);
-//		setMyActorValue(i);
 		this.tag = tag;
 	}
 	
@@ -191,25 +178,6 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 
 	@Override
 	public void onFocus(LinkBooleanSet booleanSet) {
-//		if(f != highlight) {
-//			if(highlight) {
-//				switch(ac) {
-//				case PULL:
-//					setColorFilter(ColorLib.colorTransformYellow);
-//					break;
-//				case PUSH:
-//					setColorFilter(ColorLib.colorTransformBlue);
-//					break;
-//				case FROM_PARENT:
-//					setColorFilter(ColorLib.colorTransformGreen);
-//					break;
-//				}
-//			}
-//			else {
-//				setColorFilter(ColorLib.colorTransform);
-////				Log.w("test", String.format("%s unlighted", getTag()));
-//			}
-//		}
 		if(booleanSet != null && booleanSet.hasAnyConnect()) {
 			for(LinkType ac: LinkType.values()) {
 				if(booleanSet.isTrue(ac)) {
@@ -223,16 +191,13 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 	}
 
 	@Override
-	public void onRelease(IPoint pos, IEditor edit) {
-		super.onRelease(pos,edit);
+	public void onRelease(IEditor edit, IPoint pos) {
+		super.onRelease(edit, pos);
 		MyCableTapStyle balloon = this;
 		LinkType ac = balloon.getLink();
 		IActorTap parent = balloon.getParentTap();
-//		if(getSharedHandler() != null)
-//			getSharedHandler().setLastPushed(ac, parent);
 		ClassEnvelope ce = balloon.getClassEnvelope();
 		edit.highlightConnectables(ac.reverse(), ce);
-//		edit.log("onSelect", String.format("Balloon on %s[%s]", parent.getMyActor().getName(), ac.toString()));
 
 	}
 
@@ -242,36 +207,22 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 		boolean rtn = false;
 			if(getTag().equals(heapOut)) {
 				if(edit.connect(a1, LinkType.PUSH, a2)) {
-//					if(null != edit.edit().append(a2, PathType.OFFER, a1, PathType.OFFER, true)) {
-//					Log.w("test", String.format("%s heap connection succeeded", ((MyBalloonTapStyle) t1).getParentTap().getTag()));
-//					unsetPushOutBalloon(getParentTap());
 					rtn = true;
-//					break;
 				} else {
-//					Log.w("test", String.format("%s heap connection failed", ((MyBalloonTapStyle) t1).getParentTap().getTag()));
 				}
-//			} else if (null != edit.edit().append(a1, PathType.OFFER, a2,
-//					PathType.OFFER, true)) {
 			} else if (edit.connect(a1, LinkType.PULL, a2)) {
-//				Log.w("test", String.format("%s heap connection succeeded", t2.getTag()));
-//				if(t2 instanceof MyCableTapStyle)
-//					unsetPushOutBalloon(((MyCableTapStyle)t2).getParentTap());
-//				else
-//					unsetPushOutBalloon(t2);
 				rtn = true;
-//				break;
 			} else {
-//				Log.w("test", String.format("%s heap connection failed", t2.getTag()));
 			}
 			return rtn;
 
 	}
 
 	@Override
-	public void focus(LinkType al) {
+	public void focus(IFocusControl focusControl, LinkType al) {
 	}
 
 	@Override
-	public void unfocus() {
+	public void unfocus(IFocusControl focusControl) {
 	}
 }

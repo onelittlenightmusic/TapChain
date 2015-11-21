@@ -333,10 +333,11 @@ public class TapChainView extends FragmentActivity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.i("TapChainView.state", "onStop");
+        getEditor().onDownClear();
+        getEditor().reset();
+        Log.i("TapChainView.state", "onStop");
 		if (sensorManager != null)
 			sensorManager.unregisterListener(this);
-		getEditor().onDownClear();
 	}
 
 	@Override

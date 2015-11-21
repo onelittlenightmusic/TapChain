@@ -40,7 +40,7 @@ public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, I
 	}
 	
 	@Override
-	public void onRelease(IPoint pos, IEditor edit) {
+	public void onRelease(IEditor edit, IPoint pos) {
 		if (edit.checkAndAttach(this, true)) {
 			edit.kickTapDraw(this);
 		}

@@ -5,10 +5,6 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Chain;
 import org.tapchain.core.ClassEnvelope;
-import org.tapchain.core.IActorBlueprint;
-import org.tapchain.core.IActorSharedHandler;
-import org.tapchain.core.IBlueprint;
-import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
@@ -23,7 +19,6 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class ActorTap extends AndroidView implements IActorTap, ITapControlInterface {
-	IActorSharedHandler eventHandler = null;
 	IPoint gridSize = new WorldPoint(1, 1);
 	IPoint recent = null;
 	private Actor mytapchain = null;
@@ -56,21 +51,6 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 
 	@Override
 	public void changeState(IState state) {
-	}
-
-	protected ActorTap setEventHandler(IActorSharedHandler eh) {
-		eventHandler = eh;
-		return this;
-	}
-
-	@Override
-	public IActorSharedHandler getSharedHandler() {
-		return eventHandler;
-	}
-
-	@Override
-	public boolean hasEventHandler() {
-		return eventHandler != null;
 	}
 
 	@Override
@@ -137,16 +117,13 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
         super.ctrlStop();
 	}
 
+
     @Override
-	public boolean onPush(Actor t, Object obj) {
-		if(eventHandler != null) {
-			eventHandler.onPush(this, LinkType.PUSH, obj);
+	public boolean onPush(Actor t, Object obj, ActorManager actorManager) {
 			return true;
-		}
-		return false;
 	}
 
-	@Override
+    @Override
 	public boolean setMyActorValue(Object obj) {
 		return false;
 	}
@@ -170,10 +147,6 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	@Override
 	public void setRecentPoint(IPoint p) {
 		recent = p;
-	}
-
-	@Override
-	public void postAdd(IPiece p, IActorTap rtn, IBlueprint b, IPoint pos) {
 	}
 
     @Override

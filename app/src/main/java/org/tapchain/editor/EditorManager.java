@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EditorManager extends ActorManager {
 	ActorManager tapManager;
 	IActorConnectHandler actorConnectHandler;
-	Blueprint bluepringForPathTap;
+	Blueprint blueprintForPathTap;
 
 	ConcurrentHashMap<Actor, IActorTap> dictPiece = new ConcurrentHashMap<Actor, IActorTap>();
 	ConcurrentHashMap<IPath, PathTap> dictPath = new ConcurrentHashMap<IPath, PathTap>();
@@ -56,7 +56,7 @@ public class EditorManager extends ActorManager {
 	}
 
 	public ActorManager setPathBlueprint(Blueprint p) {
-		bluepringForPathTap = p;
+		blueprintForPathTap = p;
 		return this;
 	}
 
@@ -123,48 +123,44 @@ public class EditorManager extends ActorManager {
         return new EditorReturn(rtn, null);
 	}
 
-	ActorTap __setPieceView(Actor cp2, final Blueprint bp)
+	ActorTap __setPieceView(Actor actor, final Blueprint bp)
 			throws ChainException {
 		final ActorTap _view;
-		ActorManager manager = getTapManager();
+		final ActorManager manager = getTapManager();
 		_view = (ActorTap) bp.newInstance(manager);
 		if (_view == null)
-			throw new ChainException(cp2, "view not created");
+			throw new ChainException(actor, "view not created");
 		manager.save();
-		dictPiece.put(cp2, _view);
-		if(((ChainPiece)cp2).getLogLevel())
+		dictPiece.put(actor, _view);
+		if(actor.getLogLevel())
 			((ChainPiece)_view).setLogLevel(true);
-		((ITapControlInterface)_view).setMyActor((Actor) cp2);
-		if (cp2 instanceof ChainPiece) {
-			ChainPiece c = ((ChainPiece) cp2);
-			c.setStatusHandler(new IStatusHandler<IPiece>() {
-				@Override
-				public void changeViewState(PieceState state) {
-					synchronized (_view) {
-						plist.get(state).offer(_view);
-					}
-					_view.changeState(state);
-				}
+		_view.setMyActor(actor);
+        actor.setStatusHandler(new IStatusHandler<IPiece>() {
+            @Override
+            public void changeViewState(PieceState state) {
+                synchronized (_view) {
+                    plist.get(state).offer(_view);
+                }
+                _view.changeState(state);
+            }
 
-				@Override
-				public int tickView(IPiece p, Packet packet) {
-					return _view.onTick((Actor) p, packet);
-				}
+            @Override
+            public int tickView(IPiece p, Packet packet) {
+                return _view.onTick((Actor) p, packet);
+            }
 
-				@Override
-				public void pushView(IPiece t, Object obj) {
-					if(_view.onPush((Actor) t, obj))
-						getChain().kick(_view);
-				}
+            @Override
+            public void pushView(IPiece t, Object obj) {
+                if (_view.onPush((Actor) t, obj, manager))
+                    getChain().kick(_view);
+            }
 
-				@Override
-				public int getTickInterval() {
-					return intervalMs;
-				}
-
-			});
-			c.setError(getErrorHandler());
-		}
+            @Override
+            public int getTickInterval() {
+                return getPathInterval();
+            }
+        });
+        actor.setError(getErrorHandler());
 		return _view;
 	}
 
@@ -174,10 +170,10 @@ public class EditorManager extends ActorManager {
 		Chain.ConnectionResultPath rtn = super.connect(x, xp, y, yp, addView);
 		try {
 			if(rtn != null) {
-				if(addView && bluepringForPathTap != null) {
+				if(addView && blueprintForPathTap != null) {
 					//PathTap instantiation
 					IActorTap xTap = getTap(x), yTap = getTap(y);
-					IBlueprint newBlueprintForPath = bluepringForPathTap.copyAndRenewArg()
+					IBlueprint newBlueprintForPath = blueprintForPathTap.copyAndRenewArg()
 							.addArg(yTap, xTap, yp, xp, rtn.getResult());
 					IPathTap pathTap = __setPathView(rtn.getResult(), newBlueprintForPath);
 
@@ -231,7 +227,7 @@ public class EditorManager extends ActorManager {
 
             @Override
             public int getTickInterval() {
-                return intervalMs;
+                return getPathInterval();
             }
         });
 		return _view;
@@ -286,6 +282,10 @@ public class EditorManager extends ActorManager {
 		this.intervalMs = intervalMs;
 		return;
 	}
+
+    public int getPathInterval() {
+        return intervalMs;
+    }
 
 	public void onRefreshView(Actor bp, Actor obj) {
 		IActorTap v = dictPiece.get(bp);

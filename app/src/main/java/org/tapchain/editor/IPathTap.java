@@ -9,13 +9,13 @@ import org.tapchain.core.Actor.ControllableSignal;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.editor.TapChainEditor.Tickable;
 
-public interface IPathTap extends IView, IPiece<Actor>, Tickable<IPath>, ITap<IActorEditor, Actor, IPathTap> {
-	public void setMyPath(IPath path);
-	public void unsetMyPath();
-	public IPath getMyPath();
-	public ControllableSignal interrupt(ControllableSignal end);
-	public IPoint getRecentPoint();
-	public void setRecentPoint(IPoint newKey);
-	public void setEditor(ActorManager manager);
-	public IPoint getPoint(float beta);
+public interface IPathTap extends IView, IPiece<Actor>, Tickable<IPath>, ITap {
+	void setMyPath(IPath path);
+	void unsetMyPath();
+	IPath getMyPath();
+	ControllableSignal interrupt(ControllableSignal end);
+	IPoint getRecentPoint();
+	void setRecentPoint(IPoint newKey);
+	void setEditor(ActorManager manager);
+	IPoint getPoint(float beta);
 }

@@ -1,12 +1,12 @@
 package org.tapchain;
 
 import org.tapchain.core.ClassEnvelope;
-import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
+import org.tapchain.editor.IFocusControl;
 import org.tapchain.realworld.R;
 
 import java.util.HashMap;
@@ -48,34 +48,32 @@ public class MySpotOptionTapStyle extends MySimpleOptionTapStyle implements IFoc
     LinkType al = null;
     ClassEnvelope clazz = null;
 
-	public MySpotOptionTapStyle(IActorTap t, IActorSharedHandler sh, LinkType al, ClassEnvelope clz) {
+	public MySpotOptionTapStyle(IActorTap t, LinkType al, ClassEnvelope clz) {
         super(t, spotProperties.get(al).getBitmap());
         this.al = al;
         this.clazz = clz;
         setCenter(spotProperties.get(al).getMargin());
 //			getCenter().setoffset
-        setEventHandler(sh);
-//			if(!focusControl.containsKey(t))
-//				focusControl.put(t, new ArrayList<MySpotOptionTapStyle>());
-//			focusControl.get(t).addFocusable(this);
-//			if(spotTarget != null && spotTarget != t)
-//				clearAllFocusables();
+//        setEventHandler(sh);
     }
 
     @Override
-    public void onRelease(IPoint pos, IEditor edit) {
-        getSharedHandler().setSpot(al, this, clazz);
+    public void onRelease(IEditor edit, IPoint pos) {
+        edit.getEventHandler().setSpot(al, this, clazz);
     }
 
-    public void focus(LinkType al) {
-        getSharedHandler().getFocusControl().unfocusAll(this);
+    @Override
+    public void focus(IFocusControl focusControl, LinkType al) {
+        focusControl.unfocusAll(this);
         setColorCode(ColorLib.getLinkColor(al.reverse()));
-        getSharedHandler().getFocusControl().setSpotActorLink(al);
+        focusControl.setSpotActorLink(al);
     }
 
-    public void unfocus() {
+    @Override
+    public void unfocus(IFocusControl focusControl) {
         setColorCode(ColorLib.ColorCode.CLEAR);
-        getSharedHandler().getFocusControl().setSpotActorLink(null);
+        focusControl.setSpotActorLink(null);
     }
+
 
 }

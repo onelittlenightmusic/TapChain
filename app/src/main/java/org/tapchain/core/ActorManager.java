@@ -237,7 +237,6 @@ public class ActorManager extends PieceManager<Actor> {
         void changeViewState(PieceState state);
 		int tickView(T t, Packet obj);
 		void pushView(T t, Object obj);
-
 		int getTickInterval();
 	}
 	

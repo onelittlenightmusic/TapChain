@@ -196,7 +196,17 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	}
 
 	@Override
-	public void onRelease(IPoint pos, IEditor edit) {
+	public void onRelease(IEditor edit, IPoint pos) {
 
 	}
+
+    static String _out = "_out", _in = "_in";
+    public static IActorTap createBalloon(IActorTap t, LinkType linkType, ClassEnvelope ce) {
+        OptionTapStyle balloon = null;
+        balloon = new BalloonTapStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
+        balloon.setCenter(new WorldPoint(100f, 100f));
+        balloon.setColorCode(ColorLib.ColorCode.GREEN);
+        balloon._valueGet().setOffset(t);
+        return balloon;
+    }
 }

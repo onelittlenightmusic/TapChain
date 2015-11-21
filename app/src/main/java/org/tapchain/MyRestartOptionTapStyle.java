@@ -11,7 +11,7 @@ public class MyRestartOptionTapStyle extends MySimpleOptionTapStyle {
 		super(t, bm_fg);
 	}
 
-	public void onRelease(IPoint pos, IEditor edit) {
+	public void onRelease(IEditor edit, IPoint pos) {
 		((Controllable)getParentTap().getActor()).interrupt(ControllableSignal.RESTART);
 	}
 }

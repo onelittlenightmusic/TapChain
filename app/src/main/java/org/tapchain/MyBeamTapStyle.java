@@ -3,13 +3,12 @@ package org.tapchain;
 import android.content.res.Resources;
 
 import org.tapchain.core.ClassEnvelope;
-import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.LinkType;
-import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
+import org.tapchain.editor.IFocusControl;
 import org.tapchain.realworld.R;
 
 /**
@@ -23,27 +22,29 @@ public class MyBeamTapStyle extends BeamTapStyle implements IRelease, IFocusable
     LinkType al = null;
     ClassEnvelope clazz = null;
 
-	public MyBeamTapStyle(Resources r, IActorSharedHandler sh, IActorTap t, LinkType al, ClassEnvelope clz) {
+	public MyBeamTapStyle(Resources r, IActorTap t, LinkType al, ClassEnvelope clz) {
         super(r, t, BitmapMaker.makeOrReuse("Beam", R.drawable.beam));
         this.al = al;
         this.clazz = clz;
-        setEventHandler(sh);
+//        setEventHandler(sh);
     }
 
     @Override
-    public void onRelease(IPoint pos, IEditor edit) {
-        super.onRelease(pos, edit);
-        getSharedHandler().setSpot(al, this, clazz);
+    public void onRelease(IEditor edit, IPoint pos) {
+        super.onRelease(edit, pos);
+        edit.getEventHandler().setSpot(al, this, clazz);
     }
 
-    public void focus(LinkType al) {
-        getSharedHandler().getFocusControl().unfocusAll(this);
+    @Override
+    public void focus(IFocusControl focusControl, LinkType al) {
+        focusControl.unfocusAll(this);
         setColorCode(ColorLib.getLinkColor(al.reverse()));
-        getSharedHandler().getFocusControl().setSpotActorLink(al);
+        focusControl.setSpotActorLink(al);
     }
 
-    public void unfocus() {
+    @Override
+    public void unfocus(IFocusControl focusControl) {
         setColorCode(ColorLib.ColorCode.CLEAR);
-        getSharedHandler().getFocusControl().setSpotActorLink(null);
+        focusControl.setSpotActorLink(null);
     }
 }

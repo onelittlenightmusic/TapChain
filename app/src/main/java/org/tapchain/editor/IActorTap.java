@@ -15,7 +15,7 @@ import org.tapchain.core.Piece;
 import org.tapchain.editor.TapChainEditor.Pushable;
 import org.tapchain.editor.TapChainEditor.Tickable;
 
-public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap<IActorEditor, Actor, IActorTap>, IPiece<Actor> {
+public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap, IPiece<Actor> {
 	ControllableSignal interrupt(ControllableSignal end);
 	Actor getActor();
 	Object getMyActorValue();
@@ -32,6 +32,5 @@ public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap<IActor
 	IActorTap unsetAccessoryTap(Object key);
 	IPoint getRecentPoint();
 	void setRecentPoint(IPoint p);
-	void postAdd(IPiece p, IActorTap rtn, IBlueprint b, IPoint pos);
     boolean isFamilyTo(IActorTap a);
 }

@@ -37,7 +37,7 @@ public class MySimpleOptionTapStyle extends OptionTapStyle implements IRelease {
 //		return attr;
 //	}
 	@Override
-	public void onRelease(IPoint pos, IEditor edit) {
+	public void onRelease(IEditor edit, IPoint pos) {
 //		if(getAttribute() == "exit")
 //			edit.edit().remove(((Controllable)getParentTap().getMyActor()));
 //		else if(getAttribute() == "restart")

@@ -4,8 +4,6 @@ import org.tapchain.editor.IEditor;
 import org.tapchain.core.IPoint;
 import org.tapchain.editor.IActorTap;
 
-import android.graphics.Bitmap;
-
 public class MySetFloatTapStyle extends MySetIntegerTapStyle {
 	/**
 	 * 
@@ -29,7 +27,7 @@ public class MySetFloatTapStyle extends MySetIntegerTapStyle {
 		return val == ((Float)getParentTap().getMyActorValue()).intValue();
 	}
 	@Override
-	public void onRelease(IPoint pos, IEditor edit) {
+	public void onRelease(IEditor edit, IPoint pos) {
 		setParentValue(pos, null);
 		getParentTap().commitMyActorValue();
 	}

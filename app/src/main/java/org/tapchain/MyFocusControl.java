@@ -3,6 +3,7 @@ package org.tapchain;
 import java.util.HashMap;
 
 import org.tapchain.core.Actor;
+import org.tapchain.core.ActorManager;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.IEditor;
 import org.tapchain.core.IPoint;
@@ -32,7 +33,7 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 	public void unfocusAll(IFocusable spotOption) {
 		for(IFocusable s: array.keySet())
 			if(s != spotOption)
-				s.unfocus();
+				s.unfocus(this);
 	}
 	
 	@Override
@@ -84,9 +85,9 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 			((IActorTap)spot).getCenter().setOffset(offset);
 	}
 	
-	public void save(IEditor edit) {
+	public void save(ActorManager manager) {
 		for(IFocusable focusable : array.keySet()) {
-			edit.editTap().add((Actor) focusable).save();
+			manager.add((Actor) focusable).save();
 		}
 	}
 	

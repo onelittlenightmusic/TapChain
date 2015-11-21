@@ -56,7 +56,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         spotActorlink = al;
         edit.setNextPos(spot.getCenter());
         edit.changePaletteToConnectables(al.reverse(), clazz);
-        spot.focus(al);
+        spot.focus(getFocusControl(), al);
 
     }
 
@@ -90,13 +90,13 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
             IFocusable spot = null;
             switch (al) {
                 case PUSH:
-                    MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), this, v, al, clz);
+                    MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz);
                     if (v instanceof MyTapStyle2)
                         beam.init(((MyTapStyle2) v).getOffsetVectorRaw());
                     spot = beam;
                     break;
                 case TO_CHILD:
-                    spot = new MySpotOptionTapStyle(v, this, al, clz);
+                    spot = new MySpotOptionTapStyle(v, al, clz);
                     break;
                 default:
                     continue;
@@ -110,7 +110,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
                 first = al;
             }
         }
-        getFocusControl().save(edit);
+        getFocusControl().save(edit.editTap());
     }
 
     @Override
@@ -178,7 +178,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         } catch (ChainException e) {
             e.printStackTrace();
         }
-
         combo(v, b);
     }
 
@@ -202,7 +201,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         //Create error balloon
         LinkType linkType = actorPullException.getLinkType();
         ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
-        IActorTap balloon = createBalloon(t, linkType, classEnvelopeInLink);
+        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
         edit.editTap().add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
         setLastPushed(linkType, t, classEnvelopeInLink);
@@ -210,7 +209,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 
     @Override
     public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
-
         LinkType linkType = actorPullException.getLinkType();
         if (linkType != null) {
             edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
@@ -235,7 +233,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         if (target == null)
             return null;
         IActorTap lt = target.getAccessoryTap(ac);
-//			ITap lt = t;
         if (lt != null && lt instanceof IBlueprintFocusNotification) {
             ((IBlueprintFocusNotification) lt).onFocus(ac.getBooleanSet());
         }
@@ -254,27 +251,9 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 
     @Override
     public void onPush(IActorTap t, LinkType linkType, Object obj) {
-        setPushOutBalloon(t, linkType, obj);
-
+        setLastPushed(linkType, t, new ClassEnvelope(obj.getClass()));
     }
 
-    public void setPushOutBalloon(IActorTap t, LinkType linkType, Object obj) {
-        if (t.getActor().isConnectedTo(linkType)) {
-            return;
-        }
-        IActorTap accessoryTap = t.getAccessoryTap(linkType);
-        if (accessoryTap != null) {
-            accessoryTap.setMyActorValue(obj);
-            return;
-        }
-
-        ClassEnvelope classEnvelope = new ClassEnvelope(obj.getClass());
-        IActorTap balloon = createBalloon(t, linkType, classEnvelope);
-        edit.editTap().add((Actor) balloon).save();
-        t.setAccessoryTap(linkType, balloon);
-        setLastPushed(linkType, t, classEnvelope);
-        Log.w("test", String.format("setPushOutBalloon ended %s", t.getTag()));
-    }
 
     public void unsetPushOutBalloon(ActorTap t, LinkType linkType) {
         ActorTap accessoryTap = (ActorTap) t.getAccessoryTap(linkType);
@@ -288,16 +267,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     public void combo(IActorTap t, IBlueprint b) {
         Actor actorNew = edit.toActor((ActorTap) t), aTarget = getFocusControl().getTargetActor();
         edit.connect(aTarget, getFocusControl().getLinkType(), actorNew);
-    }
-
-
-    public IActorTap createBalloon(IActorTap t, LinkType linkType, ClassEnvelope ce) {
-        OptionTapStyle balloon = null;
-        balloon = new BalloonTapStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
-        balloon.setCenter(new WorldPoint(100f, 100f));
-        balloon.setColorCode(ColorCode.GREEN);
-        balloon._valueGet().setOffset(t);
-        return balloon;
     }
 
     MyFocusControl focusControl = new MyFocusControl();

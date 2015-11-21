@@ -25,12 +25,9 @@ import org.tapchain.core.ClassLib;
 import org.tapchain.core.ClassLib.ClassLibReturn;
 import org.tapchain.core.CodingLib;
 import org.tapchain.core.IActorBlueprint;
-import org.tapchain.core.IActorSharedHandler;
-import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.ICommit;
 import org.tapchain.core.IConnectHandler;
-import org.tapchain.core.IDown;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
@@ -62,7 +59,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
-		ISelectable, IRelease, IDown, ILockedScroll, IBlueprintFocusNotification,
+		ISelectable, IRelease, ILockedScroll, IBlueprintFocusNotification,
 		IConnectHandler<IActorTap, IPathTap> {
 	static {
 		__addLinkClass(MyTapStyle2.class, LinkType.PULL, Integer.class);
@@ -91,17 +88,17 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     private boolean changed;
 
     // 1.Initialization
-	public MyTapStyle2(IActorEditor edit, IActorSharedHandler event, Activity activity) {
-		this(edit, event, activity, null);
+	public MyTapStyle2(IActorEditor edit, Activity activity) {
+		this(edit, activity, null);
 	}
 
-	public MyTapStyle2(IActorEditor edit, IActorSharedHandler event, Activity activity, Integer fg) {
+	public MyTapStyle2(IActorEditor edit, Activity activity, Integer fg) {
 		super();
         act = activity;
 		this.edit = edit;
 		myview_init(fg);
 
-		setEventHandler(event);
+//		setEventHandler(event);
 		_paint.setStyle(Paint.Style.FILL);
 		_paint.setAntiAlias(true);
 		_paint.setAlpha(120);
@@ -184,8 +181,8 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			bm_fg = BitmapFactory.decodeResource(act.getResources(),
 					fg);
 			bm_fg_mini = Bitmap.createScaledBitmap(BitmapFactory
-							.decodeResource(act.getResources(), fg), 70, 70,
-					true);
+                            .decodeResource(act.getResources(), fg), 70, 70,
+                    true);
 		}
 		return true;
 	}
@@ -293,7 +290,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	public MyTapStyle2 setPercent(IPoint wp) {
 		super.setPercent(wp);
 		setSize(sizeOpened.multiplyNew(0.01f * (float) getPercent().x())
-				.plus(sizeClosed).plus(sizeClosed));
+                .plus(sizeClosed).plus(sizeClosed));
 		return this;
 	}
 
@@ -416,7 +413,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			Object val = ((IValue) getActor())._valueGet();
 			ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this, val);
 			e.registerToManager(edit.editTap());
-			getSharedHandler().getFocusControl().large();
+			edit.getEventHandler().getFocusControl().large();
 		}
 	}
 
@@ -441,38 +438,38 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 				return;
 			} else if (val2 instanceof IValueArray) {
 				setter = new MySetPathTapStyle(_p, BitmapMaker.makeOrReuse(
-						"pathExt", R.drawable.widen, 200, 200))
-						.setEventHandler(getSharedHandler());
+						"pathExt", R.drawable.widen, 200, 200));
+//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof IPoint) {
 				setter = new MySetPointTapStyle(_p, BitmapMaker.makeOrReuse(
-						"pointExt", R.drawable.widen, 200, 200))
-						.setEventHandler(getSharedHandler());
+						"pointExt", R.drawable.widen, 200, 200));
+//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof Integer) {
-				setter = new MySetIntegerTapStyle(_p)
-						.setEventHandler(getSharedHandler());
+				setter = new MySetIntegerTapStyle(_p);
+//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof Float) {
-				setter = new MySetFloatTapStyle(_p)
-						.setEventHandler(getSharedHandler());
+				setter = new MySetFloatTapStyle(_p);
+//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof MyFloat) {
-				setter = new MySetPedalTapStyle(_p)
-						.setEventHandler(getSharedHandler());
+				setter = new MySetPedalTapStyle(_p);
+//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof Calendar) {
 				setter = new MySetTimeTapStyle(_p, BitmapMaker.makeOrReuse(
-						"pointExt", R.drawable.widen, 200, 200))
-						.setEventHandler(getSharedHandler());
+						"pointExt", R.drawable.widen, 200, 200));
+//						.setEventHandler(getSharedHandler());
 			} else {
 				return;
 			}
 			extensionTag = val2.getClass().getSimpleName();
 
 			exit = new MyExitOptionTapStyle(_p, BitmapMaker.makeOrReuse(
-					"exit", R.drawable.dust, 70, 70))
-					.setEventHandler(getSharedHandler());
+					"exit", R.drawable.dust, 70, 70));
+//					.setEventHandler(getSharedHandler());
 			exit.setCenter(new WorldPoint(180f, -180f));
 			exit.setColorCode(ColorCode.RED);
 			restart = new MyRestartOptionTapStyle(_p, BitmapMaker.makeOrReuse(
-					"restart", R.drawable.reload, 70, 70))
-					.setEventHandler(getSharedHandler());
+					"restart", R.drawable.reload, 70, 70));
+//					.setEventHandler(getSharedHandler());
 			restart.setCenter(new WorldPoint(180f, 180f));
 			restart.setColorCode(ColorCode.BLUE);
 		}
@@ -499,7 +496,8 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			return true;
 		}
 
-		public void clear(ActorManager manager) {
+		public void clear(IEditor edit) {
+            ActorManager manager = edit.editTap();
 			if (setter != null) {
 				manager.remove(setter);
 				setter = null;
@@ -516,7 +514,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 				manager.remove(setterText);
 				setterText = null;
 			}
-			getSharedHandler().getFocusControl().small();
+			edit.getEventHandler().getFocusControl().small();
 		}
 
 		public IActorTap getTap() {
@@ -524,10 +522,10 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		}
 
 		@Override
-		public void onRelease(IPoint pos, IEditor edit) {
+		public void onRelease(IEditor edit, IPoint pos) {
 			if(setter instanceof IRelease)
-				((IRelease)setter).onRelease(pos, edit);
-			clear(edit.editTap());
+				((IRelease)setter).onRelease(edit, pos);
+			clear(edit);
 		}
 
 	}
@@ -538,31 +536,48 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	}
 
 	@Override
-	public void onRelease(IPoint pos, IEditor edit) {
+	public void onRelease(IEditor edit, IPoint pos) {
 		edit.checkAndAttach(this, false);
 	}
 
 
-	protected void addSpot(IActorTap v) {
-		getSharedHandler().changeFocus(v);
-	}
+//	protected void addSpot(IActorTap v) {
+//		getSharedHandler().changeFocus(v);
+//	}
 
-	@Override
-	public void postAdd(IPiece p, IActorTap v, IBlueprint b, IPoint pos) {
-		addSpot(v);
-	}
+    @Override
+    public boolean onPush(Actor t, Object obj, ActorManager actorManager) {
+        super.onPush(t, obj, actorManager);
+        setPushOutBalloon(this,LinkType.PUSH, obj, actorManager);
+        return true;
+    }
+
+    void setPushOutBalloon(IActorTap t, LinkType linkType, Object obj, ActorManager actorManager) {
+        if (t.getActor().isConnectedTo(linkType)) {
+            return;
+        }
+        IActorTap accessoryTap = t.getAccessoryTap(linkType);
+        if (accessoryTap != null) {
+            accessoryTap.setMyActorValue(obj);
+            return;
+        }
+
+        ClassEnvelope classEnvelope = new ClassEnvelope(obj.getClass());
+        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelope);
+        actorManager.add((Actor) balloon).save();
+        t.setAccessoryTap(linkType, balloon);
+    }
 
 
-
-	@Override
-	public boolean onDown(IEditor edit, IPoint pos) {
-		addSpot(this);
-		return false;
-	}
+//	@Override
+//	public boolean onDown(IEditor edit, IPoint pos) {
+//		addSpot(this);
+//		return false;
+//	}
 
 	@Override
 	public boolean onLockedScroll(IEditor edit, ITap selectedTap, IPoint wp) {
-		setParentSize((IActorTap) this, wp);
+		setParentSize(this, wp);
 		return false;
 	}
 	

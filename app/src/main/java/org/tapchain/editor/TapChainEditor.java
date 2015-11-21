@@ -23,7 +23,6 @@ import org.tapchain.core.IActor;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintInitialization;
-import org.tapchain.core.IDown;
 import org.tapchain.core.IErrorHandler;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.ILogHandler;
@@ -254,6 +253,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		goalBlueprintManager.setOuterInstanceForInner(s.getOuter());
 	}
 
+    @Override
 	public IActorSharedHandler getEventHandler() {
 		if (styles == null)
 			return null;
@@ -355,7 +355,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	void unlockReleaseTap() {
         if (lockedReleaseTap != null) {
-            lockedReleaseTap.onRelease(touched, this);
+            lockedReleaseTap.onRelease(this, touched);
             lockedReleaseTap = null;
         }
 	}
@@ -369,7 +369,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		if(hasLockReleaseTap())
             unlockReleaseTap();
         else if(selectedTap instanceof IRelease) {
-			((IRelease) selectedTap).onRelease(touched, this);
+			((IRelease) selectedTap).onRelease(this, touched);
             rtn = true;
 		}
 
@@ -396,8 +396,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		touched = iPoint;
 		boolean rtn = capturePiece(iPoint);
 		if(rtn)
-			if (selectedTap instanceof IDown) {
-				((IDown) selectedTap).onDown(this, iPoint);
+			if (selectedTap instanceof IActorTap) {
+				getEventHandler().changeFocus((IActorTap) selectedTap);
+//                .onDown(this, iPoint);
 			}
 
 		return rtn;
@@ -573,9 +574,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
             editorManager.save();
             Actor actor = rtn.getActor();
             IActorTap tap = rtn.getTap();
-            if (tap.getSharedHandler() != null)
-                tap.getSharedHandler().onAdd(actor, tap, blueprint, iPoint);
-            tap.postAdd(actor, tap, blueprint, iPoint);
+            getEventHandler().onAdd(actor, tap, blueprint, iPoint);
+            getEventHandler().changeFocus(tap);
+//            tap.postAdd(actor, tap, blueprint, iPoint);
             return rtn;
         } catch (ChainException e) {
             editorManager.error(e);
@@ -730,10 +731,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 
 			// Connect/disconnect moving to/from target;
-			if (t1.hasEventHandler())
-				if (!t1.getSharedHandler().onAttach(t1, t2, a1, a2, type)) {
-					return false;
-				}
+            if (!getEventHandler().onAttach(t1, t2, a1, a2, type)) {
+                return false;
+            }
 		}
 
 		return true;
@@ -824,7 +824,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public interface Pushable<T> {
-		public boolean onPush(T t, Object obj);
+		public boolean onPush(T t, Object obj, ActorManager actorManager);
 	}
 
 
