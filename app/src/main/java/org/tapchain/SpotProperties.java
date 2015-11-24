@@ -21,7 +21,7 @@ import android.graphics.Bitmap;
 //			@Override
 //			public void onRelease(IPoint pos, IEdit edit) {
 //				super.onRelease(pos, edit);
-//				setSpot(al, this, clazz);
+//				changeFocus(al, this, clazz);
 //			}
 //			
 //			public void highlight(ActorLink al) {

@@ -18,8 +18,11 @@ import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.ColorLib.ColorCode;
 import org.tapchain.TapChainAndroidEditor.StateLog;
 import org.tapchain.core.Actor;
+import org.tapchain.core.ActorInputException;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.ActorPullException;
 import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.ClassLib;
 import org.tapchain.core.ClassLib.ClassLibReturn;
@@ -28,6 +31,7 @@ import org.tapchain.core.IActorBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.ICommit;
 import org.tapchain.core.IConnectHandler;
+import org.tapchain.core.IErrorHandler;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
@@ -60,7 +64,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		ISelectable, IRelease, ILockedScroll, IBlueprintFocusNotification,
-		IConnectHandler<IActorTap, IPathTap> {
+		IConnectHandler<IActorTap, IPathTap>, IErrorHandler<Actor> {
 	static {
 		__addLinkClass(MyTapStyle2.class, LinkType.PULL, Integer.class);
 	}
@@ -85,7 +89,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	private IPoint faceOffset = new WorldPoint(20f, 20f);
 	float textSize = 60f, miniTextSize= 10f;
 	Drawable myDrawable = null;
-    private boolean changed;
 
     // 1.Initialization
 	public MyTapStyle2(IActorEditor edit, Activity activity) {
@@ -388,15 +391,14 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	
 	@Override
 	public void onFocus(LinkBooleanSet booleanSet) {
-		if(booleanSet != null && !booleanSet.isEmpty()) {
-			for(LinkType ac: booleanSet) {
-				setColorCode(ColorLib.getLinkColor(ac));
-				log("%s(%s) focused", getTag(), ac.toString());
-			}
-			return;
+		if(booleanSet == null || booleanSet.isEmpty()) {
+            setColorCode(ColorCode.CLEAR);
+            log("%s unfocused", getTag());
+        }
+        for(LinkType ac: booleanSet) {
+            setColorCode(ColorLib.getLinkColor(ac));
+            log("%s(%s) focused", getTag(), ac.toString());
 		}
-		setColorCode(ColorCode.CLEAR);
-		log("%s unfocused", getTag());
 	}
 
 	@Override
@@ -413,13 +415,15 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			Object val = ((IValue) getActor())._valueGet();
 			ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this, val);
 			e.registerToManager(edit.editTap());
-			edit.getEventHandler().getFocusControl().large();
+//			edit.getEventHandler().getFocusControl().large();
 		}
 	}
 
 	@Override
 	public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
 		setOffsetVector();
+        edit.editTap().remove((Actor) getAccessoryTap((iActorTap == this) ? linkType: linkType.reverse()));
+        unsetAccessoryTap(linkType);
 	}
 
 	public class ExtensionButtonEnvelope implements IRelease {
@@ -514,7 +518,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 				manager.remove(setterText);
 				setterText = null;
 			}
-			edit.getEventHandler().getFocusControl().small();
+//			edit.getEventHandler().getFocusControl().small();
 		}
 
 		public IActorTap getTap() {
@@ -542,7 +546,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 
 //	protected void addSpot(IActorTap v) {
-//		getSharedHandler().changeFocus(v);
+//		getSharedHandler().addFocus(v);
 //	}
 
     @Override
@@ -566,6 +570,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelope);
         actorManager.add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
+        edit.highlightConnectables(linkType, t, classEnvelope);
     }
 
 
@@ -639,4 +644,56 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			rtn = new WorldPoint(200f, 0f);
 		return rtn;
 	}
+
+    @Override
+    public ChainPiece onError(Actor actor, ChainException e) {
+        if(!(e instanceof ActorInputException))
+            return actor;
+        if(e instanceof ActorPullException)
+            onPullLocked(this, (ActorPullException) e);
+        return actor;
+    }
+
+    @Override
+    public ChainPiece onUnerror(Actor actor, ChainException e) {
+        if(!(e instanceof ActorInputException))
+            return actor;
+        if(e instanceof ActorPullException) {
+            onPullUnlocked(this, (ActorPullException) e);
+        }
+        return actor;
+    }
+
+    public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
+//        l.offer(String.format("%s: \"%s\"", actorPullException.getLocation(),
+//                actorPullException.getErrorMessage()));
+        AndroidActor.AndroidImageView errorMark = new AndroidActor.AndroidImageView(act, R.drawable.error);
+        errorMark.setColorCode(ColorCode.RED)
+                .setPercent(new WorldPoint(200f, 200f));
+        errorMark._valueGet().setOffset(t);
+        edit.editTap()
+                .add(errorMark
+                )
+                ._in()
+                .add(new Actor.Reset(false)/*.setLogLevel(true)*/)
+                .old(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
+                .save();
+
+        //Create error balloon
+        LinkType linkType = actorPullException.getLinkType();
+        ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
+        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
+        edit.editTap().add((Actor) balloon).save();
+        t.setAccessoryTap(linkType, balloon);
+        edit.highlightConnectables(linkType, t, classEnvelopeInLink);
+    }
+
+    public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
+        LinkType linkType = actorPullException.getLinkType();
+        if (linkType != null) {
+            edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
+            t.unsetAccessoryTap(linkType);
+            edit.unhighlightConnectables();
+        }
+    }
 }

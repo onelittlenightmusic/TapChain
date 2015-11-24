@@ -29,9 +29,7 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
 	VIEW getCapturedActorTap();
 	void setNextPos(IPoint nextConnectivity);
 	void resetNextPos();
-	List<IBlueprint<ACTOR>> highlightConnectables(LinkType reverse, ClassEnvelope ce);
-	void changePaletteToConnectables(LinkType ac,
-			ClassEnvelope classEnvelope);
+	List<IBlueprint<ACTOR>> highlightConnectables(LinkType reverse, IActorTap target, ClassEnvelope ce);
 	boolean connect(ACTOR a1, LinkType al, ACTOR a2);
 	void lockReleaseTap(IRelease t);
 	VIEW getLockedReleaseTap();

@@ -216,7 +216,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 			offset = new HashMap<IValue<IPoint>, Float>();
 		if(offset.containsKey(pt))
 			return this;
-		if(pt._valueGet() == this)
+		if(pt == null || pt._valueGet() == this)
 			return this;
 		offset.put(pt, alpha);
 		return this;

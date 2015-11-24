@@ -4,22 +4,18 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.util.Log;
 
-import org.tapchain.AndroidActor.AndroidImageView;
-import org.tapchain.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Controllable;
-import org.tapchain.core.ActorPullException;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.ClassEnvelope;
-import org.tapchain.core.IActorBlueprint;
 import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
-import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.PathType;
 import org.tapchain.core.WorldPoint;
+import org.tapchain.core.actors.IFocusHandler;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IAttachHandler;
@@ -34,7 +30,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     String _out = "_out", _in = "_in";
     Integer addSoundHammer = R.raw.button;
     Integer addSoundFail = R.raw.failbuzzer;
-    LinkType spotActorlink = LinkType.PUSH;
     Resources res = null;
     Activity act = null;
 
@@ -52,10 +47,10 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     }
 
     @Override
-    public void setSpot(LinkType al, IFocusable spot, ClassEnvelope clazz) {
-        spotActorlink = al;
+    public void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz) {
         edit.setNextPos(spot.getCenter());
-        edit.changePaletteToConnectables(al.reverse(), clazz);
+//        edit.changePaletteToConnectables(al.reverse(), clazz);
+        edit.highlightConnectables(al, spot, clazz);
         spot.focus(getFocusControl(), al);
 
     }
@@ -66,50 +61,53 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     }
 
     @Override
-    public void changeFocus(IActorTap v) {
-        if (v.getActor() == getFocusControl().getTargetActor())
-            return;
-        resetSpot();
-        getFocusControl().clearAllFocusables();
-
-        IActorBlueprint b = v.getActor().getBlueprint();
-        if (!(b instanceof IActorBlueprint)) {
-            return;
-        }
-
+    public void addFocus(IActorTap v) {
+        Actor actor = v.getActor();
+        ClassEnvelope firstClassEnvelope = null;
         LinkType spotLatest = getFocusControl().getLinkType(), first = null;
-        getFocusControl().init(v);
-        for (LinkType al : LinkType.values()) {
-            ClassEnvelope clz = b.getConnectClass(al);
-            if (clz == null) {
-                unsetLastPushed();
-                continue;
-            }
+        IFocusable firstSpot = null;
+        if (actor == getFocusControl().getTargetActor()) {
+        } else {
+            resetSpot();
+            getFocusControl().clearAllFocusables();
 
-            //Create beam view
-            IFocusable spot = null;
-            switch (al) {
-                case PUSH:
-                    MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz);
-                    if (v instanceof MyTapStyle2)
-                        beam.init(((MyTapStyle2) v).getOffsetVectorRaw());
-                    spot = beam;
-                    break;
-                case TO_CHILD:
-                    spot = new MySpotOptionTapStyle(v, al, clz);
-                    break;
-                default:
+            getFocusControl().init(v);
+            for (LinkType al : LinkType.values()) {
+                ClassEnvelope clz = actor.getLinkClassFromLib(al);
+                if (clz == null) {
+                    //                edit.unhighlightConnectables();
                     continue;
-            }
+                }
 
-            setLastPushed(al, v, clz);
-            getFocusControl().addFocusable(spot, al);
-            if (first == null || spotLatest == al) {
-                setSpot(al, spot, clz);
-                getFocusControl().setTargetActor(v.getActor(), spot);
-                first = al;
+                //Create beam view
+                IFocusable spot = null;
+                switch (al) {
+                    case PUSH:
+                        MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz, this);
+                        if (v instanceof MyTapStyle2)
+                            beam.init(((MyTapStyle2) v).getOffsetVectorRaw());
+                        spot = beam;
+                        break;
+                    case TO_CHILD:
+                        spot = new MySpotOptionTapStyle(v, al, clz, this);
+                        break;
+                    default:
+                        continue;
+                }
+
+                getFocusControl().addFocusable(spot, al);
+                if (first == null || spotLatest == al) {
+                    first = al;
+                    firstClassEnvelope = clz;
+                    firstSpot = spot;
+                }
             }
         }
+        if(firstSpot == null) {
+            return;
+        }
+        getFocusControl().setTargetActor(actor, firstSpot);
+        changeFocus(first, firstSpot, firstClassEnvelope);
         getFocusControl().save(edit.editTap());
     }
 
@@ -182,87 +180,87 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     }
 
 
-    @Override
-    public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
-        l.offer(String.format("%s: \"%s\"", actorPullException.getLocation(),
-                actorPullException.getErrorMessage()));
-        AndroidImageView errorMark = new AndroidImageView(act, R.drawable.error);
-        errorMark.setColorCode(ColorCode.RED)
-                .setPercent(new WorldPoint(200f, 200f));
-        errorMark._valueGet().setOffset(t);
-        edit.editTap()
-                .add(errorMark
-                )
-                ._in()
-                .add(new Actor.Reset(false)/*.setLogLevel(true)*/)
-                .old(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
-                .save();
+//    @Override
+//    public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
+//        l.offer(String.format("%s: \"%s\"", actorPullException.getLocation(),
+//                actorPullException.getErrorMessage()));
+//        AndroidImageView errorMark = new AndroidImageView(act, R.drawable.error);
+//        errorMark.setColorCode(ColorCode.RED)
+//                .setPercent(new WorldPoint(200f, 200f));
+//        errorMark._valueGet().setOffset(t);
+//        edit.editTap()
+//                .add(errorMark
+//                )
+//                ._in()
+//                .add(new Actor.Reset(false)/*.setLogLevel(true)*/)
+//                .old(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
+//                .save();
+//
+//        //Create error balloon
+//        LinkType linkType = actorPullException.getLinkType();
+//        ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
+//        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
+//        edit.editTap().add((Actor) balloon).save();
+//        t.setAccessoryTap(linkType, balloon);
+//        setLastHighlighted(linkType, t, classEnvelopeInLink);
+//    }
+//
+//    @Override
+//    public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
+//        LinkType linkType = actorPullException.getLinkType();
+//        if (linkType == null) {
+//            return;
+//        }
+//        edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
+//        t.unsetAccessoryTap(linkType);
+//        unsetLastPushed();
+//    }
+//
+//    IActorTap pushed = null;
+//
+//    public IActorTap setLastHighlighted(LinkType ac, IActorTap target, ClassEnvelope classEnvelope) {
+//        edit.highlightConnectables(ac.reverse(), classEnvelope);
+//
+//        if (pushed != null) {
+//            IActorTap last = pushed.getAccessoryTap(ac);
+//            if (last != null && last instanceof IBlueprintFocusNotification) {
+//                ((IBlueprintFocusNotification) last).onFocus(null);
+//            }
+//        }
+//        pushed = target;
+//        if (target == null)
+//            return null;
+//        IActorTap lt = target.getAccessoryTap(ac);
+//        if (lt != null && lt instanceof IBlueprintFocusNotification) {
+//            ((IBlueprintFocusNotification) lt).onFocus(ac.getBooleanSet());
+//        }
+//        return target;
+//    }
 
-        //Create error balloon
-        LinkType linkType = actorPullException.getLinkType();
-        ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
-        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
-        edit.editTap().add((Actor) balloon).save();
-        t.setAccessoryTap(linkType, balloon);
-        setLastPushed(linkType, t, classEnvelopeInLink);
-    }
-
-    @Override
-    public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
-        LinkType linkType = actorPullException.getLinkType();
-        if (linkType != null) {
-            edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
-            t.unsetAccessoryTap(linkType);
-            unsetLastPushed();
-
-        }
-    }
-
-    IActorTap pushed = null;
-
-    public IActorTap setLastPushed(LinkType ac, IActorTap target, ClassEnvelope classEnvelope) {
-        edit.highlightConnectables(ac.reverse(), classEnvelope);
-
-        if (pushed != null) {
-            IActorTap last = pushed.getAccessoryTap(ac);
-            if (last != null && last instanceof IBlueprintFocusNotification) {
-                ((IBlueprintFocusNotification) last).onFocus(null);
-            }
-        }
-        pushed = target;
-        if (target == null)
-            return null;
-        IActorTap lt = target.getAccessoryTap(ac);
-        if (lt != null && lt instanceof IBlueprintFocusNotification) {
-            ((IBlueprintFocusNotification) lt).onFocus(ac.getBooleanSet());
-        }
-        return target;
-    }
-
-    public void unsetLastPushed() {
-        edit.unhighlightConnectables();
-        pushed = null;
-    }
-
-    public void unsetLastPushed(IActorTap t) {
-        if (t == pushed)
-            unsetLastPushed();
-    }
-
-    @Override
-    public void onPush(IActorTap t, LinkType linkType, Object obj) {
-        setLastPushed(linkType, t, new ClassEnvelope(obj.getClass()));
-    }
-
-
-    public void unsetPushOutBalloon(ActorTap t, LinkType linkType) {
-        ActorTap accessoryTap = (ActorTap) t.getAccessoryTap(linkType);
-        if (accessoryTap != null) {
-            unsetLastPushed(t);
-            t.unsetAccessoryTap(linkType);
-            edit.editTap().remove(accessoryTap);
-        }
-    }
+//    public void unsetLastPushed() {
+//        edit.unhighlightConnectables();
+//        pushed = null;
+//    }
+//
+//    public void unsetLastPushed(IActorTap t) {
+//        if (t == pushed)
+//            unsetLastPushed();
+//    }
+//
+//    @Override
+//    public void onPush(IActorTap t, LinkType linkType, Object obj) {
+//        setLastHighlighted(linkType, t, new ClassEnvelope(obj.getClass()));
+//    }
+//
+//
+//    public void unsetPushOutBalloon(ActorTap t, LinkType linkType) {
+//        ActorTap accessoryTap = (ActorTap) t.getAccessoryTap(linkType);
+//        if (accessoryTap != null) {
+//            unsetLastPushed(t);
+//            t.unsetAccessoryTap(linkType);
+//            edit.editTap().remove(accessoryTap);
+//        }
+//    }
 
     public void combo(IActorTap t, IBlueprint b) {
         Actor actorNew = edit.toActor((ActorTap) t), aTarget = getFocusControl().getTargetActor();

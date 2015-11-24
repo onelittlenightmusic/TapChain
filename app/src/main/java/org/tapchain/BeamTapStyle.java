@@ -109,7 +109,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 	// public void onAttach(IPoint pos, IEdit edit) {
 	// ActorLink ac = getConnect();
 	// IActorTap parent = getParentTap();
-	// getEventHandler().setLastPushed(ac, parent);
+	// getEventHandler().setLastHighlighted(ac, parent);
 	// ClassEnvelope ce = getClassEnvelope();
 	// edit.highlightConnectables(ac.reverse(), ce);
 	// // edit.log("onSelect", String.format("Balloon on %s[%s]",

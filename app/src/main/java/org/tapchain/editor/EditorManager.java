@@ -4,7 +4,9 @@ import org.tapchain.ActorTap;
 import org.tapchain.PathTap;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorChain.IView;
+import org.tapchain.core.ActorInputException;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.ActorPullException;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.Chain;
 import org.tapchain.core.Chain.ChainException;
@@ -14,6 +16,7 @@ import org.tapchain.core.ChainPiece.PieceState;
 import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IConnectHandler;
+import org.tapchain.core.IErrorHandler;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
@@ -155,12 +158,15 @@ public class EditorManager extends ActorManager {
                     getChain().kick(_view);
             }
 
+
             @Override
             public int getTickInterval() {
                 return getPathInterval();
             }
         });
-        actor.setError(getErrorHandler());
+//        actor.setError(getErrorHandler());
+        if(_view instanceof IErrorHandler)
+            actor.setError((IErrorHandler)_view);
 		return _view;
 	}
 

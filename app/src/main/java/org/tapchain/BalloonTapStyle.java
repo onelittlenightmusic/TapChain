@@ -201,7 +201,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	}
 
     static String _out = "_out", _in = "_in";
-    public static IActorTap createBalloon(IActorTap t, LinkType linkType, ClassEnvelope ce) {
+    public static OptionTapStyle createBalloon(IActorTap t, LinkType linkType, ClassEnvelope ce) {
         OptionTapStyle balloon = null;
         balloon = new BalloonTapStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
         balloon.setCenter(new WorldPoint(100f, 100f));

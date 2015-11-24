@@ -1,6 +1,7 @@
 package org.tapchain;
 
 import org.tapchain.core.ClassEnvelope;
+import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
@@ -47,19 +48,19 @@ public class MySpotOptionTapStyle extends MySimpleOptionTapStyle implements IFoc
     private static final long serialVersionUID = 1L;
     LinkType al = null;
     ClassEnvelope clazz = null;
+    IActorSharedHandler handler;
 
-	public MySpotOptionTapStyle(IActorTap t, LinkType al, ClassEnvelope clz) {
+	public MySpotOptionTapStyle(IActorTap t, LinkType al, ClassEnvelope clz, IActorSharedHandler handler) {
         super(t, spotProperties.get(al).getBitmap());
         this.al = al;
         this.clazz = clz;
+        this.handler = handler;
         setCenter(spotProperties.get(al).getMargin());
-//			getCenter().setoffset
-//        setEventHandler(sh);
     }
 
     @Override
     public void onRelease(IEditor edit, IPoint pos) {
-        edit.getEventHandler().setSpot(al, this, clazz);
+        handler.changeFocus(al, this, clazz);
     }
 
     @Override

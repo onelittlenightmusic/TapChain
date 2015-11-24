@@ -82,7 +82,7 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 		default:
 		}
 		if(offset != null)
-			((IActorTap)spot).getCenter().setOffset(offset);
+			spot.getCenter().setOffset(offset);
 	}
 	
 	public void save(ActorManager manager) {

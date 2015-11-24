@@ -197,7 +197,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 		LinkType ac = balloon.getLink();
 		IActorTap parent = balloon.getParentTap();
 		ClassEnvelope ce = balloon.getClassEnvelope();
-		edit.highlightConnectables(ac.reverse(), ce);
+		edit.highlightConnectables(ac.reverse(), parent, ce);
 
 	}
 

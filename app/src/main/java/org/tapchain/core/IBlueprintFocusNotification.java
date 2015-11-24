@@ -1,5 +1,5 @@
 package org.tapchain.core;
 
 public interface IBlueprintFocusNotification {
-	public void onFocus(LinkBooleanSet booleanSet);
+	void onFocus(LinkBooleanSet booleanSet);
 }

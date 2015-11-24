@@ -15,18 +15,17 @@ import java.util.Collection;
  * Created by hiro on 2015/05/20.
  */
 public interface IGenericSharedHandler<EDITOR, ACTOR extends IPiece, VIEW extends ITap> {
-    public void onLockedScroll(EDITOR edit, VIEW startTap, IPoint wp);
-    public boolean onAttach(VIEW t1, VIEW t2, ACTOR chainPiece, ACTOR chainPiece2, TapChainEditor.InteractionType type);
-    public void onAdd(ACTOR p, VIEW v, IBlueprint b, IPoint pos);
-    public void onPullLocked(VIEW t, ActorPullException e);
-    public void onPullUnlocked(VIEW t, ActorPullException ePull);
-    public void onPush(VIEW t, LinkType linkType, Object obj);
+    void onLockedScroll(EDITOR edit, VIEW startTap, IPoint wp);
+    boolean onAttach(VIEW t1, VIEW t2, ACTOR chainPiece, ACTOR chainPiece2, TapChainEditor.InteractionType type);
+    void onAdd(ACTOR p, VIEW v, IBlueprint b, IPoint pos);
+//    public void onPullLocked(VIEW t, ActorPullException e);
+//    public void onPullUnlocked(VIEW t, ActorPullException ePull);
 
-    public IFocusControl getFocusControl();
-    public void resetSpot();
-    public Resources getResources();
-    void setSpot(LinkType al, IFocusable spot, ClassEnvelope clazz);
+    IFocusControl getFocusControl();
+    void resetSpot();
+    Resources getResources();
+    void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz);
 
-    public void changeFocus(VIEW t);
+    void addFocus(VIEW t);
 
 }

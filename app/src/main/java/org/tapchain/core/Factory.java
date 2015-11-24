@@ -13,16 +13,17 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 		super();
 	}
 
+    public Factory(Factory<PIECE> factory) {
+        super(factory);
+    }
+
 	public Factory<PIECE> Register(IBlueprint root) {
-//		collect.add(root);
 		add(root);
-		notifyView();
 		return this;
 	}
 	
 	public Factory<PIECE> Register(List<IBlueprint<PIECE>> root) {
 		addAll(root);
-		notifyView();
 		return this;
 	}
 	
@@ -32,7 +33,6 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 
 	public void clear() {
 		super.clear();
-		notifyView();
 	}
 
 	public void setNotifier(ValueChangeNotifier not) {
@@ -48,6 +48,10 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 		if (notif != null)
 			notif.invalidate();
 	}
+
+    public void save() {
+        notifyView();
+    }
 
 
 	public int getSize() {
@@ -75,12 +79,12 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 	public void setRelatives(LinkType ac, ClassEnvelope classEnvelope, Factory<PIECE> rel) {
 		rel.clear();
 		rel.Register(getConnectables(ac, classEnvelope));
+        rel.save();
 	}
 
 	public interface ValueChangeNotifier {
-		public void notifyChange();
-
-		public void invalidate();
+		void notifyChange();
+		void invalidate();
 	}
 
 	public IBlueprint search(String tag) {
@@ -95,23 +99,27 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 	public List<IBlueprint<PIECE>> getConnectables(LinkType ac,
 			ClassEnvelope classEnvelope) {
 		List<IBlueprint<PIECE>> bl = new ArrayList<IBlueprint<PIECE>>();
-		for (IBlueprint b : this) {
-			if (classEnvelope != null) {
-				if (b instanceof IActorBlueprint) {
-					ClassEnvelope clz = ((IActorBlueprint) b)
-							.getConnectClass(ac);
-					if (clz != null) {
-						if ((EnumSet.of(LinkType.PULL, LinkType.FROM_PARENT)
-								.contains(ac) && clz
-								.isAssignableFrom(classEnvelope))
-								|| (EnumSet.of(LinkType.PUSH,
-										LinkType.TO_CHILD).contains(ac) && classEnvelope
-										.isAssignableFrom(clz))) {
-							bl.add(b);
-						}
-					}
-				}
-			}
+        if (classEnvelope == null) {
+            return bl;
+        }
+
+        for (IBlueprint b : this) {
+            if (!(b instanceof IActorBlueprint)) {
+                continue;
+            }
+            ClassEnvelope clz = ((IActorBlueprint) b)
+                    .getConnectClass(ac);
+            if (clz == null) {
+                continue;
+            }
+            if ((EnumSet.of(LinkType.PULL, LinkType.FROM_PARENT)
+                    .contains(ac) && clz
+                    .isAssignableFrom(classEnvelope))
+                    || (EnumSet.of(LinkType.PUSH,
+                            LinkType.TO_CHILD).contains(ac) && classEnvelope
+                            .isAssignableFrom(clz))) {
+                bl.add(b);
+            }
 		}
 		return bl;
 	}
