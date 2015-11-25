@@ -29,6 +29,9 @@ import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -712,7 +715,7 @@ public class TapChainView extends FragmentActivity implements
             act = (TapChainView) c;
             key = k;
             _parent = parent;
-            f = new Factory(act.getEditor().getFactory(key));
+            f = Factory.copy(act.getEditor().getFactory(key));
             act.getEditor().getFactory(key).setNotifier(this);
         }
 
@@ -1198,27 +1201,28 @@ public class TapChainView extends FragmentActivity implements
 		public void move(float vx, float vy) {
 			IPoint v = getScreenVector(-vx, -vy);
 			matrix.postTranslate(v.x(), v.y());
-			float[] rtn = new float[9];
-			matrix.getValues(rtn);
-			float x = rtn[Matrix.MTRANS_X], dx = 0f;
-			float y = rtn[Matrix.MTRANS_Y], dy = 0f;
-			boolean change = false;
-			if(x < 0f) {
-				dx = -x;
-				change = true;
-			} else if(x > 300f) {
-				dx = 300f - x;
-				change = true;
-			}
-			if(y < 0f) {
-				dy = -y;
-				change = true;
-			} else if(y > 300f) {
-				dy = 300f - y;
-				change = true;
-			}
-			if(change)
-				matrix.postTranslate(dx, dy);
+//			float[] rtn = new float[9];
+//			matrix.getValues(rtn);
+//			float x = rtn[Matrix.MTRANS_X];
+//            float dx = 0f, dy = 0f;
+//			float y = rtn[Matrix.MTRANS_Y];
+//			boolean change = false;
+//			if(x < 0f) {
+//				dx = -x;
+//				change = true;
+//			} else if(x > 300f) {
+//				dx = 300f - x;
+//				change = true;
+//			}
+//			if(y < 0f) {
+//				dy = -y;
+//				change = true;
+//			} else if(y > 300f) {
+//				dy = 300f - y;
+//				change = true;
+//			}
+//			if(change)
+//				matrix.postTranslate(dx, dy);
 			matrix.invert(inverse);
 		}
 
@@ -1279,7 +1283,8 @@ public class TapChainView extends FragmentActivity implements
 		Paint paint = new Paint(), paint_text = new Paint();
 		WorldPoint window_size = new WorldPoint();
 		String log = "";
-
+        TextPaint mTextPaint=new TextPaint();
+        StaticLayout mTextLayout;
 		public TapChainSurfaceView(Context context) {
 			super(context);
 //			gdetect = new GestureDetector(context, this);
@@ -1289,7 +1294,9 @@ public class TapChainView extends FragmentActivity implements
 			paint_text.setColor(0xff000000);
 			paint_text.setTextSize(20);
 			paint.setColor(0xff444444);
-			setFocusable(true);
+            mTextPaint.setTextSize(20);
+            mTextLayout = new StaticLayout("", mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            setFocusable(true);
 			requestFocus();
 		}
 
@@ -1311,23 +1318,23 @@ public class TapChainView extends FragmentActivity implements
 						paintBackground(canvas);
 						myDraw(canvas);
 						canvas.drawText(
-								"View = "
-										+ Integer.toString(getEditor()
-												.editTap().getChain()
-												.getViewNum()), 20, 20,
-								paint_text);
+                                "View = "
+                                        + Integer.toString(getEditor()
+                                        .editTap().getChain()
+                                        .getViewNum()), 20, 20,
+                                paint_text);
 						canvas.drawText(
-								"Effect = "
-										+ Integer.toString(getEditor()
-												.editTap().getChain()
-												.getPieces().size()), 20,
-								40, paint_text);
+                                "Effect = "
+                                        + Integer.toString(getEditor()
+                                        .editTap().getChain()
+                                        .getPieces().size()), 20,
+                                40, paint_text);
 						canvas.drawText(
-								"UserView = "
-										+ Integer.toString(getEditor()
-												.edit()
-												.getChain().getViewNum()),
-								20, 60, paint_text);
+                                "UserView = "
+                                        + Integer.toString(getEditor()
+                                        .edit()
+                                        .getChain().getViewNum()),
+                                20, 60, paint_text);
 						canvas.drawText(
 								"UserEffect = "
 										+ Integer.toString(getEditor()
@@ -1335,7 +1342,11 @@ public class TapChainView extends FragmentActivity implements
 										.getChain().getPieces()
 										.size()), 20, 80,
 								paint_text);
-						canvas.drawText("Log = "+log, 20, 120, paint_text);
+//						canvas.drawText("Log = "+log, 20, 120, paint_text);
+                        canvas.save();
+                        canvas.translate(20, 120);
+                        mTextLayout.draw(canvas);
+                        canvas.restore();
 					}
 				} finally {
 					if (canvas != null)
@@ -1348,13 +1359,18 @@ public class TapChainView extends FragmentActivity implements
 		}
 
 		public abstract void myDraw(Canvas canvas);
-		
+
+        StringBuilder buf = new StringBuilder();
 		public void log(String...strings) {
-			StringBuilder buf = new StringBuilder();
-			for(String s : strings)
-				buf.append(s);
+			for(String s : strings) {
+                buf.append(s);
+            }
+            buf.append("\n");
+            if(buf.length() > 300)
+            buf.delete(0, buf.length() - 300);
 			log = buf.toString();
-		}
+            mTextLayout = new StaticLayout(log, mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        }
 
 		public void paintBackground(Canvas canvas) {
 			return;

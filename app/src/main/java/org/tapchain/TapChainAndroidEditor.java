@@ -438,7 +438,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     @Override
     public void showFamily(IActorTap tap) {
-        tap.getCenter().plus(10f * (float) Math.random() - 5f, 10f * (float) Math.random() - 5f);
+//        tap.getCenter().plus(10f * (float) Math.random() - 5f, 10f * (float) Math.random() - 5f);
     }
 
     public class RoadTapStyle extends MyTapStyle2 {

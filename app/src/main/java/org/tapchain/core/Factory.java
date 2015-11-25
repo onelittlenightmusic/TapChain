@@ -13,6 +13,10 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 		super();
 	}
 
+    public static <P extends Piece> Factory<P> copy(Factory<P> factory) {
+        return new Factory<>(factory);
+    }
+
     public Factory(Factory<PIECE> factory) {
         super(factory);
     }

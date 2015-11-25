@@ -629,16 +629,12 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		return offsetVector;
 	}
 
-	public WorldPoint getOffsetVectorRaw() {
-		WorldPoint rtn = (WorldPoint)partnersOffsetAverageRaw._valueGet();
+	public WorldPoint getOffsetVectorRawCopy() {
+		WorldPoint rtn = new WorldPoint(partnersOffsetAverageRaw._valueGet());
 		if(getActor().getPartners(LinkType.PULL).size() == 0) {
-			rtn = new WorldPoint(0f, 0f);
-			rtn.setOffset(partnersOffsetAverageRaw);
-			rtn.setOffset(this, -1.0f);
+			rtn.sub(this._valueGet());
 		} else if(getActor().getPartners(LinkType.PUSH).size() == 0) {
-			rtn = new WorldPoint(0f, 0f);
-			rtn.setOffset(partnersOffsetAverageRaw);
-			rtn.setOffset(this);
+			rtn.plus(this._valueGet());
 		}
 		if(rtn.len() == 0f)
 			rtn = new WorldPoint(200f, 0f);

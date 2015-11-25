@@ -15,7 +15,6 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.PathType;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.core.actors.IFocusHandler;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IAttachHandler;
@@ -85,7 +84,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
                     case PUSH:
                         MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz, this);
                         if (v instanceof MyTapStyle2)
-                            beam.init(((MyTapStyle2) v).getOffsetVectorRaw());
+                            beam.init(((MyTapStyle2) v).getOffsetVectorRawCopy());
                         spot = beam;
                         break;
                     case TO_CHILD:

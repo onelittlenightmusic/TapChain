@@ -492,6 +492,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		touched = pos;
 		if (!isNotCapturing()) {
 			if (selectedTap instanceof IScrollable) {
+                Log.w("test", String.format("%s scrolled", selectedTap));
 				((IScrollable) selectedTap).onScrolled(this, pos, vp);
 			}
             onShowFamily();

@@ -119,7 +119,7 @@ public class Chain implements JSONSerializable {
 			kick(cp);
 		}
 		if (log != null)
-			log.log("Chain", String.format("+%s(%d) added->%s", cp.getTag(), cp.getId(), getName()));
+			log.log("Chain", String.format("+ADD %s (%s)", cp.getTag(), getName()));
 		return cp;
 
 	}
@@ -134,7 +134,7 @@ public class Chain implements JSONSerializable {
 
 	public IPiece removePiece(IPiece bp) {
 		if (log != null)
-			log.log("Chain", String.format("-%s(%d) removed<-%s", bp.getTag(), bp.getId(), getName()));
+			log.log("Chain", String.format("-REM %s (%s)", bp.getTag(), getName()));
 		aFunc.remove(bp);
 		return bp;
 	}
