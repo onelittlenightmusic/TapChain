@@ -1469,7 +1469,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public boolean actorRun(Actor act) throws ChainException {
-            L("ValueLog").go(_valueSet(((IValueLog) getTarget(false))._valueLog()));
+            L("ValueLog").go(_valueSet(getTarget(false)._valueLog()));
             push(_valueGet().toString());
             return false;
         }
@@ -2079,12 +2079,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public IntegerCounter() {
             super();
         }
-
-//		@Override
-//		public boolean actorRun(Actor act) throws ChainException, InterruptedException {
-//			_valueSet(_valueGet()+1);
-//			return super.actorRun(act);
-//		}
 
         @Override
         public void onStep() {

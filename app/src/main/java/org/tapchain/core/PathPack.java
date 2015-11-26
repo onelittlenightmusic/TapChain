@@ -15,7 +15,7 @@ import java.util.Iterator;
 
 @SuppressWarnings("serial")
 public class PathPack<T extends Connector> extends ArrayList<T> implements Serializable {
-    public static interface PathPackType {
+    public interface PathPackType {
     }
 
     PathType ptype = PathType.EVENT;

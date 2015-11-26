@@ -240,7 +240,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //				._out()
 
                 .add(Actor.IntegerCounter.class)
-                .setViewArg(R.drawable.rotate).setTag("Counter").save()
+                .setViewArg(R.drawable.rotate).setTag("Counter")/*.setLogLevel()*/.save()
 
                 .add(Actor.SumIntegerFilter.class)
                 .setViewArg(R.drawable.plus).setTag("Sum").save()

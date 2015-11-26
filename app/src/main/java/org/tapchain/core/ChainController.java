@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ChainController {
 	IControlCallback callback = null;
-	LocalControllerThread th = null;
 	CountDownLatch c = new CountDownLatch(1), go = new CountDownLatch(1);
 	boolean running = true;
 	ConcurrentLinkedQueue<Object> kickingObj;
@@ -63,7 +62,7 @@ public class ChainController {
 	
 	public synchronized void registerControllerAdapter(IChainAdapter adapter) {
 		if(kickingObj == null)
-			kickingObj = new ConcurrentLinkedQueue<Object>();
+			kickingObj = new ConcurrentLinkedQueue<>();
 		adapters.add(adapter);
 	}
 	
@@ -87,7 +86,7 @@ public class ChainController {
 				for(IChainAdapter adapter: adapters)
 					adapter.adapterRun(kickingObj);
 				if(kickingObj != null)
-					kickingObj.clear();
+				    kickingObj.clear();
 				c = new CountDownLatch(1);
 				callback.onCalled();
 			}

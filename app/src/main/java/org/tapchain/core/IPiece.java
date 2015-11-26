@@ -51,7 +51,7 @@ public interface IPiece<PARTNER extends IPiece> {
 	public boolean isConnectedTo(IPiece target, PathType type);
 	public boolean isConnectedTo(PathType type, boolean out);
 
-	public IPiece end();
+    public IPiece end();
 
 	public String getName();
 	public int getId();

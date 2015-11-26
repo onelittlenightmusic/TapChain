@@ -241,17 +241,21 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
 	protected boolean _waitNext() throws InterruptedException {
 		if(controlled_by_ac)
-			getParentChain().waitNext();
+			getParentChain().waitNext(invalidating);
+        invalidating = false;
 		return true;
 	}
-	
+	boolean invalidating = false;
 	public ChainPiece invalidate() {
 		tick(Packet.HeartBeat);//1 is dummy data for onTick handlers
-		if (getParentChain() != null)
-			getParentChain().kick(this);
+        //If invalidating is on(so this piece was kicked) but main thread stops at _waitNext,
+        //Then this calls kick() again to wake up main thread.
+        if(getParentChain() != null)
+            getParentChain().kick(this);
+        invalidating = true;
 		return this;
 	}
-	
+
 	public IPiece start() {
 		if (_root_chain == null)
 			return this;

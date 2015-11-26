@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Chain implements JSONSerializable {
 	static int n = 0;
@@ -19,17 +21,19 @@ public class Chain implements JSONSerializable {
 	int mode = 0;// 0: Run-as-a-thread mode, 1: Automatic mode
 	public static final int AUTO_MODE = 1;
 	public boolean AUTO_END = true;
+    int time = 0;
 	ILogHandler log = null;
 	String name = "";
-	protected CyclicBarrier signal = new CyclicBarrier(Integer.MAX_VALUE);
-
 	Chain(int _mode, int time) {
 		aFunc = new ConcurrentSkipListSet<IPiece>();
 		mode = _mode;
+        this.time = time;
 		setCtrl(new ChainController(time));
 		setCallback(null);
 		operator = new ChainPieceOperator(this);
 	}
+
+    protected CyclicBarrier signal = new CyclicBarrier(Integer.MAX_VALUE);
 
 	Chain() {
 		this(AUTO_MODE, 30);
@@ -86,12 +90,17 @@ public class Chain implements JSONSerializable {
 		signal.reset();
 	}
 
-	public void waitNext() throws InterruptedException {
+	public void waitNext(boolean now) throws InterruptedException {
 		try {
-			signal.await();
+            if(now)
+                signal.await(time, TimeUnit.MILLISECONDS);
+            else
+    			signal.await();
 		} catch (BrokenBarrierException e) {
-		}
-	}
+		} catch (TimeoutException e) {
+//            e.printStackTrace();
+        }
+    }
 
 	public void setName(String _name) {
 		name = _name;

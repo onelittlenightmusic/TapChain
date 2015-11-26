@@ -13,6 +13,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
+import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.ColorLib.ColorCode;
@@ -405,14 +406,15 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	public void onSelected(IEditor edit, IPoint pos) {
 		if (edit.getLockedReleaseTap() != null)
 			return;
-		if (getActor() instanceof IStep) {
-			((IStep) getActor()).onStep();
-		} else if (getActor() instanceof IValueArray) {
-			ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this,
-					(IValueArray) getActor());
+        Actor actor = getActor();
+		if (actor instanceof IStep) {
+			((IStep) actor).onStep();
+            Log.w("test", "onStep called");
+		} else if (actor instanceof IValueArray) {
+			ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this, actor);
 			e.registerToManager(edit.editTap());
-		} else if (getActor() instanceof IValue) {
-			Object val = ((IValue) getActor())._valueGet();
+		} else if (actor instanceof IValue) {
+			Object val = ((IValue) actor)._valueGet();
 			ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this, val);
 			e.registerToManager(edit.editTap());
 //			edit.getEventHandler().getFocusControl().large();
@@ -518,7 +520,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 				manager.remove(setterText);
 				setterText = null;
 			}
-//			edit.getEventHandler().getFocusControl().small();
 		}
 
 		public IActorTap getTap() {
@@ -545,10 +546,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	}
 
 
-//	protected void addSpot(IActorTap v) {
-//		getSharedHandler().addFocus(v);
-//	}
-
     @Override
     public boolean onPush(Actor t, Object obj, ActorManager actorManager) {
         super.onPush(t, obj, actorManager);
@@ -574,11 +571,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
 
-//	@Override
-//	public boolean onDown(IEditor edit, IPoint pos) {
-//		addSpot(this);
-//		return false;
-//	}
 
 	@Override
 	public boolean onLockedScroll(IEditor edit, ITap selectedTap, IPoint wp) {

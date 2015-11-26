@@ -1201,28 +1201,6 @@ public class TapChainView extends FragmentActivity implements
 		public void move(float vx, float vy) {
 			IPoint v = getScreenVector(-vx, -vy);
 			matrix.postTranslate(v.x(), v.y());
-//			float[] rtn = new float[9];
-//			matrix.getValues(rtn);
-//			float x = rtn[Matrix.MTRANS_X];
-//            float dx = 0f, dy = 0f;
-//			float y = rtn[Matrix.MTRANS_Y];
-//			boolean change = false;
-//			if(x < 0f) {
-//				dx = -x;
-//				change = true;
-//			} else if(x > 300f) {
-//				dx = 300f - x;
-//				change = true;
-//			}
-//			if(y < 0f) {
-//				dy = -y;
-//				change = true;
-//			} else if(y > 300f) {
-//				dy = 300f - y;
-//				change = true;
-//			}
-//			if(change)
-//				matrix.postTranslate(dx, dy);
 			matrix.invert(inverse);
 		}
 
