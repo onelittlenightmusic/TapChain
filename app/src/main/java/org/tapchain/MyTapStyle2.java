@@ -194,9 +194,9 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	@Override
 	public void view_init() throws ChainException {
-		if (bm_fg == null) {
-			bm_fg = BitmapFactory.decodeResource(act.getResources(), pull());
-		}
+//		if (bm_fg == null) {
+//			bm_fg = BitmapFactory.decodeResource(act.getResources(), pull());
+//		}
 		bm_face = BitmapMaker.makeOrReuse("MyTapFace", R.drawable.face);
 		return;
 	}
@@ -217,10 +217,10 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         canvas.drawRoundRect(rect, 50f, 50f, _paint);
         canvas.translate(50f, 50f);
 
-		if (bm_face != null)
-			DrawLib.drawBitmapCenter(canvas, bm_face, faceOffset, _paint);
+//		if (bm_face != null)
+//			DrawLib.drawBitmapCenter(canvas, bm_face, faceOffset, _paint);
 
-		showStateCircle(canvas);
+//		showStateCircle(canvas);
 
 		if (!dummy) {
 			if (bm_fg_mini != null) {
@@ -230,21 +230,21 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		}
 		canvas.restore();
 
-		if (getActor() != null) {
+		if (getActor() == null) {
+            return true;
+        }
 			// Draw Extensions _in association with IValue interface
-			if (getActor() instanceof IValueArray) {
-				showPath(canvas, (IValueArray<IPoint>) getActor());
-			} else if (getActor() instanceof IValue) {
-				Object val = ((IValue<?>) getActor())._valueGet();
-                String tag = "";
-                if(getActor() instanceof Controllable)
-                    tag = ((Controllable)getActor()).getNowTag();
-                if(val != null)
-				    ShowInstance.showInstance(canvas, val, cp, textPaint, _paint, tag);
-			}
-
-
-		}
+        Actor actor = getActor();
+        if (actor instanceof IValueArray) {
+            showPath(canvas, (IValueArray<IPoint>) getActor());
+        } else if (actor instanceof IValue) {
+            Object val = ((IValue<?>) actor)._valueGet();
+            String tag = "";
+            if(actor instanceof Controllable)
+                tag = ((Controllable)actor).getNowTag();
+            if(val != null)
+                ShowInstance.showInstance(canvas, val, cp, textPaint, _paint, tag);
+        }
 		return true;
 	}
 
@@ -263,37 +263,37 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		}
 	}
 
-	public void showStateCircle(Canvas canvas) {
-
-		StateLog prev = null;
-		for (StateLog stateLog : stateList) {
-			if (prev != null) {
-				if (stateLog.getSweepLog() < sweep - 360f) {
-					prev = stateLog;
-					continue;
-				}
-				float s = prev.getSweepLog();
-				if (s < sweep - 360f)
-					s = sweep - 360f;
-				canvas.drawArc(tickCircleRect, s % 360f,
-						stateLog.getSweepLog() % 360f, false, innerPaint2);
-			}
-			prev = stateLog;
-		}
-		if (prev != null) {
-			Paint _p = _paint;
-			if (prev.getState().hasError())
-				_p = innerPaint2;
-			canvas.drawArc(tickCircleRect, prev.getSweepLog() % 360f,
-					sweep % 360f, false, _p);
-		}
-
-	}
+//	public void showStateCircle(Canvas canvas) {
+//
+//		StateLog prev = null;
+//		for (StateLog stateLog : stateList) {
+//			if (prev != null) {
+//				if (stateLog.getSweepLog() < sweep - 360f) {
+//					prev = stateLog;
+//					continue;
+//				}
+//				float s = prev.getSweepLog();
+//				if (s < sweep - 360f)
+//					s = sweep - 360f;
+//				canvas.drawArc(tickCircleRect, s % 360f,
+//						stateLog.getSweepLog() % 360f, false, innerPaint2);
+//			}
+//			prev = stateLog;
+//		}
+//		if (prev != null) {
+//			Paint _p = _paint;
+//			if (prev.getState().hasError())
+//				_p = innerPaint2;
+//			canvas.drawArc(tickCircleRect, prev.getSweepLog() % 360f,
+//					sweep % 360f, false, _p);
+//		}
+//
+//	}
 
 	@Override
 	public MyTapStyle2 setPercent(IPoint wp) {
 		super.setPercent(wp);
-		setSize(sizeOpened.multiplyNew(0.01f * (float) getPercent().x())
+		setSize(sizeOpened.multiplyNew(0.01f * getPercent().x())
                 .plus(sizeClosed).plus(sizeClosed));
 		return this;
 	}
@@ -404,8 +404,8 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	@Override
 	public void onSelected(IEditor edit, IPoint pos) {
-		if (edit.getLockedReleaseTap() != null)
-			return;
+//		if (edit.getLockedReleaseTap() != null)
+//			return;
         Actor actor = getActor();
 		if (actor instanceof IStep) {
 			((IStep) actor).onStep();
@@ -445,24 +445,18 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			} else if (val2 instanceof IValueArray) {
 				setter = new MySetPathTapStyle(_p, BitmapMaker.makeOrReuse(
 						"pathExt", R.drawable.widen, 200, 200));
-//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof IPoint) {
 				setter = new MySetPointTapStyle(_p, BitmapMaker.makeOrReuse(
 						"pointExt", R.drawable.widen, 200, 200));
-//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof Integer) {
 				setter = new MySetIntegerTapStyle(_p);
-//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof Float) {
 				setter = new MySetFloatTapStyle(_p);
-//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof MyFloat) {
 				setter = new MySetPedalTapStyle(_p);
-//						.setEventHandler(getSharedHandler());
 			} else if (val2 instanceof Calendar) {
 				setter = new MySetTimeTapStyle(_p, BitmapMaker.makeOrReuse(
 						"pointExt", R.drawable.widen, 200, 200));
-//						.setEventHandler(getSharedHandler());
 			} else {
 				return;
 			}
@@ -470,12 +464,10 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 			exit = new MyExitOptionTapStyle(_p, BitmapMaker.makeOrReuse(
 					"exit", R.drawable.dust, 70, 70));
-//					.setEventHandler(getSharedHandler());
 			exit.setCenter(new WorldPoint(180f, -180f));
 			exit.setColorCode(ColorCode.RED);
 			restart = new MyRestartOptionTapStyle(_p, BitmapMaker.makeOrReuse(
 					"restart", R.drawable.reload, 70, 70));
-//					.setEventHandler(getSharedHandler());
 			restart.setCenter(new WorldPoint(180f, 180f));
 			restart.setColorCode(ColorCode.BLUE);
 		}
@@ -567,7 +559,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelope);
         actorManager.add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
-        edit.highlightConnectables(linkType, t, classEnvelope);
+//        edit.highlightConnectables(linkType, t, classEnvelope);
     }
 
 
@@ -622,15 +614,19 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	}
 
 	public WorldPoint getOffsetVectorRawCopy() {
+        boolean pullZero = false;
 		WorldPoint rtn = new WorldPoint(partnersOffsetAverageRaw._valueGet());
 		if(getActor().getPartners(LinkType.PULL).size() == 0) {
 			rtn.sub(this._valueGet());
-		} else if(getActor().getPartners(LinkType.PUSH).size() == 0) {
-			rtn.plus(this._valueGet());
+            pullZero = true;
 		}
-		if(rtn.len() == 0f)
-			rtn = new WorldPoint(200f, 0f);
-		return rtn;
+        if(getActor().getPartners(LinkType.PUSH).size() == 0) {
+			rtn.plus(this._valueGet());
+            //Pull and Push are both no connection
+            if(pullZero)
+                rtn = new WorldPoint(150f, 0f);
+		}
+		return rtn.multiply(150f/rtn.len());
 	}
 
     @Override

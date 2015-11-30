@@ -5,9 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.tapchain.core.ClassEnvelope;
+import org.tapchain.core.IPoint;
 import org.tapchain.core.IValue;
+import org.tapchain.game.CarEngineer;
 import org.tapchain.realworld.R;
 
+import java.util.Calendar;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BitmapMaker {
@@ -46,19 +49,40 @@ public class BitmapMaker {
 		if (bitmaps.containsKey(str))
 			return bitmaps.get(str);
 		Bitmap bitmap = BitmapFactory.decodeResource(
-				act.getResources(), resource);
+                act.getResources(), resource);
 		bitmaps.put(str, bitmap);
 		return bitmap;
 	}
-	public static Bitmap getClassImage(ClassEnvelope cls) {
+
+	public static Bitmap getClassImage(ClassEnvelope cls, int sizex, int sizey) {
 		// Log.w("test_getClassImage", cls.getSimpleName());
 		Class<?> _cls = cls.getRawClass();
 		if (cls.getRawClass() == IValue.class)
 			_cls = cls.getSubclass(0);
-		return getClassImage(_cls);
+		return getClassImage(_cls, sizex, sizey);
 	}
 	
-	public static Bitmap getClassImage(Class<?> cls) {
-		return makeOrReuse(cls.getSimpleName(), R.drawable.question);
+	public static Bitmap getClassImage(Class<?> cls, int sizex, int sizey) {
+		return makeOrReuse(String.format("%s_%d_%d", cls.getSimpleName(), sizex, sizey), getImageFromClass(cls), sizex, sizey);
 	}
+
+    static int getImageFromClass(Class<?> cls) {
+        switch(cls.getSimpleName()) {
+            case "Integer":
+                return R.drawable.num;
+            case "Float":
+                return R.drawable.f123;
+            case "IPoint":
+                return R.drawable.up;
+            case "String":
+                return R.drawable.a;
+            case "Calendar":
+                return R.drawable.clock;
+            case "RotationAcceleration":
+                return R.drawable.rotation2;
+            case "Angle":
+                return R.drawable.pedal;
+        }
+        return R.drawable.question;
+    }
 }

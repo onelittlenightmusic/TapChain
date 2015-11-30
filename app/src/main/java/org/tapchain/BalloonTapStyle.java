@@ -33,9 +33,6 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	private static final long serialVersionUID = 1L;
 	ShapeDrawable dOut;
 	public Bitmap bm_fg = null, bm_face = null;
-//	public Bitmap bm_plug_male = null, bm_plug_female = null;
-//	IPoint pt_plug_male = new WorldPoint(100, 0);
-	IPoint pt_plug_female = new WorldPoint(-100, 0);
 	Paint paint = new Paint();
 	String str = null;
 	String tag = null;
@@ -93,8 +90,8 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	public BalloonTapStyle(IActorTap t) {
 		super(t);
 		setMyActor(t.getActor());
-		setSize(new WorldPoint(80f, 80f));
-		float r = 20;
+		setSize(new WorldPoint(60f, 60f));
+		float r = 15;
 		dOut = new ShapeDrawable(new RoundRectShape(new float[] { r, r, r,
 				r, r, r, r, r }, null, null));
 		dOut.getPaint().setAntiAlias(true);
@@ -113,7 +110,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	public BalloonTapStyle(IActorTap t, LinkType al, ClassEnvelope c, String tag) {
 		this(t);
 //		ce = c;
-		Bitmap i = BitmapMaker.getClassImage(c);
+		Bitmap i = BitmapMaker.getClassImage(c, 50, 50);
 		setMyActorValue(i);
 		this.tag = tag;
 	}
@@ -205,7 +202,6 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
         OptionTapStyle balloon = null;
         balloon = new BalloonTapStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
         balloon.setCenter(new WorldPoint(100f, 100f));
-        balloon.setColorCode(ColorLib.ColorCode.GREEN);
         balloon._valueGet().setOffset(t);
         return balloon;
     }

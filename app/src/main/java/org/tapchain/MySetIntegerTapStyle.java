@@ -46,9 +46,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	@Override
 	public boolean view_user(Canvas canvas, IPoint cp, IPoint size,
 			int alpha) {
-//		DrawLib.drawBitmapCenter(canvas, bm_fg, cp, getPaint());
 		IPoint _point = getParentTap()._valueGet();
-//		canvas.drawCircle(_point.x(), _point.y(), 300, focuspaint);
 		float d = 150f;
 		RectF r = new RectF(_point.x()-d, _point.y()-d,_point.x()+d, _point.y()+d);
 		for (int i = 0; i < 10; i++) {
@@ -68,7 +66,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	}
 	
 	public boolean equalMyValue(Integer val) {
-		return (Integer)getParentTap().getMyActorValue() == val;
+		return getParentTap().getMyActorValue() == val;
 	}
 	
 	public void setParentValue(IPoint pos, IPoint vp) {
@@ -88,8 +86,10 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 
 	@Override
 	public void onRelease(IEditor edit, IPoint pos) {
-		Log.w("test", "MySetInteger onRelease called");
-		setParentValue(pos, null);
-		commitParentValue();
+//		Log.w("test", "MySetInteger onRelease called");
+        if(((WorldPoint)pos.subNew(getParentTap().getCenter())).len() < 150f) {
+            setParentValue(pos, null);
+            commitParentValue();
+        }
 	}
 }

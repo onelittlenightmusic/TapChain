@@ -13,7 +13,7 @@ import org.tapchain.core.WorldPoint;
  * Created by hiro on 2015/10/27.
  */
 public class ViewActor extends
-        Actor.Controllable<Self, Integer, Void, Void> implements IActor,
+        Actor.Controllable<Self, Void, Void, Void> implements IActor,
         ActorChain.IView/* , IPoint */, IValue<IPoint>, ActorChain.IViewCallback {
     protected IPoint _wp = new WorldPoint();
     IPoint back_wp = new WorldPoint();

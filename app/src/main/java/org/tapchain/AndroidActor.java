@@ -1042,43 +1042,6 @@ public class AndroidActor {
 
 	}
 
-	public static class AndroidNumberView extends AndroidImageView implements
-			IPathListener {
-		static {
-			__addLinkClass(AndroidNumberView.class, LinkType.PULL, Integer.class);
-		}
-		int __num = 1;
-
-		public AndroidNumberView() {
-			super();
-			// setPullClass(Integer.class);
-			setImage(BitmapFactory.decodeResource(getOwnActivity().getResources(),
-                    R.drawable.bubble4));
-			getInPack(PathType.OFFER).setUserPathListener(this);
-		}
-
-		@Override
-		public void OnPushed(Connector p, Object obj)
-				throws InterruptedException {
-			__num++;// = (Integer)objcache;
-			// validate();
-		}
-
-		@Override
-		public void view_init() throws ChainException {
-			__num = pull();
-		}
-
-		@Override
-		public boolean view_user(Canvas canvas, IPoint sp, IPoint size,
-				int alpha) {
-			for (int i = 0; i < __num; i++)
-				super.view_user(canvas, sp.plusNew(new WorldPoint(0, 50 * i)),
-						size, alpha);
-			return false;
-		}
-
-	}
 
 	public static class AndroidMail extends AndroidControllable<Self, String, Void, Void> {
 		String dest = "";
@@ -1096,7 +1059,6 @@ public class AndroidActor {
 
 		@Override
 		public void ctrlStart() throws ChainException, InterruptedException {
-			// intent(getRecognizerIntent("Email title:"), this);
 			Intent i = new Intent(android.content.Intent.ACTION_SENDTO)
 					.setData(Uri.parse(dest))
 					// .putExtra(android.content.Intent.EXTRA_SUBJECT,
@@ -1106,16 +1068,6 @@ public class AndroidActor {
 																	 * pull()
 																	 */)
 					.putExtra(android.content.Intent.EXTRA_TEXT, pull());
-			// String aEmailList[] = {
-			// "o-sanmail@docomo.ne.jp","hiroyuki.osaki@gmail.com" };
-			// i.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);
-			// i.putExtra(android.content.Intent.EXTRA_SUBJECT, "from Android");
-			// i.putExtra(android.content.Intent.EXTRA_TEXT, "");
-			// String aEmailCCList[] = {
-			// "user3@fakehost.com","user4@fakehost.com"};
-			// String aEmailBCCList[] = { "user5@fakehost.com" };
-			// i.putExtra(android.content.Intent.EXTRA_CC, aEmailCCList);
-			// i.putExtra(android.content.Intent.EXTRA_BCC, aEmailBCCList);
 			intent(getOwnActivity(), i);
 
 		}

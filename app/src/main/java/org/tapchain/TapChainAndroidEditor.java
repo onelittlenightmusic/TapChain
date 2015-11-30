@@ -123,50 +123,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setTag("Word")
                 .save()
 
-                .add(new Actor.IFunc<String, String, String>() {
-                    @Override
-                    public String func(IValue<String> val, String _in) {
-                        return _in + " " + val._valueGet();
-                    }
-
-                    @Override
-                    public void init(IValue<String> val) {
-                        val._valueSet("");
-                    }
-                }).setViewArg(R.drawable.plus2).setTag("Plus Word")/*.setLogLevel()*/.save()
-
-
-                .add(new Actor.IFunc<Integer, String, String>() {
-                    @Override
-                    public String func(IValue<Integer> val, String _in) {
-                        StringBuilder stringBuilder = new StringBuilder();
-                        int value = val._valueGet();
-                        for (int i = 0; i < value; i++) {
-                            stringBuilder.append(_in);
-                            stringBuilder.append(" ");
-                        }
-                        return stringBuilder.toString();
-                    }
-
-                    @Override
-                    public void init(IValue<Integer> val) {
-                        val._valueSet(2);
-                    }
-                }).setViewArg(R.drawable.multi2).setTag("Multi Word")/*.setLogLevel()*/.save()
-
-                .add(new Actor.IFunc<String, String, String>() {
-                    @Override
-                    public String func(IValue<String> val, String _in) {
-                        val._valueSet(val._valueGet() + _in);
-                        return val._valueGet();
-                    }
-
-                    @Override
-                    public void init(IValue<String> val) {
-                        val._valueSet("");
-                    }
-                }).setViewArg(R.drawable.plus2).setTag("Accumulate Word")/*.setLogLevel()*/.save()
-
                 .add(AndroidActor.AndroidMail.class, act, "mailto:heretic55@docomo.ne.jp")
                 .setViewArg(R.drawable.mail2)
                 .setTag("Mail to Mari")
@@ -202,42 +158,20 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setTag("Path Through")
                 .save()
 
-                .add(new Actor.IFunc<Integer, Integer, Integer>() {
-                    @Override
-                    public Integer func(IValue<Integer> val, Integer _in) {
-                        return _in + val._valueGet();
-                    }
+                .add(Actor.PlusIntegerFilter.class)
+                .setViewArg(R.drawable.plus2)
+                .setTag("Plus Word")/*.setLogLevel()*/
+                .save()
 
-                    @Override
-                    public void init(IValue<Integer> val) {
-                        val._valueSet(1);
-                    }
-                }).setViewArg(R.drawable.plus2).setTag("Plus")/*.setLogLevel()*/.save()
+                .add(Actor.MultiIntegerFilter.class)
+                .setViewArg(R.drawable.multi2)
+                .setTag("Multi Word")/*.setLogLevel()*/
+                .save()
 
-                .add(new Actor.IFunc<Integer, Integer, Integer>() {
-                    @Override
-                    public Integer func(IValue<Integer> val, Integer _in) {
-                        return _in - val._valueGet();
-                    }
-
-                    @Override
-                    public void init(IValue<Integer> val) {
-                        val._valueSet(1);
-                    }
-                }).setViewArg(R.drawable.minus2).setTag("Minus")/*.setLogLevel()*/.save()
-
-                .add(new Actor.IFunc<Integer, Integer, Integer>() {
-                    @Override
-                    public Integer func(IValue<Integer> val, Integer _in) {
-                        return _in * val._valueGet();
-                    }
-
-                    @Override
-                    public void init(IValue<Integer> val) {
-                        val._valueSet(2);
-                    }
-                }).setViewArg(R.drawable.multi2).setTag("Multiply")/*.setLogLevel()*/.save()
-//				._out()
+                .add(Actor.SumIntegerFilter.class)
+                .setViewArg(R.drawable.filter)
+                .setTag("Accumulate Word")/*.setLogLevel()*/
+                .save()
 
                 .add(Actor.IntegerCounter.class)
                 .setViewArg(R.drawable.rotate).setTag("Counter")/*.setLogLevel()*/.save()

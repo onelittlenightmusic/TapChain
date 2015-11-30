@@ -335,14 +335,14 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	IRelease lockedReleaseTap = null;
 
-	@Override
+//	@Override
 	public void lockReleaseTap(IRelease t) {
 		if (lockedReleaseTap == null && t != null) {
 			lockedReleaseTap = t;
 		}
 	}
 
-	@Override
+//	@Override
 	public ActorTap getLockedReleaseTap() {
 		return (ActorTap)lockedReleaseTap;
 	}
@@ -364,13 +364,14 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	public boolean releaseTap() {
         boolean rtn = false;
-		if(hasLockReleaseTap())
-            unlockReleaseTap();
-        else if(selectedTap instanceof IRelease) {
+        /*else */
+        if(selectedTap instanceof IRelease) {
 			((IRelease) selectedTap).onRelease(this, touched);
             rtn = true;
 		}
 
+        if(hasLockReleaseTap())
+            unlockReleaseTap();
         clearSelectedTap();
 		commitRegistration();
 		return rtn;

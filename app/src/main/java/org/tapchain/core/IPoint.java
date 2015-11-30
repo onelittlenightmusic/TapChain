@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 
 public interface IPoint {
-	public static enum WPEffect implements Serializable { POS, DIF }
+
+    enum WPEffect implements Serializable { POS, DIF }
 	float x();
 	float y();
 	IPoint copy();

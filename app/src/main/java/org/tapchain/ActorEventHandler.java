@@ -66,7 +66,8 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         LinkType spotLatest = getFocusControl().getLinkType(), first = null;
         IFocusable firstSpot = null;
         if (actor == getFocusControl().getTargetActor()) {
-        } else {
+            return;
+        }
             resetSpot();
             getFocusControl().clearAllFocusables();
 
@@ -101,13 +102,12 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
                     firstSpot = spot;
                 }
             }
-        }
-        if(firstSpot == null) {
-            return;
-        }
-        getFocusControl().setTargetActor(actor, firstSpot);
-        changeFocus(first, firstSpot, firstClassEnvelope);
-        getFocusControl().save(edit.editTap());
+            if(firstSpot == null) {
+                return;
+            }
+            getFocusControl().setTargetActor(actor, firstSpot);
+            changeFocus(first, firstSpot, firstClassEnvelope);
+            getFocusControl().save(edit.editTap());
     }
 
     @Override
