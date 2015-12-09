@@ -37,6 +37,7 @@ import org.tapchain.core.PathType;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
+import org.tapchain.game.ISensorView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +69,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	protected List<Geometry> geos = new ArrayList<Geometry>();
 	private IPoint nextConnectivityPoint = null;
     ArrayList<IActorTap> family = new ArrayList<IActorTap>();
+    ISensorView sensorView = null;
     public enum FACTORY_KEY {
         ALL, RECENT, RELATIVES
     }
@@ -97,6 +99,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         factories.put(FACTORY_KEY.ALL, factory);
         factories.put(FACTORY_KEY.RECENT, recent);
         factories.put(FACTORY_KEY.RELATIVES, relatives);
+        if(win instanceof ISensorView)
+            sensorView = (ISensorView)win;
 	}
 
 	public void reset() {
@@ -421,17 +425,25 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		editTap()._move(t)._in()
 				.add(new Accel(vp).once()).save();
 	}
+    private void _onFlingBackground(float vx, float vy) {
+        moveBackground(- vx, - vy);
+    }
 
-	private void _onFlingBackground(final float vx, final float vy) {
+    private void _onFlingBackgroundTo(float x, float y) {
+        IPoint center = win.getMiddlePoint();
+        moveBackground(x - center.x(), y - center.y());
+    }
+
+    private void moveBackground(final float dx, final float dy) {
 		// Background center starts moving and slows down gradually.
 		editTap().addActor(new IActor() {
-            float delta = 0.03f;
+            float delta = 0.1f;
             int t = 0;
 
             @Override
             public boolean actorRun(Actor act) {
-                win.move(delta * -vx, delta * -vy);
-                delta -= 0.003f;
+                delta = 0.15f * (float)Math.sqrt((10f - t) / 10f);
+                win.move(delta * dx, delta * dy);
                 act.invalidate();
                 return ++t < 10;
             }
@@ -496,7 +508,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
                 Log.w("test", String.format("%s scrolled", selectedTap));
 				((IScrollable) selectedTap).onScrolled(this, pos, vp);
 			}
-            onShowFamily();
+//            onShowFamily();
 		} else {
 			win.move(-vp.x(), -vp.y());
 		}
@@ -505,6 +517,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
     void onShowFamily() {
+        if(! (selectedTap instanceof IActorTap))
+            return;
         if (family.isEmpty()) {
             for (IActorTap tap : getTaps()) {
                 if (!tap.equals(selectedTap)) {
@@ -552,6 +566,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 		// Create new instance piece
 		IPoint setPos = checkRoom(pos);
+//        IPoint setPos = new WorldPoint(pos);
         IBlueprint b = f.get(num);
         EditorReturn rtn = add(b, setPos);
         captureTap(rtn.getTap());
@@ -563,6 +578,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		if (key == FACTORY_KEY.ALL)
 			getFactory(FACTORY_KEY.RECENT).Register(b);
 		touched = pos;
+        if(!win.isInWindow(pos.x(), pos.y()))
+            _onFlingBackgroundTo(pos.x(), pos.y());
 		onUp();
 		return rtn;
 	}
@@ -639,16 +656,17 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public IPoint checkRoom(IPoint basePos, IPiece... exclusive) {
-		IPoint setPos = getPointOnAdd(basePos);
-		while (true) {
-			Collection<IActorTap> p = searchRoomPieces(setPos, exclusive);
-			if (p != null && !p.isEmpty()) {
-				setPos.plus(new WorldPoint(100, 0));
-				continue;
-			}
-			break;
-		}
-		return setPos;
+        return basePos;
+//		IPoint setPos = getPointOnAdd(basePos);
+//		while (true) {
+//			Collection<IActorTap> p = searchRoomPieces(setPos, exclusive);
+//			if (p != null && !p.isEmpty()) {
+//				setPos.plus(new WorldPoint(100, 0));
+//				continue;
+//			}
+//			break;
+//		}
+//		return setPos;
 	}
 
 	public void Compile() {
@@ -973,5 +991,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			return false;
 		}
 	}
+
+    @Override
+    public void shake(int duration) {
+        if(sensorView != null)
+            sensorView.shake(duration);
+    }
 
 }

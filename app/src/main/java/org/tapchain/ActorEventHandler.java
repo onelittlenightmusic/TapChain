@@ -65,49 +65,49 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         ClassEnvelope firstClassEnvelope = null;
         LinkType spotLatest = getFocusControl().getLinkType(), first = null;
         IFocusable firstSpot = null;
-        if (actor == getFocusControl().getTargetActor()) {
+        if (actor == null || actor == getFocusControl().getTargetActor()) {
             return;
         }
-            resetSpot();
-            getFocusControl().clearAllFocusables();
+        resetSpot();
+        getFocusControl().clearAllFocusables();
 
-            getFocusControl().init(v);
-            for (LinkType al : LinkType.values()) {
-                ClassEnvelope clz = actor.getLinkClassFromLib(al);
-                if (clz == null) {
-                    //                edit.unhighlightConnectables();
+        getFocusControl().init(v);
+        for (LinkType al : LinkType.values()) {
+            ClassEnvelope clz = actor.getLinkClassFromLib(al);
+            if (clz == null) {
+                //                edit.unhighlightConnectables();
+                continue;
+            }
+
+            //Create beam view
+            IFocusable spot = null;
+            switch (al) {
+                case PUSH:
+                    MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz, this);
+                    if (v instanceof MyTapStyle2)
+                        beam.init(((MyTapStyle2) v).getOffsetVectorRawCopy());
+                    spot = beam;
+                    break;
+                case TO_CHILD:
+                    spot = new MySpotOptionTapStyle(v, al, clz, this);
+                    break;
+                default:
                     continue;
-                }
-
-                //Create beam view
-                IFocusable spot = null;
-                switch (al) {
-                    case PUSH:
-                        MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz, this);
-                        if (v instanceof MyTapStyle2)
-                            beam.init(((MyTapStyle2) v).getOffsetVectorRawCopy());
-                        spot = beam;
-                        break;
-                    case TO_CHILD:
-                        spot = new MySpotOptionTapStyle(v, al, clz, this);
-                        break;
-                    default:
-                        continue;
-                }
-
-                getFocusControl().addFocusable(spot, al);
-                if (first == null || spotLatest == al) {
-                    first = al;
-                    firstClassEnvelope = clz;
-                    firstSpot = spot;
-                }
             }
-            if(firstSpot == null) {
-                return;
+
+            getFocusControl().addFocusable(spot, al);
+            if (first == null || spotLatest == al) {
+                first = al;
+                firstClassEnvelope = clz;
+                firstSpot = spot;
             }
-            getFocusControl().setTargetActor(actor, firstSpot);
-            changeFocus(first, firstSpot, firstClassEnvelope);
-            getFocusControl().save(edit.editTap());
+        }
+        if(firstSpot == null) {
+            return;
+        }
+        getFocusControl().setTargetActor(actor, firstSpot);
+        changeFocus(first, firstSpot, firstClassEnvelope);
+        getFocusControl().save(edit.editTap());
     }
 
     @Override
@@ -160,7 +160,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         return true;
     }
 
-
     @Override
     public void onLockedScroll(IActorEditor edit, IActorTap tap, IPoint wp) {
     }
@@ -178,89 +177,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         combo(v, b);
     }
 
-
-//    @Override
-//    public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
-//        l.offer(String.format("%s: \"%s\"", actorPullException.getLocation(),
-//                actorPullException.getErrorMessage()));
-//        AndroidImageView errorMark = new AndroidImageView(act, R.drawable.error);
-//        errorMark.setColorCode(ColorCode.RED)
-//                .setPercent(new WorldPoint(200f, 200f));
-//        errorMark._valueGet().setOffset(t);
-//        edit.editTap()
-//                .add(errorMark
-//                )
-//                ._in()
-//                .add(new Actor.Reset(false)/*.setLogLevel(true)*/)
-//                .old(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
-//                .save();
-//
-//        //Create error balloon
-//        LinkType linkType = actorPullException.getLinkType();
-//        ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
-//        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
-//        edit.editTap().add((Actor) balloon).save();
-//        t.setAccessoryTap(linkType, balloon);
-//        setLastHighlighted(linkType, t, classEnvelopeInLink);
-//    }
-//
-//    @Override
-//    public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
-//        LinkType linkType = actorPullException.getLinkType();
-//        if (linkType == null) {
-//            return;
-//        }
-//        edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
-//        t.unsetAccessoryTap(linkType);
-//        unsetLastPushed();
-//    }
-//
-//    IActorTap pushed = null;
-//
-//    public IActorTap setLastHighlighted(LinkType ac, IActorTap target, ClassEnvelope classEnvelope) {
-//        edit.highlightConnectables(ac.reverse(), classEnvelope);
-//
-//        if (pushed != null) {
-//            IActorTap last = pushed.getAccessoryTap(ac);
-//            if (last != null && last instanceof IBlueprintFocusNotification) {
-//                ((IBlueprintFocusNotification) last).onFocus(null);
-//            }
-//        }
-//        pushed = target;
-//        if (target == null)
-//            return null;
-//        IActorTap lt = target.getAccessoryTap(ac);
-//        if (lt != null && lt instanceof IBlueprintFocusNotification) {
-//            ((IBlueprintFocusNotification) lt).onFocus(ac.getBooleanSet());
-//        }
-//        return target;
-//    }
-
-//    public void unsetLastPushed() {
-//        edit.unhighlightConnectables();
-//        pushed = null;
-//    }
-//
-//    public void unsetLastPushed(IActorTap t) {
-//        if (t == pushed)
-//            unsetLastPushed();
-//    }
-//
-//    @Override
-//    public void onPush(IActorTap t, LinkType linkType, Object obj) {
-//        setLastHighlighted(linkType, t, new ClassEnvelope(obj.getClass()));
-//    }
-//
-//
-//    public void unsetPushOutBalloon(ActorTap t, LinkType linkType) {
-//        ActorTap accessoryTap = (ActorTap) t.getAccessoryTap(linkType);
-//        if (accessoryTap != null) {
-//            unsetLastPushed(t);
-//            t.unsetAccessoryTap(linkType);
-//            edit.editTap().remove(accessoryTap);
-//        }
-//    }
-
     public void combo(IActorTap t, IBlueprint b) {
         Actor actorNew = edit.toActor((ActorTap) t), aTarget = getFocusControl().getTargetActor();
         edit.connect(aTarget, getFocusControl().getLinkType(), actorNew);
@@ -273,24 +189,8 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         return focusControl;
     }
 
-
     @Override
     public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
-        if (linkType == null) {
-            Log.w("test", "LinkType is null");
-            return;
-        }
-        if (iActorTap == null || iActorTap2 == null) {
-            Log.w("test", "ActorTap is null");
-            return;
-        }
-        if (iPathTap == null) {
-            Log.w("test", "PathTap is null");
-            return;
-        }
-        edit.editTap().remove((Actor) iActorTap.getAccessoryTap(linkType));
-        iActorTap.unsetAccessoryTap(linkType);
-        edit.editTap().remove((Actor) iActorTap2.getAccessoryTap(linkType.reverse()));
-        iActorTap2.unsetAccessoryTap(linkType.reverse());
+        edit.shake(100);
     }
 }

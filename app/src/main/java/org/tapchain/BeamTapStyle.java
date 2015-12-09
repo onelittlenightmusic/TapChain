@@ -33,7 +33,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 
 	BeamTapStyle(Resources r, IActorTap _p, Bitmap bm_fg, IPoint initPos) {
 		super(_p);
-		setSize(new WorldPoint(200f, 200f));
+		setSize(new WorldPoint(30f, 30f));
 		bitmap = new BitmapDrawable(r, bm_fg);
 		sizey = Math.max(bitmap.getIntrinsicHeight(), bitmap.getBitmap().getHeight());
 		sizex = Math.max(bitmap.getIntrinsicWidth(), bitmap.getBitmap().getWidth());

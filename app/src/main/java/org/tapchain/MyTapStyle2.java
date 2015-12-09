@@ -77,19 +77,18 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			textPaint = new Paint(),
 			miniTextPaint = new Paint(),
 			innerPaint2 = new Paint();
+    float sizeDefaultX = 50f;
 	public Bitmap bm_fg = null, bm_face = null, bm_fg_mini = null;
 	WorldPoint sizeOpened = new WorldPoint(300f, 300f),
-			sizeClosed = new WorldPoint(50f, 50f),
-			sizeDefault = new WorldPoint(100f, 100f);
+			sizeClosed = new WorldPoint(sizeDefaultX, sizeDefaultX),
+			sizeDefault = new WorldPoint(2*sizeDefaultX, 2*sizeDefaultX);
 	ShapeDrawable d, dOut;
 	RectF tickCircleRect = new RectF();
 	int tickCircleRadius = 30;
 	float sweep = 0f;
 	Bitmap bm_bg;
 	ConcurrentLinkedQueue<StateLog> stateList = new ConcurrentLinkedQueue<StateLog>();
-	private IPoint faceOffset = new WorldPoint(20f, 20f);
 	float textSize = 60f, miniTextSize= 10f;
-	Drawable myDrawable = null;
 
     // 1.Initialization
 	public MyTapStyle2(IActorEditor edit, Activity activity) {
@@ -106,7 +105,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		_paint.setStyle(Paint.Style.FILL);
 		_paint.setAntiAlias(true);
 		_paint.setAlpha(120);
-		_paint.setColor(0x55ffffff);
+		_paint.setColor(0x44ffffff);
 		_paint.setTextAlign(Align.CENTER);
 		_paint.setFilterBitmap(true);
 
@@ -161,7 +160,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 			return;
 		IActorBlueprint b = getActor().getBlueprint();
 		Class<? extends IPiece> blueprintClass = b.getBlueprintClass();
-		/*else */if (IValue.class.isAssignableFrom(blueprintClass)) {
+		if (IValue.class.isAssignableFrom(blueprintClass)) {
 			ClassLibReturn classReturn = ClassLib.getParameterizedType(blueprintClass, IValue.class);
 			if (classReturn == null)
 				return;
@@ -182,11 +181,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	public boolean myview_init(Integer fg) {
 		if (fg != null) {
-			bm_fg = BitmapFactory.decodeResource(act.getResources(),
-					fg);
-			bm_fg_mini = Bitmap.createScaledBitmap(BitmapFactory
-                            .decodeResource(act.getResources(), fg), 70, 70,
-                    true);
+            bm_fg = BitmapMaker.makeOrReuse("Large"+fg.toString(), fg, 200, 200);
+            bm_fg_mini = BitmapMaker.makeOrReuse("Mini"+fg.toString(), fg, 70,70);
+//			bm_fg_mini = Bitmap.createScaledBitmap(BitmapFactory
+//                            .decodeResource(act.getResources(), fg), 70, 70,
+//                    true);
 		}
 		return true;
 	}
@@ -194,9 +193,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	@Override
 	public void view_init() throws ChainException {
-//		if (bm_fg == null) {
-//			bm_fg = BitmapFactory.decodeResource(act.getResources(), pull());
-//		}
 		bm_face = BitmapMaker.makeOrReuse("MyTapFace", R.drawable.face);
 		return;
 	}
@@ -207,33 +203,27 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		if(!inited)
 			initBackground();
 
-		boolean dummy = false;
+        float r = 50f;
 		_paint.setAlpha(alpha);
 		canvas.save();
         canvas.translate(cp.x(), cp.y());
-        canvas.translate(-50f, -50f);
+        canvas.translate(-r, -r);
 		int sizex = (int) size.x(), sizey = (int) size.y();
         rect.set(0f, 0f, sizex, sizey);
-        canvas.drawRoundRect(rect, 50f, 50f, _paint);
-        canvas.translate(50f, 50f);
+        canvas.drawRoundRect(rect, r, r, _paint);
+        canvas.translate(r, r);
 
-//		if (bm_face != null)
-//			DrawLib.drawBitmapCenter(canvas, bm_face, faceOffset, _paint);
-
-//		showStateCircle(canvas);
-
-		if (!dummy) {
-			if (bm_fg_mini != null) {
-				DrawLib.drawBitmapCenter(canvas, bm_fg_mini, WorldPoint.zero(),
-						_paint);
-			}
-		}
-		canvas.restore();
 
 		if (getActor() == null) {
+            DrawLib.drawBitmapCenter(canvas, bm_fg_mini, WorldPoint.zero(),
+                    _paint);
+            canvas.restore();
             return true;
         }
 			// Draw Extensions _in association with IValue interface
+        DrawLib.drawBitmapCenter(canvas, bm_fg, WorldPoint.zero(),
+                    _paint);
+        canvas.restore();
         Actor actor = getActor();
         if (actor instanceof IValueArray) {
             showPath(canvas, (IValueArray<IPoint>) getActor());
@@ -263,32 +253,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 		}
 	}
 
-//	public void showStateCircle(Canvas canvas) {
-//
-//		StateLog prev = null;
-//		for (StateLog stateLog : stateList) {
-//			if (prev != null) {
-//				if (stateLog.getSweepLog() < sweep - 360f) {
-//					prev = stateLog;
-//					continue;
-//				}
-//				float s = prev.getSweepLog();
-//				if (s < sweep - 360f)
-//					s = sweep - 360f;
-//				canvas.drawArc(tickCircleRect, s % 360f,
-//						stateLog.getSweepLog() % 360f, false, innerPaint2);
-//			}
-//			prev = stateLog;
-//		}
-//		if (prev != null) {
-//			Paint _p = _paint;
-//			if (prev.getState().hasError())
-//				_p = innerPaint2;
-//			canvas.drawArc(tickCircleRect, prev.getSweepLog() % 360f,
-//					sweep % 360f, false, _p);
-//		}
-//
-//	}
+
 
 	@Override
 	public MyTapStyle2 setPercent(IPoint wp) {
@@ -328,10 +293,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	@Override
 	public boolean setMyActorValue(Object obj) {
-		if (getActor() instanceof IValueArray) {
-			((IValueArray) getActor())._valueSet(obj);
-		} else if (getActor() instanceof IValue) {
-			IValue v = (IValue) getActor();
+        Actor actor = getActor();
+		if (actor instanceof IValueArray) {
+			((IValueArray) actor)._valueSet(obj);
+		} else if (actor instanceof IValue) {
+			IValue v = (IValue) actor;
 			Object val = v._valueGet();
 			if (val.getClass().isAssignableFrom(obj.getClass())) {
 				v._valueSet(obj);
@@ -343,16 +309,19 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	@Override
 	public void commitMyActorValue() {
-		if (getActor() instanceof ICommit) {
-			Object commit = ((ICommit) getActor())._commit();
-			if (commit != null)
-                try {
-                    edit.editTap()
-                            .add(new AndroidActor.AndroidTTS(act, CodingLib.talk(getActor().getTag(), commit)))
-                            .save();
-                } catch (ChainException e) {
-                    e.printStackTrace();
-                }
+        Actor actor = getActor();
+		if (!(actor instanceof ICommit)) {
+            return;
+        }
+        Object commit = ((ICommit) actor)._commit();
+        if (commit == null)
+            return;
+        try {
+            edit.editTap()
+                .add(new AndroidActor.AndroidTTS(act, CodingLib.talk(actor.getTag(), commit)))
+                .save();
+        } catch (ChainException e) {
+            e.printStackTrace();
         }
 	}
 
@@ -404,8 +373,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 	@Override
 	public void onSelected(IEditor edit, IPoint pos) {
-//		if (edit.getLockedReleaseTap() != null)
-//			return;
         Actor actor = getActor();
 		if (actor instanceof IStep) {
 			((IStep) actor).onStep();
@@ -424,8 +391,9 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 	@Override
 	public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
 		setOffsetVector();
-        edit.editTap().remove((Actor) getAccessoryTap((iActorTap == this) ? linkType: linkType.reverse()));
-        unsetAccessoryTap(linkType);
+        LinkType lt = (iActorTap == this) ? linkType: linkType.reverse();
+        edit.editTap().remove((Actor) getAccessoryTap(lt));
+        unsetAccessoryTap(lt);
 	}
 
 	public class ExtensionButtonEnvelope implements IRelease {

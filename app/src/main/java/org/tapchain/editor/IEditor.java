@@ -32,7 +32,7 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
 	List<IBlueprint<ACTOR>> highlightConnectables(LinkType reverse, IActorTap target, ClassEnvelope ce);
 	boolean connect(ACTOR a1, LinkType al, ACTOR a2);
 	void lockReleaseTap(IRelease t);
-//	VIEW getLockedReleaseTap();
 	void unhighlightConnectables();
     IActorSharedHandler getEventHandler();
+    void shake(int duration);
 }
