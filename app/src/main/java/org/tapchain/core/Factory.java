@@ -80,10 +80,10 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 		return (Blueprint) get(n).getView();
 	}
 
-	public void setRelatives(LinkType ac, ClassEnvelope classEnvelope, Factory<PIECE> rel) {
-		rel.clear();
-		rel.Register(getConnectables(ac, classEnvelope));
-        rel.save();
+	public void setBlueprints(List<IBlueprint<PIECE>> listBlueprint) {
+		clear();
+		Register(listBlueprint);
+        save();
 	}
 
 	public interface ValueChangeNotifier {

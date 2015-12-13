@@ -128,7 +128,7 @@ public class ActorManager extends PieceManager<Actor> {
 		if(bp == null) 
 			return this;
 		getChain().getOperator().add(bp);
-//		bp.onAdd(newSession());
+//		bp.addFromFactory(newSession());
 		_move(bp);
 		if(getRoot() != null) {
 			super.append(bp, PathType.FAMILY, getRoot(), PathType.FAMILY, false);

@@ -16,7 +16,7 @@ public class LinkBooleanSet extends ConcurrentSkipListSet<LinkType> {
 	public LinkBooleanSet() {
 		super();
 	}
-	
+
 	public LinkBooleanSet(LinkType al) {
 		this();
 		setTrue(al);

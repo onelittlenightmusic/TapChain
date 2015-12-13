@@ -1,8 +1,10 @@
 package org.tapchain.editor;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.tapchain.ActorTap;
+import org.tapchain.IFocusable;
 import org.tapchain.PaletteSort;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Mover;
@@ -71,7 +73,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
     ArrayList<IActorTap> family = new ArrayList<IActorTap>();
     ISensorView sensorView = null;
     public enum FACTORY_KEY {
-        ALL, RECENT, RELATIVES
+        ALL, LOG, RELATIVES
     }
 
 	// 1.Initialization
@@ -97,7 +99,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		setLog(this);
 //		setError(this);
         factories.put(FACTORY_KEY.ALL, factory);
-        factories.put(FACTORY_KEY.RECENT, recent);
+        factories.put(FACTORY_KEY.LOG, recent);
         factories.put(FACTORY_KEY.RELATIVES, relatives);
         if(win instanceof ISensorView)
             sensorView = (ISensorView)win;
@@ -115,27 +117,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return true;
 	}
 
-//	@Override
-//	public ChainPiece onError(ChainPiece bp, ChainException e) {
-//		if(!(e instanceof ActorInputException))
-//			return bp;
-//		IActorTap t = toTap((Actor) bp);
-//		if(e instanceof ActorPullException)
-//			getEventHandler().onPullLocked(t, (ActorPullException) e);
-//		return bp;
-//	}
-//
-//	@Override
-//	public ChainPiece onUnerror(ChainPiece cp, ChainException e) {
-//		if(!(e instanceof ActorInputException))
-//			return cp;
-//		if(e instanceof ActorPullException) {
-//			IActorTap t = toTap((Actor) cp);
-//			getEventHandler().onPullUnlocked(t, (ActorPullException) e);
-//		}
-//		return cp;
-//	}
-
 	public void setWindow(IWindow v) {
 		win = v;
 	}
@@ -152,7 +133,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         switch(key) {
             case ALL:
                 return factory;
-            case RECENT:
+            case LOG:
                 return recent;
             case RELATIVES:
                 return relatives;
@@ -188,27 +169,27 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	IPoint rangeMin = new WorldPoint(-300f, -300f);
 	IPoint rangeMax = new WorldPoint(300f, 300f);
 
-	public List<IActorTap> getNearbyTaps(IPoint pt) {
-		List<IActorTap> rtn = new ArrayList<IActorTap>();
-		IPoint min = pt.plusNew(rangeMin);
-		IPoint max = pt.plusNew(rangeMax);
-		for (float f = min.x(); f <= max.x(); f += 100f) {
-			for (float fy = min.y(); fy <= max.y(); fy += 100f) {
-				Collection<IActorTap> tmp = getTaps(new WorldPoint(f, fy));
-				if (tmp == null)
-					continue;
-				rtn.addAll(tmp);
-			}
-		}
-		return rtn;
-	}
+//	public List<IActorTap> getNearbyTaps(IPoint pt) {
+//		List<IActorTap> rtn = new ArrayList<IActorTap>();
+//		IPoint min = pt.plusNew(rangeMin);
+//		IPoint max = pt.plusNew(rangeMax);
+//		for (float f = min.x(); f <= max.x(); f += 100f) {
+//			for (float fy = min.y(); fy <= max.y(); fy += 100f) {
+//				Collection<IActorTap> tmp = getTaps(new WorldPoint(f, fy));
+//				if (tmp == null)
+//					continue;
+//				rtn.addAll(tmp);
+//			}
+//		}
+//		return rtn;
+//	}
 
 	static WorldPoint approximate = new WorldPoint(400f, 400f);
 
-	public Collection<IActorTap> getApproximateTaps(IPoint pt) {
-		return TapLib.getRangeTaps(pt.subNew(approximate),
-				pt.plusNew(approximate));
-	}
+//	public Collection<IActorTap> getApproximateTaps(IPoint pt) {
+//		return TapLib.getRangeTaps(pt.subNew(approximate),
+//				pt.plusNew(approximate));
+//	}
 
 	public BlueprintManager<Actor> getBlueprintManager() {
 		return blueprintManager;
@@ -262,30 +243,26 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return styles.getEventHandler();
 	}
 
-	public interface IWindowCallback {
-		public boolean redraw(String str);
-	}
-
 	@Override
 	public void kickTapDraw(ITap startTap2) {
 		editorManager.getTapManager().getChain().kick(startTap2);
 	}
 
-	public boolean kickUserDraw(IPiece pc) {
-		editorManager.getChain().kick(pc);
-		return true;
-	}
-
+//	public boolean kickUserDraw(IPiece pc) {
+//		editorManager.getChain().kick(pc);
+//		return true;
+//	}
+//
 	public enum EditMode {
 		ADD, REMOVE, RENEW
 	}
 
 	EditMode editmode = EditMode.ADD;
 
-	public boolean getMode(EditMode mode) {
-		editmode = mode;
-		return true;
-	}
+//	public boolean getMode(EditMode mode) {
+//		editmode = mode;
+//		return true;
+//	}
 
 	protected boolean capturePiece(IPoint iPoint) {
 		ITap t = searchTouchedTap(iPoint);
@@ -339,14 +316,12 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	IRelease lockedReleaseTap = null;
 
-//	@Override
 	public void lockReleaseTap(IRelease t) {
 		if (lockedReleaseTap == null && t != null) {
 			lockedReleaseTap = t;
 		}
 	}
 
-//	@Override
 	public ActorTap getLockedReleaseTap() {
 		return (ActorTap)lockedReleaseTap;
 	}
@@ -397,17 +372,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	public boolean onDown(IPoint iPoint) {
 		touched = iPoint;
-		boolean rtn = capturePiece(iPoint);
-		if(rtn)
-			if (selectedTap instanceof IActorTap) {
-				getEventHandler().addFocus((IActorTap) selectedTap);
-			}
-
-		return rtn;
-	}
-
-	public boolean onDownClear() {
-		return true;
+		return capturePiece(iPoint);
 	}
 
 	public boolean onFling(final float vx, final float vy) {
@@ -460,8 +425,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			return false;
 		}
 		Actor p = null;
-		if (t1 instanceof IActorTap)
-			p = toActor((ActorTap) t1);
+		if (t1 instanceof IActorTap) {
+            p = toActor((ActorTap) t1);
+            getEventHandler().createFocus((IActorTap) t1);
+        }
 		switch (editmode) {
 		case REMOVE:
 			if (p == null)
@@ -516,30 +483,43 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return true;
 	}
 
-    void onShowFamily() {
-        if(! (selectedTap instanceof IActorTap))
-            return;
-        if (family.isEmpty()) {
-            for (IActorTap tap : getTaps()) {
-                if (!tap.equals(selectedTap)) {
-                    if (tap.isFamilyTo((IActorTap) selectedTap)) {
-                        family.add(tap);
-                    }
-                }
-            }
+//    void onShowFamily() {
+//        if(! (selectedTap instanceof IActorTap))
+//            return;
+//        if (family.isEmpty()) {
+//            for (IActorTap tap : getTaps()) {
+//                if (!tap.equals(selectedTap)) {
+//                    if (tap.isFamilyTo((IActorTap) selectedTap)) {
+//                        family.add(tap);
+//                    }
+//                }
+//            }
+//        }
+//        for(IActorTap tap: family) {
+//            showFamily(tap);
+//        }
+//    }
+
+//    public void showFamily(IActorTap tap) {
+//    }
+
+//    public boolean onShowPress() {
+//		return false;
+//	}
+
+    public EditorReturn onAdd(FACTORY_KEY key, int num,
+                                       IPoint pos) {
+        if (pos == null) {
+            pos = getNextPos();
         }
-        for(IActorTap tap: family) {
-            showFamily(tap);
-        }
+        EditorReturn rtn = addFromFactory(key, num, pos);
+        if(!win.isInWindow(pos.x(), pos.y()))
+            //Centering
+            _onFlingBackgroundTo(pos.x(), pos.y());
+        touched = pos;
+        onUp();
+        return rtn;
     }
-
-    public void showFamily(IActorTap tap) {
-    }
-
-    public boolean onShowPress() {
-		return false;
-	}
-
 	/**
 	 * Create an IPiece instance and addFocusable to Chain.
 	 *
@@ -552,47 +532,41 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	 * @return the IPiece instance created and the Tap instance associated with
 	 *         the IPiece instance
 	 */
-	public EditorReturn onAdd(FACTORY_KEY key, int num,
-			IPoint pos) {
+	public EditorReturn addFromFactory(FACTORY_KEY key, int num,
+                                       IPoint pos) {
+//		IPoint setPos = checkRoom(pos);
+
         Factory<Actor> f = factories.get(key);
-		// Invalid parameter
+		// Invalid number input
         if (num >= f.getSize())
             return null;
-		if (pos == null) {
-			pos = getNextPos();
-			if (pos == null)
-				pos = new WorldPoint(0f, 0f);
-		}
-
-		// Create new instance piece
-		IPoint setPos = checkRoom(pos);
-//        IPoint setPos = new WorldPoint(pos);
         IBlueprint b = f.get(num);
-        EditorReturn rtn = add(b, setPos);
+
+        EditorReturn rtn = add(b, pos);
+
+        if (rtn == null) {
+            return null;
+        }
         captureTap(rtn.getTap());
-		if (rtn == null) {
-			log("Chain", "Fatal Error: no instance");
-			return null;
-		}
-		// Get PieceView
-		if (key == FACTORY_KEY.ALL)
-			getFactory(FACTORY_KEY.RECENT).Register(b);
-		touched = pos;
-        if(!win.isInWindow(pos.x(), pos.y()))
-            _onFlingBackgroundTo(pos.x(), pos.y());
-		onUp();
+        getFactory(FACTORY_KEY.LOG).Register(b);
 		return rtn;
 	}
 
-    EditorReturn add(IBlueprint<Actor> blueprint, IPoint iPoint) {
+    private EditorReturn add(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
         try {
+            // Create new instance piece
             EditorReturn rtn = editorManager.addAndInstallView(blueprint, iPoint);
             editorManager.save();
-            Actor actor = rtn.getActor();
-            IActorTap tap = rtn.getTap();
-            getEventHandler().onAdd(actor, tap, blueprint, iPoint);
-            getEventHandler().addFocus(tap);
-//            tap.postAdd(actor, tap, blueprint, iPoint);
+            final Actor actor = rtn.getActor();
+            final IActorTap tap = rtn.getTap();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    getEventHandler().onAdd(actor, tap, blueprint, iPoint);
+                    getEventHandler().createFocus(tap);
+                    return null;
+                }
+            }.execute();
             return rtn;
         } catch (ChainException e) {
             editorManager.error(e);
@@ -606,22 +580,22 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return tp;
 	}
 
-	IPoint getPointOnAdd(IPoint iPoint) {
-		return (styles == null || getInteract() == null) ? iPoint
-				: getInteract().pointOnAdd(iPoint);
-	}
+//	IPoint getPointOnAdd(IPoint iPoint) {
+//		return (styles == null || getInteract() == null) ? iPoint
+//				: getInteract().pointOnAdd(iPoint);
+//	}
 
 	private void round(IActorTap startTap2) {
 		if (styles == null || getInteract() == null)
 			return;
 		startTap2._valueSet(getInteract()
-				.pointOnAdd((startTap2._valueGet())));
+                .pointOnAdd((startTap2._valueGet())));
 
 		TapLib.setTap(startTap2);
 		kickTapDraw(startTap2);
 	}
 
-	public boolean onDummyAdd(FACTORY_KEY key, int num, IPoint iPoint) {
+	public boolean addDummy(FACTORY_KEY key, int num, IPoint iPoint) {
         ActorTap t = null;
         try {
             t = createView(getFactory(key), num, editTap());
@@ -636,7 +610,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return true;
 	}
 
-	public boolean onDummyRemove() {
+	public boolean removeDummy() {
 		if (dummyTap == null)
 			return false;
 		editTap().remove(dummyTap);
@@ -644,7 +618,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return true;
 	}
 
-	public boolean onDummyScroll(IPoint iPoint) {
+	public boolean scrollDummy(IPoint iPoint) {
 		if (dummyTap == null)
 			return false;
 		IPoint setPos = checkRoom(iPoint, dummyTap);
@@ -669,16 +643,16 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 //		return setPos;
 	}
 
-	public void Compile() {
-		editorManager.getChain().getOperator().reset();
-		editorManager.getChain().setCallback(new IControlCallback() {
-			public boolean onCalled() {
-				return true;
-			}
-		});
-		return;
-	}
-
+//	public void Compile() {
+//		editorManager.getChain().getOperator().reset();
+//		editorManager.getChain().setCallback(new IControlCallback() {
+//			public boolean onCalled() {
+//				return true;
+//			}
+//		});
+//		return;
+//	}
+//
 	public void start() {
 		if (editorManager.getChain() == null) {
 			return;
@@ -837,11 +811,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 
 	public interface Tickable<T> {
-		public int onTick(T t, Packet obj);
+		int onTick(T t, Packet obj);
 	}
 
 	public interface Pushable<T> {
-		public boolean onPush(T t, Object obj, ActorManager actorManager);
+		boolean onPush(T t, Object obj, ActorManager actorManager);
 	}
 
 
@@ -873,6 +847,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 				data = new BlueprintInitialization(v, tag + "I");
 				bnew.setInitialization(data);
 				f.Register(bnew);
+                f.invalidate();
 			}
 		}
 		return data;
@@ -903,7 +878,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	private IPoint getNextPos() {
-		return nextConnectivityPoint;
+		if(nextConnectivityPoint == null)
+            return win.getMiddlePoint();
+        return nextConnectivityPoint;
 	}
 
 	public void setNextPos(IPoint nextConnectivity) {
@@ -918,7 +895,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	@Override
 	public List<IBlueprint<Actor>> highlightConnectables(LinkType ac,
                                                          IActorTap target, ClassEnvelope classEnvelope) {
-        List<IBlueprint<Actor>> rtn = setLastHighlighted(ac, target, classEnvelope);
+        List<IBlueprint<Actor>> rtn = setLastHighlighted(ac, classEnvelope);
         //Erase the indicator for the privious target.
         if (highlighted != null) {
             IActorTap last = highlighted.getAccessoryTap(ac);
@@ -938,20 +915,22 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         return rtn;
 	}
 
-    public List<IBlueprint<Actor>> setLastHighlighted(LinkType ac, IActorTap target, ClassEnvelope classEnvelope) {
-        changePaletteToConnectables(ac.reverse(), classEnvelope);
+    public List<IBlueprint<Actor>> setLastHighlighted(LinkType ac, ClassEnvelope classEnvelope) {
         //Clear all blueprints view with neutral coloring.
         for (IBlueprint<Actor> b : getFactory().getList()) {
             b.unhighlight();
         }
         //Coloring connectable blueprints with LinkType's color.
-        List<IBlueprint<Actor>> bl = getFactory().getConnectables(ac, classEnvelope);
+        List<IBlueprint<Actor>> bl = getFactory().getConnectables(ac.reverse(), classEnvelope);
         if (bl.size() == 0) {
+            win.showPalette(PaletteSort.FACTORY);
             getFactory().invalidate();
             return null;
         }
+        relatives.setBlueprints(bl);
+        win.showPalette(PaletteSort.RELATIVES);
         for (IBlueprint<Actor> b : bl) {
-            b.highlight(ac, true);
+            b.highlight(ac);
         }
         getFactory().invalidate();
         return bl;
@@ -964,11 +943,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		}
 	}
 
-	public void changePaletteToConnectables(LinkType ac,
-			ClassEnvelope classEnvelope) {
-		getFactory().setRelatives(ac, classEnvelope, relatives);
-		win.showPalette(PaletteSort.RELATIVES);
-	}
+//	public void changePaletteToConnectables(LinkType ac,
+//			ClassEnvelope classEnvelope) {
+//		getFactory().setBlueprints(ac, classEnvelope, relatives);
+//		win.showPalette(PaletteSort.RELATIVES);
+//	}
 
 	@Override
 	public boolean connect(Actor a1, LinkType al, Actor a2) {
@@ -998,4 +977,15 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
             sensorView.shake(duration);
     }
 
+    @Override
+    public void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz) {
+        resetNextPos();
+        highlightConnectables(al, spot, clazz);
+        if(spot == null)
+            return;
+        setNextPos(spot.getCenter());
+        getEventHandler().getFocusControl().unfocusAll(spot);
+        spot.focus(getEventHandler().getFocusControl(), al);
+        getEventHandler().getFocusControl().setSpotActorLink(al);
+    }
 }

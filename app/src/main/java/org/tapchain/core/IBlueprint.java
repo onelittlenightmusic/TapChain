@@ -58,7 +58,7 @@ public interface IBlueprint<ACTOR extends IPiece> {
 	Class<? extends IPiece> getBlueprintClass();
 	public void setInitialization(IBlueprintInitialization i);
 	public boolean getFocused(LinkType ac);
-	public void highlight(LinkType ac, boolean f);
+	public void highlight(LinkType ac);
 	public void unhighlight();
 	public void setNotification(IBlueprintFocusNotification n);
 }

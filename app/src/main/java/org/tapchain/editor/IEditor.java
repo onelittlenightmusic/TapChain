@@ -3,6 +3,7 @@ package org.tapchain.editor;
 import java.util.Collection;
 import java.util.List;
 
+import org.tapchain.IFocusable;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.ActorManager;
@@ -35,4 +36,5 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
 	void unhighlightConnectables();
     IActorSharedHandler getEventHandler();
     void shake(int duration);
+    void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz);
 }

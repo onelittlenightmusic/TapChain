@@ -330,7 +330,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 					.append(Appender.This().getInstance(), appender_pack,
 							Appendee.This().getInstance(), appendee_pack, false);
 			if (view != null)
-				maker.add((PIECE) view.newInstance(null));
+				maker.add(view.newInstance(null));
 		}
 
 		public ConnectionBlueprint setview(Blueprint _view) {
@@ -388,8 +388,8 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 	}
 	
 	@Override
-	public void highlight(LinkType ac, boolean f) {
-		connectSet = f?ac.getBooleanSet():LinkBooleanSet.NULL;
+	public void highlight(LinkType ac) {
+		connectSet = ac.getBooleanSet();
 		if(notif != null) {
 			notif.onFocus(connectSet);
 		}
@@ -405,8 +405,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 	@Override
 	public void setNotification(IBlueprintFocusNotification n) {
 		notif = n;
-		for(LinkType ac: LinkType.values())
-			notif.onFocus(connectSet);
+        notif.onFocus(connectSet);
 	}
 	
 	public void log(String format, String...l) {

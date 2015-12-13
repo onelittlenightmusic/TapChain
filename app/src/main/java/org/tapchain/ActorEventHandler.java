@@ -26,7 +26,6 @@ import org.tapchain.realworld.R;
 public class ActorEventHandler implements IActorSharedHandler, IActorConnectHandler {
     Actor l;
     IEditor<Actor, ActorTap> edit;
-    String _out = "_out", _in = "_in";
     Integer addSoundHammer = R.raw.button;
     Integer addSoundFail = R.raw.failbuzzer;
     Resources res = null;
@@ -35,8 +34,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     public ActorEventHandler(IEditor edit, Resources r, Activity activity) {
         this.edit = edit;
         act = activity;
-        edit.editTap().add(l = new AndroidActor.AndroidAlert())
-        /* .teacher(p) */.save();
         res = r;
     }
 
@@ -45,37 +42,21 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         return res;
     }
 
-    @Override
-    public void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz) {
-        edit.setNextPos(spot.getCenter());
-//        edit.changePaletteToConnectables(al.reverse(), clazz);
-        edit.highlightConnectables(al, spot, clazz);
-        spot.focus(getFocusControl(), al);
-
-    }
 
     @Override
-    public void resetSpot() {
-        edit.resetNextPos();
-    }
-
-    @Override
-    public void addFocus(IActorTap v) {
-        Actor actor = v.getActor();
+    public void createFocus(IActorTap v) {
+        final Actor actor = v.getActor();
         ClassEnvelope firstClassEnvelope = null;
         LinkType spotLatest = getFocusControl().getLinkType(), first = null;
         IFocusable firstSpot = null;
         if (actor == null || actor == getFocusControl().getTargetActor()) {
             return;
         }
-        resetSpot();
         getFocusControl().clearAllFocusables();
 
-        getFocusControl().init(v);
         for (LinkType al : LinkType.values()) {
             ClassEnvelope clz = actor.getLinkClassFromLib(al);
             if (clz == null) {
-                //                edit.unhighlightConnectables();
                 continue;
             }
 
@@ -83,31 +64,32 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
             IFocusable spot = null;
             switch (al) {
                 case PUSH:
-                    MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz, this);
+                    MyBeamTapStyle beam = new MyBeamTapStyle(getResources(), v, al, clz);
                     if (v instanceof MyTapStyle2)
                         beam.init(((MyTapStyle2) v).getOffsetVectorRawCopy());
                     spot = beam;
                     break;
                 case TO_CHILD:
-                    spot = new MySpotOptionTapStyle(v, al, clz, this);
+                    spot = new MySpotOptionTapStyle(v, al, clz);
                     break;
                 default:
                     continue;
             }
 
             getFocusControl().addFocusable(spot, al);
-            if (first == null || spotLatest == al) {
+            if (first == null/* spotLatest == al*/) {
                 first = al;
                 firstClassEnvelope = clz;
                 firstSpot = spot;
             }
         }
         if(firstSpot == null) {
+            edit.changeFocus(null, null, null);
             return;
         }
-        getFocusControl().setTargetActor(actor, firstSpot);
-        changeFocus(first, firstSpot, firstClassEnvelope);
         getFocusControl().save(edit.editTap());
+        getFocusControl().setTargetActor(actor);
+        edit.changeFocus(first, firstSpot, firstClassEnvelope);
     }
 
     @Override
@@ -165,8 +147,10 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     }
 
     @Override
-    public void onAdd(Actor p, IActorTap v, IBlueprint b, IPoint pos) {
-        try {
+    public void onAdd(final Actor p, final IActorTap v, final IBlueprint b, IPoint pos) {
+        try
+
+        {
             edit.editTap()
                     .add(new AndroidActor.AndroidSound2(act, addSoundHammer))
                     .add(new AndroidActor.AndroidTTS(act, p.getTag()))
@@ -174,6 +158,9 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
         } catch (ChainException e) {
             e.printStackTrace();
         }
+
+//                Actor actorNew = edit.toActor((ActorTap) v), aTarget = getFocusControl().getTargetActor();
+//                edit.connect(aTarget, getFocusControl().getLinkType(), actorNew);
         combo(v, b);
     }
 

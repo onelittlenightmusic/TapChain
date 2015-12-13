@@ -424,7 +424,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-//    public void onAdd(ActorManager maker) {
+//    public void addFromFactory(ActorManager maker) {
 //    }
 
     public void onRemove(ActorManager newSession) {
@@ -2400,8 +2400,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //        }
 //
 //        @Override
-//        public void onAdd(ActorManager maker) {
-//            super.onAdd(maker);
+//        public void addFromFactory(ActorManager maker) {
+//            super.addFromFactory(maker);
 //            this.maker = maker;
 //        }
 //    }

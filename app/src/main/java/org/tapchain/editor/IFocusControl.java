@@ -12,10 +12,7 @@ public interface IFocusControl {
     void unfocusAll(IFocusable spotOption);
     void clearAllFocusables();
     void addFocusable(IFocusable spot, LinkType al);
-    void large();
-    void small();
-    void init(IActorTap v);
-    void setTargetActor(Actor actor, IActorTap spot);
+    void setTargetActor(Actor actor);
     LinkType getLinkType();
     Actor getTargetActor();
     void save(ActorManager manager);

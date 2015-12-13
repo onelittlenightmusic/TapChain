@@ -1,10 +1,20 @@
 package org.tapchain.core;
 
+import java.util.EnumMap;
+
 public enum LinkType {
 	PULL(PathType.OFFER, false), PUSH(PathType.OFFER, true),
 	FROM_PARENT(PathType.FAMILY, false), TO_CHILD(PathType.FAMILY, true);
 	PathType _pathType;
 	boolean _out = false;
+
+    private static final EnumMap<LinkType, LinkType> reverse = new EnumMap<>(LinkType.class);
+    static {
+        reverse.put(PULL, PUSH);
+        reverse.put(PUSH, PULL);
+        reverse.put(FROM_PARENT, TO_CHILD);
+        reverse.put(TO_CHILD, FROM_PARENT);
+    }
 
 	LinkType(PathType pathType, boolean out) {
 		_pathType = pathType;
@@ -12,17 +22,7 @@ public enum LinkType {
 	}
 
 	public LinkType reverse() {
-		switch(this) {
-		case PUSH:
-			return PULL;
-		case PULL:
-			return PUSH;
-		case FROM_PARENT:
-			return TO_CHILD;
-		case TO_CHILD:
-			return FROM_PARENT;
-		}
-		return PUSH;
+        return reverse.get(this);
 	}
 	
 	public LinkBooleanSet getBooleanSet() {

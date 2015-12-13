@@ -339,7 +339,6 @@ public class TapChainView extends FragmentActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        getEditor().onDownClear();
         getEditor().reset();
         Log.i("TapChainView.state", "onStop");
         if (sensorManager != null)
@@ -563,7 +562,7 @@ public class TapChainView extends FragmentActivity implements
             tabH.setup();
             addTab(tabH, "TS1", "[ + ]", FACTORY_KEY.ALL,
                     0xaa000000, R.drawable.plus);
-            addTab(tabH, "TS2", "[ V ]", FACTORY_KEY.RECENT,
+            addTab(tabH, "TS2", "[ V ]", FACTORY_KEY.LOG,
                     0xaa220000, R.drawable.history);
             addTab(tabH, "TS3", "[ <=> ]", FACTORY_KEY.RELATIVES,
                     0xaa000022, R.drawable.relatives);
@@ -1033,7 +1032,7 @@ public class TapChainView extends FragmentActivity implements
 
                 @Override
                 public void onShowPress(MotionEvent e) {
-                    getEditor().onShowPress();
+//                    getEditor().onShowPress();
                 }
 
                 @Override
@@ -1135,23 +1134,23 @@ public class TapChainView extends FragmentActivity implements
 
         public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y,
                                float dx, float dy) {
-            IActorTap added = getEditor().onAdd(key, code, getPosition(x, y))
+            IActorTap added = getEditor().addFromFactory(key, code, getPosition(x, y))
                     .getTap();
-            getEditor().captureTap(added);
+//            getEditor().captureTap(added);
             getEditor().onFling((int) dx, (int) dy);
             return added;
         }
 
         public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {
-            getEditor().onDummyAdd(key, num, getPosition(x, y));
+            getEditor().addDummy(key, num, getPosition(x, y));
         }
 
         public void onDummyMoveTo(float x, float y) {
-            getEditor().onDummyScroll(getPosition(x, y));
+            getEditor().scrollDummy(getPosition(x, y));
         }
 
         public void onDummyRemove() {
-            getEditor().onDummyRemove();
+            getEditor().removeDummy();
         }
 
         public void sendDownEvent(float x, float y) {

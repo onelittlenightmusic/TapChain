@@ -17,10 +17,8 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 	HashMap<IFocusable, LinkType> array = new HashMap<IFocusable, LinkType>();
 	private static final long serialVersionUID = 1L;
 	Actor spotTargetActor = null;
-	IActorTap spotTap = null;
 	LinkType selectedLinkType = null;
-	IActorTap parent = null;
-	
+
 	public enum SpotGroupLayout {
 		RIGHT, LEFT, TOP, BOTTOM
 	}
@@ -34,7 +32,8 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 		for(IFocusable s: array.keySet())
 			if(s != spotOption)
 				s.unfocus(this);
-	}
+        setSpotActorLink(null);
+    }
 	
 	@Override
 	public void clearAllFocusables() {
@@ -45,9 +44,8 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 	}
 
 	@Override
-	public void setTargetActor(Actor a, IActorTap tap) {
+	public void setTargetActor(Actor a) {
 		spotTargetActor = a;
-		spotTap = tap;
 	}
 	
 	public Actor getTargetActor() {
@@ -62,40 +60,13 @@ public class MyFocusControl extends ActorTap implements IFocusControl {
 	}
 
 	@Override
-	public void init(IActorTap t) {
-		getSize()._valueGet().clear();
-		getSize()._valueGet().setOffset(t.getSize());
-		parent = t;
-	}
-
-	@Override
 	public void addFocusable(IFocusable spot, LinkType al) {
 		array.put(spot, al);
-		IValue<IPoint> offset = null;
-		switch(al) {
-		case FROM_PARENT:
-			offset = new PointValue(getSize()._valueGet(), new WorldPoint(0, 1));
-			break;
-		case TO_CHILD://TOP
-			offset = new PointValue(getSize()._valueGet(), new WorldPoint(0, -1));
-			break;
-		default:
-		}
-		if(offset != null)
-			spot.getCenter().setOffset(offset);
 	}
 	
 	public void save(ActorManager manager) {
 		for(IFocusable focusable : array.keySet()) {
 			manager.add((Actor) focusable).save();
 		}
-	}
-	
-	public void large() {
-		getSize()._valueGet().set(new WorldPoint(200f, 200f));
-	}
-
-	public void small() {
-		getSize()._valueGet().set(new WorldPoint());
 	}
 }

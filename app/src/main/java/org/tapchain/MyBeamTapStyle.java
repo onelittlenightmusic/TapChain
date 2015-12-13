@@ -24,30 +24,25 @@ public class MyBeamTapStyle extends BeamTapStyle implements IRelease, IFocusable
     ClassEnvelope clazz = null;
     IActorSharedHandler handler;
 
-	public MyBeamTapStyle(Resources r, IActorTap t, LinkType al, ClassEnvelope clz, IActorSharedHandler handler) {
-        super(r, t, BitmapMaker.makeOrReuse("Beam", R.drawable.beam));
+	public MyBeamTapStyle(Resources r, IActorTap t, LinkType al, ClassEnvelope clz) {
+        super(r, t, BitmapMaker.makeOrReuse("Beam", R.drawable.beam, 50, 50));
         this.al = al;
         this.clazz = clz;
-        this.handler = handler;
-//        setEventHandler(sh);
     }
 
     @Override
     public void onRelease(IEditor edit, IPoint pos) {
         super.onRelease(edit, pos);
-        handler.changeFocus(al, this, clazz);
+        edit.changeFocus(al, this, clazz);
     }
 
     @Override
     public void focus(IFocusControl focusControl, LinkType al) {
-        focusControl.unfocusAll(this);
         setColorCode(ColorLib.getLinkColor(al.reverse()));
-        focusControl.setSpotActorLink(al);
     }
 
     @Override
     public void unfocus(IFocusControl focusControl) {
         setColorCode(ColorLib.ColorCode.CLEAR);
-        focusControl.setSpotActorLink(null);
     }
 }

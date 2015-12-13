@@ -29,7 +29,7 @@ import org.tapchain.editor.IFocusControl;
 
 import java.io.Serializable;
 
-public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IBlueprintFocusNotification, IRelease, IActorAttachHandler, IFocusable {
+public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IBlueprintFocusNotification, IRelease, IActorAttachHandler {
 	/**
 	 * 
 	 */
@@ -190,16 +190,16 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 
 	}
 
-	@Override
-	public void onRelease(IEditor edit, IPoint pos) {
-		super.onRelease(edit, pos);
-		MyCableTapStyle balloon = this;
-		LinkType ac = balloon.getLink();
-		IActorTap parent = balloon.getParentTap();
-		ClassEnvelope ce = balloon.getClassEnvelope();
-		edit.highlightConnectables(ac.reverse(), parent, ce);
-
-	}
+//	@Override
+//	public void onRelease(IEditor edit, IPoint pos) {
+//		super.onRelease(edit, pos);
+//		MyCableTapStyle balloon = this;
+//		LinkType ac = balloon.getLink();
+//		IActorTap parent = balloon.getParentTap();
+//		ClassEnvelope ce = balloon.getClassEnvelope();
+//		edit.highlightConnectables(ac.reverse(), parent, ce);
+//
+//	}
 
 	String heapOut = "_out", heapIn = "_in";
 	@Override
@@ -218,11 +218,5 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 
 	}
 
-	@Override
-	public void focus(IFocusControl focusControl, LinkType al) {
-	}
 
-	@Override
-	public void unfocus(IFocusControl focusControl) {
-	}
 }

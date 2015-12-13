@@ -329,8 +329,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //        }
 //
 //        @Override
-//        public void onAdd(ActorManager maker) {
-//            super.onAdd(maker);
+//        public void addFromFactory(ActorManager maker) {
+//            super.addFromFactory(maker);
 //            maker.add(h);
 //        }
 //
@@ -370,30 +370,30 @@ public class TapChainAndroidEditor extends TapChainEditor {
         return rtn;
     }
 
-    @Override
-    public void showFamily(IActorTap tap) {
-//        tap.getCenter().plus(10f * (float) Math.random() - 5f, 10f * (float) Math.random() - 5f);
-    }
+//    @Override
+//    public void showFamily(IActorTap tap) {
+////        tap.getCenter().plus(10f * (float) Math.random() - 5f, 10f * (float) Math.random() - 5f);
+//    }
 
-    public class RoadTapStyle extends MyTapStyle2 {
-        public RoadTapStyle() {
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
-            // set background image bitmap
-            setBackground(road_init());
-        }
-
-        public RoadTapStyle(Integer bm) {
-            // set foreground image resource
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act, bm);
-            // set background image bitmap
-            setBackground(road_init());
-        }
-
-        public Bitmap road_init() {
-            return BitmapMaker.makeOrReuse(getName(), R.drawable.roadback, 100,
-                    100);
-        }
-    }
+//    public class RoadTapStyle extends MyTapStyle2 {
+//        public RoadTapStyle() {
+//            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
+//            // set background image bitmap
+//            setBackground(road_init());
+//        }
+//
+//        public RoadTapStyle(Integer bm) {
+//            // set foreground image resource
+//            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act, bm);
+//            // set background image bitmap
+//            setBackground(road_init());
+//        }
+//
+//        public Bitmap road_init() {
+//            return BitmapMaker.makeOrReuse(getName(), R.drawable.roadback, 100,
+//                    100);
+//        }
+//    }
 
     public class BubbleTapStyle extends MyTapStyle2 {
         public BubbleTapStyle() {

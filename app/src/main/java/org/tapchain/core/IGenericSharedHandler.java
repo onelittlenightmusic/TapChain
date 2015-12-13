@@ -22,10 +22,8 @@ public interface IGenericSharedHandler<EDITOR, ACTOR extends IPiece, VIEW extend
 //    public void onPullUnlocked(VIEW t, ActorPullException ePull);
 
     IFocusControl getFocusControl();
-    void resetSpot();
     Resources getResources();
-    void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz);
 
-    void addFocus(VIEW t);
+    void createFocus(VIEW t);
 
 }

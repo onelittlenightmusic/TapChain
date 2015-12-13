@@ -48,33 +48,27 @@ public class MySpotOptionTapStyle extends MySimpleOptionTapStyle implements IFoc
     private static final long serialVersionUID = 1L;
     LinkType al = null;
     ClassEnvelope clazz = null;
-    IActorSharedHandler handler;
 
-	public MySpotOptionTapStyle(IActorTap t, LinkType al, ClassEnvelope clz, IActorSharedHandler handler) {
+	public MySpotOptionTapStyle(IActorTap t, LinkType al, ClassEnvelope clz) {
         super(t, spotProperties.get(al).getBitmap());
         this.al = al;
         this.clazz = clz;
-        this.handler = handler;
         setCenter(spotProperties.get(al).getMargin());
     }
 
     @Override
     public void onRelease(IEditor edit, IPoint pos) {
-        handler.changeFocus(al, this, clazz);
+        super.onRelease(edit, pos);
+        edit.changeFocus(al, this, clazz);
     }
 
     @Override
     public void focus(IFocusControl focusControl, LinkType al) {
-        focusControl.unfocusAll(this);
         setColorCode(ColorLib.getLinkColor(al.reverse()));
-        focusControl.setSpotActorLink(al);
     }
 
     @Override
     public void unfocus(IFocusControl focusControl) {
         setColorCode(ColorLib.ColorCode.CLEAR);
-        focusControl.setSpotActorLink(null);
     }
-
-
 }
