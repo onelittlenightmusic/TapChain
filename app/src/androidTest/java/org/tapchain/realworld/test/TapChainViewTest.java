@@ -34,33 +34,44 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
     @Test
     public void testSomeFunction2() {
 //        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
-        view.add(FACTORY_KEY.ALL, 0, 100, 300);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "Star", 100, 300));
         sleepSecond();
-        view.add(FACTORY_KEY.ALL, 4);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "Mover"));
         assertTrue(true);
     }
 
     @Test
     public void testSomeFunction() {
 //        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
-        view.add(FACTORY_KEY.ALL, 13, 100, 300);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "Number", 100, 300));
         sleepSecond();
-        view.add(FACTORY_KEY.ALL, 14, 250, 300);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "Multi", 250, 300));
         sleepSecond();
-        view.add(FACTORY_KEY.ALL, 26, 400, 200);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "Plus", 400, 200));
         assertTrue(true);
     }
 
     @Test
     public void top() {
 //        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
-        view.add(FACTORY_KEY.ALL, 13, 100, 300);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "Number", 100, 300));
         sleepSecond();
-        IActorTap a = view.add(FACTORY_KEY.ALL, 14, 250, 300);
+        IActorTap a;
+        assertNotNull(
+                a = view.add(FACTORY_KEY.ALL, "PushOut", 250, 300));
         sleepSecond();
-        view.add(FACTORY_KEY.ALL, 15, 400, 400);
+        assertNotNull(
+                view.add(FACTORY_KEY.ALL, "PassThru", 400, 400));
         sleepSecond();
-        IActorTap b = view.add(FACTORY_KEY.ALL, 15, 250, 500);
+        IActorTap b;
+        assertNotNull(
+                b = view.add(FACTORY_KEY.ALL, "Accumulate", 250, 500));
         sleepSecond();
         view.connect(a, LinkType.PULL, b);
         sleepSecond(10000);
@@ -74,7 +85,7 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
     }
 
     public void sleepSecond() {
-        sleepSecond(1500);
+        sleepSecond(3000);
     }
 
     public void sleepSecond(int intervalMs) {

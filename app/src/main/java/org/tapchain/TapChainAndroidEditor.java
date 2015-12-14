@@ -26,7 +26,6 @@ import org.tapchain.core.D2Point;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
-import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.actors.PathThru;
 import org.tapchain.core.StyleCollection;
@@ -150,27 +149,27 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
                 .add(PushOut.IntegerPushOut.class)
                 .setViewArg(R.drawable.boost1)
-                .setTag("Convert")
+                .setTag("PushOut")
                 .save()
 
-                .add(PathThru.IntegerPathThru.class)
+                .add(PathThru.IntegerPassThru.class)
                 .setViewArg(R.drawable.right2)
-                .setTag("Path Through")
+                .setTag("PassThru")
                 .save()
 
                 .add(Actor.PlusIntegerFilter.class)
                 .setViewArg(R.drawable.plus2)
-                .setTag("Plus Word")/*.setLogLevel()*/
+                .setTag("Plus")/*.setLogLevel()*/
                 .save()
 
                 .add(Actor.MultiIntegerFilter.class)
                 .setViewArg(R.drawable.multi2)
-                .setTag("Multi Word")/*.setLogLevel()*/
+                .setTag("Multi")/*.setLogLevel()*/
                 .save()
 
                 .add(Actor.SumIntegerFilter.class)
                 .setViewArg(R.drawable.filter)
-                .setTag("Accumulate Word")/*.setLogLevel()*/
+                .setTag("Accumulate")/*.setLogLevel()*/
                 .save()
 
                 .add(Actor.IntegerCounter.class)

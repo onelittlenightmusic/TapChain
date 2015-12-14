@@ -12,7 +12,7 @@ public abstract class PathThru<VALUE> extends Actor.Filter<Void, VALUE, VALUE> {
         return in;
     }
 
-    public static class IntegerPathThru extends PathThru<Integer> {
+    public static class IntegerPassThru extends PathThru<Integer> {
         @Override
         public void init(IValue<Void> val){
         }

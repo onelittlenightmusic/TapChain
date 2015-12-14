@@ -10,9 +10,8 @@ public class BlueprintInitialization
 	private static final long serialVersionUID = -2728411892052137465L;
 	Object o;
 	String t;
-	public BlueprintInitialization(Object obj, String tag) {
+	public BlueprintInitialization(Object obj) {
 		setObject(obj);
-		setTag(tag);
 	}
 	
 	public void setObject(Object obj) {
@@ -23,14 +22,6 @@ public class BlueprintInitialization
 		return o;
 	}
 	
-	public void setTag(String tag) {
-		t = tag;
-	}
-	
-	public String getTag() {
-		return t;
-	}
-
 	@Override
 	public void init(IPiece rtn) {
 		((IValue)rtn)._valueSet(getObject());

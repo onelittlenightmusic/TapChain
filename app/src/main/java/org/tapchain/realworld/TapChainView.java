@@ -439,6 +439,19 @@ public class TapChainView extends FragmentActivity implements
             viewControl.setVisibility(View.VISIBLE);
     }
 
+    public IActorTap add(TapChainEditor.FACTORY_KEY key, String tag) {
+        return getCanvas().onAdd(key, tag);
+    }
+
+    public IActorTap add(FACTORY_KEY key, String tag, float x, float y) {
+        return getCanvas().onAdd(key, tag, x, y);
+    }
+
+    public IActorTap add(FACTORY_KEY key, String tag, float x, float y, float dx,
+                         float dy) {
+        return getCanvas().onAdd(key, tag, x, y, dx, dy);
+    }
+
     public IActorTap add(TapChainEditor.FACTORY_KEY key, int code) {
         return getCanvas().onAdd(key, code);
     }
@@ -1116,28 +1129,52 @@ public class TapChainView extends FragmentActivity implements
 
         int index = 0;
 
-        public IActorTap onAdd(FACTORY_KEY key, int code) {
-            EditorReturn editorReturn = getEditor().onAdd(key, code, null);
+        public IActorTap onAdd(FACTORY_KEY key, String tag) {
+            return onAdd(key, tag, null, null);
+        }
+
+        public IActorTap onAdd(FACTORY_KEY key, String tag, float x, float y) {
+            return onAdd(key, tag, getPosition(x, y), null);
+        }
+
+        public IActorTap onAdd(FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
+            return onAdd(key, tag, getPosition(x, y), null);
+        }
+
+
+        public IActorTap onAdd(FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
+            EditorReturn editorReturn = getEditor().onAdd(key, tag, pos);
             if (editorReturn == null)
                 return null;
-            else
-                return editorReturn.getTap();
+            IActorTap added = editorReturn.getTap();
+            if(vec == null)
+                return added;
+            getEditor().captureTap(added);
+            getEditor().onFling((int) vec.x(), (int) vec.y());
+            return added;
+        }
+
+        public IActorTap onAdd(FACTORY_KEY key, int code) {
+            return onAdd(key, code, null, null);
         }
 
         public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y) {
-            EditorReturn editorReturn = getEditor().onAdd(key, code, getPosition(x, y));
-            if (editorReturn == null)
-                return null;
-            else
-                return editorReturn.getTap();
+            return onAdd(key, code, getPosition(x, y), null);
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y,
-                               float dx, float dy) {
-            IActorTap added = getEditor().addFromFactory(key, code, getPosition(x, y))
-                    .getTap();
-//            getEditor().captureTap(added);
-            getEditor().onFling((int) dx, (int) dy);
+        public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
+            return onAdd(key, code, getPosition(x, y), null);
+        }
+
+        public IActorTap onAdd(FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
+            EditorReturn editorReturn = getEditor().onAdd(key, code, pos);
+            if (editorReturn == null)
+                return null;
+            IActorTap added = editorReturn.getTap();
+            if(vec == null)
+                return added;
+            getEditor().captureTap(added);
+            getEditor().onFling((int) vec.x(), (int) vec.y());
             return added;
         }
 
@@ -1172,7 +1209,7 @@ public class TapChainView extends FragmentActivity implements
                 if (i != null) {
                     try {
                         FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
-                        Log.w("test", String.format("num = %d, tag = %s", initNum, i.getTag()));
+//                        Log.w("test", String.format("num = %d, tag = %s", initNum, i.getTag()));
                         inclementInitNum();
                         ObjectOutputStream oos = new ObjectOutputStream(fos);
                         oos.close();
@@ -1198,7 +1235,7 @@ public class TapChainView extends FragmentActivity implements
             GridFragment f1 = getGrid();
             if (f1 != null) {
                 Factory f = f1.getCurrentFactory();
-                getEditor().registerBlueprint(f, bi);
+//                getEditor().registerBlueprint(f, bi);
             }
         }
 
@@ -1528,8 +1565,8 @@ public class TapChainView extends FragmentActivity implements
                 BlueprintInitialization data = (BlueprintInitialization) ois.readObject();
                 ois.close();
                 if (data != null) {
-                    if (data.getObject() != null)
-                        Log.w("test", String.format("recoverFactory tag = %s, obj = %s", data.getTag(), data.getObject().toString()));
+//                    if (data.getObject() != null)
+//                        Log.w("test", String.format("recoverFactory tag = %s, obj = %s", data.getTag(), data.getObject().toString()));
                     getCanvas().registerBlueprint(data);
                 } else {
                     break;

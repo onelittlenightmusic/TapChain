@@ -507,12 +507,43 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 //		return false;
 //	}
 
+    /**
+     * Create an IPiece instance and addFocusable to Chain.
+     *
+     * @param key
+     *            the factory in which IPiece blueprint is registered.
+     * @param num
+     *            the number of the IPiece blueprint
+     * @param pos
+     *            position where the IPiece instance sho0uld be added
+     * @return the IPiece instance created and the Tap instance associated with
+     *         the IPiece instance
+     */
     public EditorReturn onAdd(FACTORY_KEY key, int num,
+                                       IPoint pos) {
+        Factory<Actor> f = factories.get(key);
+        // Invalid number input
+        if (num >= f.getSize())
+            return null;
+        IBlueprint b = f.get(num);
+        return addBlueprintAndRelease(b, pos);
+    }
+
+    public EditorReturn onAdd(FACTORY_KEY key, String tag,
+                              IPoint pos) {
+        Factory<Actor> f = factories.get(key);
+        IBlueprint b = f.search(tag);
+        if (b == null)
+            return null;
+        return addBlueprintAndRelease(b, pos);
+    }
+
+    public EditorReturn addBlueprintAndRelease(IBlueprint b,
                                        IPoint pos) {
         if (pos == null) {
             pos = getNextPos();
         }
-        EditorReturn rtn = addFromFactory(key, num, pos);
+        EditorReturn rtn = addBlueprint(b, pos);
         if(!win.isInWindow(pos.x(), pos.y()))
             //Centering
             _onFlingBackgroundTo(pos.x(), pos.y());
@@ -520,27 +551,20 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         onUp();
         return rtn;
     }
-	/**
+    /**
 	 * Create an IPiece instance and addFocusable to Chain.
 	 *
-	 * @param key
+	 * @param b
 	 *            the factory in which IPiece blueprint is registered.
-	 * @param num
-	 *            the number of the IPiece blueprint
 	 * @param pos
 	 *            position where the IPiece instance sho0uld be added
 	 * @return the IPiece instance created and the Tap instance associated with
 	 *         the IPiece instance
 	 */
-	public EditorReturn addFromFactory(FACTORY_KEY key, int num,
+	public EditorReturn addBlueprint(IBlueprint b,
                                        IPoint pos) {
 //		IPoint setPos = checkRoom(pos);
 
-        Factory<Actor> f = factories.get(key);
-		// Invalid number input
-        if (num >= f.getSize())
-            return null;
-        IBlueprint b = f.get(num);
 
         EditorReturn rtn = add(b, pos);
 
@@ -840,42 +864,41 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			Object v, String tag) {
 		IBlueprintInitialization data = null;
 		IBlueprint b = f.search(tag);
-		if (b != null) {
-			if (b instanceof Blueprint) {
-				IBlueprint bnew = b.copy();
-				bnew.setTag(tag + "I");
-				data = new BlueprintInitialization(v, tag + "I");
-				bnew.setInitialization(data);
-				f.Register(bnew);
-                f.invalidate();
-			}
-		}
+		if (b == null || !(b instanceof Blueprint)) {
+            return data;
+        }
+        IBlueprint bnew = b.copy();
+        bnew.setTag(tag + "I");
+        data = new BlueprintInitialization(v);
+        bnew.setInitialization(data);
+        f.Register(bnew);
+        f.invalidate();
 		return data;
 	}
 
 	protected void commitRegistration() {
 		standby = false;
 	}
-
-	public void registerBlueprint(Factory<?> f, IBlueprintInitialization bi) {
-		String tag = bi.getTag();
-		String t = tag.substring(0, tag.length() - 1);
-		IBlueprint b2 = f.search(tag);
-		if (b2 != null) {
-			b2.setInitialization(bi);
-			return;
-		}
-		IBlueprint b = f.search(t);
-		if (b == null || !(b instanceof Blueprint)) {
-            return;
-        }
-        IBlueprint bnew = b.copy();
-        bnew.setTag(tag);
-        bnew.setInitialization(bi);
-        f.Register(bnew);
-        f.save();
-
-	}
+//
+//	public void registerBlueprint(Factory<?> f, IBlueprintInitialization bi) {
+//		String tag = bi.getTag();
+//		String t = tag.substring(0, tag.length() - 1);
+//		IBlueprint b2 = f.search(tag);
+//		if (b2 != null) {
+//			b2.setInitialization(bi);
+//			return;
+//		}
+//		IBlueprint b = f.search(t);
+//		if (b == null || !(b instanceof Blueprint)) {
+//            return;
+//        }
+//        IBlueprint bnew = b.copy();
+//        bnew.setTag(tag);
+//        bnew.setInitialization(bi);
+//        f.Register(bnew);
+//        f.save();
+//
+//	}
 
 	private IPoint getNextPos() {
 		if(nextConnectivityPoint == null)
