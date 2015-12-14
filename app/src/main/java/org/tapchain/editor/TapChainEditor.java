@@ -90,7 +90,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 				@Override
 				public boolean actorRun(Actor act) throws ChainException {
 					if (getTarget() instanceof ActorTap)
-						checkAndAttach((ActorTap) getTarget(), false);
+						checkAndAttach((ActorTap) getTarget());
 					return false;
 				}
 			}.setParentType(PathType.OFFER)
@@ -162,7 +162,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return editorManager.getActors();
 	}
 
-	public Collection<IActorTap> getTaps(IPoint pt) {
+	private Collection<IActorTap> getTaps(IPoint pt) {
 		return TapLib.getTaps(pt);
 	}
 
@@ -254,7 +254,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 //	}
 //
 	public enum EditMode {
-		ADD, REMOVE, RENEW
+		ADD, REMOVE
 	}
 
 	EditMode editmode = EditMode.ADD;
@@ -435,14 +435,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 				return false;
 			edit().remove(p);
 			releaseTap();
-			editmode = EditMode.ADD;
-			return false;
-		case RENEW:
-			if (p == null)
-				return false;
-			edit().restart(p);
-			releaseTap();
-			editmode = EditMode.ADD;
 			return false;
 		default:
 			if (t1 instanceof ISelectable)
@@ -507,6 +499,21 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 //		return false;
 //	}
 
+    private IBlueprint factoryToBlueprint(FACTORY_KEY key, int num) {
+        Factory<Actor> f = factories.get(key);
+        // Invalid number input
+        if (num >= f.getSize())
+            return null;
+        return f.get(num);
+    }
+
+    private IBlueprint factoryToBlueprint(FACTORY_KEY key, String tag) {
+        Factory<Actor> f = factories.get(key);
+        IBlueprint b = f.search(tag);
+        if (b == null)
+            return null;
+        return b;
+    }
     /**
      * Create an IPiece instance and addFocusable to Chain.
      *
@@ -521,29 +528,22 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
      */
     public EditorReturn onAdd(FACTORY_KEY key, int num,
                                        IPoint pos) {
-        Factory<Actor> f = factories.get(key);
-        // Invalid number input
-        if (num >= f.getSize())
-            return null;
-        IBlueprint b = f.get(num);
-        return addBlueprintAndRelease(b, pos);
+        return addBlueprintAndRelease(factoryToBlueprint(key, num), pos);
     }
 
     public EditorReturn onAdd(FACTORY_KEY key, String tag,
                               IPoint pos) {
-        Factory<Actor> f = factories.get(key);
-        IBlueprint b = f.search(tag);
-        if (b == null)
-            return null;
-        return addBlueprintAndRelease(b, pos);
+        return addBlueprintAndRelease(factoryToBlueprint(key, tag), pos);
     }
 
-    public EditorReturn addBlueprintAndRelease(IBlueprint b,
-                                       IPoint pos) {
+    public EditorReturn addBlueprintAndRelease(IBlueprint b, IPoint pos) {
+        if(b == null)
+            return null;
         if (pos == null) {
             pos = getNextPos();
         }
-        EditorReturn rtn = addBlueprint(b, pos);
+        EditorReturn rtn = add(b, pos);
+        captureTap(rtn.getTap());
         if(!win.isInWindow(pos.x(), pos.y()))
             //Centering
             _onFlingBackgroundTo(pos.x(), pos.y());
@@ -554,27 +554,13 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
     /**
 	 * Create an IPiece instance and addFocusable to Chain.
 	 *
-	 * @param b
+	 * @param blueprint
 	 *            the factory in which IPiece blueprint is registered.
-	 * @param pos
+	 * @param iPoint
 	 *            position where the IPiece instance sho0uld be added
 	 * @return the IPiece instance created and the Tap instance associated with
 	 *         the IPiece instance
 	 */
-	public EditorReturn addBlueprint(IBlueprint b,
-                                       IPoint pos) {
-//		IPoint setPos = checkRoom(pos);
-
-
-        EditorReturn rtn = add(b, pos);
-
-        if (rtn == null) {
-            return null;
-        }
-        captureTap(rtn.getTap());
-        getFactory(FACTORY_KEY.LOG).Register(b);
-		return rtn;
-	}
 
     private EditorReturn add(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
         try {
@@ -588,6 +574,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
                 protected Void doInBackground(Void... params) {
                     getEventHandler().onAdd(actor, tap, blueprint, iPoint);
                     getEventHandler().createFocus(tap);
+                    getFactory(FACTORY_KEY.LOG).Register(blueprint);
                     return null;
                 }
             }.execute();
@@ -598,16 +585,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         return null;
     }
 
-    public ActorTap createView(Factory<Actor> f, int num, ActorManager manager)
+    private ActorTap createView(Factory<Actor> f, int num, ActorManager manager)
 			throws ChainException {
-		ActorTap tp = (ActorTap) f.getViewBlueprint(num).newInstance(manager);
-		return tp;
+		return (ActorTap) f.getViewBlueprint(num).newInstance(manager);
 	}
-
-//	IPoint getPointOnAdd(IPoint iPoint) {
-//		return (styles == null || getInteract() == null) ? iPoint
-//				: getInteract().pointOnAdd(iPoint);
-//	}
 
 	private void round(IActorTap startTap2) {
 		if (styles == null || getInteract() == null)
@@ -655,16 +636,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	public IPoint checkRoom(IPoint basePos, IPiece... exclusive) {
         return basePos;
-//		IPoint setPos = getPointOnAdd(basePos);
-//		while (true) {
-//			Collection<IActorTap> p = searchRoomPieces(setPos, exclusive);
-//			if (p != null && !p.isEmpty()) {
-//				setPos.plus(new WorldPoint(100, 0));
-//				continue;
-//			}
-//			break;
-//		}
-//		return setPos;
 	}
 
 //	public void Compile() {
@@ -699,20 +670,21 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	 *
 	 * @param t1
 	 *            Selected piece view
-	 * @param onlyInclude
-	 *            Velocity of selected piece view
 	 * @return True when selected piece was attached.
 	 */
 	@Override
-	public boolean checkAndAttach(IActorTap t1, boolean onlyInclude) {
+	public boolean checkAndAttach(IActorTap t1) {
 		if (t1 == null)
 			return false;
 		boolean rtn = false;
-		for (IActorTap t2 :  getTaps()
-			) {
-			if (_attach((ActorTap) t1, (ActorTap) t2, onlyInclude))
+		for (IActorTap t2 :  getTaps()) {
+            if (t1 == t2) {
+                continue;
+            }
+			if (_attach((ActorTap) t1, (ActorTap) t2))
 				rtn = true;
 		}
+        kickTapDraw(t1);
 		return rtn;
 	}
 
@@ -722,36 +694,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	 *
 	 * @param t1
 	 * @param t2
-	 * @param onlyInclude
 	 * @return True when selected piece was attached.
 	 */
-	boolean _attach(ActorTap t1, ActorTap t2, boolean onlyInclude) {
-		if (t1 == t2) {
-			return false;
-		}
-		InteractionType type = _checkInteractionType(t1, t2, onlyInclude);
-		if (type == InteractionType.NONE) {
-			return false;
-		} else {
-			Actor a1 = toActor(t1), a2 = toActor(t2);
-			if (a1.isConnectedTo(a2)
-					&& !EnumSet.of(InteractionType.OUTSIDE,
-							InteractionType.CROSSING).contains(type)) {
-				return false;
-			}
-
-			if ((type == InteractionType.INSIDE || type == InteractionType.CROSSING)
-					&& t1 instanceof IAttachHandler)
-				((IAttachHandler)t1).onInside(this, t2, a1, a2);
-
-
-			// Connect/disconnect moving to/from target;
-            if (!getEventHandler().onAttach(t1, t2, a1, a2, type)) {
-                return false;
-            }
-		}
-
-		return true;
+	private boolean _attach(ActorTap t1, ActorTap t2) {
+		InteractionType type = _checkInteractionType(t1, t2);
+        return getEventHandler().onAttach(t1, t2, toActor(t1), toActor(t2), type);
 	}
 
 	/**
@@ -766,12 +713,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		INSIDE, TOUCH_LEFT, TOUCH_RIGHT, TOUCH_TOP, TOUCH_BOTTOM, NONE, GOOUTSIDE, OUTSIDE, CROSSING
 	}
 
-	InteractionType _checkInteractionType(ActorTap t1, ActorTap t2,
-			boolean onlyInclude) {
+	InteractionType _checkInteractionType(ActorTap t1, ActorTap t2) {
 		IPiece p1 = toActor(t1);
 		IPiece p2 = toActor(t2);
 		if (p1 == null || p2 == null) {
-			// log("Edit", "Checked Piece: NULL");
 			return InteractionType.NONE;
 		}
 		IActionStyle style = getInteract();
@@ -779,7 +724,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		if (p1.isConnectedTo(p2)) {
 			return style.checkLeaveType(t1, t2);
 		} else {
-			return style.checkTouchType(t1, t2, onlyInclude);
+			return style.checkTouchType(t1, t2);
 		}
 	}
 
@@ -819,14 +764,14 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			delta -= 0.01f;
 			boolean rtn = ++j < 10 || d.getAbs() > 30;
 			super.actorRun(act);
-			if (checkAndAttach(((IActorTap) getTarget()), false)) {
+			if (checkAndAttach(((IActorTap) getTarget()))) {
 				round((IActorTap) getTarget());
 				return false;
 			}
 			if (!rtn) {
 				ActorTap v = (ActorTap) getTarget();
 				round(v);
-				checkAndAttach(v, false);
+				checkAndAttach(v);
 				return false;
 			}
 			return rtn;
@@ -846,30 +791,28 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	boolean standby = false;
 
 	public IBlueprintInitialization standbyRegistration(Factory<?> f) {
-		IBlueprintInitialization data = null;
-		if (!standby)
-			if (!isNotCapturing()) {
-				IPiece p = getCapturedActorTap().getActor();
-				String tag = p.getTag();
-				if (p instanceof IValue) {
-					Object v = ((IValue) p)._valueGet();
-					data = standbyRegisteration(f, v, tag);
-				}
-				standby = true;
-			}
+		if (standby || isNotCapturing()) {
+            return null;
+        }
+        IBlueprintInitialization data = null;
+        IPiece p = getCapturedActorTap().getActor();
+        if (p instanceof IValue) {
+            Object v = ((IValue) p)._valueGet();
+            data = standbyRegisteration(f, v, p.getTag());
+        }
+        standby = true;
 		return data;
 	}
 
 	public IBlueprintInitialization standbyRegisteration(Factory<?> f,
-			Object v, String tag) {
-		IBlueprintInitialization data = null;
+			Object initObj, String tag) {
 		IBlueprint b = f.search(tag);
 		if (b == null || !(b instanceof Blueprint)) {
-            return data;
+            return null;
         }
         IBlueprint bnew = b.copy();
-        bnew.setTag(tag + "I");
-        data = new BlueprintInitialization(v);
+        bnew.setTag(String.format("%s_(%s)", tag, initObj.toString()));
+        IBlueprintInitialization data = new BlueprintInitialization(initObj);
         bnew.setInitialization(data);
         f.Register(bnew);
         f.invalidate();
@@ -919,7 +862,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	public List<IBlueprint<Actor>> highlightConnectables(LinkType ac,
                                                          IActorTap target, ClassEnvelope classEnvelope) {
         List<IBlueprint<Actor>> rtn = setLastHighlighted(ac, classEnvelope);
-        //Erase the indicator for the privious target.
+        //Reset privious highlighted target's highlight.
         if (highlighted != null) {
             IActorTap last = highlighted.getAccessoryTap(ac);
             if (last != null && last instanceof IBlueprintFocusNotification) {
@@ -927,7 +870,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
             }
         }
 
-        //Create new indicator for the current target.
+        //Add the current target's highlight.
         highlighted = target;
         if (target == null)
             return null;
@@ -939,10 +882,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
     public List<IBlueprint<Actor>> setLastHighlighted(LinkType ac, ClassEnvelope classEnvelope) {
-        //Clear all blueprints view with neutral coloring.
-        for (IBlueprint<Actor> b : getFactory().getList()) {
-            b.unhighlight();
-        }
+        unhighlightAllConnectables();
         //Coloring connectable blueprints with LinkType's color.
         List<IBlueprint<Actor>> bl = getFactory().getConnectables(ac.reverse(), classEnvelope);
         if (bl.size() == 0) {
@@ -960,7 +900,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
     }
 
 
-    public void unhighlightConnectables() {
+    public void unhighlightAllConnectables() {
+        //Clear all blueprints view with neutral coloring.
 		for(IBlueprint b: getFactory().getList()) {
 			b.unhighlight();
 		}

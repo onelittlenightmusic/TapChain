@@ -15,7 +15,7 @@ public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, I
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 110974406008187568L;
 	private LinkType ac;
@@ -36,14 +36,10 @@ public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, I
 	@Override
 	public void onScroll(IEditor edit, IActorTap tap, IPoint pos, IPoint vp) {
 		setCenter(pos);
-
 	}
 	
 	@Override
 	public void onRelease(IEditor edit, IPoint pos) {
-		if (edit.checkAndAttach(this, true)) {
-			edit.kickTapDraw(this);
-		}
+		edit.checkAndAttach(this);
 	}
-
 }

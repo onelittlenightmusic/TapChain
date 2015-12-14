@@ -2,7 +2,6 @@ package org.tapchain;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.DashPathEffect;
@@ -10,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.util.Log;
@@ -337,12 +335,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
     @Override
     public boolean onScrolled(IEditor edit, IPoint pos, IPoint vp) {
-
         setCenter(pos);
-        if (edit.checkAndAttach(edit.getCapturedActorTap(), true)) {
-            edit.kickTapDraw(this);
-            return true;
-        }
+//        if (edit.checkAndAttach(this, true)) {
+//            edit.kickTapDraw(this);
+//            return true;
+//        }
         return false;
     }
 
@@ -499,7 +496,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
     @Override
     public void onRelease(IEditor edit, IPoint pos) {
-        edit.checkAndAttach(this, false);
+        edit.checkAndAttach(this);
     }
 
 
@@ -643,7 +640,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         if (linkType != null) {
             edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
             t.unsetAccessoryTap(linkType);
-            edit.unhighlightConnectables();
+            edit.unhighlightAllConnectables();
         }
     }
 }

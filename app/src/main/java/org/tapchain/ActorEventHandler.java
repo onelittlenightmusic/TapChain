@@ -95,6 +95,8 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     @Override
     public boolean onAttach(IActorTap t1, IActorTap t2, Actor a1, Actor a2, InteractionType type) {
         switch (type) {
+            case NONE:
+                break;
             case TOUCH_TOP:
             case TOUCH_BOTTOM:
             case TOUCH_RIGHT:
@@ -109,9 +111,9 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
                 }
                 return false;
             case CROSSING:
-                if (a1 instanceof Controllable) {
-                    ((Controllable) a1).interruptError();
-                }
+//                if (a1 instanceof Controllable) {
+//                    ((Controllable) a1).interruptError();
+//                }
                 return false;
             case INSIDE:
                 boolean connect = false;

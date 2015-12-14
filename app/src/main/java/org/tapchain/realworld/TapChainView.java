@@ -439,35 +439,35 @@ public class TapChainView extends FragmentActivity implements
             viewControl.setVisibility(View.VISIBLE);
     }
 
-    public IActorTap add(TapChainEditor.FACTORY_KEY key, String tag) {
+    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
         return getCanvas().onAdd(key, tag);
     }
 
-    public IActorTap add(FACTORY_KEY key, String tag, float x, float y) {
+    public Actor add(FACTORY_KEY key, String tag, float x, float y) {
         return getCanvas().onAdd(key, tag, x, y);
     }
 
-    public IActorTap add(FACTORY_KEY key, String tag, float x, float y, float dx,
+    public Actor add(FACTORY_KEY key, String tag, float x, float y, float dx,
                          float dy) {
         return getCanvas().onAdd(key, tag, x, y, dx, dy);
     }
 
-    public IActorTap add(TapChainEditor.FACTORY_KEY key, int code) {
+    public Actor add(TapChainEditor.FACTORY_KEY key, int code) {
         return getCanvas().onAdd(key, code);
     }
 
-    public IActorTap add(FACTORY_KEY key, int code, float x, float y) {
+    public Actor add(FACTORY_KEY key, int code, float x, float y) {
         return getCanvas().onAdd(key, code, x, y);
     }
 
-    public IActorTap add(FACTORY_KEY key, int code, float x, float y, float dx,
+    public Actor add(FACTORY_KEY key, int code, float x, float y, float dx,
                          float dy) {
         // Log.w("test", "addFocusable(xy, dxy) called");
         return getCanvas().onAdd(key, code, x, y, dx, dy);
     }
 
-    public void connect(IActorTap t1, LinkType type, IActorTap t2) {
-        getEditor().connect(t1.getActor(), type, t2.getActor());
+    public void connect(Actor a1, LinkType type, Actor a2) {
+        getEditor().connect(a1, type, a2);
     }
 
     public void dummyAdd(FACTORY_KEY key, int num, float x, float y) {
@@ -1129,53 +1129,51 @@ public class TapChainView extends FragmentActivity implements
 
         int index = 0;
 
-        public IActorTap onAdd(FACTORY_KEY key, String tag) {
+        public Actor onAdd(FACTORY_KEY key, String tag) {
             return onAdd(key, tag, null, null);
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, String tag, float x, float y) {
+        public Actor onAdd(FACTORY_KEY key, String tag, float x, float y) {
             return onAdd(key, tag, getPosition(x, y), null);
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
+        public Actor onAdd(FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
             return onAdd(key, tag, getPosition(x, y), null);
         }
 
 
-        public IActorTap onAdd(FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
+        public Actor onAdd(FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
             EditorReturn editorReturn = getEditor().onAdd(key, tag, pos);
             if (editorReturn == null)
                 return null;
-            IActorTap added = editorReturn.getTap();
             if(vec == null)
-                return added;
-            getEditor().captureTap(added);
+                return editorReturn.getActor();
+            getEditor().captureTap(editorReturn.getTap());
             getEditor().onFling((int) vec.x(), (int) vec.y());
-            return added;
+            return editorReturn.getActor();
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, int code) {
+        public Actor onAdd(FACTORY_KEY key, int code) {
             return onAdd(key, code, null, null);
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y) {
+        public Actor onAdd(FACTORY_KEY key, int code, float x, float y) {
             return onAdd(key, code, getPosition(x, y), null);
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
-            return onAdd(key, code, getPosition(x, y), null);
+        public Actor onAdd(FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
+            return onAdd(key, code, getPosition(x, y), new WorldPoint(vx, vy));
         }
 
-        public IActorTap onAdd(FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
+        public Actor onAdd(FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
             EditorReturn editorReturn = getEditor().onAdd(key, code, pos);
             if (editorReturn == null)
                 return null;
-            IActorTap added = editorReturn.getTap();
             if(vec == null)
-                return added;
-            getEditor().captureTap(added);
+                return editorReturn.getActor();
+            getEditor().captureTap(editorReturn.getTap());
             getEditor().onFling((int) vec.x(), (int) vec.y());
-            return added;
+            return editorReturn.getActor();
         }
 
         public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {

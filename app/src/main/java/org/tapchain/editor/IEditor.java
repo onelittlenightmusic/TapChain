@@ -16,7 +16,7 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 
 public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
-	boolean checkAndAttach(VIEW selected, boolean onlyInclude);
+	boolean checkAndAttach(VIEW selected);
     Collection<VIEW> getTaps();
     Collection<ACTOR> getActors();
     VIEW toTap(ACTOR actor);
@@ -33,7 +33,7 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
 	List<IBlueprint<ACTOR>> highlightConnectables(LinkType reverse, IActorTap target, ClassEnvelope ce);
 	boolean connect(ACTOR a1, LinkType al, ACTOR a2);
 	void lockReleaseTap(IRelease t);
-	void unhighlightConnectables();
+	void unhighlightAllConnectables();
     IActorSharedHandler getEventHandler();
     void shake(int duration);
     void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz);

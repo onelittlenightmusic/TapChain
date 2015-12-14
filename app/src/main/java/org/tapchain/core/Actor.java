@@ -1047,8 +1047,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             for (IPiece o : pieces)
                 if (o instanceof IView)
                     if (o != v1)
-                        if (edit.getInteract().checkTouchType((IView) o, v1,
-                                false) != InteractionType.NONE) {
+                        if (edit.getInteract().checkTouchType((IView) o, v1) != InteractionType.NONE) {
                             ((Controllable) v1).interruptEnd();
                             return true;
                         }

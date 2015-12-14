@@ -119,11 +119,8 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 
 	@Override
 	public boolean onInside(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
-//		Log.w("test", "Beam's onInside called");
 		boolean rtn = false;
 		if (edit.connect(a1, LinkType.PUSH, a2)) {
-//			if (null != edit.edit().append(a2, PathType.OFFER, a1,
-//					PathType.OFFER, true)) {
 			rtn = true;
 		}
 		return rtn;

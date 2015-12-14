@@ -241,10 +241,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
             e.printStackTrace();
         }
 
-//        goalBlueprintManager.add(TapChainGoalView.class).setSystem(
-//                TapChainGoalTap.class).save();
-
-
         editTap()
                 .add(touch = new AndroidView() {
                     Paint paint_ = new Paint();
@@ -288,54 +284,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //        freezeToggle();
     }
 
-//    public class TapChainGoalView extends AndroidActor.AndroidImageView implements ICollidable<Actor> {
-//        volatile boolean achieved = false;
-//        Collection<IActorCollideHandler> handlers = new ConcurrentLinkedQueue<IActorCollideHandler>();
-//        CollidableHandler h;
-//
-//        public TapChainGoalView() {
-//            super(TapChainAndroidEditor.this.act, R.drawable.star);
-//            setCenter(new WorldPoint((float) 400f * (float) Math.random(),
-//                    400f * (float) Math.random()));
-//            h = new CollidableHandler();
-//            handlers.add(h);
-//        }
-//
-//        @Override
-//        public void onCollideInternal(IEditor edit, IView v1, Collection<Actor> v2,
-//                                      IPoint pos) {
-//            if (achieved)
-//                return;
-//            for (IActorCollideHandler h : handlers)
-//                if (h.onCollide(TapChainAndroidEditor.this, v1, v2, pos))
-//                    achieved = true;
-//        }
-//
-//        public void onCollide(IEditor edit, IView v1, Collection<Actor> v2, IPoint pos) {
-//            Collection<Actor> pieces;
-//            if (v2 == null)
-//                pieces = editorManager.getActors();
-//            else {
-//                pieces = v2;
-//            }
-//            for (IPiece o : pieces)
-//                if (o instanceof IView)
-//                    if (o != v1)
-//                        if (getInteract().checkTouchType((IView) o, v1, false) != InteractionType.NONE) {
-//                            ((Controllable) v1).interruptEnd();
-//                            achieved = true;
-//                        }
-//        }
-//
-//        @Override
-//        public void addFromFactory(ActorManager maker) {
-//            super.addFromFactory(maker);
-//            maker.add(h);
-//        }
-//
-//
-//    }
-
     // 2.Getters and setters
 
     @Override
@@ -372,26 +320,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //    @Override
 //    public void showFamily(IActorTap tap) {
 ////        tap.getCenter().plus(10f * (float) Math.random() - 5f, 10f * (float) Math.random() - 5f);
-//    }
-
-//    public class RoadTapStyle extends MyTapStyle2 {
-//        public RoadTapStyle() {
-//            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
-//            // set background image bitmap
-//            setBackground(road_init());
-//        }
-//
-//        public RoadTapStyle(Integer bm) {
-//            // set foreground image resource
-//            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act, bm);
-//            // set background image bitmap
-//            setBackground(road_init());
-//        }
-//
-//        public Bitmap road_init() {
-//            return BitmapMaker.makeOrReuse(getName(), R.drawable.roadback, 100,
-//                    100);
-//        }
 //    }
 
     public class BubbleTapStyle extends MyTapStyle2 {
@@ -440,8 +368,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
         }
 
         @Override
-        public InteractionType checkTouchType(IView f1, IView f2,
-                                              boolean onlyInclude) {
+        public InteractionType checkTouchType(IView f1, IView f2) {
             Rect rect1 = ((AndroidActor.AndroidView) f1).getScreenRect();
             rect1.inset(-10, -10);
             Rect intersect = new Rect();
@@ -459,8 +386,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
             }
             if (checkCrossing(intersect))
                 return InteractionType.CROSSING;
-            if (onlyInclude)
-                return InteractionType.NONE;
             c.countDown();
             if (intersect.width() > intersect.height()) {
                 if (intersect.bottom == ((AndroidView) f2).getScreenRect().bottom) {

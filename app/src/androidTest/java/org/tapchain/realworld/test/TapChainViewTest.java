@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.tapchain.core.Actor;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
@@ -62,14 +63,14 @@ public class TapChainViewTest extends ActivityInstrumentationTestCase2<TapChainV
         assertNotNull(
                 view.add(FACTORY_KEY.ALL, "Number", 100, 300));
         sleepSecond();
-        IActorTap a;
+        Actor a;
         assertNotNull(
                 a = view.add(FACTORY_KEY.ALL, "PushOut", 250, 300));
         sleepSecond();
         assertNotNull(
                 view.add(FACTORY_KEY.ALL, "PassThru", 400, 400));
         sleepSecond();
-        IActorTap b;
+        Actor b;
         assertNotNull(
                 b = view.add(FACTORY_KEY.ALL, "Accumulate", 250, 500));
         sleepSecond();
