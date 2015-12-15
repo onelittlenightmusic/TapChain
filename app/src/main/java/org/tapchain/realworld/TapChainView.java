@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -470,17 +469,17 @@ public class TapChainView extends FragmentActivity implements
         getEditor().connect(a1, type, a2);
     }
 
-    public void dummyAdd(FACTORY_KEY key, int num, float x, float y) {
-        getCanvas().onDummyAdd(key, num, x, y);
-    }
-
-    public void dummyMoveTo(float x, float y) {
-        getCanvas().onDummyMoveTo(x, y);
-    }
-
-    public void dummyRemove() {
-        getCanvas().onDummyRemove();
-    }
+//    public void dummyAdd(FACTORY_KEY key, int num, float x, float y) {
+//        getCanvas().onDummyAdd(key, num, x, y);
+//    }
+//
+//    public void dummyMoveTo(float x, float y) {
+//        getCanvas().onDummyMoveTo(x, y);
+//    }
+//
+//    public void dummyRemove() {
+//        getCanvas().onDummyRemove();
+//    }
 
     public void finishThisFromOutside() {
         runOnUiThread(new Runnable() {
@@ -806,7 +805,7 @@ public class TapChainView extends FragmentActivity implements
         }
 
         private GridFragment returnPaletteAble() {
-            act.dummyRemove();
+//            act.dummyRemove();
             GridFragment f1 = act.getGrid();
             f1.enable();
             return f1;
@@ -821,18 +820,18 @@ public class TapChainView extends FragmentActivity implements
             switch (action) {
                 case MotionEvent.ACTION_POINTER_UP:
                 case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
                     GridFragment f1 = returnPaletteAble();
                     if (f1 != null
                             && f1.contains((int) event.getRawX(),
                             (int) event.getRawY())) {
-                        p.dismiss();
-                        break;
+                        act.add(key, num);
+                    } else {
+                        float x = event.getRawX();
+                        float y = event.getRawY();
+                        act.add(key, num, x, y);
                     }
-                    float x = event.getRawX();
-                    float y = event.getRawY();
-                    act.add(key, num, x, y);
                     p.dismiss();
-                case MotionEvent.ACTION_CANCEL:
                     break;
             }
             return true;
@@ -840,7 +839,7 @@ public class TapChainView extends FragmentActivity implements
 
         @Override
         public boolean onDown(MotionEvent e) {
-            act.dummyAdd(key, num, e.getRawX(), e.getRawY());
+//            act.dummyAdd(key, num, e.getRawX(), e.getRawY());
             getParent().requestDisallowInterceptTouchEvent(true);
             if (p == null)
                 p = new OverlayPopup(act);
@@ -857,7 +856,7 @@ public class TapChainView extends FragmentActivity implements
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                 float distanceX, float distanceY) {
-            act.dummyMoveTo(e2.getRawX(), e2.getRawY());
+//            act.dummyMoveTo(e2.getRawX(), e2.getRawY());
             p.show((int) e2.getRawX(), (int) e2.getRawY());
             return true;
         }
@@ -869,13 +868,11 @@ public class TapChainView extends FragmentActivity implements
             if (f1 != null
                     && f1.contains((int) e2.getRawX(), (int) e2.getRawY())) {
                 p.dismiss();
-                p = null;
                 return true;
             }
             act.add(key, num, e2.getRawX(), e2.getRawY(), velocityX,
                     velocityY);
             p.dismiss();
-            p = null;
             return true;
         }
 
@@ -889,12 +886,12 @@ public class TapChainView extends FragmentActivity implements
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            returnPaletteAble();
-            act.add(key, num);
-            p.dismiss();
-            return true;
+//            returnPaletteAble();
+//            act.add(key, num);
+//            p.dismiss();
+//            return true;
+            return false;
         }
-
     }
 
     public static class OverlayPopup extends PopupWindow {
@@ -1024,14 +1021,11 @@ public class TapChainView extends FragmentActivity implements
     }
 
     public abstract class WritingView extends TapChainSurfaceView {
-        private int width = 100;
-        private int height = 100;
-        private int max_x = 500, max_y = 500;
         private TapChainEditor editor;
 
         public WritingView(Context context) {
             super(context);
-            setSize(300, 300);
+//            setSize(300, 300);
             move(-100, -100);
             editor = new TapChainAndroidEditor(this, getResources(), TapChainView.this);
             editor.kickTapDraw(null);
@@ -1039,25 +1033,23 @@ public class TapChainView extends FragmentActivity implements
             gdetect = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDown(MotionEvent e) {
-                    sendDownEvent(e.getX(), e.getY());
+                    getEditor().onDown(getPosition(e.getX(), e.getY()));
+                    resetRegistration();
                     return true;
                 }
 
                 @Override
                 public void onShowPress(MotionEvent e) {
-//                    getEditor().onShowPress();
                 }
 
                 @Override
                 public boolean onSingleTapUp(MotionEvent e) {
-                    // getEditor().editTap().getChain().TouchOff();
                     return false;
                 }
 
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
                     ((TapChainView) getContext()).setVisibility();
-                    // getEditor().editTap().getChain().TouchOff();
                     return false;
                 }
 
@@ -1068,8 +1060,7 @@ public class TapChainView extends FragmentActivity implements
 
                 @Override
                 public boolean onSingleTapConfirmed(MotionEvent e) {
-                    getEditor().onSingleTapConfirmed();
-                    return false;
+                    return getEditor().onSingleTapConfirmed(getPosition(e.getX(), e.getY()));
                 }
 
                 @Override
@@ -1102,8 +1093,6 @@ public class TapChainView extends FragmentActivity implements
                     getEditor().onLongPress();
                     setMode(CAPTURED);
                 }
-
-
             });
         }
 
@@ -1114,20 +1103,10 @@ public class TapChainView extends FragmentActivity implements
             return editor;
         }
 
-        private void setSize(int max_x, int max_y) {
-            this.max_x = max_x;
-            this.max_y = max_y;
-        }
-
-
-        void drawText(Canvas canvas, String str) {
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setColor(Color.BLACK);
-            canvas.drawText(str, 100, 100, paint);
-        }
-
-        int index = 0;
+//        private void setSize(int max_x, int max_y) {
+//            this.max_x = max_x;
+//            this.max_y = max_y;
+//        }
 
         public Actor onAdd(FACTORY_KEY key, String tag) {
             return onAdd(key, tag, null, null);
@@ -1176,34 +1155,31 @@ public class TapChainView extends FragmentActivity implements
             return editorReturn.getActor();
         }
 
-        public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {
-            getEditor().addDummy(key, num, getPosition(x, y));
-        }
-
-        public void onDummyMoveTo(float x, float y) {
-            getEditor().scrollDummy(getPosition(x, y));
-        }
-
-        public void onDummyRemove() {
-            getEditor().removeDummy();
-        }
-
-        public void sendDownEvent(float x, float y) {
-            getEditor().onDown(getPosition(x, y));
-        }
+//        public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {
+//            getEditor().addDummy(key, num, getPosition(x, y));
+//        }
+//
+//        public void onDummyMoveTo(float x, float y) {
+//            getEditor().scrollDummy(getPosition(x, y));
+//        }
+//
+//        public void onDummyRemove() {
+//            getEditor().removeDummy();
+//        }
 
         public void sendUpEvent() {
             getEditor().onUp();
         }
 
         int initNum = 0;
-
+        boolean standby = false;
         public void standbyRegistration() {
             GridFragment f1 = getGrid();
             if (f1 != null) {
                 Factory f = f1.getCurrentFactory();
 //				f.Register(f.get(0));
                 IBlueprintInitialization i = getEditor().standbyRegistration(f);
+                standby = true;
                 if (i != null) {
                     try {
                         FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
@@ -1216,6 +1192,10 @@ public class TapChainView extends FragmentActivity implements
                     }
                 }
             }
+        }
+
+        public void resetRegistration() {
+            standby = false;
         }
 
         public void deleteRegistration() {

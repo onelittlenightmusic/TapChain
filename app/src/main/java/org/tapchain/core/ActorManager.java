@@ -22,19 +22,19 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 	
 	public ActorManager(
-			IErrorHandler _error, 
+//			IErrorHandler _error,
 			ILogHandler _log)
 	{
 		this();
 		this
 		.setLog(_log)
-		.setError(_error)
+//		.setError(_error)
 		;
 	}
 	
 	public ActorManager(ActorManager am) {
 		this(
-                am.error,
+//                am.error,
                 am.log
         );
 

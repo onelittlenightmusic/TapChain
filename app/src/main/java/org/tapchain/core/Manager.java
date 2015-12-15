@@ -3,7 +3,7 @@ package org.tapchain.core;
 import org.tapchain.core.Chain.ChainException;
 
 public class Manager<T extends IPiece> implements IManager<T, T> {
-	IErrorHandler error = null;
+//	IErrorHandler error = null;
 	ILogHandler log = null;
 
 	@Override
@@ -60,20 +60,16 @@ public class Manager<T extends IPiece> implements IManager<T, T> {
 
 	@Override
 	public IManager<T, T> error(ChainException e) {
-		if (error != null)
-			error.onError(null, e);
+//		if (error != null)
+//			error.onError(null, e);
 		return this;
 	}
 
-	public IManager<T, T> setError(IErrorHandler handle) {
-		error = handle;
-		return this;
-	}
+//	public IManager<T, T> setError(IErrorHandler handle) {
+//		error = handle;
+//		return this;
+//	}
 	
-	protected IErrorHandler getErrorHandler() {
-		return error;
-	}
-
 	@Override
 	public IManager<T, T> _out() {
 		return this;

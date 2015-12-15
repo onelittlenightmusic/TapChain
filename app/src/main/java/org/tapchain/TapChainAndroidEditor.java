@@ -313,7 +313,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
     @Override
     public boolean onDown(IPoint iPoint) {
         boolean rtn = super.onDown(iPoint);
-        ((Actor) touch).offer(iPoint);
+        touch.offer(iPoint);
         return rtn;
     }
 
