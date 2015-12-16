@@ -309,8 +309,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
     }
 
 	public boolean onUp(IPoint point) {
-//		if (!isNotCapturingActorTap())
-//    		round((IActorTap) selectedTap);
+		if (!isNotCapturingActorTap())
+    		round((IActorTap) selectedTap);
         return releaseTap(point);
 	}
 

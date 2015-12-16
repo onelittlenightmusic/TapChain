@@ -217,8 +217,10 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             canvas.restore();
             return true;
         }
+
+        float theta = getOffsetVectorRawCopy().theta();
         // Draw Extensions _in association with IValue interface
-        DrawLib.drawBitmapCenter(canvas, bm_fg, WorldPoint.zero(),
+        DrawLib.drawBitmapCenter(canvas, bm_fg, theta, WorldPoint.zero(),
                 _paint);
         canvas.restore();
         Actor actor = getActor();
