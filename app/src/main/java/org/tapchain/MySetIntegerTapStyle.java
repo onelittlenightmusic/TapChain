@@ -85,11 +85,12 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	}
 
 	@Override
-	public void onRelease(IEditor edit, IPoint pos) {
-//		Log.w("test", "MySetInteger onRelease called");
+	public boolean onRelease(IEditor edit, IPoint pos) {
         if(((WorldPoint)pos.subNew(getParentTap().getCenter())).len() < 150f) {
             setParentValue(pos, null);
             commitParentValue();
+            return true;
         }
+        return false;
 	}
 }

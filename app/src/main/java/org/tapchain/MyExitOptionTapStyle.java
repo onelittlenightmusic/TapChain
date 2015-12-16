@@ -11,7 +11,9 @@ public class MyExitOptionTapStyle extends MySimpleOptionTapStyle {
 		super(t, bm_fg);
 	}
 
-	public void onRelease(IEditor edit, IPoint pos) {
+    @Override
+	public boolean onRelease(IEditor edit, IPoint pos) {
 		edit.edit().remove(getParentTap().getActor());
+        return true;
 	}
 }

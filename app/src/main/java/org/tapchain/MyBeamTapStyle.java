@@ -31,9 +31,10 @@ public class MyBeamTapStyle extends BeamTapStyle implements IRelease, IFocusable
     }
 
     @Override
-    public void onRelease(IEditor edit, IPoint pos) {
-        super.onRelease(edit, pos);
+    public boolean onRelease(IEditor edit, IPoint pos) {
+        boolean rtn = super.onRelease(edit, pos);
         edit.changeFocus(al, this, clazz);
+        return rtn;
     }
 
     @Override

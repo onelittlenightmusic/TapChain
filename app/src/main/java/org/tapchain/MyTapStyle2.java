@@ -481,12 +481,13 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         }
 
         @Override
-        public void onRelease(IEditor edit, IPoint pos) {
+        public boolean onRelease(IEditor edit, IPoint pos) {
+            boolean rtn = false;
             if (setter instanceof IRelease)
-                ((IRelease) setter).onRelease(edit, pos);
+                rtn = ((IRelease) setter).onRelease(edit, pos);
             clear(edit);
+            return rtn;
         }
-
     }
 
 
@@ -495,8 +496,9 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     @Override
-    public void onRelease(IEditor edit, IPoint pos) {
+    public boolean onRelease(IEditor edit, IPoint pos) {
         edit.checkAndAttach(this);
+        return true;
     }
 
 

@@ -193,8 +193,8 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	}
 
 	@Override
-	public void onRelease(IEditor edit, IPoint pos) {
-
+	public boolean onRelease(IEditor edit, IPoint pos) {
+        return true;
 	}
 
     static String _out = "_out", _in = "_in";

@@ -23,7 +23,6 @@ import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.IBlueprintInitialization;
-import org.tapchain.core.IErrorHandler;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.ILogHandler;
 import org.tapchain.core.IPiece;
@@ -64,7 +63,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	Actor.Mover move_ef = (Mover) new Actor.Mover()
 			.initEffectValue(new WorldPoint(0f, 0f), 1)
 			.setParentType(PathType.OFFER).boost();
-	IPoint touched = null;
+//	IPoint touched = null;
 	protected List<Geometry> geos = new ArrayList<Geometry>();
 	private IPoint nextConnectivityPoint = null;
     ArrayList<IActorTap> family = new ArrayList<IActorTap>();
@@ -224,17 +223,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	EditMode editmode = EditMode.ADD;
 
-	protected boolean capturePiece(IPoint iPoint) {
-		ITap t = searchTouchedTap(iPoint);
-		if (t != null)
-			Log.w("test", String.format("onScroll(%s)", t.toString()));
-		captureTap(t);
-		return true;
-	}
-
-	public boolean captureTap(ITap pv) {
-		selectedTap = pv;
-		return true;
+	public ITap captureTap(ITap pv) {
+		return selectedTap = pv;
 	}
 
 	protected boolean isNotCapturing() {
@@ -282,35 +272,33 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		}
 	}
 
-//    public ActorTap getLockedReleaseTap() {
-//        return (ActorTap)lockedReleaseTap;
-//    }
-
     boolean hasLockReleaseTap() {
         return lockedReleaseTap != null;
     }
 
-	void unlockReleaseTap() {
+	boolean unlockReleaseTap(IPoint point) {
+        boolean rtn = false;
         if (lockedReleaseTap != null) {
-            lockedReleaseTap.onRelease(this, touched);
+            rtn = lockedReleaseTap.onRelease(this, point);
             lockedReleaseTap = null;
         }
+        return rtn;
 	}
 
 	public boolean freezeToggle() {
 		return edit().getChain().getCtrl().Toggle();
 	}
 
-	public boolean releaseTap() {
+	public boolean releaseTap(IPoint point) {
         boolean rtn = false;
         /*else */
+        if(hasLockReleaseTap() && unlockReleaseTap(point))
+            return true;
         if(selectedTap instanceof IRelease) {
-			((IRelease) selectedTap).onRelease(this, touched);
+			((IRelease) selectedTap).onRelease(this, point);
             rtn = true;
 		}
 
-        if(hasLockReleaseTap())
-            unlockReleaseTap();
         clearSelectedTap();
 		return rtn;
 	}
@@ -320,28 +308,31 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         selectedTap = null;
     }
 
-	public boolean onUp() {
-		if (!isNotCapturingActorTap())
-    		round((IActorTap) selectedTap);
-        return releaseTap();
+	public boolean onUp(IPoint point) {
+//		if (!isNotCapturingActorTap())
+//    		round((IActorTap) selectedTap);
+        return releaseTap(point);
 	}
 
 	public static int border = 700, border2 = 3 * border / 2;
 
-	public boolean onDown(IPoint iPoint) {
-		touched = iPoint;
-		return capturePiece(iPoint);
+	public ITap onDown(IPoint iPoint) {
+//		touched = iPoint;
+        ITap t = searchTouchedTap(iPoint);
+//        if (t != null)
+//            Log.w("test", String.format("onScroll(%s)", t.toString()));
+        return captureTap(t);
 	}
 
-	public boolean onFling(final float vx, final float vy) {
+	public boolean onFling(IPoint point, final float vx, final float vy) {
 		if (vx < border && vx > -border && vy < border && vy > -border)
-			return onUp();
+			return onUp(point);
 		if (!isNotCapturingActorTap()) {
 			_onFling((ActorTap) selectedTap, new WorldPoint(vx, vy).setDif());
 		} else {
 			_onFlingBackground(vx, vy);
 		}
-		return releaseTap();
+		return releaseTap(point);
 	}
 
 	private void _onFling(ActorTap t, IPoint vp) {
@@ -388,11 +379,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			if (p == null)
 				return false;
 			edit().remove(p);
-			releaseTap();
+//			releaseTap(point);
 			return false;
 		default:
 			if (t1 instanceof ISelectable)
-				((ISelectable) t1).onSelected(this, touched);
+				((ISelectable) t1).onSelected(this, point);
 		}
 		return true;
 	}
@@ -400,10 +391,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	public boolean onLongPress() {
 		if (selectedTap instanceof IPressed)
 			((IPressed) selectedTap).onPressed();
-
-		if (isNotCapturing())
-			return false;
-		return true;
+		return !isNotCapturing();
 	}
 
 	public boolean onLockedScroll(final IPoint wp) {
@@ -415,7 +403,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public boolean onScroll(final IPoint vp, final IPoint pos) {
-		touched = pos;
+//		touched = pos;
 		if (!isNotCapturing()) {
 			if (selectedTap instanceof IScrollable) {
                 Log.w("test", String.format("%s scrolled", selectedTap));
@@ -476,8 +464,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         if(!win.isInWindow(pos.x(), pos.y()))
             //Centering
             _onFlingBackgroundTo(pos.x(), pos.y());
-        touched = pos;
-        onUp();
+//        touched = pos;
+        onUp(pos);
         return rtn;
     }
     /**
@@ -514,10 +502,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         return null;
     }
 
-    private ActorTap createView(Factory<Actor> f, int num, ActorManager manager)
-			throws ChainException {
-		return (ActorTap) f.getViewBlueprint(num).newInstance(manager);
-	}
+//    private ActorTap createView(Factory<Actor> f, int num, ActorManager manager)
+//			throws ChainException {
+//		return (ActorTap) f.getViewBlueprint(num).newInstance(manager);
+//	}
 
 	private void round(IActorTap startTap2) {
 		if (styles == null || getInteract() == null)
@@ -657,7 +645,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 				ActorTap v = (ActorTap) getTarget();
 				round(v);
 				checkAndAttach(v);
-				return false;
 			}
 			return rtn;
 		}
@@ -681,13 +668,13 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         IPiece p = getCapturedActorTap().getActor();
         if (p instanceof IValue) {
             Object v = ((IValue) p)._valueGet();
-            data = standbyRegisteration(f, v, p.getTag());
+            data = standbyRegistration(f, v, p.getTag());
         }
 		return data;
 	}
 
-	protected IBlueprintInitialization standbyRegisteration(Factory<?> f,
-			Object initObj, String tag) {
+	protected IBlueprintInitialization standbyRegistration(Factory<?> f,
+                                                           Object initObj, String tag) {
 		IBlueprint b = f.search(tag);
 		if (b == null || !(b instanceof Blueprint)) {
             return null;

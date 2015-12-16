@@ -1085,7 +1085,7 @@ public class TapChainView extends FragmentActivity implements
                 @Override
                 public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                        float velocityY) {
-                    return getEditor().onFling((int) velocityX, (int) velocityY);
+                    return getEditor().onFling(getPosition(e2.getRawX(), e2.getRawY()), velocityX, velocityY);
                 }
 
                 @Override
@@ -1128,7 +1128,7 @@ public class TapChainView extends FragmentActivity implements
             if(vec == null)
                 return editorReturn.getActor();
             getEditor().captureTap(editorReturn.getTap());
-            getEditor().onFling((int) vec.x(), (int) vec.y());
+            getEditor().onFling(pos, vec.x(), vec.y());
             return editorReturn.getActor();
         }
 
@@ -1151,7 +1151,7 @@ public class TapChainView extends FragmentActivity implements
             if(vec == null)
                 return editorReturn.getActor();
             getEditor().captureTap(editorReturn.getTap());
-            getEditor().onFling((int) vec.x(), (int) vec.y());
+            getEditor().onFling(pos, vec.x(), vec.y());
             return editorReturn.getActor();
         }
 
@@ -1167,30 +1167,32 @@ public class TapChainView extends FragmentActivity implements
 //            getEditor().removeDummy();
 //        }
 
-        public void sendUpEvent() {
-            getEditor().onUp();
+        public void sendUpEvent(IPoint point) {
+            getEditor().onUp(point);
         }
 
         int initNum = 0;
         boolean standby = false;
         public void standbyRegistration() {
             GridFragment f1 = getGrid();
-            if (f1 != null) {
-                Factory f = f1.getCurrentFactory();
+            if (standby || f1 == null) {
+                return;
+            }
+            Factory f = f1.getCurrentFactory();
 //				f.Register(f.get(0));
-                IBlueprintInitialization i = getEditor().standbyRegistration(f);
-                standby = true;
-                if (i != null) {
-                    try {
-                        FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
+            IBlueprintInitialization i = getEditor().standbyRegistration(f);
+            standby = true;
+            if (i == null) {
+                return;
+            }
+            try {
+                FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
 //                        Log.w("test", String.format("num = %d, tag = %s", initNum, i.getTag()));
-                        inclementInitNum();
-                        ObjectOutputStream oos = new ObjectOutputStream(fos);
-                        oos.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+                inclementInitNum();
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -1414,7 +1416,7 @@ public class TapChainView extends FragmentActivity implements
                     if (oldDist > 10f) {
                         mode = ZOOM;
                         Log.d(TAG, "mode=ZOOM");
-                        getCanvas().sendUpEvent();
+                        getCanvas().sendUpEvent(getPosition(ev.getX(), ev.getY()));
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -1434,7 +1436,7 @@ public class TapChainView extends FragmentActivity implements
                     break;
                 case MotionEvent.ACTION_UP:
                     mode = NONE;
-                    getEditor().onUp();
+                    getEditor().onUp(getPosition(ev.getX(), ev.getY()));
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
                     mode = NONE;

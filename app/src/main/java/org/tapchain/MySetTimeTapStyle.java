@@ -59,7 +59,8 @@ public class MySetTimeTapStyle extends OptionTapStyle implements IScrollHandler,
 		}
 
 		@Override
-		public void onRelease(IEditor edit, IPoint pos) {
+		public boolean onRelease(IEditor edit, IPoint pos) {
 			getParentTap().commitMyActorValue();
+            return true;
 		}
 }

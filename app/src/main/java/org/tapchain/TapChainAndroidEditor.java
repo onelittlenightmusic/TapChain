@@ -33,6 +33,7 @@ import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.Geometry;
 import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.ITap;
 import org.tapchain.editor.IWindow;
 import org.tapchain.editor.TapChainEditor;
 import org.tapchain.game.CarEngineer;
@@ -311,8 +312,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     // 3.Changing state
     @Override
-    public boolean onDown(IPoint iPoint) {
-        boolean rtn = super.onDown(iPoint);
+    public ITap onDown(IPoint iPoint) {
+        ITap rtn = super.onDown(iPoint);
         touch.offer(iPoint);
         return rtn;
     }

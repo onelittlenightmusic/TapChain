@@ -27,9 +27,10 @@ public class MySetFloatTapStyle extends MySetIntegerTapStyle {
 		return val == ((Float)getParentTap().getMyActorValue()).intValue();
 	}
 	@Override
-	public void onRelease(IEditor edit, IPoint pos) {
+	public boolean onRelease(IEditor edit, IPoint pos) {
 		setParentValue(pos, null);
 		getParentTap().commitMyActorValue();
+        return true;
 	}
 	
 	
