@@ -2,10 +2,8 @@ package org.tapchain;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.util.Log;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Actor.Controllable;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IActorConnectHandler;
@@ -13,7 +11,6 @@ import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
-import org.tapchain.core.PathType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
@@ -94,52 +91,69 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 
     @Override
     public boolean onAttach(IActorTap t1, IActorTap t2, Actor a1, Actor a2, InteractionType type) {
-        switch (type) {
-            case NONE:
-                break;
-            case TOUCH_TOP:
-            case TOUCH_BOTTOM:
-            case TOUCH_RIGHT:
-            case TOUCH_LEFT:
-                if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
-                    Log.w("Test", String.format("Parent %s to Child %s Succeeded", a1.getTag(), a2.getTag()));
-                    break;
-                }
-                if (edit.connect(a1, LinkType.TO_CHILD, a2)) {
-                    Log.w("Test", String.format("Child %s to Parent %s Succeeded", a2.getTag(), a1.getTag()));
-                    break;
-                }
-                return false;
-            case CROSSING:
-//                if (a1 instanceof Controllable) {
-//                    ((Controllable) a1).interruptError();
+//        switch (type) {
+//            case NONE:
+//                break;
+//            case TOUCH_TOP:
+//            case TOUCH_BOTTOM:
+//            case TOUCH_RIGHT:
+//            case TOUCH_LEFT:
+//                if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
+//                    Log.w("Test", String.format("Parent %s to Child %s Succeeded", a1.getTag(), a2.getTag()));
+//                    break;
 //                }
-                return false;
-            case INSIDE:
-                boolean connect = false;
-                if (t1 instanceof IAttachHandler) {
-                    connect = ((IAttachHandler) t1).onInside(edit, t2, a1, a2);
-                } else {
-                    if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
-                        t2._valueGet().setOffset(t1, true);
-                        connect = true;
-                    }
-                }
-                if (!connect) {
-                    t1.setCenter(new WorldPoint(0, 100).setDif());
-                    edit.editTap()
-                            .add(new AndroidActor.AndroidSound2(act, addSoundFail)).save();
-                }
-
-                return false;
-            case OUTSIDE:
-                if (a1.isConnectedTo(a2, PathType.FAMILY)) {
-                    edit.editTap().disconnect(a1, a2);
-                    t1._valueGet().unsetOffset(t2, true);
-                }
-                break;
-            default:
-                return false;
+//                if (edit.connect(a1, LinkType.TO_CHILD, a2)) {
+//                    Log.w("Test", String.format("Child %s to Parent %s Succeeded", a2.getTag(), a1.getTag()));
+//                    break;
+//                }
+//                return false;
+//            case CROSSING:
+////                if (a1 instanceof Controllable) {
+////                    ((Controllable) a1).interruptError();
+////                }
+//                return false;
+//            case INSIDE:
+//                boolean connect = false;
+//                if (t1 instanceof IAttachHandler) {
+//                    connect = ((IAttachHandler) t1).onTouch(edit, t2, a1, a2);
+////                } else {
+////                    if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
+////                        t2._valueGet().setOffset(t1, true);
+////                        connect = true;
+////                    }
+//                }
+//                if (!connect) {
+//                    t1.setCenter(new WorldPoint(0, 100).setDif());
+//                    edit.editTap()
+//                            .add(new AndroidActor.AndroidSound2(act, addSoundFail)).save();
+//                }
+//
+//                return false;
+//            case OUTSIDE:
+//                if (a1.isConnectedTo(a2, PathType.FAMILY)) {
+//                    edit.editTap().disconnect(a1, a2);
+//                    t1._valueGet().unsetOffset(t2, true);
+//                }
+//                break;
+//            default:
+//                return false;
+//        }
+        if(!type.touching()) {
+            return false;
+        }
+        if(a1 != null && a2 != null) {
+            if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
+//                Log.w("Test", String.format("Parent %s to Child %s Succeeded", a1.getTag(), a2.getTag()));
+            } else if (edit.connect(a1, LinkType.TO_CHILD, a2)) {
+//                Log.w("Test", String.format("Child %s to Parent %s Succeeded", a2.getTag(), a1.getTag()));
+            }
+        }
+        if (t1 instanceof IAttachHandler) {
+            if(((IAttachHandler) t1).onTouch(edit, t2, a1, a2)) {
+                t1.setCenter(new WorldPoint(0, 100).setDif());
+                edit.editTap()
+                        .add(new AndroidActor.AndroidSound2(act, addSoundFail)).save();
+            }
         }
         return true;
     }
@@ -161,8 +175,6 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
             e.printStackTrace();
         }
 
-//                Actor actorNew = edit.toActor((ActorTap) v), aTarget = getFocusControl().getTargetActor();
-//                edit.connect(aTarget, getFocusControl().getLinkType(), actorNew);
         combo(v, b);
     }
 

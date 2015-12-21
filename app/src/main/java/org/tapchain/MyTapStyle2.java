@@ -616,8 +616,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
-//        l.offer(String.format("%s: \"%s\"", actorPullException.getLocation(),
-//                actorPullException.getErrorMessage()));
         AndroidActor.AndroidImageView errorMark = new AndroidActor.AndroidImageView(act, R.drawable.error);
         errorMark.setColorCode(ColorCode.RED)
                 .setPercent(new WorldPoint(200f, 200f));

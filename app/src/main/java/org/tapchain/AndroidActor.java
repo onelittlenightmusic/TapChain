@@ -739,7 +739,6 @@ public class AndroidActor {
 					new DashPathEffect(new float[] { 0.4f * size.x(),
 							0.6f * size.y() }, 0.2f * size.x()));
 			canvas.drawRect(getScreenRectF(), getPaint());
-			// canvas.drawArc(getScreenRectF(), 180f, 360f, true, paint);
 			return true;
 		}
 
@@ -776,9 +775,6 @@ public class AndroidActor {
 	}
 
 	public static class AndroidAlert extends AndroidControllable<Self, String, Void, Void> {
-//		static {
-//			__addLinkClass(AndroidAlert.class, ActorLink.PULL, String.class);
-//		}
 
         String alert = null;
 
@@ -887,7 +883,6 @@ public class AndroidActor {
 		private void requestImageSearch(String key) throws ChainException {
 			Uri uri = Uri.parse(QUERY_URL + key);
 			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-			// intent.setData(uri);
 			intent(getOwnActivity(), intent);
 		}
 	}
@@ -959,24 +954,18 @@ public class AndroidActor {
 
 	public static class AndroidRecognizer extends AndroidControllable<Self, Void, String, Void> implements
 			IntentHandler, IStep, IValue<String> {
-//		static {
-//			__addPushClass(AndroidRecognizer.class, String.class);
-//		}
 		String text = "";
 
         public AndroidRecognizer() {
             super();
             // once();
             unsetAutoEnd();
-            // setPushClass(String.class);
         }
         public AndroidRecognizer(Activity act) throws ChainException {
             super(act);
-            // once();
             unsetAutoEnd();
 			setAutoStart();
 			setLoop(null);
-            // setPushClass(String.class);
         }
 
         @Override
@@ -995,11 +984,7 @@ public class AndroidActor {
 				buffer.append(results.get(i));
 			}
 			_valueSet(results.get(0));
-			// show the value
-			// Toast.makeText(activity, results.get(0),
-			// Toast.LENGTH_LONG).show();
 			push(text);
-//			invalidate();
 		}
 
 		@Override
@@ -1073,36 +1058,12 @@ public class AndroidActor {
 		}
 	}
 
-	public static class AndroidMail2 extends AndroidControllable {
-		public AndroidMail2() {
-			super();
-			// once();
-			setAutoEnd();
-			setAutoStart();
-		}
-
-		@Override
-		public void ctrlStart() throws ChainException, InterruptedException {
-			Intent i = new Intent(android.content.Intent.ACTION_SEND);
-			i.setType("plain/text");
-			String aEmailList[] = { "o-sanmail@docomo.ne.jp",
-					"hiroyuki.osaki@gmail.com" };
-			i.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);
-			i.putExtra(android.content.Intent.EXTRA_SUBJECT, "from Android");
-			i.putExtra(android.content.Intent.EXTRA_TEXT,
-					"test mail from android, notifying a train time");
-			intent(getOwnActivity(), i);
-		}
-	}
-
 	public static class AndroidOverlay extends AndroidView {
 		OverlayPopup p;
 		View v;
 
 		public AndroidOverlay(Activity activity) {
 			super(activity);
-			// p.setWidth(1000);
-			// p.setHeight(1000);
 			v = createObjectByUIThread();
 			p = new OverlayPopup(getOwnActivity());
 		}
@@ -1135,38 +1096,6 @@ public class AndroidActor {
                 }
             });
 		}
-
-		// @Override
-		// public void view_init() {
-		// final IPoint screenp =
-		// ((TapChainView)activity).getCanvas().getScreenPosition(getCenter().x(),
-		// getCenter().y());
-		// activity.postMQ(new Runnable() {
-		// @Override
-		// public void run() {
-		// p.show((int)screenp.x(), (int)screenp.y());
-		// }
-		// });
-		// }
-		//
-		// @Override
-		// public void view_end() {
-		// activity.postMQ(new Runnable() {
-		// @Override
-		// public void run() {
-		// p.dismiss();
-		// }
-		// });
-		// }
-		//
-
-		// @Override
-		// public void move_user(IPoint vp) {
-		// IPoint point =
-		// ((TapChainView)activity).getCanvas().getScreenPosition(getCenter().x(),
-		// getCenter().y());
-		// move(point);
-		// }
 
 		protected View getFace() {
 			ImageView v = (ImageView) getObjectByUIThread();
@@ -1223,11 +1152,6 @@ public class AndroidActor {
 			final EditText e = (EditText) getObjectByUIThread();
 			p.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 			p.setFocusable(true);
-			// Log.w("test", getName()+".getFace() before new EditText");
-			// // Could not create EditText programatically _in a thread other
-			// than UI thread.
-			// final TextView e = new TextView(activity);
-			// Log.w("test", getName()+".getFace() new EditText");
 			e.setBackgroundColor(0xff333333);
 			e.setWidth(200);
 			e.setFocusable(true);
@@ -1285,8 +1209,6 @@ public class AndroidActor {
 		}
 
 		public View getFace() {
-			// View v = new View(activity);
-			// v.setBackground(this.getDrawable());
 			ImageView v = new ImageView(getOwnActivity());
 			v.setImageBitmap(bm_scaled);
 			return v;
@@ -1344,22 +1266,4 @@ public class AndroidActor {
 		onTTSDestroy();
 	}
 	
-	public static class AndroidTilt extends Mover {
-        Activity act = null;
-
-        public AndroidTilt() {
-            super();
-        }
-		public AndroidTilt(Activity activity) {
-			super();
-			initEffectValue(new WorldPoint(0f, 0f), -1);
-		}
-		
-		
-		@Override
-		public void effect(IValue<IPoint> _t, IPoint _e) throws ChainException {
-			_valueSet(((ISensorView)act).getTilt().multiply(20f));
-			super.effect(_t, _e);
-		}
-	}
 }

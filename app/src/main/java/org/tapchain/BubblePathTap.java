@@ -84,8 +84,6 @@ public class BubblePathTap extends PathTap implements ISelectable {
     @Override
     public boolean view_user(Canvas canvas, IPoint sp, IPoint size,
                              int alpha) {
-//        sp12 = ((MyTapStyle2)start).getOffsetVector(gamma);
-//        sp21 = ((MyTapStyle2)stop).getOffsetVector(-gamma);
         Rect r1 = ((AndroidActor.AndroidView) start).getScreenRect();
         Rect r2 = ((AndroidActor.AndroidView) stop).getScreenRect();
         if (starttype == PathType.FAMILY) {
@@ -119,9 +117,6 @@ public class BubblePathTap extends PathTap implements ISelectable {
                     sp2.x() - xsize, sp2.y());
             canvas.drawPath(path, paint);
         }
-//        IPoint center = getPoint(0.5f);
-//        if (objcache != null)
-//            ShowInstance.showInstance(canvas, objcache, center, paint2, paint2, objtag);
         return true;
     }
 

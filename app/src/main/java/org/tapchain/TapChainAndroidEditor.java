@@ -50,7 +50,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
     // 1.Initialization
     final Actor v2 = new Actor();
     TapChainGoalTap goal;
-    boolean magnet = true;
+    boolean magnet = false;
     Actor touch = null;
     Activity act = null;
 
@@ -537,12 +537,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
     }
 
     @Override
-    public boolean onLongPress() {
-        boolean rtn = super.onLongPress();
+    public boolean onLongPress(IActorTap selected) {
+        boolean rtn = super.onLongPress(selected);
+        if(selected == null)
+            return false;
         if (rtn) {
             AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
             a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
-            a._valueGet().setOffset(getCapturedTap());
+            a._valueGet().setOffset(selected);
             editTap()
                     .add(a)
                     ._in()
@@ -551,16 +553,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
                     ._out()
                     .save();
         }
-        if (getCapturedTap() instanceof IActorTap) {
-            Actor a = ((IActorTap) getCapturedTap()).getActor();
-            a.setLogLevel(true);
-            a.setLogTag("test");
-            Log.w("test", String.format("%s's setLogLevel true(lock:%s[%s], state:%s)",
-                    a.getTag(), a.getLockStatus() ? "free" : "locked",
-                    a.getLockTag(),
-                    a.getState()));
-            a.printLastExecLog();
-        }
+        Actor a = (selected).getActor();
+        a.setLogLevel(true);
+        a.setLogTag("test");
+        Log.w("test", String.format("%s's setLogLevel true(lock:%s[%s], state:%s)",
+                a.getTag(), a.getLockStatus() ? "free" : "locked",
+                a.getLockTag(),
+                a.getState()));
+        a.printLastExecLog();
         return rtn;
     }
 

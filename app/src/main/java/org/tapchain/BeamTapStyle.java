@@ -72,8 +72,6 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 	public boolean view_user(Canvas canvas, IPoint cp, IPoint size, int alpha) {
 		IPoint parent = getParentTap().getCenter();
 		canvas.save();
-//		sizex = sizex - sizex % 60;
-//		sizex = sizex * canvas.getDensity() / 160;
 		canvas.translate(parent.x(), parent.y());
 		canvas.rotate(theta);
 		canvas.translate(sizey / 2, -sizey / 2);
@@ -87,12 +85,6 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 		return true;
 	}
 
-//	@Override
-//	public void onScroll(IEdit edit, IActorTap act, IPoint pos, IPoint vp) {
-//		super.onScroll(edit, act, pos, vp);
-//		calcTheta(pos);
-//	}
-	
 	@Override
 	public ViewActor setCenter(IPoint pos) {
 		super.setCenter(pos);
@@ -106,19 +98,9 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 		length = v.getAbs();
 	}
 
-	// public void onAttach(IPoint pos, IEdit edit) {
-	// ActorLink ac = getConnect();
-	// IActorTap parent = getParentTap();
-	// getEventHandler().setLastHighlighted(ac, parent);
-	// ClassEnvelope ce = getClassEnvelope();
-	// edit.highlightConnectables(ac.reverse(), ce);
-	// // edit.log("onSelect", String.format("Balloon on %s[%s]",
-	// parent.getMyActor().getName(), ac.toString()));
-	//
-	// }
 
 	@Override
-	public boolean onInside(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
+	public boolean onTouch(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
 		boolean rtn = false;
 		if (edit.connect(a1, LinkType.PUSH, a2)) {
 			rtn = true;

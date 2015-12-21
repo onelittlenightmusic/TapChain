@@ -203,7 +203,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 
 	String heapOut = "_out", heapIn = "_in";
 	@Override
-	public boolean onInside(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
+	public boolean onTouch(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
 		boolean rtn = false;
 			if(getTag().equals(heapOut)) {
 				if(edit.connect(a1, LinkType.PUSH, a2)) {

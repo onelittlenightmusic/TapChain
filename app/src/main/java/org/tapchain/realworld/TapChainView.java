@@ -82,6 +82,7 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.EditorReturn;
 import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.ITap;
 import org.tapchain.editor.IWindow;
 import org.tapchain.editor.TapChainEditor;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
@@ -99,18 +100,18 @@ import static java.lang.Math.sqrt;
 public class TapChainView extends FragmentActivity implements
         SensorEventListener, ISensorView {
     static final String VIEW_SELECT = "SELECT";
-    static final String X = "LOCATIONX", Y = "LOCATIONY", V = "VIEWS";
+    static final String X = "LOCATIONX", V = "VIEWS";
     static final RectF RF = new RectF(0, 0, 100, 100);
 
     private WritingView viewCanvas;
-    private UserView viewUser;
     FrameLayout viewControl = null;
     SensorManager sensorManager;
     private Sensor accelerometer;
     //	Handler mq = new Handler();
-    SparseArray<IntentHandler> intentHandlers = new SparseArray<IntentHandler>();
+    SparseArray<IntentHandler> intentHandlers = new SparseArray<>();
     static Activity now;
     public static int tapOffset = 10000;
+    private TapChainEditor editor;
 
     public static Activity getNow() {
         return now;
@@ -141,7 +142,7 @@ public class TapChainView extends FragmentActivity implements
         now = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         viewCanvas = new CanvasViewImpl2(this);
-        viewUser = new UserView(this);
+//        viewUser = new UserView(this);
         if (savedInstanceState != null) {
             getCanvas().matrix.setRectToRect(RF,
                     (RectF) savedInstanceState.getParcelable(X),
@@ -176,26 +177,6 @@ public class TapChainView extends FragmentActivity implements
                             ((ImageView) v).setImageResource(R.drawable.start);
                     }
                 });
-        addButton(view_bottom_left, R.drawable.magnet, true,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        boolean magnet = false;
-                        magnet = ((TapChainAndroidEditor) getEditor())
-                                .magnetToggle();
-                        if (!magnet)
-                            ((ImageView) v).setImageAlpha(100);
-                        else
-                            ((ImageView) v).setImageAlpha(255);
-                    }
-                });
-        addButton(view_bottom_left, R.drawable.config, true,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        recoverFactory();
-                    }
-                });
         addButton(view_bottom_left, R.drawable.pullup, true,
                 new View.OnClickListener() {
                     @Override
@@ -210,13 +191,6 @@ public class TapChainView extends FragmentActivity implements
                                     .setImageResource(R.drawable.pulldown);
                         else
                             ((ImageView) v).setImageResource(R.drawable.pullup);
-                    }
-                });
-        addButton(view_bottom_left, R.drawable.dust, true,
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        viewCanvas.deleteRegistration();
                     }
                 });
         addButton(view_bottom_left, R.drawable.config, true,
@@ -239,8 +213,6 @@ public class TapChainView extends FragmentActivity implements
                         finish();
                     }
                 });
-        rootview.addView(viewUser, new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
         rootview.addView(getCanvas(), new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
@@ -257,35 +229,11 @@ public class TapChainView extends FragmentActivity implements
         l.setGravity(Gravity.BOTTOM | Gravity.RIGHT);
         l.setId(0x00001234);
         new GridFragment().setContext(this).show(GridShow.HIDE);
-        // Log.i("TapChainView.state", "onCreate");
 
     }
 
     int leftnum = 100, rightnum = 200;
 
-    public Button addLeftButton(ViewGroup parent, String label,
-                                View.OnClickListener c) {
-        Button rtn = addButton(parent, label, c);
-        rtn.setId(leftnum);
-        RelativeLayout.LayoutParams lo2 = (RelativeLayout.LayoutParams) rtn
-                .getLayoutParams();
-        lo2.addRule(RelativeLayout.RIGHT_OF, leftnum - 1);
-        lo2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        leftnum++;
-        return rtn;
-    }
-
-    public Button addButton(ViewGroup parent, String label,
-                            View.OnClickListener c) {
-        Button bt = new Button(this);
-        bt.setOnClickListener(c);
-        LayoutParams lo = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT);
-        parent.addView(bt, lo);
-        bt.setText(label);
-        return bt;
-
-    }
 
     public ImageView addButton(ViewGroup parent, int resource, boolean left,
                                View.OnClickListener c) {
@@ -339,7 +287,7 @@ public class TapChainView extends FragmentActivity implements
     protected void onStop() {
         super.onStop();
         getEditor().reset();
-        Log.i("TapChainView.state", "onStop");
+//        Log.i("TapChainView.state", "onStop");
         if (sensorManager != null)
             sensorManager.unregisterListener(this);
     }
@@ -356,9 +304,9 @@ public class TapChainView extends FragmentActivity implements
         DisplayMetrics metrix = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrix);
         if (metrix.widthPixels > metrix.heightPixels)
-            return new Pair<Integer, Integer>(metrix.widthPixels * 1 / 2,
+            return new Pair<>(metrix.widthPixels * 1 / 2,
                     LayoutParams.MATCH_PARENT);
-        return new Pair<Integer, Integer>(LayoutParams.MATCH_PARENT,
+        return new Pair<>(LayoutParams.MATCH_PARENT,
                 metrix.heightPixels * 1 / 2);
     }
 
@@ -438,7 +386,7 @@ public class TapChainView extends FragmentActivity implements
             viewControl.setVisibility(View.VISIBLE);
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
+    public Actor add(FACTORY_KEY key, String tag) {
         return getCanvas().onAdd(key, tag);
     }
 
@@ -451,7 +399,7 @@ public class TapChainView extends FragmentActivity implements
         return getCanvas().onAdd(key, tag, x, y, dx, dy);
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code) {
+    public Actor add(FACTORY_KEY key, int code) {
         return getCanvas().onAdd(key, code);
     }
 
@@ -461,7 +409,6 @@ public class TapChainView extends FragmentActivity implements
 
     public Actor add(FACTORY_KEY key, int code, float x, float y, float dx,
                          float dy) {
-        // Log.w("test", "addFocusable(xy, dxy) called");
         return getCanvas().onAdd(key, code, x, y, dx, dy);
     }
 
@@ -469,17 +416,6 @@ public class TapChainView extends FragmentActivity implements
         getEditor().connect(a1, type, a2);
     }
 
-//    public void dummyAdd(FACTORY_KEY key, int num, float x, float y) {
-//        getCanvas().onDummyAdd(key, num, x, y);
-//    }
-//
-//    public void dummyMoveTo(float x, float y) {
-//        getCanvas().onDummyMoveTo(x, y);
-//    }
-//
-//    public void dummyRemove() {
-//        getCanvas().onDummyRemove();
-//    }
 
     public void finishThisFromOutside() {
         runOnUiThread(new Runnable() {
@@ -514,6 +450,489 @@ public class TapChainView extends FragmentActivity implements
     public void showPalette(PaletteSort sort) {
         if (getGrid() != null)
             getGrid().setCurrentFactory(sort.getNum());
+    }
+
+    public class CanvasViewImpl2 extends WritingView {
+        GradientDrawable mGradient, mGradient2;
+        Rect r = new Rect();
+
+        public CanvasViewImpl2(Context context) {
+            super(context);
+            mGradient = new GradientDrawable(Orientation.LEFT_RIGHT, new int[]{
+                    0xff303030, 0xff777777});
+            mGradient2 = new GradientDrawable(Orientation.RIGHT_LEFT,
+                    new int[]{0xff303030, 0xff777777});
+            paint.setColor(0xff303030);
+            paint.setStyle(Style.FILL);
+        }
+
+
+        @Override
+        public void paintBackground(Canvas canvas) {
+            canvas.drawRect(r,
+                    paint);
+            return;
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width,
+                                   int height) {
+            int xmax = getWidth(), ymax = getHeight();
+            int xcenter = xmax / 2;
+            r.set(0, 0, xmax, ymax);
+            mGradient.setBounds(new Rect(0, 0, xcenter, ymax));
+            mGradient2.setBounds(new Rect(xcenter, 0, xmax, ymax));
+            super.surfaceChanged(holder, format, width, height);
+        }
+
+        @Override
+        public void myDraw(Canvas canvas) {
+            getEditor().userShow(canvas);
+            canvas.drawText("Goal = " + TapChainGoalTap.printState(), 20, 100,
+                    paint_text);
+            canvas.setMatrix(matrix);
+            getEditor().show(canvas);
+            getEditor().userShow(canvas);
+        }
+    }
+
+    public abstract class WritingView extends TapChainSurfaceView {
+        IActorTap selected;
+        public WritingView(Context context) {
+            super(context);
+//            setSize(300, 300);
+            move(-100, -100);
+            editor = new TapChainAndroidEditor(this, getResources(), TapChainView.this);
+            editor.kickTapDraw(null);
+            gdetect = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return false;
+                }
+
+                @Override
+                public void onShowPress(MotionEvent e) {
+                }
+
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return false;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    ((TapChainView) getContext()).setVisibility();
+                    return false;
+                }
+
+                @Override
+                public boolean onDoubleTapEvent(MotionEvent e) {
+                    return false;
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    return getEditor().onSingleTapConfirmed(getPosition(e.getX(), e.getY()));
+                }
+
+                @Override
+                public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                        float distanceX, float distanceY) {
+                    if (mode == CAPTURED) {
+                        return onSecondTouch(getPosition(e2.getX(), e2.getY()));
+                    }
+                    GridFragment f1 = getGrid();
+                    if (f1 != null
+                            && f1.contains((int) e2.getRawX(),
+                            (int) e2.getRawY())) {
+                        standbyRegistration(selected);
+                        return true;
+                    }
+                    getEditor().onScroll(selected, getVector(-distanceX, -distanceY),
+                            getPosition(e2.getX(), e2.getY()));
+                    return false;
+                }
+
+
+                @Override
+                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                                       float velocityY) {
+                    return getEditor().onFling(selected, getPosition(e2.getRawX(), e2.getRawY()), getVector(velocityX, velocityY));
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    getEditor().onLongPress(selected);
+                    setMode(CAPTURED);
+                }
+            });
+        }
+
+        public boolean onTouchEvent(MotionEvent ev) {
+            if (gdetect.onTouchEvent(ev))
+                return true;
+            int action = ev.getAction();
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    ITap selectedTap = getEditor().onDown(getPosition(ev.getX(), ev.getY()));
+                    if(selectedTap instanceof IActorTap)
+                        selected = (IActorTap)selectedTap;
+                    else
+                        selected = null;
+                    resetRegistration();
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    savedMatrix.set(matrix);
+                    oldDist = spacing(ev);
+                    Log.d(TAG, "oldDist=" + oldDist);
+                    midPoint(mid, ev);
+                    if (oldDist > 10f) {
+                        mode = ZOOM;
+                        Log.d(TAG, "mode=ZOOM");
+                        getEditor().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mode == ZOOM) {
+                        float newDist = spacing(ev);
+                        matrix.set(savedMatrix);
+                        if (newDist > 10f) {
+                            float scale = newDist / oldDist;
+                            midPoint(mid, ev);
+                            matrix.postScale(scale, scale, mid.x, mid.y);
+                        }
+                    } else if (mode == CAPTURED) {
+                        onSecondTouch(getPosition(ev.getX(), ev.getY()));
+                        break;
+                    }
+
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mode = NONE;
+                    getEditor().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = NONE;
+                    matrix.invert(inverse);
+                    break;
+            }
+            return true;
+        }
+
+        /**
+         * @return the editor
+         */
+        public TapChainEditor getEditor() {
+            return editor;
+        }
+
+
+        public Actor onAdd(FACTORY_KEY key, String tag) {
+            return onAdd(key, tag, null, null);
+        }
+
+        public Actor onAdd(FACTORY_KEY key, String tag, float x, float y) {
+            return onAdd(key, tag, getPosition(x, y), null);
+        }
+
+        public Actor onAdd(FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
+            return onAdd(key, tag, getPosition(x, y), getVector(vx, vy));
+        }
+
+
+        public Actor onAdd(FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
+            EditorReturn editorReturn = getEditor().onAdd(key, tag, pos);
+            if (editorReturn == null)
+                return null;
+            if(vec == null)
+                return editorReturn.getActor();
+            getEditor().onFling(editorReturn.getTap(), pos, vec);
+            return editorReturn.getActor();
+        }
+
+        public Actor onAdd(FACTORY_KEY key, int code) {
+            return onAdd(key, code, null, null);
+        }
+
+        public Actor onAdd(FACTORY_KEY key, int code, float x, float y) {
+            return onAdd(key, code, getPosition(x, y), null);
+        }
+
+        public Actor onAdd(FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
+            return onAdd(key, code, getPosition(x, y), getVector(vx, vy));
+        }
+
+        public Actor onAdd(FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
+            EditorReturn editorReturn = getEditor().onAdd(key, code, pos);
+            if (editorReturn == null)
+                return null;
+            if(vec == null)
+                return editorReturn.getActor();
+            getEditor().onFling(editorReturn.getTap(), pos, vec);
+            return editorReturn.getActor();
+        }
+
+        int initNum = 0;
+        boolean standby = false;
+        public void standbyRegistration(IActorTap selected) {
+            GridFragment f1 = getGrid();
+            if (standby || f1 == null) {
+                return;
+            }
+            Factory f = f1.getCurrentFactory();
+            IBlueprintInitialization i = getEditor().standbyRegistration(f, selected);
+            if (i == null) {
+                return;
+            }
+            standby = true;
+            try {
+                FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
+                inclementInitNum();
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void resetRegistration() {
+            standby = false;
+        }
+
+        public void inclementInitNum() {
+            initNum++;
+        }
+
+
+        @Override
+        public boolean onSecondTouch(final IPoint wp) {
+            return getEditor().onLockedScroll(selected, wp);
+        }
+    }
+
+    abstract class TapChainSurfaceView
+            // extends TextureView implements
+            extends SurfaceView implements SurfaceHolder.Callback,
+            IWindow, ISensorView {
+        protected GestureDetector gdetect;
+        Matrix matrix = new Matrix();
+        Matrix inverse = new Matrix();
+        Paint paint = new Paint(), paint_text = new Paint();
+        WorldPoint window_size = new WorldPoint();
+        String log = "";
+        TextPaint mTextPaint = new TextPaint();
+        StaticLayout mTextLayout;
+
+        public TapChainSurfaceView(Context context) {
+            super(context);
+//			gdetect = new GestureDetector(context, this);
+            SurfaceHolder holder = getHolder();
+            holder.setFormat(PixelFormat.TRANSPARENT);
+            holder.addCallback(this);
+            paint_text.setColor(0xff000000);
+            paint_text.setTextSize(20);
+            paint.setColor(0xff444444);
+            mTextPaint.setTextSize(20);
+            mTextLayout = new StaticLayout("", mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            setFocusable(true);
+            requestFocus();
+        }
+
+        public void onDraw() {
+            TapChainView.this.runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    Canvas canvas = null;
+                    try {
+                        canvas = getHolder().lockCanvas();
+                        if (canvas == null) {
+                            return;
+                        }
+                        paintBackground(canvas);
+                        myDraw(canvas);
+                        canvas.drawText(
+                                "View = "
+                                        + Integer.toString(getEditor()
+                                        .editTap().getChain()
+                                        .getViewNum()), 20, 20,
+                                paint_text);
+                        canvas.drawText(
+                                "Effect = "
+                                        + Integer.toString(getEditor()
+                                        .editTap().getChain()
+                                        .getPieces().size()), 20,
+                                40, paint_text);
+                        canvas.drawText(
+                                "UserView = "
+                                        + Integer.toString(getEditor()
+                                        .edit()
+                                        .getChain().getViewNum()),
+                                20, 60, paint_text);
+                        canvas.drawText(
+                                "UserEffect = "
+                                        + Integer.toString(getEditor()
+                                        .edit()
+                                        .getChain().getPieces()
+                                        .size()), 20, 80,
+                                paint_text);
+//						canvas.drawText("Log = "+log, 20, 120, paint_text);
+                        canvas.save();
+                        canvas.translate(20, 120);
+                        mTextLayout.draw(canvas);
+                        canvas.restore();
+                    } finally {
+                        if (canvas != null)
+                            getHolder().unlockCanvasAndPost(canvas);
+                    }
+
+                }
+
+            });
+        }
+
+        public abstract void myDraw(Canvas canvas);
+
+        StringBuilder buf = new StringBuilder();
+
+        public void log(String... strings) {
+            for (String s : strings) {
+                buf.append(s);
+            }
+            buf.append("\n");
+            if (buf.length() > 300)
+                buf.delete(0, buf.length() - 300);
+            log = buf.toString();
+            mTextLayout = new StaticLayout(log, mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        }
+
+        public void paintBackground(Canvas canvas) {
+            return;
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width,
+                                   int height) {
+            window_size.x = getWidth();
+            window_size.y = getHeight();
+            getEditor().kickTapDraw(null);
+        }
+
+        @Override
+        public void surfaceCreated(SurfaceHolder holder) {
+            window_size.x = getWidth();
+            window_size.y = getHeight();
+            getEditor().kickTapDraw(null);
+        }
+
+        static final int NONE = 0;
+        static final int ZOOM = 1;
+        static final int CAPTURED = 2;
+        static final String TAG = "ACTION";
+        int mode = NONE;
+        float oldDist = 0f;
+        Matrix savedMatrix = new Matrix();
+        PointF mid = new PointF();
+
+        float spacing(MotionEvent event) {
+            float x = event.getX(0) - event.getX(1);
+            float y = event.getY(0) - event.getY(1);
+            return (float) sqrt(x * x + y * y);
+        }
+
+        void midPoint(PointF point, MotionEvent event) {
+            float x = event.getX(0) + event.getX(1);
+            float y = event.getY(0) + event.getY(1);
+            point.set(x / 2, y / 2);
+        }
+
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+        }
+
+        @Override
+        public void move(float vx, float vy) {
+            IPoint v = getScreenVector(-vx, -vy);
+            matrix.postTranslate(v.x(), v.y());
+            matrix.invert(inverse);
+        }
+
+        @Override
+        public boolean isInWindow(float x, float y) {
+            IPoint d = getScreenPosition(x, y);
+            if (size.x < d.x() || 0 > d.x() || size.y < d.y() || 0 > d.y()) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public IPoint getMiddlePoint() {
+            return getPosition(size.x/2f, size.y/2f);
+        }
+
+        protected void setMode(int _mode) {
+            mode = _mode;
+        }
+
+        public IPoint getPosition(float x, float y) {
+            return TapChainView.getPosition(x, y, inverse);
+        }
+
+        public IPoint getVector(float x, float y) {
+            return TapChainView.getVector(x, y, inverse);
+        }
+
+        public IPoint getScreenVector(float x, float y) {
+            return TapChainView.getVector(x, y, matrix);
+        }
+
+        public IPoint getScreenPosition(float x, float y) {
+            return TapChainView.getPosition(x, y, matrix);
+        }
+
+        public boolean onSecondTouch(final IPoint iPoint) {
+            return false;
+        }
+
+        @Override
+        public void showPalette(final PaletteSort sort) {
+            ((Activity) getContext()).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (getGrid() != null)
+                        getGrid().setCurrentFactory(sort.getNum());
+                }
+            });
+        }
+
+        @Override
+        public IPoint getTilt() {
+            return TapChainView.this.getTilt();
+        }
+
+        @Override
+        public void shake(int interval) {
+            TapChainView.this.shake(interval);
+        }
+    }
+
+    public IWindow getActorWindow() {
+        return getCanvas();
+    }
+
+    public static IPoint getPosition(float x, float y, Matrix matrix) {
+        float[] pos = new float[]{x, y};
+        matrix.mapPoints(pos);
+        return new WorldPoint(pos[0], pos[1]);
+
+    }
+
+    public static IPoint getVector(float x, float y, Matrix matrix) {
+        float[] pos = new float[]{x, y};
+        matrix.mapVectors(pos);
+        return new WorldPoint(pos[0], pos[1]).setDif();
     }
 
     public static class GridFragment extends Fragment {
@@ -779,7 +1198,6 @@ public class TapChainView extends FragmentActivity implements
 
         @Override
         public int getCount() {
-//            Log.w("Test", String.format("ViewAdapter:%s -> (size=%d)", key.toString(), f.getSize()));
             return f.getSize();
         }
     }
@@ -805,7 +1223,6 @@ public class TapChainView extends FragmentActivity implements
         }
 
         private GridFragment returnPaletteAble() {
-//            act.dummyRemove();
             GridFragment f1 = act.getGrid();
             f1.enable();
             return f1;
@@ -839,7 +1256,6 @@ public class TapChainView extends FragmentActivity implements
 
         @Override
         public boolean onDown(MotionEvent e) {
-//            act.dummyAdd(key, num, e.getRawX(), e.getRawY());
             getParent().requestDisallowInterceptTouchEvent(true);
             if (p == null)
                 p = new OverlayPopup(act);
@@ -856,7 +1272,6 @@ public class TapChainView extends FragmentActivity implements
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                 float distanceX, float distanceY) {
-//            act.dummyMoveTo(e2.getRawX(), e2.getRawY());
             p.show((int) e2.getRawX(), (int) e2.getRawY());
             return true;
         }
@@ -886,10 +1301,6 @@ public class TapChainView extends FragmentActivity implements
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-//            returnPaletteAble();
-//            act.add(key, num);
-//            p.dismiss();
-//            return true;
             return false;
         }
     }
@@ -972,590 +1383,5 @@ public class TapChainView extends FragmentActivity implements
         }
     }
 
-    public class WritingViewImplLattice extends WritingView {
-        private Bitmap b = BitmapFactory.decodeResource(
-                TapChainView.this.getResources(), R.drawable.car);
-
-        public WritingViewImplLattice(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void myDraw(Canvas canvas) {
-            viewUser.paintBackground(canvas);
-            canvas.setMatrix(matrix);
-            canvas.drawBitmap(b, 100f, 100f, paint);
-            int w = 100, h = 100;
-            IPoint lefttop = getPosition(0f, 0f);
-            IPoint rightbottom = getPosition(canvas.getWidth(),
-                    canvas.getHeight());
-            float offsetx = w / 2, offsety = h / 2;
-            float startx = lefttop.x() - lefttop.x() % w - w + offsetx;
-            float starty = lefttop.y() - lefttop.y() % h - h + offsety;
-            float endx = rightbottom.x() + offsetx;
-            float endy = rightbottom.y() + offsety;
-            for (float i = startx; i < endx; i += w) {
-                canvas.drawLine(i, starty, i, endy, paint);
-            }
-            for (float j = starty; j < endy; j += h) {
-                canvas.drawLine(startx, j, endx, j, paint);
-            }
-            getEditor().show(canvas);
-            viewUser.myDraw(canvas);
-        }
-    }
-
-    public class CanvasViewImpl2 extends WritingView {
-
-        public CanvasViewImpl2(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void myDraw(Canvas canvas) {
-            viewUser.paintBackground(canvas);
-            canvas.setMatrix(matrix);
-            getEditor().show(canvas);
-            getEditor().userShow(canvas);
-        }
-    }
-
-    public abstract class WritingView extends TapChainSurfaceView {
-        private TapChainEditor editor;
-
-        public WritingView(Context context) {
-            super(context);
-//            setSize(300, 300);
-            move(-100, -100);
-            editor = new TapChainAndroidEditor(this, getResources(), TapChainView.this);
-            editor.kickTapDraw(null);
-            // paint.setShadowLayer(10, 20, 20, 0x80000000);
-            gdetect = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onDown(MotionEvent e) {
-                    getEditor().onDown(getPosition(e.getX(), e.getY()));
-                    resetRegistration();
-                    return true;
-                }
-
-                @Override
-                public void onShowPress(MotionEvent e) {
-                }
-
-                @Override
-                public boolean onSingleTapUp(MotionEvent e) {
-                    return false;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    ((TapChainView) getContext()).setVisibility();
-                    return false;
-                }
-
-                @Override
-                public boolean onDoubleTapEvent(MotionEvent e) {
-                    return false;
-                }
-
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    return getEditor().onSingleTapConfirmed(getPosition(e.getX(), e.getY()));
-                }
-
-                @Override
-                public boolean onScroll(MotionEvent e1, MotionEvent e2,
-                                        float distanceX, float distanceY) {
-                    if (mode == CAPTURED) {
-                        return onSecondTouch(getPosition(e2.getX(), e2.getY()));
-                    }
-                    GridFragment f1 = getGrid();
-                    if (f1 != null
-                            && f1.contains((int) e2.getRawX(),
-                            (int) e2.getRawY())) {
-                        standbyRegistration();
-                        return true;
-                    }
-                    getEditor().onScroll(getVector(-distanceX, -distanceY),
-                            getPosition(e2.getX(), e2.getY()));
-                    return false;
-                }
-
-
-                @Override
-                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-                                       float velocityY) {
-                    return getEditor().onFling(getPosition(e2.getRawX(), e2.getRawY()), velocityX, velocityY);
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    getEditor().onLongPress();
-                    setMode(CAPTURED);
-                }
-            });
-        }
-
-        /**
-         * @return the editor
-         */
-        public TapChainEditor getEditor() {
-            return editor;
-        }
-
-//        private void setSize(int max_x, int max_y) {
-//            this.max_x = max_x;
-//            this.max_y = max_y;
-//        }
-
-        public Actor onAdd(FACTORY_KEY key, String tag) {
-            return onAdd(key, tag, null, null);
-        }
-
-        public Actor onAdd(FACTORY_KEY key, String tag, float x, float y) {
-            return onAdd(key, tag, getPosition(x, y), null);
-        }
-
-        public Actor onAdd(FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
-            return onAdd(key, tag, getPosition(x, y), null);
-        }
-
-
-        public Actor onAdd(FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
-            EditorReturn editorReturn = getEditor().onAdd(key, tag, pos);
-            if (editorReturn == null)
-                return null;
-            if(vec == null)
-                return editorReturn.getActor();
-            getEditor().captureTap(editorReturn.getTap());
-            getEditor().onFling(pos, vec.x(), vec.y());
-            return editorReturn.getActor();
-        }
-
-        public Actor onAdd(FACTORY_KEY key, int code) {
-            return onAdd(key, code, null, null);
-        }
-
-        public Actor onAdd(FACTORY_KEY key, int code, float x, float y) {
-            return onAdd(key, code, getPosition(x, y), null);
-        }
-
-        public Actor onAdd(FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
-            return onAdd(key, code, getPosition(x, y), new WorldPoint(vx, vy));
-        }
-
-        public Actor onAdd(FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
-            EditorReturn editorReturn = getEditor().onAdd(key, code, pos);
-            if (editorReturn == null)
-                return null;
-            if(vec == null)
-                return editorReturn.getActor();
-            getEditor().captureTap(editorReturn.getTap());
-            getEditor().onFling(pos, vec.x(), vec.y());
-            return editorReturn.getActor();
-        }
-
-//        public void onDummyAdd(FACTORY_KEY key, int num, float x, float y) {
-//            getEditor().addDummy(key, num, getPosition(x, y));
-//        }
-//
-//        public void onDummyMoveTo(float x, float y) {
-//            getEditor().scrollDummy(getPosition(x, y));
-//        }
-//
-//        public void onDummyRemove() {
-//            getEditor().removeDummy();
-//        }
-
-        public void sendUpEvent(IPoint point) {
-            getEditor().onUp(point);
-        }
-
-        int initNum = 0;
-        boolean standby = false;
-        public void standbyRegistration() {
-            GridFragment f1 = getGrid();
-            if (standby || f1 == null) {
-                return;
-            }
-            Factory f = f1.getCurrentFactory();
-//				f.Register(f.get(0));
-            IBlueprintInitialization i = getEditor().standbyRegistration(f);
-            standby = true;
-            if (i == null) {
-                return;
-            }
-            try {
-                FileOutputStream fos = openFileOutput(String.format("SaveData%d.dat", initNum), MODE_MULTI_PROCESS);
-//                        Log.w("test", String.format("num = %d, tag = %s", initNum, i.getTag()));
-                inclementInitNum();
-                ObjectOutputStream oos = new ObjectOutputStream(fos);
-                oos.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void resetRegistration() {
-            standby = false;
-        }
-
-        public void deleteRegistration() {
-            for (int i = 0; i < initNum; i++)
-                if (!deleteFile(String.format("SaveData%d.dat", i)))
-                    break;
-            initNum = 0;
-        }
-
-        public void inclementInitNum() {
-            initNum++;
-        }
-
-        public void registerBlueprint(IBlueprintInitialization bi) {
-            GridFragment f1 = getGrid();
-            if (f1 != null) {
-                Factory f = f1.getCurrentFactory();
-//                getEditor().registerBlueprint(f, bi);
-            }
-        }
-
-        @Override
-        public boolean onSecondTouch(final IPoint wp) {
-            return getEditor().onLockedScroll(wp);
-        }
-    }
-
-    public class UserView extends TapChainSurfaceView {
-        GradientDrawable mGradient, mGradient2;
-        Rect r = new Rect();
-
-        UserView(Context context) {
-            super(context);
-            mGradient = new GradientDrawable(Orientation.LEFT_RIGHT, new int[]{
-                    0xff303030, 0xff777777});
-            mGradient2 = new GradientDrawable(Orientation.RIGHT_LEFT,
-                    new int[]{0xff303030, 0xff777777});
-            paint.setColor(0xff303030);
-            paint.setStyle(Style.FILL);
-        }
-
-        @Override
-        public void paintBackground(Canvas canvas) {
-            canvas.drawRect(r,
-                    paint);
-            return;
-        }
-
-        @Override
-        public void myDraw(Canvas canvas) {
-            getEditor().userShow(canvas);
-            canvas.drawText("Goal = " + TapChainGoalTap.printState(), 20, 100,
-                    paint_text);
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                                   int height) {
-            int xmax = getWidth(), ymax = getHeight();
-            int xcenter = xmax / 2;
-            r.set(0, 0, xmax, ymax);
-            mGradient.setBounds(new Rect(0, 0, xcenter, ymax));
-            mGradient2.setBounds(new Rect(xcenter, 0, xmax, ymax));
-            super.surfaceChanged(holder, format, width, height);
-        }
-    }
-
-    abstract class TapChainSurfaceView
-            // extends TextureView implements
-            extends SurfaceView implements SurfaceHolder.Callback,
-            IWindow, ISensorView {
-        protected GestureDetector gdetect;
-        Matrix matrix = new Matrix();
-        Matrix inverse = new Matrix();
-        Paint paint = new Paint(), paint_text = new Paint();
-        WorldPoint window_size = new WorldPoint();
-        String log = "";
-        TextPaint mTextPaint = new TextPaint();
-        StaticLayout mTextLayout;
-
-        public TapChainSurfaceView(Context context) {
-            super(context);
-//			gdetect = new GestureDetector(context, this);
-            SurfaceHolder holder = getHolder();
-            holder.setFormat(PixelFormat.TRANSPARENT);
-            holder.addCallback(this);
-            paint_text.setColor(0xff000000);
-            paint_text.setTextSize(20);
-            paint.setColor(0xff444444);
-            mTextPaint.setTextSize(20);
-            mTextLayout = new StaticLayout("", mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-            setFocusable(true);
-            requestFocus();
-        }
-
-        public void onDraw() {
-            TapChainView.this.runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    Canvas canvas = null;
-                    try {
-                        canvas = getHolder().lockCanvas();
-                        if (canvas == null) {
-                            return;
-                        }
-                        paintBackground(canvas);
-                        myDraw(canvas);
-                        canvas.drawText(
-                                "View = "
-                                        + Integer.toString(getEditor()
-                                        .editTap().getChain()
-                                        .getViewNum()), 20, 20,
-                                paint_text);
-                        canvas.drawText(
-                                "Effect = "
-                                        + Integer.toString(getEditor()
-                                        .editTap().getChain()
-                                        .getPieces().size()), 20,
-                                40, paint_text);
-                        canvas.drawText(
-                                "UserView = "
-                                        + Integer.toString(getEditor()
-                                        .edit()
-                                        .getChain().getViewNum()),
-                                20, 60, paint_text);
-                        canvas.drawText(
-                                "UserEffect = "
-                                        + Integer.toString(getEditor()
-                                        .edit()
-                                        .getChain().getPieces()
-                                        .size()), 20, 80,
-                                paint_text);
-//						canvas.drawText("Log = "+log, 20, 120, paint_text);
-                        canvas.save();
-                        canvas.translate(20, 120);
-                        mTextLayout.draw(canvas);
-                        canvas.restore();
-                    } finally {
-                        if (canvas != null)
-                            getHolder().unlockCanvasAndPost(canvas);
-                    }
-
-                }
-
-            });
-        }
-
-        public abstract void myDraw(Canvas canvas);
-
-        StringBuilder buf = new StringBuilder();
-
-        public void log(String... strings) {
-            for (String s : strings) {
-                buf.append(s);
-            }
-            buf.append("\n");
-            if (buf.length() > 300)
-                buf.delete(0, buf.length() - 300);
-            log = buf.toString();
-            mTextLayout = new StaticLayout(log, mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        }
-
-        public void paintBackground(Canvas canvas) {
-            return;
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                                   int height) {
-            window_size.x = getWidth();
-            window_size.y = getHeight();
-            getEditor().kickTapDraw(null);
-        }
-
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            window_size.x = getWidth();
-            window_size.y = getHeight();
-            getEditor().kickTapDraw(null);
-        }
-
-        static final int NONE = 0;
-        static final int ZOOM = 1;
-        static final int CAPTURED = 2;
-        static final String TAG = "ACTION";
-        int mode = NONE;
-        float oldDist = 0f;
-        Matrix savedMatrix = new Matrix();
-        PointF mid = new PointF();
-
-        private float spacing(MotionEvent event) {
-            float x = event.getX(0) - event.getX(1);
-            float y = event.getY(0) - event.getY(1);
-            return (float) sqrt(x * x + y * y);
-        }
-
-        private void midPoint(PointF point, MotionEvent event) {
-            float x = event.getX(0) + event.getX(1);
-            float y = event.getY(0) + event.getY(1);
-            point.set(x / 2, y / 2);
-        }
-
-        public boolean onTouchEvent(MotionEvent ev) {
-            if (gdetect.onTouchEvent(ev))
-                return true;
-            int action = ev.getAction();
-            switch (action & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_DOWN:
-                    break;
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    savedMatrix.set(matrix);
-                    oldDist = spacing(ev);
-                    Log.d(TAG, "oldDist=" + oldDist);
-                    midPoint(mid, ev);
-                    if (oldDist > 10f) {
-                        mode = ZOOM;
-                        Log.d(TAG, "mode=ZOOM");
-                        getCanvas().sendUpEvent(getPosition(ev.getX(), ev.getY()));
-                    }
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (mode == ZOOM) {
-                        float newDist = spacing(ev);
-                        matrix.set(savedMatrix);
-                        if (newDist > 10f) {
-                            float scale = newDist / oldDist;
-                            midPoint(mid, ev);
-                            matrix.postScale(scale, scale, mid.x, mid.y);
-                        }
-                    } else if (mode == CAPTURED) {
-                        onSecondTouch(getPosition(ev.getX(), ev.getY()));
-                        break;
-                    }
-
-                    break;
-                case MotionEvent.ACTION_UP:
-                    mode = NONE;
-                    getEditor().onUp(getPosition(ev.getX(), ev.getY()));
-                    break;
-                case MotionEvent.ACTION_POINTER_UP:
-                    mode = NONE;
-                    matrix.invert(inverse);
-                    break;
-            }
-            return true;
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-        }
-
-        @Override
-        public void move(float vx, float vy) {
-            IPoint v = getScreenVector(-vx, -vy);
-            matrix.postTranslate(v.x(), v.y());
-            matrix.invert(inverse);
-        }
-
-        @Override
-        public boolean isInWindow(float x, float y) {
-            IPoint d = getScreenPosition(x, y);
-            if (size.x < d.x() || 0 > d.x() || size.y < d.y() || 0 > d.y()) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public IPoint getMiddlePoint() {
-            return getPosition(size.x/2f, size.y/2f);
-        }
-
-        protected void setMode(int _mode) {
-            mode = _mode;
-        }
-
-        public IPoint getPosition(float x, float y) {
-            return TapChainView.getPosition(x, y, inverse);
-        }
-
-        public IPoint getVector(float x, float y) {
-            return TapChainView.getVector(x, y, inverse);
-        }
-
-        public IPoint getScreenVector(float x, float y) {
-            return TapChainView.getVector(x, y, matrix);
-        }
-
-        public IPoint getScreenPosition(float x, float y) {
-            return TapChainView.getPosition(x, y, matrix);
-        }
-
-        public boolean onSecondTouch(final IPoint iPoint) {
-            return false;
-        }
-
-        @Override
-        public void showPalette(final PaletteSort sort) {
-            ((Activity) getContext()).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (getGrid() != null)
-                        getGrid().setCurrentFactory(sort.getNum());
-                }
-            });
-        }
-
-        @Override
-        public IPoint getTilt() {
-            return TapChainView.this.getTilt();
-        }
-
-        @Override
-        public void shake(int interval) {
-            TapChainView.this.shake(interval);
-        }
-    }
-
-    public IWindow getActorWindow() {
-        return getCanvas();
-    }
-
-    public static IPoint getPosition(float x, float y, Matrix matrix) {
-        float[] pos = new float[]{x, y};
-        matrix.mapPoints(pos);
-        return new WorldPoint(pos[0], pos[1]);
-
-    }
-
-    public static IPoint getVector(float x, float y, Matrix matrix) {
-        float[] pos = new float[]{x, y};
-        matrix.mapVectors(pos);
-        return new WorldPoint(pos[0], pos[1]).setDif();
-    }
-
-    public void recoverFactory() {
-        try {
-            for (int i = 0; true; i++) {
-                FileInputStream fis = openFileInput(String.format("SaveData%d.dat", i));
-                if (fis == null)
-                    break;
-                getCanvas().inclementInitNum();
-                ObjectInputStream ois = new ObjectInputStream(fis);
-                BlueprintInitialization data = (BlueprintInitialization) ois.readObject();
-                ois.close();
-                if (data != null) {
-//                    if (data.getObject() != null)
-//                        Log.w("test", String.format("recoverFactory tag = %s, obj = %s", data.getTag(), data.getObject().toString()));
-                    getCanvas().registerBlueprint(data);
-                } else {
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
 }
