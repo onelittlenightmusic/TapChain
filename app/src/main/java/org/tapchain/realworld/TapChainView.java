@@ -1,6 +1,8 @@
 package org.tapchain.realworld;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -26,9 +28,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Vibrator;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -97,7 +96,7 @@ import java.util.HashMap;
 
 import static java.lang.Math.sqrt;
 
-public class TapChainView extends FragmentActivity implements
+public class TapChainView extends Activity implements
         SensorEventListener, ISensorView {
     static final String VIEW_SELECT = "SELECT";
     static final String X = "LOCATIONX", V = "VIEWS";
@@ -107,11 +106,11 @@ public class TapChainView extends FragmentActivity implements
     FrameLayout viewControl = null;
     SensorManager sensorManager;
     private Sensor accelerometer;
-    //	Handler mq = new Handler();
     SparseArray<IntentHandler> intentHandlers = new SparseArray<>();
     static Activity now;
     public static int tapOffset = 10000;
     private TapChainEditor editor;
+    String CANVAS_TAG = "Canvas";
 
     public static Activity getNow() {
         return now;
@@ -122,9 +121,9 @@ public class TapChainView extends FragmentActivity implements
     public void onSaveInstanceState(Bundle out) {
         RectF r = new RectF(RF);
         getCanvas().matrix.mapRect(r);
-        out.putParcelable(X, r);
-        out.putParcelableArray(V,
-                getEditor().getTaps().toArray(new Parcelable[0]));
+//        out.putParcelable(X, r);
+//        out.putParcelableArray(V,
+//                getEditor().getTaps().toArray(new Parcelable[0]));
     }
 
 
@@ -141,19 +140,6 @@ public class TapChainView extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         now = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        viewCanvas = new CanvasViewImpl2(this);
-//        viewUser = new UserView(this);
-        if (savedInstanceState != null) {
-            getCanvas().matrix.setRectToRect(RF,
-                    (RectF) savedInstanceState.getParcelable(X),
-                    Matrix.ScaleToFit.FILL);
-            getCanvas().matrix.invert(getCanvas().inverse);
-            Parcelable[] p = savedInstanceState.getParcelableArray(V);
-            int i = 0;
-            for (IActorTap v : getEditor().editorManager.getTaps()) {
-                v.setCenter(((AndroidView) p[i++]).getCenter());
-            }
-        }
 
         FrameLayout rootview = new FrameLayout(this);
         FrameLayout root = new FrameLayout(this);
@@ -213,9 +199,13 @@ public class TapChainView extends FragmentActivity implements
                         finish();
                     }
                 });
-        rootview.addView(getCanvas(), new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
+//        if(viewCanvas == null) {
+//            viewCanvas = new CanvasViewImpl2(this);
+////            Log.w("test", "onCreate", new Throwable());
+//        }
+//        rootview.addView(getCanvas(), new LayoutParams(
+//                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+//        rootview.setId(0x00001236);
         root.addView(rootview);
         root.addView(viewControl, new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
@@ -224,12 +214,31 @@ public class TapChainView extends FragmentActivity implements
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
+
+        LinearLayout l2 = new LinearLayout(this);
+        rootview.addView(l2);
+        l2.setId(0x00001236);
+
         LinearLayout l = new LinearLayout(this);
         rootview.addView(l);
         l.setGravity(Gravity.BOTTOM | Gravity.RIGHT);
         l.setId(0x00001234);
-        new GridFragment().setContext(this).show(GridShow.HIDE);
 
+        CanvasFragment canvas;
+//        if (savedInstanceState == null) {
+        if(getFragmentManager().findFragmentByTag(CANVAS_TAG) == null) {
+            canvas = new CanvasFragment();
+            Log.w("test", "onCreate", new Throwable());
+            viewCanvas = canvas.setContext(this).view;
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+//            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            ft.replace(0x00001236, canvas, CANVAS_TAG);
+//            view.setLayoutParams(
+//                    new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+//            ft.show(this);
+            ft.commit();
+        }
+        new GridFragment().setContext(this).show(GridShow.HIDE);
     }
 
     int leftnum = 100, rightnum = 200;
@@ -274,7 +283,7 @@ public class TapChainView extends FragmentActivity implements
     // 2.Getters and setters
     public GridFragment getGrid() {
         // [APIv11]
-        GridFragment f = (GridFragment) getSupportFragmentManager()
+        GridFragment f = (GridFragment) getFragmentManager()
                 .findFragmentByTag(VIEW_SELECT);
         return f;
     }
@@ -286,7 +295,7 @@ public class TapChainView extends FragmentActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        getEditor().reset();
+//        getEditor().reset();
 //        Log.i("TapChainView.state", "onStop");
         if (sensorManager != null)
             sensorManager.unregisterListener(this);
@@ -452,16 +461,42 @@ public class TapChainView extends FragmentActivity implements
             getGrid().setCurrentFactory(sort.getNum());
     }
 
+    public static class CanvasFragment extends Fragment {
+        CanvasViewImpl2 view;
+        TapChainView act;
+        String tag = "Canvas";
+        public CanvasFragment() {
+            super();
+//            setRetainInstance(true);
+        }
+
+        public CanvasFragment setContext(TapChainView a) {
+            this.act = a;
+            view = act.new CanvasViewImpl2(act);
+            return this;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            if(view == null)
+                view = act.new CanvasViewImpl2(act);
+            return this.view;
+        }
+
+    }
+
     public class CanvasViewImpl2 extends WritingView {
-        GradientDrawable mGradient, mGradient2;
         Rect r = new Rect();
 
         public CanvasViewImpl2(Context context) {
             super(context);
-            mGradient = new GradientDrawable(Orientation.LEFT_RIGHT, new int[]{
-                    0xff303030, 0xff777777});
-            mGradient2 = new GradientDrawable(Orientation.RIGHT_LEFT,
-                    new int[]{0xff303030, 0xff777777});
             paint.setColor(0xff303030);
             paint.setStyle(Style.FILL);
         }
@@ -469,8 +504,7 @@ public class TapChainView extends FragmentActivity implements
 
         @Override
         public void paintBackground(Canvas canvas) {
-            canvas.drawRect(r,
-                    paint);
+            canvas.drawRect(r, paint);
             return;
         }
 
@@ -478,16 +512,13 @@ public class TapChainView extends FragmentActivity implements
         public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                    int height) {
             int xmax = getWidth(), ymax = getHeight();
-            int xcenter = xmax / 2;
             r.set(0, 0, xmax, ymax);
-            mGradient.setBounds(new Rect(0, 0, xcenter, ymax));
-            mGradient2.setBounds(new Rect(xcenter, 0, xmax, ymax));
             super.surfaceChanged(holder, format, width, height);
         }
 
         @Override
         public void myDraw(Canvas canvas) {
-            getEditor().userShow(canvas);
+//            getEditor().userShow(canvas);
             canvas.drawText("Goal = " + TapChainGoalTap.printState(), 20, 100,
                     paint_text);
             canvas.setMatrix(matrix);
@@ -1061,10 +1092,10 @@ public class TapChainView extends FragmentActivity implements
 
         public void show(GridShow _show) {
             show = _show;
-            FragmentTransaction ft = act.getSupportFragmentManager()
+            FragmentTransaction ft = act.getFragmentManager()
                     .beginTransaction();
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            if (this != act.getSupportFragmentManager().findFragmentByTag(tag)) {
+            if (this != act.getFragmentManager().findFragmentByTag(tag)) {
                 ft.replace(0x00001234, this, tag);
             }
             switch (_show) {

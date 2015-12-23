@@ -612,16 +612,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 
-	public interface Tickable<T> {
-		int onTick(T t, Packet obj);
-	}
-
-	public interface Pushable<T> {
-		boolean onPush(T t, Object obj, ActorManager actorManager);
-	}
-
-
-	public IBlueprintInitialization standbyRegistration(Factory<?> f, IActorTap selected) {
+    public IBlueprintInitialization standbyRegistration(Factory<?> f, IActorTap selected) {
         if(selected == null)
             return null;
         IBlueprintInitialization data = null;

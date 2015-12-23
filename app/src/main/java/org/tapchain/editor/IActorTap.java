@@ -4,16 +4,10 @@ import java.util.Collection;
 
 import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.ControllableSignal;
-import org.tapchain.core.ActorChain.IView;
-import org.tapchain.core.IActorBlueprint;
-import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
-import org.tapchain.core.Piece;
-import org.tapchain.editor.TapChainEditor.Pushable;
-import org.tapchain.editor.TapChainEditor.Tickable;
 
 public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap, IPiece<Actor> {
 	ControllableSignal interrupt(ControllableSignal end);

@@ -7,7 +7,6 @@ import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.Actor.ControllableSignal;
 import org.tapchain.core.ActorChain.IView;
-import org.tapchain.editor.TapChainEditor.Tickable;
 
 public interface IPathTap extends IView, IPiece<Actor>, Tickable<IPath>, ITap {
 	void setMyPath(IPath path);
