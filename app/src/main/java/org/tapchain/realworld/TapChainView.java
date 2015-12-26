@@ -2,6 +2,7 @@ package org.tapchain.realworld;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
@@ -143,7 +144,6 @@ public class TapChainView extends Activity implements
 
         FrameLayout rootview = new FrameLayout(this);
         FrameLayout root = new FrameLayout(this);
-        setContentView(root);
         viewControl = new FrameLayout(this);
         RelativeLayout view_bottom_left = new RelativeLayout(this);
         addButton(view_bottom_left, R.drawable.dust, true,
@@ -218,6 +218,7 @@ public class TapChainView extends Activity implements
         LinearLayout l2 = new LinearLayout(this);
         rootview.addView(l2);
         l2.setId(0x00001236);
+        l2.setTag("Canvas");
 
         LinearLayout l = new LinearLayout(this);
         rootview.addView(l);
@@ -226,19 +227,25 @@ public class TapChainView extends Activity implements
 
         CanvasFragment canvas;
 //        if (savedInstanceState == null) {
-        if(getFragmentManager().findFragmentByTag(CANVAS_TAG) == null) {
-            canvas = new CanvasFragment();
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        if(fm.findFragmentByTag(CANVAS_TAG) == null) {
+            canvas = (CanvasFragment)Fragment.instantiate(this, CanvasFragment.class.getName());
             Log.w("test", "onCreate", new Throwable());
             viewCanvas = canvas.setContext(this).view;
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-//            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             ft.replace(0x00001236, canvas, CANVAS_TAG);
-//            view.setLayoutParams(
-//                    new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-//            ft.show(this);
-            ft.commit();
+//        } else {
+//            ft.attach(canvas);
+        }
+        ft.commit();
+        for(int entry = 0; entry < fm.getBackStackEntryCount(); entry++){
+            Log.w("Test", "Found fragment: " + fm.getBackStackEntryAt(entry).getId());
         }
         new GridFragment().setContext(this).show(GridShow.HIDE);
+        setContentView(root);
+
+//        setContentView(R.layout.activity_main);
+
     }
 
     int leftnum = 100, rightnum = 200;
@@ -357,11 +364,6 @@ public class TapChainView extends Activity implements
     WorldPoint gravity = new WorldPoint();
 
     @Override
-    public IPoint getTilt() {
-        return gravity.set(-currentAccelerationValues[0], currentAccelerationValues[1]);
-    }
-
-    @Override
     public void shake(int interval) {
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(interval);
@@ -467,7 +469,7 @@ public class TapChainView extends Activity implements
         String tag = "Canvas";
         public CanvasFragment() {
             super();
-//            setRetainInstance(true);
+            setRetainInstance(true);
         }
 
         public CanvasFragment setContext(TapChainView a) {
@@ -479,7 +481,7 @@ public class TapChainView extends Activity implements
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setRetainInstance(true);
+//            setRetainInstance(true);
         }
 
         @Override
@@ -939,11 +941,6 @@ public class TapChainView extends Activity implements
         }
 
         @Override
-        public IPoint getTilt() {
-            return TapChainView.this.getTilt();
-        }
-
-        @Override
         public void shake(int interval) {
             TapChainView.this.shake(interval);
         }
@@ -979,6 +976,7 @@ public class TapChainView extends Activity implements
 
         public GridFragment() {
             super();
+            setRetainInstance(true);
         }
 
         public GridFragment setContext(TapChainView a) {
