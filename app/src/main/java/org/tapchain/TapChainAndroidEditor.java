@@ -285,6 +285,10 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //        freezeToggle();
     }
 
+    public void setActivity(Activity act) {
+        this.act = act;
+    }
+
     // 2.Getters and setters
 
     @Override

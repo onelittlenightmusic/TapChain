@@ -132,14 +132,21 @@ public class MainActivity extends AppCompatActivity implements
 //        l.setGravity(Gravity.BOTTOM | Gravity.RIGHT);
 //        l.setId(0x00001234);
 
-        CanvasFragment canvas;
+        Fragment fragment;
+        CanvasFragment canvasFragment;
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        if(fm.findFragmentByTag(CANVAS_TAG) == null) {
-            canvas = (CanvasFragment)Fragment.instantiate(this, CanvasFragment.class.getName());
+        fragment = fm.findFragmentByTag(CANVAS_TAG);
+        if(fragment == null) {
+            fragment = Fragment.instantiate(this, CanvasFragment.class.getName());
             Log.w("test", "onCreate", new Throwable());
-            viewCanvas = canvas.setContext(this).view;
-            ft.replace(R.id.fragment, canvas, CANVAS_TAG);
+            canvasFragment = (CanvasFragment)fragment;
+            viewCanvas = canvasFragment.setContext(this).view;
+            ft.replace(R.id.fragment, fragment, CANVAS_TAG);
+        } else {
+            ft.attach(fragment);
+            canvasFragment = (CanvasFragment)fragment;
+            viewCanvas = canvasFragment.setContext(this).view;
         }
         ft.commit();
         new GridFragment().setContext(this).show(GridShow.HIDE);
@@ -230,10 +237,11 @@ public class MainActivity extends AppCompatActivity implements
             super(context);
             paint.setColor(0xff303030);
             paint.setStyle(Paint.Style.FILL);
-            editor = new TapChainAndroidEditor(this, getResources(), MainActivity.this);
-            editor.kickTapDraw(null);
         }
 
+        public void setEditor(TapChainEditor editor) {
+            this.editor = editor;
+        }
 
         @Override
         public void paintBackground(Canvas canvas) {
