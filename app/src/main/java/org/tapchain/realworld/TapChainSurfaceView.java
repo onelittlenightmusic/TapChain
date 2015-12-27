@@ -11,6 +11,7 @@ import android.graphics.PointF;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -48,7 +49,6 @@ public abstract class TapChainSurfaceView
     float oldDist = 0f;
     Matrix savedMatrix = new Matrix();
     PointF mid = new PointF();
-    Point size = new Point();
 
     public TapChainSurfaceView(Context context) {
         super(context);
@@ -157,15 +157,16 @@ public abstract class TapChainSurfaceView
     @Override
     public boolean isInWindow(float x, float y) {
         IPoint d = getScreenPosition(x, y);
-        if (size.x < d.x() || 0 > d.x() || size.y < d.y() || 0 > d.y()) {
+        if (window_size.x() < d.x() || 0 > d.x() || window_size.y() < d.y() || 0 > d.y()) {
             return false;
         }
         return true;
     }
 
+
     @Override
     public IPoint getMiddlePoint() {
-        return getPosition(size.x / 2f, size.y / 2f);
+        return getPosition(window_size.x / 2f, window_size.y / 2f);
     }
 
     protected void setMode(int _mode) {

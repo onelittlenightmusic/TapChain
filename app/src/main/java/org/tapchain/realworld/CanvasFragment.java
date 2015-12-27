@@ -1,7 +1,10 @@
 package org.tapchain.realworld;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +18,11 @@ import org.tapchain.editor.TapChainEditor;
 public class CanvasFragment extends Fragment {
     MainActivity.CanvasViewImpl2 view;
     MainActivity act;
-    String tag = "Canvas";
+    static String CANVAS = "Canvas";
     TapChainEditor editor;
 
     public CanvasFragment() {
         super();
-
 //        setRetainInstance(true);
     }
 
@@ -59,4 +61,9 @@ public class CanvasFragment extends Fragment {
         return this.view;
     }
 
+    public static CanvasFragment getCanvas(MainActivity act) {
+        CanvasFragment f = (CanvasFragment) act.getFragmentManager()
+                .findFragmentByTag(CANVAS);
+        return f;
+    }
 }

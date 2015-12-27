@@ -12,6 +12,7 @@ import android.graphics.RectF;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -28,6 +29,7 @@ import org.tapchain.TapChainGoalTap;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IBlueprintInitialization;
+import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.TapChainEditor;
@@ -215,6 +217,11 @@ public class MainActivity extends AppCompatActivity implements
     // 2.Getters and setters
     public GridFragment getGrid() {
         GridFragment f = GridFragment.getGrid(this);
+        return f;
+    }
+
+    public CanvasFragment getCanvas() {
+        CanvasFragment f = CanvasFragment.getCanvas(this);
         return f;
     }
 
