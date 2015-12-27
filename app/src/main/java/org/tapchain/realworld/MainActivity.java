@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 
@@ -51,88 +52,6 @@ public class MainActivity extends AppCompatActivity implements
 //        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-//        FrameLayout rootview = new FrameLayout(this);
-//        FrameLayout root = new FrameLayout(this);
-//        viewControl = new FrameLayout(this);
-//        RelativeLayout view_bottom_left = new RelativeLayout(this);
-//        addButton(view_bottom_left, R.drawable.dust, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        getEditor().reset();
-//                    }
-//                });
-//        addButton(view_bottom_left, R.drawable.stop, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        if (getEditor().freezeToggle())
-//                            ((ImageView) v).setImageResource(R.drawable.stop);
-//                        else
-//                            ((ImageView) v).setImageResource(R.drawable.start);
-//                    }
-//                });
-//        addButton(view_bottom_left, R.drawable.pullup, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        boolean gridshow = false;
-//                        GridFragment f = getGrid();
-//                        if (f != null) {
-//                            gridshow = f.toggle();
-//                        }
-//                        if (gridshow)
-//                            ((ImageView) v)
-//                                    .setImageResource(R.drawable.pulldown);
-//                        else
-//                            ((ImageView) v).setImageResource(R.drawable.pullup);
-//                    }
-//                });
-//        addButton(view_bottom_left, R.drawable.config, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        try {
-//                            Log.w("JSON TEST", getEditor().edit().getChain().toJSON().toString());
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                });
-//        viewControl.addView(view_bottom_left, new ViewGroup.LayoutParams(
-//                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//        addButton(view_bottom_left, R.drawable.no, false,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        finish();
-//                    }
-//                });
-////        if(viewCanvas == null) {
-////            viewCanvas = new CanvasViewImpl2(this);
-//////            Log.w("test", "onCreate", new Throwable());
-////        }
-////        rootview.addView(getCanvas(), new LayoutParams(
-////                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-////        rootview.setId(0x00001236);
-//        root.addView(rootview);
-//        root.addView(viewControl, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-//                ViewGroup.LayoutParams.MATCH_PARENT));
-//        root.setId(0x00001235);
-//        root.setTag("OVERLAY");
-//
-//        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//
-//
-//        LinearLayout l2 = new LinearLayout(this);
-//        rootview.addView(l2);
-//        l2.setId(0x00001236);
-//        l2.setTag("Canvas");
-//
-//        LinearLayout l = new LinearLayout(this);
-//        rootview.addView(l);
-//        l.setGravity(Gravity.BOTTOM | Gravity.RIGHT);
-//        l.setId(0x00001234);
 
         Fragment fragment;
         CanvasFragment canvasFragment;
@@ -225,6 +144,14 @@ public class MainActivity extends AppCompatActivity implements
         return f;
     }
 
+    public void finishThisFromOutside() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                MainActivity.this.finish();
+            }
+        });
+    }
 
     public TapChainEditor getEditor() {
         return viewCanvas.getEditor();
