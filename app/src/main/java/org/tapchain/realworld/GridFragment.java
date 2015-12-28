@@ -46,9 +46,16 @@ public class GridFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle saved) {
         // Log.i("TapChain", "GridFragment#onCreateView called");
+        Activity act = getActivity();
         LinearLayout tabView;
         HorizontalScrollView scrollTitle;
         TabWidget tabWidget;
@@ -93,9 +100,7 @@ public class GridFragment extends Fragment {
         tabWidget.getChildAt(3).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GridFragment f = getGrid(act);
-                if (f != null)
-                    f.toggle();
+                toggle();
             }
         });
         darkMask = new FrameLayout(act);
@@ -115,7 +120,7 @@ public class GridFragment extends Fragment {
         ts.setIndicator(""/* label */, getResources().getDrawable(resource));
         ts.setContent(new TabHost.TabContentFactory() {
             public View createTabContent(String tag) {
-                return new ActorSelector(act, key, color);
+                return new ActorSelector(getActivity(), key, color);
             }
         });
         // ts1.setContent(new Intent(this,Tab1.class));
@@ -152,10 +157,10 @@ public class GridFragment extends Fragment {
         show = _show;
         FragmentTransaction ft = act.getFragmentManager()
                 .beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        if (this != act.getFragmentManager().findFragmentByTag(VIEW_SELECT)) {
-            ft.replace(R.id.fragment2, this, VIEW_SELECT);
-        }
+//        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//        if (this != act.getFragmentManager().findFragmentByTag(VIEW_SELECT)) {
+//            ft.replace(R.id.fragment2, this, VIEW_SELECT);
+//        }
         switch (_show) {
             case SHOW:
                 setSize(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -220,7 +225,7 @@ public class GridFragment extends Fragment {
 
     public Pair<Integer, Integer> checkDisplayAndRotate() {
         DisplayMetrics metrix = new DisplayMetrics();
-        act.getWindowManager().getDefaultDisplay().getMetrics(metrix);
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrix);
         if (metrix.widthPixels > metrix.heightPixels)
             return new Pair<>(metrix.widthPixels * 1 / 2,
                     ViewGroup.LayoutParams.MATCH_PARENT);
@@ -228,4 +233,11 @@ public class GridFragment extends Fragment {
                 metrix.heightPixels * 1 / 2);
     }
 
+    public static void create(MainActivity mainActivity) {
+        Fragment fragment = FragmentFactory.create(mainActivity, GridFragment.class, R.id.fragment2, VIEW_SELECT);
+        if(fragment == null)
+            return;
+        GridFragment grid = (GridFragment)fragment;
+        grid.setContext(mainActivity).show(GridShow.HIDE);
+    }
 }

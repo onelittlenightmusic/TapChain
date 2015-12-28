@@ -39,7 +39,6 @@ public abstract class WritingView extends TapChainSurfaceView {
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-//                    ((MainActivity) getContext()).setVisibility();
                 return false;
             }
 
@@ -137,62 +136,11 @@ public abstract class WritingView extends TapChainSurfaceView {
      * @return the editor
      */
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag) {
-        return onAdd(key, tag, null, null);
-    }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
-        return onAdd(key, tag, getPosition(x, y), null);
-    }
-
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
-        return onAdd(key, tag, getPosition(x, y), getVector(vx, vy));
-    }
-
-
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = getEditor().onAdd(key, tag, pos);
-        if (editorReturn == null)
-            return null;
-        if (vec == null)
-            return editorReturn.getActor();
-        getEditor().onFling(editorReturn.getTap(), pos, vec);
-        return editorReturn.getActor();
-    }
-
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code) {
-        return onAdd(key, code, null, null);
-    }
-
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code, float x, float y) {
-        return onAdd(key, code, getPosition(x, y), null);
-    }
-
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
-        return onAdd(key, code, getPosition(x, y), getVector(vx, vy));
-    }
-
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = getEditor().onAdd(key, code, pos);
-        if (editorReturn == null)
-            return null;
-        if (vec == null)
-            return editorReturn.getActor();
-        getEditor().onFling(editorReturn.getTap(), pos, vec);
-        return editorReturn.getActor();
-    }
-
-    int initNum = 0;
-    boolean standby = false;
 
     public abstract boolean standbyRegistration(IActorTap selected, int x, int y);
 
     public abstract void resetRegistration();
-
-    public void inclementInitNum() {
-        initNum++;
-    }
-
 
     @Override
     public boolean onSecondTouch(final IPoint wp) {
