@@ -249,9 +249,9 @@ public class TapChainAndroidEditor extends TapChainEditor {
                     public void view_init() throws ChainException {
                         IPoint p = (WorldPoint) pullInActor().getObject();
                         setCenter(p);
-                        Collection<IActorTap> t = searchRoomPieces(p);
+                        ITap t = searchTouchedTap(p);
                         int c = Color.BLACK;
-                        if (t != null && !t.isEmpty()) {
+                        if (t != null) {
                             c = Color.WHITE;
                         }
                         setColor(c);

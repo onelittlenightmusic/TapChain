@@ -17,6 +17,7 @@ import org.tapchain.core.IPoint;
  * Created by hiro on 2015/12/26.
  */
 public class ActorImage extends ImageView {
+    public static int tapOffset = 10000;
     AndroidActor.AndroidView v;
     IBlueprint b;
     Drawable a;
@@ -36,7 +37,7 @@ public class ActorImage extends ImageView {
         if (v != null) {
             setTag(v.getTag());
         }
-        setId(MainActivity.tapOffset + j);
+        setId(tapOffset + j);
     }
 
     public void registerToFactory() {

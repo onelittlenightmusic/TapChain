@@ -7,8 +7,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -20,14 +18,11 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.os.Vibrator;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -50,7 +45,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.HorizontalScrollView;
@@ -70,7 +64,6 @@ import org.tapchain.PaletteSort;
 import org.tapchain.TapChainAndroidEditor;
 import org.tapchain.TapChainGoalTap;
 import org.tapchain.core.Actor;
-import org.tapchain.core.BlueprintInitialization;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Factory;
 import org.tapchain.core.Factory.ValueChangeNotifier;
@@ -88,9 +81,7 @@ import org.tapchain.editor.TapChainEditor;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
 import org.tapchain.game.ISensorView;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -565,7 +556,7 @@ public class TapChainView extends Activity implements
 
                 @Override
                 public boolean onSingleTapConfirmed(MotionEvent e) {
-                    return getEditor().onSingleTapConfirmed(getPosition(e.getX(), e.getY()));
+                    return getEditor().onSingleTouch(getPosition(e.getX(), e.getY()));
                 }
 
                 @Override
@@ -581,7 +572,7 @@ public class TapChainView extends Activity implements
                         standbyRegistration(selected);
                         return true;
                     }
-                    getEditor().onScroll(selected, getVector(-distanceX, -distanceY),
+                    getEditor().scroll(selected, getVector(-distanceX, -distanceY),
                             getPosition(e2.getX(), e2.getY()));
                     return false;
                 }
@@ -590,7 +581,7 @@ public class TapChainView extends Activity implements
                 @Override
                 public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                        float velocityY) {
-                    return getEditor().onFling(selected, getPosition(e2.getRawX(), e2.getRawY()), getVector(velocityX, velocityY));
+                    return getEditor().onFling(selected, getVector(velocityX, velocityY));
                 }
 
                 @Override
@@ -674,12 +665,12 @@ public class TapChainView extends Activity implements
 
 
         public Actor onAdd(FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
-            EditorReturn editorReturn = getEditor().onAdd(key, tag, pos);
+            EditorReturn editorReturn = getEditor().addActorFromBlueprint(key, tag, pos);
             if (editorReturn == null)
                 return null;
             if(vec == null)
                 return editorReturn.getActor();
-            getEditor().onFling(editorReturn.getTap(), pos, vec);
+            getEditor().onFling(editorReturn.getTap(), vec);
             return editorReturn.getActor();
         }
 
@@ -696,12 +687,12 @@ public class TapChainView extends Activity implements
         }
 
         public Actor onAdd(FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
-            EditorReturn editorReturn = getEditor().onAdd(key, code, pos);
+            EditorReturn editorReturn = getEditor().addActorFromBlueprint(key, code, pos);
             if (editorReturn == null)
                 return null;
             if(vec == null)
                 return editorReturn.getActor();
-            getEditor().onFling(editorReturn.getTap(), pos, vec);
+            getEditor().onFling(editorReturn.getTap(), vec);
             return editorReturn.getActor();
         }
 

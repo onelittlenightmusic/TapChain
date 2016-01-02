@@ -2,10 +2,7 @@ package org.tapchain.realworld;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +14,9 @@ import org.tapchain.editor.EditorReturn;
 import org.tapchain.editor.TapChainEditor;
 
 /**
+ * CanvasFragment controls creation of canvas view and canvas model.
+ * CanvasFragment is set for retaining instance so that canvas model
+ * is not recreated.
  * Created by hiro on 2015/12/26.
  */
 public class CanvasFragment extends Fragment {
@@ -40,7 +40,7 @@ public class CanvasFragment extends Fragment {
 //            }
 //            view.setEditor(editor);
 //        }
-////        view.onAdd(TapChainEditor.FACTORY_KEY.ALL, "Number", 100, 300);
+////        view.addActorFromBlueprint(TapChainEditor.FACTORY_KEY.ALL, "Number", 100, 300);
 //        return this;
 //    }
 
@@ -71,48 +71,48 @@ public class CanvasFragment extends Fragment {
         return f;
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag) {
-        return onAdd(key, tag, null, null);
+    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
+        return add(key, tag, null, null);
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
-        return onAdd(key, tag, view.getPosition(x, y), null);
+    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
+        return add(key, tag, view.getPosition(x, y), null);
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
-        return onAdd(key, tag, view.getPosition(x, y), view.getVector(vx, vy));
+    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
+        return add(key, tag, view.getPosition(x, y), view.getVector(vx, vy));
     }
 
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = view.getEditor().onAdd(key, tag, pos);
+    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
+        EditorReturn editorReturn = view.getEditor().addActorFromBlueprint(key, tag, pos);
         if (editorReturn == null)
             return null;
         if (vec == null)
             return editorReturn.getActor();
-        view.getEditor().onFling(editorReturn.getTap(), pos, vec);
+        view.getEditor().onFling(editorReturn.getTap(), vec);
         return editorReturn.getActor();
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code) {
-        return onAdd(key, code, null, null);
+    public Actor add(TapChainEditor.FACTORY_KEY key, int code) {
+        return add(key, code, null, null);
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code, float x, float y) {
-        return onAdd(key, code, view.getPosition(x, y), null);
+    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y) {
+        return add(key, code, view.getPosition(x, y), null);
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
-        return onAdd(key, code, view.getPosition(x, y), view.getVector(vx, vy));
+    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
+        return add(key, code, view.getPosition(x, y), view.getVector(vx, vy));
     }
 
-    public Actor onAdd(TapChainEditor.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = view.getEditor().onAdd(key, code, pos);
+    public Actor add(TapChainEditor.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
+        EditorReturn editorReturn = view.getEditor().addActorFromBlueprint(key, code, pos);
         if (editorReturn == null)
             return null;
         if (vec == null)
             return editorReturn.getActor();
-        view.getEditor().onFling(editorReturn.getTap(), pos, vec);
+        view.getEditor().onFling(editorReturn.getTap(), vec);
         return editorReturn.getActor();
     }
 
@@ -120,7 +120,12 @@ public class CanvasFragment extends Fragment {
         return editor;
     }
 
-    public static void create(MainActivity mainActivity) {
-        FragmentFactory.create(mainActivity, CanvasFragment.class, R.id.fragment, CANVAS);
+    /**
+     * Create CanvasFragment into android layout.
+     * @param mainActivity Activity instance
+     * @param id layout object id into which CanvasFragment is inserted
+     */
+    public static void create(MainActivity mainActivity, int id) {
+        FragmentFactory.create(mainActivity, CanvasFragment.class, id, CANVAS);
     }
 }

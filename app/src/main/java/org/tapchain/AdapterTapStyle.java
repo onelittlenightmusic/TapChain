@@ -40,7 +40,7 @@ public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, I
 	
 	@Override
 	public boolean onRelease(IEditor edit, IPoint pos) {
-		edit.checkAndAttach(this);
+		edit.checkAndConnect(this);
         return true;
 	}
 }

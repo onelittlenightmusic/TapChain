@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
-    boolean checkAndAttach(VIEW selected);
+    boolean checkAndConnect(VIEW selected);
 
     Collection<VIEW> getTaps();
 
@@ -51,8 +51,6 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
     void lockReleaseTap(IRelease t);
 
     void unhighlightAllConnectables();
-
-    IActorSharedHandler getEventHandler();
 
     void shake(int duration);
 

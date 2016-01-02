@@ -39,11 +39,11 @@ public class GridFragment extends Fragment {
         setRetainInstance(true);
     }
 
-    public GridFragment setContext(MainActivity a) {
-        // Log.i("TapChain", "GridFragment#setContext called");
-        this.act = a;
-        return this;
-    }
+//    public GridFragment setContext(MainActivity a) {
+//        // Log.i("TapChain", "GridFragment#setContext called");
+//        this.act = a;
+//        return this;
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -155,12 +155,8 @@ public class GridFragment extends Fragment {
 
     public void show(GridShow _show) {
         show = _show;
-        FragmentTransaction ft = act.getFragmentManager()
+        FragmentTransaction ft = getActivity().getFragmentManager()
                 .beginTransaction();
-//        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//        if (this != act.getFragmentManager().findFragmentByTag(VIEW_SELECT)) {
-//            ft.replace(R.id.fragment2, this, VIEW_SELECT);
-//        }
         switch (_show) {
             case SHOW:
                 setSize(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -233,11 +229,12 @@ public class GridFragment extends Fragment {
                 metrix.heightPixels * 1 / 2);
     }
 
-    public static void create(MainActivity mainActivity) {
-        Fragment fragment = FragmentFactory.create(mainActivity, GridFragment.class, R.id.fragment2, VIEW_SELECT);
-        if(fragment == null)
-            return;
-        GridFragment grid = (GridFragment)fragment;
-        grid.setContext(mainActivity).show(GridShow.HIDE);
+    public static void create(MainActivity mainActivity, int id) {
+//        Fragment fragment =
+                FragmentFactory.create(mainActivity, GridFragment.class, id, VIEW_SELECT);
+//        if(fragment == null)
+//            return;
+//        GridFragment grid = (GridFragment)fragment;
+//        grid.setContext(mainActivity);//.show(GridShow.HIDE);
     }
 }

@@ -1,0 +1,8 @@
+org.tapchain
+org.tapchain.core
+org.tapchain.core.actors
+org.tapchain.editor
+org.tapchain.game
+org.tapchain.realworld
+org.tapchain.realworld.test
+org.tapchain.viewlib

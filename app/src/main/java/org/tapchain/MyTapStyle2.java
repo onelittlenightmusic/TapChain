@@ -338,7 +338,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     @Override
     public boolean onScrolled(IEditor edit, IPoint pos, IPoint vp) {
         setCenter(pos);
-//        if (edit.checkAndAttach(this, true)) {
+//        if (edit.checkAndConnect(this, true)) {
 //            edit.kickTapDraw(this);
 //            return true;
 //        }
@@ -499,7 +499,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
     @Override
     public boolean onRelease(IEditor edit, IPoint pos) {
-        edit.checkAndAttach(this);
+        edit.checkAndConnect(this);
         return true;
     }
 

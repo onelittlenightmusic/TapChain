@@ -8,7 +8,9 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.text.DynamicLayout;
 import android.text.Layout;
+import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
@@ -40,15 +42,15 @@ public abstract class TapChainSurfaceView
     WorldPoint window_size = new WorldPoint();
     String log = "";
     TextPaint mTextPaint = new TextPaint();
-    StaticLayout mTextLayout;
+    DynamicLayout mTextLayout;
     static final int NONE = 0;
     static final int ZOOM = 1;
     static final int CAPTURED = 2;
     static final String TAG = "ACTION";
     int mode = NONE;
     float oldDist = 0f;
-    Matrix savedMatrix = new Matrix();
     PointF mid = new PointF();
+    SpannableStringBuilder buf = new SpannableStringBuilder();
 
     public TapChainSurfaceView(Context context) {
         super(context);
@@ -60,7 +62,7 @@ public abstract class TapChainSurfaceView
         paint_text.setTextSize(20);
         paint.setColor(0xff444444);
         mTextPaint.setTextSize(20);
-        mTextLayout = new StaticLayout("", mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        mTextLayout = new DynamicLayout(buf, mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         setFocusable(true);
         requestFocus();
     }
@@ -78,10 +80,11 @@ public abstract class TapChainSurfaceView
                     }
                     paintBackground(canvas);
                     myDraw(canvas);
-//						canvas.drawText("Log = "+log, 20, 120, paint_text);
                     canvas.save();
                     canvas.translate(20, 120);
-                    mTextLayout.draw(canvas);
+                    synchronized (mTextLayout) {
+                        mTextLayout.draw(canvas);
+                    }
                     canvas.restore();
                 } finally {
                     if (canvas != null)
@@ -95,17 +98,16 @@ public abstract class TapChainSurfaceView
 
     public abstract void myDraw(Canvas canvas);
 
-    StringBuilder buf = new StringBuilder();
 
     public void log(String... strings) {
-        for (String s : strings) {
-            buf.append(s);
+        synchronized(mTextLayout) {
+            for (String s : strings) {
+                buf.append(s);
+            }
+            buf.append("\n");
+            if (buf.length() > 300)
+                buf.delete(0, buf.length() - 300);
         }
-        buf.append("\n");
-        if (buf.length() > 300)
-            buf.delete(0, buf.length() - 300);
-        log = buf.toString();
-        mTextLayout = new StaticLayout(log, mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
     }
 
     public void paintBackground(Canvas canvas) {

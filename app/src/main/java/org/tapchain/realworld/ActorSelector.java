@@ -16,6 +16,6 @@ public class ActorSelector extends GridView {
         setVerticalSpacing(0);
         setHorizontalSpacing(0);
         setNumColumns(GridView.AUTO_FIT);
-        setAdapter(new MainActivity.ViewAdapter(act, this, key));
+        setAdapter(new FactoryViewAdapter(act, this, key));
     }
 }

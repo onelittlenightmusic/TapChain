@@ -1,7 +1,6 @@
 package org.tapchain.editor;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.tapchain.ActorTap;
 import org.tapchain.IFocusable;
@@ -33,7 +32,6 @@ import org.tapchain.core.IScrollable;
 import org.tapchain.core.ISelectable;
 import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
-import org.tapchain.core.Packet;
 import org.tapchain.core.PathType;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.TapLib;
@@ -43,10 +41,14 @@ import org.tapchain.game.ISensorView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * TapChainEditor is a model for TapChain.
+ * TapChainEditor contains actor blueprints (Factory),
+ * style for tap instantiation and ActorManager for editing actors and taps.
+ */
 @SuppressWarnings("serial")
 public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		IActorEditor {
@@ -65,13 +67,12 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			.setParentType(PathType.OFFER).boost();
 	protected List<Geometry> geos = new ArrayList<Geometry>();
 	private IPoint nextConnectivityPoint = null;
-    ArrayList<IActorTap> family = new ArrayList<IActorTap>();
+//    ArrayList<IActorTap> family = new ArrayList<IActorTap>();
     ISensorView sensorView = null;
     public enum FACTORY_KEY {
         ALL, LOG, RELATIVES
     }
 
-	// 1.Initialization
 	protected TapChainEditor(IWindow w) {
 		setWindow(w);
 		goalBlueprintManager = new ActorBlueprintManager<Actor>(goalFactory);
@@ -85,14 +86,13 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 				@Override
 				public boolean actorRun(Actor act) throws ChainException {
 					if (getTarget() instanceof ActorTap)
-						checkAndAttach((ActorTap) getTarget());
+						checkAndConnect((ActorTap) getTarget());
 					return false;
 				}
 			}.setParentType(PathType.OFFER)
 					.setLinkClass(LinkType.PULL, Object.class).boost())
 			.teacher(move).save();
 		setLog(this);
-//		setError(this);
         factories.put(FACTORY_KEY.ALL, factory);
         factories.put(FACTORY_KEY.LOG, recent);
         factories.put(FACTORY_KEY.RELATIVES, relatives);
@@ -124,6 +124,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return factory;
 	}
 
+    /**
+     * Get factory from factory key
+     * @param key factory key
+     * @return factory designated by factory key
+     */
     public Factory<Actor> getFactory(FACTORY_KEY key) {
         switch(key) {
             case ALL:
@@ -137,26 +142,51 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         }
     }
 
+    /**
+     * Get a manager for editing only taps (not actors).
+     * For adding or removing simple taps such as path taps, this is the first step.
+     * @return ActorManager for editing taps
+     */
 	@Override
 	public ActorManager editTap() {
 		return editorManager.getTapManager()/*.newSession()*/;
 	}
 
+    /**
+     * Get a manager for editing actor and actor tap.
+     * For adding or removing actor, this is the first step.
+     * And when you add actor by this return, actor tap will be added automatically by
+     * instantiating tap blueprint style that you set.
+     * @return Actormanager for editing actors.
+     */
 	@Override
 	public ActorManager edit() {
 		return editorManager/*.newSession()*/;
 	}
 
+    /**
+     * Get a collection of all taps
+     * @return collection of all taps
+     */
     @Override
 	public Collection<IActorTap> getTaps() {
 		return editorManager.getTaps();
 	}
 
+    /**
+     * Get a collection of all actors
+     * @return collection of all actors
+     */
     @Override
 	public Collection<Actor> getActors() {
 		return editorManager.getActors();
 	}
 
+    /**
+     * Get
+     * @param pt
+     * @return
+     */
 	private Collection<IActorTap> getTaps(IPoint pt) {
 		return TapLib.getTaps(pt);
 	}
@@ -165,14 +195,24 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return blueprintManager;
 	}
 
+    /**
+     * Get tap from actor
+     * @param actor actor
+     * @return tap
+     */
 	@Override
-	public IActorTap toTap(Actor p) {
-		return editorManager.getTap(p);
+	public IActorTap toTap(Actor actor) {
+		return editorManager.getTap(actor);
 	}
 
+    /**
+     * Get actor from tap
+     * @param tap tap
+     * @return actor
+     */
 	@Override
-	public Actor toActor(IActorTap sp) {
-		return sp.getActor();
+	public Actor toActor(IActorTap tap) {
+		return tap.getActor();
 	}
 
 	/**
@@ -189,6 +229,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		editorManager.setLog(l);
 	}
 
+    /**
+     * Set StyleCollection. This is the first step for instantiation actors and taps.
+     * @param s
+     */
 	public void setStyle(StyleCollection s) {
 		styles = s;
 		blueprintManager.setOuterInstanceForInner(s.getOuter());
@@ -199,8 +243,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		goalBlueprintManager.setOuterInstanceForInner(s.getOuter());
 	}
 
-    @Override
-	public IActorSharedHandler getEventHandler() {
+	private IActorSharedHandler getEventHandler() {
 		if (styles == null)
 			return null;
 		return styles.getEventHandler();
@@ -217,7 +260,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	EditMode editmode = EditMode.ADD;
 
-	ITap searchTouchedTap(IPoint iPoint, IPiece... exclusive) {
+	protected ITap searchTouchedTap(IPoint iPoint, IPiece... exclusive) {
 		Collection<ITap> ps = TapLib.getAllSystemPieces();
 		ps.removeAll(Arrays.asList(exclusive));
 		for (ITap f : ps) {
@@ -228,15 +271,15 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return null;
 	}
 
-	protected Collection<IActorTap> searchRoomPieces(IPoint iPoint,
-			IPiece... exclusive) {
-		Collection<IActorTap> tList = getTaps(iPoint);
-		if (tList == null || tList.size() <= 0)
-			return null;
-		tList.removeAll(Arrays.asList(exclusive));
-		return tList;
-	}
-
+//	protected Collection<IActorTap> searchRoomPieces(IPoint iPoint,
+//			IPiece... exclusive) {
+//		Collection<IActorTap> tList = getTaps(iPoint);
+//		if (tList == null || tList.size() <= 0)
+//			return null;
+//		tList.removeAll(Arrays.asList(exclusive));
+//		return tList;
+//	}
+//
 
 	IRelease lockedReleaseTap = null;
 
@@ -273,28 +316,40 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
             rtn = true;
 		}
 
-        clearSelectedTap();
+//        clearSelectedTap();
 		return rtn;
 	}
 
-    public void clearSelectedTap() {
-        family.clear();
-    }
+//    public void clearSelectedTap() {
+////        family.clear();
+//    }
 
-	public static int border = 700, border2 = 3 * border / 2;
+	public static int vector_max = 700;//, border2 = 3 * vector_max / 2;
 
+    /**
+     * Touch down on one point and return tap which is located on the point.
+     * @param iPoint
+     *          down point
+     * @return
+     */
 	public ITap onDown(IPoint iPoint) {
         ITap t = searchTouchedTap(iPoint);
         return t;//captureTap(t);
 	}
 
-	public boolean onFling(IActorTap selected, IPoint point, IPoint v) {
-		if (v.x() < border && v.x() > -border && v.y() < border && v.y() > -border)
+    /**
+     * Fling with vector
+     * @param selected Target actor tap
+     * @param vector Fling vector
+     * @return True when selected tap is null
+     */
+	public boolean onFling(IActorTap selected, IPoint vector) {
+		if (vector.x() < vector_max && vector.x() > -vector_max && vector.y() < vector_max && vector.y() > -vector_max)
 			return true;//onUp(point);
 		if (selected != null) {
-			_onFling((ActorTap) selected, new WorldPoint(v).setDif());
+			_onFling((ActorTap) selected, new WorldPoint(vector).setDif());
 		} else {
-			_onFlingBackground(v);
+			_onFlingBackground(vector);
 		}
 		return true;
 	}
@@ -328,7 +383,12 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         }).save();
 	}
 
-	public boolean onSingleTapConfirmed(IPoint point) {
+    /**
+     * Single touch.
+     * @param point touched point
+     * @return
+     */
+	public boolean onSingleTouch(IPoint point) {
 		ITap t1 = searchTouchedTap(point);
 		if (t1== null) {
 			return false;
@@ -363,15 +423,21 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return true;
 	}
 
-	public boolean onScroll(IActorTap selected, final IPoint vp, final IPoint pos) {
-		if (selected != null) {
-			if (selected instanceof IScrollable) {
+    /**
+     * Scroll tap by difference vector
+     * @param selected target tap
+     * @param vp vector
+     * @param pos position
+     * @return true
+     */
+	public boolean scroll(IActorTap selected, final IPoint vp, final IPoint pos) {
+		if (selected == null) {
+            return false;
+        }
+        if (selected instanceof IScrollable) {
 //                Log.w("test", String.format("%s scrolled", selectedTap));
-				((IScrollable) selected).onScrolled(this, pos, vp);
-			}
-		} else {
-			win.move(-vp.x(), -vp.y());
-		}
+            ((IScrollable) selected).onScrolled(this, pos, vp);
+        }
 		kickTapDraw(selected);
 		return true;
 	}
@@ -392,53 +458,71 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         return b;
     }
     /**
-     * Create an IPiece instance and addFocusable to Chain.
+     * Create an actor instance from its blueprint.
      *
      * @param key
-     *            the factory in which IPiece blueprint is registered.
+     *           the key for the factory in which actor blueprint is registered
      * @param num
-     *            the number of the IPiece blueprint
+     *            the number of the actor blueprint
      * @param pos
-     *            position where the IPiece instance sho0uld be added
-     * @return the IPiece instance created and the Tap instance associated with
-     *         the IPiece instance
+     *            position where the actor instance sho0uld be added
+     * @return EditorReturn including the created actor instance and the its tap instance
      */
-    public EditorReturn onAdd(FACTORY_KEY key, int num,
-                                       IPoint pos) {
-        return addBlueprintAndRelease(factoryToBlueprint(key, num), pos);
+    public EditorReturn addActorFromBlueprint(FACTORY_KEY key, int num,
+                                              IPoint pos) {
+        return addActorFromBlueprint(factoryToBlueprint(key, num), pos);
     }
 
-    public EditorReturn onAdd(FACTORY_KEY key, String tag,
-                              IPoint pos) {
-        return addBlueprintAndRelease(factoryToBlueprint(key, tag), pos);
+    /**
+     * Create an actor instance from its blueprint.
+     * @param key
+     *           the key for the factory in which actor blueprint is registered
+     * @param tag
+     *           the tag of the actor blueprint
+     * @param pos
+     *           position where the actor instance sho0uld be added
+     * @return EditorReturn including the created actor instance and the its tap instance
+     */
+    public EditorReturn addActorFromBlueprint(FACTORY_KEY key, String tag,
+                                              IPoint pos) {
+        return addActorFromBlueprint(factoryToBlueprint(key, tag), pos);
     }
 
-    public EditorReturn addBlueprintAndRelease(IBlueprint b, IPoint pos) {
+    /**
+     * Create an actor instance from its blueprint.
+     *
+     * @param b
+     *            the actor blueprint
+     * @param pos
+     *            position where the actor instance is added
+     * @return EditorReturn including the created actor instance and the its tap instance
+     */
+    public EditorReturn addActorFromBlueprint(IBlueprint b, IPoint pos) {
         if(b == null)
             return null;
         if (pos == null) {
             pos = getNextPos();
         }
-        EditorReturn rtn = add(b, pos);
+        EditorReturn rtn = addActor(b, pos);
         if(!win.isInWindow(pos.x(), pos.y()))
             //Centering
             _onFlingBackgroundTo(pos.x(), pos.y());
         return rtn;
     }
+
     /**
-	 * Create an IPiece instance and addFocusable to Chain.
+	 * Create an actor instance from its blueprint.
 	 *
 	 * @param blueprint
-	 *            the factory in which IPiece blueprint is registered.
+	 *            the actor blueprint
 	 * @param iPoint
-	 *            position where the IPiece instance sho0uld be added
-	 * @return the IPiece instance created and the Tap instance associated with
-	 *         the IPiece instance
+	 *            position where the actor instance is added
+	 * @return the created actor instance and the its tap instance
 	 */
 
-    private EditorReturn add(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
+    private EditorReturn addActor(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
         try {
-            // Create new instance piece
+            // Create new instance actor
             EditorReturn rtn = editorManager.addAndInstallView(blueprint, iPoint);
             editorManager.save();
             final Actor actor = rtn.getActor();
@@ -469,9 +553,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		kickTapDraw(startTap2);
 	}
 
-	public IPoint checkRoom(IPoint basePos, IPiece... exclusive) {
-        return basePos;
-	}
+//	public IPoint checkRoom(IPoint basePos, IPiece... exclusive) {
+//        return basePos;
+//	}
 
 	public void start() {
 		if (editorManager.getChain() == null) {
@@ -490,50 +574,41 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	/**
-	 * Check if selected piece is now attaching to other pieces, and when it is
-	 * true, connect it to them.
+	 * Check if an actor tap touches any other actor taps, then connect their actors.
 	 *
-	 * @param t1
-	 *            Selected piece view
-	 * @return True when selected piece was attached.
+	 * @param actorTap
+	 *            a target actor tap which is checked
+	 * @return True when a actor is checked and connected.
 	 */
 	@Override
-	public boolean checkAndAttach(IActorTap t1) {
-		if (t1 == null)
+	public boolean checkAndConnect(IActorTap actorTap) {
+		if (actorTap == null)
 			return false;
 		boolean rtn = false;
 		for (IActorTap t2 :  getTaps()) {
-            if (t1 == t2) {
+            if (actorTap == t2) {
                 continue;
             }
-			if (_attach((ActorTap) t1, (ActorTap) t2))
+			if (_attach((ActorTap) actorTap, (ActorTap) t2))
 				rtn = true;
 		}
-        kickTapDraw(t1);
+        kickTapDraw(actorTap);
 		return rtn;
 	}
 
 	/**
-	 * Connect selected piece to another target piece. When two are already
-	 * connected, disconnect two into pieces.
+	 * Connect selected actor to another target actor. When two are already
+	 * connected, nothing happens.
 	 *
-	 * @param t1
-	 * @param t2
-	 * @return True when selected piece was attached.
+	 * @param t1 actor tap 1
+	 * @param t2 actor tap 2
+	 * @return True when selected actor was attached.
 	 */
 	private boolean _attach(ActorTap t1, ActorTap t2) {
 		InteractionType type = _checkInteractionType(t1, t2);
         return getEventHandler().onAttach(t1, t2, toActor(t1), toActor(t2), type);
 	}
 
-	/**
-	 * Check if selected piece is now in position for deletion, and when it is
-	 * true, delete this piece.
-	 *
-	 * //@param t
-	 * //           Selected piece view.
-	 * @return True when selected piece was deleted.
-	 */
 	public enum InteractionType {
 		INSIDE, TOUCH_LEFT, TOUCH_RIGHT, TOUCH_TOP, TOUCH_BOTTOM, NONE, GOOUTSIDE, OUTSIDE, CROSSING;
         public boolean touching() {
@@ -551,9 +626,9 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         }
 	}
 
-	InteractionType _checkInteractionType(ActorTap t1, ActorTap t2) {
-		IPiece p1 = toActor(t1);
-		IPiece p2 = toActor(t2);
+	private InteractionType _checkInteractionType(ActorTap t1, ActorTap t2) {
+		Actor p1 = toActor(t1);
+		Actor p2 = toActor(t2);
 		if (p1 == null || p2 == null) {
 			return InteractionType.NONE;
 		}
@@ -598,25 +673,30 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			delta -= 0.01f;
 			boolean rtn = ++j < 10 || d.getAbs() > 30;
 			super.actorRun(act);
-			if (checkAndAttach(((IActorTap) getTarget()))) {
+			if (checkAndConnect(((IActorTap) getTarget()))) {
 				round((IActorTap) getTarget());
 				return false;
 			}
 			if (!rtn) {
 				ActorTap v = (ActorTap) getTarget();
 				round(v);
-				checkAndAttach(v);
+				checkAndConnect(v);
 			}
 			return rtn;
 		}
 	}
 
-
+    /**
+     * Standby registration
+     * @param f target factory for registering
+     * @param selected actor tap
+     * @return Blueprint initialization instance
+     */
     public IBlueprintInitialization standbyRegistration(Factory<?> f, IActorTap selected) {
         if(selected == null)
             return null;
         IBlueprintInitialization data = null;
-        IPiece p = selected.getActor();
+        Actor p = selected.getActor();
         if (p instanceof IValue) {
             Object v = ((IValue) p)._valueGet();
             data = standbyRegistration(f, v, p.getTag());
@@ -624,7 +704,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return data;
 	}
 
-	protected IBlueprintInitialization standbyRegistration(Factory<?> f,
+	private IBlueprintInitialization standbyRegistration(Factory<?> f,
                                                            Object initObj, String tag) {
 		IBlueprint b = f.search(tag);
 		if (b == null || !(b instanceof Blueprint)) {
@@ -635,7 +715,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         IBlueprintInitialization data = new BlueprintInitialization(initObj);
         bnew.setInitialization(data);
         f.Register(bnew);
-        f.invalidate();
+        f.notifyView();
 		return data;
 	}
 

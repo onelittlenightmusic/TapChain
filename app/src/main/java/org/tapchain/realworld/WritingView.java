@@ -1,22 +1,21 @@
 package org.tapchain.realworld;
 
 import android.content.Context;
+import android.graphics.Matrix;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-import org.tapchain.core.Actor;
 import org.tapchain.core.IPoint;
-import org.tapchain.editor.EditorReturn;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.ITap;
-import org.tapchain.editor.TapChainEditor;
 
 /**
  * Created by hiro on 2015/12/27.
  */
 public abstract class WritingView extends TapChainSurfaceView {
     IActorTap selected;
+    Matrix savedMatrix = new Matrix();
 
     public WritingView(Context context) {
         super(context);
@@ -49,7 +48,7 @@ public abstract class WritingView extends TapChainSurfaceView {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                return getEditor().onSingleTapConfirmed(getPosition(e.getX(), e.getY()));
+                return getEditor().onSingleTouch(getPosition(e.getX(), e.getY()));
             }
 
             @Override
@@ -61,16 +60,20 @@ public abstract class WritingView extends TapChainSurfaceView {
                 if (standbyRegistration(selected, (int) e2.getRawX(),
                         (int) e2.getRawY()))
                     return true;
-                getEditor().onScroll(selected, getVector(-distanceX, -distanceY),
-                        getPosition(e2.getX(), e2.getY()));
-                return false;
+                IPoint v = getVector(-distanceX, -distanceY);
+                if(getEditor().scroll(selected, v,
+                        getPosition(e2.getX(), e2.getY())))
+                    return true;
+                move(-v.x(), -v.y());
+                WritingView.this.onDraw();
+                return true;
             }
 
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                    float velocityY) {
-                return getEditor().onFling(selected, getPosition(e2.getRawX(), e2.getRawY()), getVector(velocityX, velocityY));
+                return getEditor().onFling(selected, getVector(velocityX, velocityY));
             }
 
             @Override
@@ -121,6 +124,7 @@ public abstract class WritingView extends TapChainSurfaceView {
 
                 break;
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
                 mode = NONE;
                 getEditor().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
                 break;

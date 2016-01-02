@@ -1,33 +1,26 @@
 package org.tapchain.realworld;
 
-import android.content.Context;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Factory;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.TapChainEditor;
 
+/**
+ *
+ */
 public class MainActivity extends AppCompatActivity {
-    static final String X = "LOCATIONX", V = "VIEWS";
-    static final RectF RF = new RectF(0, 0, 100, 100);
-    public static int tapOffset = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CanvasFragment.create(this);
-        GridFragment.create(this);
+        CanvasFragment.create(this, R.id.fragment);
+        GridFragment.create(this, R.id.fragment2);
     }
 
     @Override
@@ -35,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (getGrid() != null)
             getGrid().show(GridShow.HALF);
-//        Log.i("TapChainView.state", "onResume");
     }
 
     @Override
@@ -60,30 +52,78 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
-        return getCanvas().onAdd(key, tag);
+    /**
+     * Make a actor from actor tag
+     * @param key
+     * @param actorTag
+     * @return generated actor
+     */
+    public Actor add(TapChainEditor.FACTORY_KEY key, String actorTag) {
+        return getCanvas().add(key, actorTag);
     }
 
+    /**
+     * Make a actor from actor tag and set location
+     * @param key
+     * @param tag
+     * @param x
+     * @param y
+     * @return
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
-        return getCanvas().onAdd(key, tag, x, y);
+        return getCanvas().add(key, tag, x, y);
     }
 
+    /**
+     * Make a actor from actor tag and set both location and motion
+     * @param key
+     * @param tag
+     * @param x
+     * @param y
+     * @param dx
+     * @param dy
+     * @return
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float dx,
                      float dy) {
-        return getCanvas().onAdd(key, tag, x, y, dx, dy);
+        return getCanvas().add(key, tag, x, y, dx, dy);
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code) {
-        return getCanvas().onAdd(key, code);
+    /**
+     * Make a actor from actor id
+     * @param key
+     * @param id
+     * @return
+     */
+    public Actor add(TapChainEditor.FACTORY_KEY key, int id) {
+        return getCanvas().add(key, id);
     }
 
+    /**
+     * Make a actor from actor id and set location
+     * @param key
+     * @param code
+     * @param x
+     * @param y
+     * @return
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y) {
-        return getCanvas().onAdd(key, code, x, y);
+        return getCanvas().add(key, code, x, y);
     }
 
+    /**
+     * Make a actor from actor id and set both location and motion
+     * @param key
+     * @param code
+     * @param x
+     * @param y
+     * @param dx
+     * @param dy
+     * @return
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float dx,
                      float dy) {
-        return getCanvas().onAdd(key, code, x, y, dx, dy);
+        return getCanvas().add(key, code, x, y, dx, dy);
     }
 
     public void connect(Actor a1, LinkType type, Actor a2) {
@@ -112,70 +152,6 @@ public class MainActivity extends AppCompatActivity {
 
     public TapChainEditor getEditor() {
         return getCanvas().getEditor();
-    }
-
-    public static class ViewAdapter extends BaseAdapter implements Factory.ValueChangeNotifier {
-        private Factory<Actor> f;
-        private TapChainEditor.FACTORY_KEY key;
-        private MainActivity act;
-        private GridView _parent;
-
-        public ViewAdapter(Context c, GridView parent, TapChainEditor.FACTORY_KEY k) {
-            super();
-            act = (MainActivity) c;
-            key = k;
-            _parent = parent;
-            f = Factory.copy(act.getEditor().getFactory(key));
-            act.getEditor().getFactory(key).setNotifier(this);
-        }
-
-        @Override
-        public void notifyChange() {
-            act.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    f = new Factory(act.getEditor().getFactory(key));
-                    ViewAdapter.this.notifyDataSetChanged();
-                }
-            });
-        }
-
-        @Override
-        public void invalidate() {
-            act.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    f = new Factory(act.getEditor().getFactory(key));
-                    _parent.invalidate();
-                }
-            });
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null || convertView.getTag() == null
-                    || !convertView.getTag().equals(f.get(position).getTag())) {
-                ActorImageButton v = new ActorImageButton(act, f, key, position);
-                convertView = v;
-            }
-            convertView.setId(300 + position);
-            return convertView;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 300 + position;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return f.get(position).getTag();
-        }
-
-        @Override
-        public int getCount() {
-            return f.getSize();
-        }
     }
 
 
