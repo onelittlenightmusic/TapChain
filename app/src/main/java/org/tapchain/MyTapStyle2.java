@@ -64,9 +64,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         ISelectable, IRelease, ILockedScroll, IBlueprintFocusNotification,
         IConnectHandler<IActorTap, IPathTap>, IErrorHandler<Actor> {
-    static {
-        __addLinkClass(MyTapStyle2.class, LinkType.PULL, Integer.class);
-    }
 
     /**
      *
@@ -374,11 +371,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             ((IStep) actor).onStep();
             Log.w("test", "onStep called");
         } else if (actor instanceof IValueArray) {
-            ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this, actor);
+            ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(act, this, actor);
             e.registerToManager(edit.editTap());
         } else if (actor instanceof IValue) {
             Object val = ((IValue) actor)._valueGet();
-            ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(this, val);
+            ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(act, this, val);
             e.registerToManager(edit.editTap());
 //			edit.getEventHandler().getFocusControl().large();
         }
@@ -396,14 +393,12 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         ActorTap setter, exit, restart;
         ViewActor setterText;
         IActorTap t;
-        String extensionTag = null;
 
 
-        ExtensionButtonEnvelope(IActorTap _p, Object val2) {
+        ExtensionButtonEnvelope(Activity act, IActorTap _p, Object val2) {
             t = _p;
             if (val2 instanceof String) {
-                setterText = new AndroidActor.AndroidTextInput(
-                        MyTapStyle2.this.act, (IValue) _p.getActor());
+                setterText = new AndroidActor.AndroidTextInput(act, (IValue) _p.getActor());
                 setterText._valueGet().setOffset(_p);
                 return;
             } else if (val2 instanceof IValueArray) {
@@ -424,7 +419,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             } else {
                 return;
             }
-            extensionTag = val2.getClass().getSimpleName();
 
             exit = new MyExitOptionTapStyle(_p, BitmapMaker.makeOrReuse(
                     "exit", R.drawable.dust, 70, 70));
@@ -434,10 +428,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
                     "restart", R.drawable.reload, 70, 70));
             restart.setCenter(new WorldPoint(180f, 180f));
             restart.setColorCode(ColorCode.BLUE);
-        }
-
-        public String getExtensionTag() {
-            return extensionTag;
         }
 
         public boolean registerToManager(ActorManager manager) {
