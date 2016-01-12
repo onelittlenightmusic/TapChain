@@ -1,12 +1,10 @@
 package org.tapchain.editor;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.tapchain.ActorTap;
-import org.tapchain.IFocusable;
-import org.tapchain.PaletteSort;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Actor.Mover;
 import org.tapchain.core.ActorBlueprintManager;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Blueprint;
@@ -61,10 +59,10 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	protected ActorBlueprintManager<Actor> blueprintManager = new ActorBlueprintManager<>(
 			factory), goalBlueprintManager = null;
 	private StyleCollection styles = null;
-	Actor move = new Actor().setLinkClass(LinkType.PUSH, IPoint.class);
-	Actor.Mover move_ef = (Mover) new Actor.Mover()
-			.initEffectValue(new WorldPoint(0f, 0f), 1)
-			.setParentType(PathType.OFFER).boost();
+//	Actor move = new Actor().setLinkClass(LinkType.PUSH, IPoint.class);
+//	Actor.Mover move_ef = (Mover) new Actor.Mover()
+//			.initEffectValue(new WorldPoint(0f, 0f), 1)
+//			.setParentType(PathType.OFFER).boost();
 	protected List<Geometry> geos = new ArrayList<Geometry>();
 	private IPoint nextConnectivityPoint = null;
 //    ArrayList<IActorTap> family = new ArrayList<IActorTap>();
@@ -79,19 +77,19 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		editorManager.setAllCallback(this);
 		editorManager.setPathInterval(1000);
 		editorManager.init();
-		editTap()
-			.add(move)
-			.student(move_ef)
-			.next(new Actor.Effector() {
-				@Override
-				public boolean actorRun(Actor act) throws ChainException {
-					if (getTarget() instanceof ActorTap)
-						checkAndConnect((ActorTap) getTarget());
-					return false;
-				}
-			}.setParentType(PathType.OFFER)
-					.setLinkClass(LinkType.PULL, Object.class).boost())
-			.teacher(move).save();
+//		editTap()
+//			.add(move)
+//			.student(move_ef)
+//			.next(new Actor.Effector() {
+//				@Override
+//				public boolean actorRun(Actor act) throws ChainException {
+//					if (getTarget() instanceof ActorTap)
+//						checkAndConnect((ActorTap) getTarget());
+//					return false;
+//				}
+//			}.setParentType(PathType.OFFER)
+//					.setLinkClass(LinkType.PULL, Object.class).boost())
+//			.teacher(move).save();
 		setLog(this);
         factories.put(FACTORY_KEY.ALL, factory);
         factories.put(FACTORY_KEY.LOG, recent);
@@ -116,10 +114,22 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		win = v;
 	}
 
-	protected IWindow getWindow() {
-		return win;
-	}
-
+    @Override
+    public void log(String... s) {
+        switch (s.length) {
+            case 0:
+                break;
+            case 1:
+                Log.w(s[0], "");
+                break;
+            case 2:
+            default:
+                Log.w(s[0], s[1]);
+                break;
+        }
+        win.log(s);
+        return;
+    }
 	public Factory<Actor> getFactory() {
 		return factory;
 	}
@@ -821,4 +831,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         spot.focus(getEventHandler().getFocusControl(), al);
         getEventHandler().getFocusControl().setSpotActorLink(al);
     }
+
+
 }

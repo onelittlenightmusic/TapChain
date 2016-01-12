@@ -16,6 +16,7 @@ import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IAttachHandler;
 import org.tapchain.editor.IEditor;
+import org.tapchain.editor.IFocusable;
 import org.tapchain.editor.IPathTap;
 import org.tapchain.editor.TapChainEditor.InteractionType;
 import org.tapchain.realworld.R;

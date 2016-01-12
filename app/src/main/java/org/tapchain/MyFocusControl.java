@@ -5,13 +5,8 @@ import java.util.HashMap;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.LinkType;
-import org.tapchain.editor.IEditor;
-import org.tapchain.core.IPoint;
-import org.tapchain.core.IValue;
-import org.tapchain.core.PointValue;
-import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IFocusControl;
+import org.tapchain.editor.IFocusable;
 
 public class MyFocusControl extends ActorTap implements IFocusControl {
 	HashMap<IFocusable, LinkType> array = new HashMap<IFocusable, LinkType>();

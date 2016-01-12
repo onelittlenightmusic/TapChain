@@ -11,7 +11,8 @@ import android.graphics.Path;
 import android.graphics.RectF;
 
 import org.tapchain.AndroidActor.AndroidView;
-import org.tapchain.ColorLib.ColorCode;
+import org.tapchain.editor.ColorLib;
+import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IBlueprintFocusNotification;
@@ -24,8 +25,6 @@ import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorAttachHandler;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
-import org.tapchain.editor.IFocusControl;
 
 import java.io.Serializable;
 

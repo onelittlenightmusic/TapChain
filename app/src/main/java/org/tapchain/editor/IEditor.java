@@ -1,11 +1,9 @@
 package org.tapchain.editor;
 
-import org.tapchain.IFocusable;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IActionStyle;
-import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;

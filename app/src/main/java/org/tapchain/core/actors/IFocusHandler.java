@@ -2,7 +2,7 @@ package org.tapchain.core.actors;
 
 import android.content.res.Resources;
 
-import org.tapchain.IFocusable;
+import org.tapchain.editor.IFocusable;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.IFocusControl;

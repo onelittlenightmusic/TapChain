@@ -1,4 +1,4 @@
-package org.tapchain;
+package org.tapchain.editor;
 
 public enum PaletteSort {
 	FACTORY(0), HISTORY(1), RELATIVES(2);

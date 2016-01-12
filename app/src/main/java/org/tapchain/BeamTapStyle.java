@@ -1,7 +1,7 @@
 package org.tapchain;
 
 import org.tapchain.AndroidActor.AndroidView;
-import org.tapchain.ColorLib.ColorCode;
+import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.actors.ViewActor;

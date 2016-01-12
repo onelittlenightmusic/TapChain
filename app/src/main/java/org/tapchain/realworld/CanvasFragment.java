@@ -20,7 +20,7 @@ import org.tapchain.editor.TapChainEditor;
  * Created by hiro on 2015/12/26.
  */
 public class CanvasFragment extends Fragment {
-    CanvasViewImpl2 view;
+    CanvasViewImpl view;
 //    Activity act;
     static String CANVAS = "Canvas";
     TapChainEditor editor;
@@ -28,21 +28,6 @@ public class CanvasFragment extends Fragment {
     public CanvasFragment() {
         super();
     }
-
-
-//    public CanvasFragment setContext(Activity a) {
-//        this.act = a;
-//        if(view == null) {
-//            view = new CanvasViewImpl2(act);
-//            if(editor == null) {
-//                editor = new TapChainAndroidEditor(view, act.getResources(), act);
-//                editor.kickTapDraw(null);
-//            }
-//            view.setEditor(editor);
-//        }
-////        view.addActorFromBlueprint(TapChainEditor.FACTORY_KEY.ALL, "Number", 100, 300);
-//        return this;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +40,7 @@ public class CanvasFragment extends Fragment {
                              Bundle savedInstanceState) {
         Activity act = getActivity();
         if (view == null) {
-            view = new CanvasViewImpl2(act);
+            view = new CanvasViewImpl(act);
             if(editor == null) {
                 editor = new TapChainAndroidEditor(view, act.getResources(), act);
                 editor.kickTapDraw(null);

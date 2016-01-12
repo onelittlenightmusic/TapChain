@@ -4,17 +4,13 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
-import android.graphics.Path;
 import android.graphics.RectF;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RoundRectShape;
-import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
-import org.tapchain.ColorLib.ColorCode;
+import org.tapchain.editor.ColorLib;
+import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.TapChainAndroidEditor.StateLog;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorInputException;
@@ -46,18 +42,14 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.Packet;
 import org.tapchain.core.Value;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
 import org.tapchain.editor.IPathTap;
 import org.tapchain.editor.ITap;
-import org.tapchain.game.MyFloat;
-import org.tapchain.game.MySetPedalTapStyle;
 import org.tapchain.realworld.R;
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -69,16 +61,15 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
      *
      */
     private final IActorEditor edit;
-    Paint _paint = new Paint(), innerPaint = new Paint(),
+    Paint _paint = new Paint(),
             textPaint = new Paint(),
-            miniTextPaint = new Paint(),
-            innerPaint2 = new Paint();
+            miniTextPaint = new Paint();
     float sizeDefaultX = 50f;
     public Bitmap bm_fg = null, bm_face = null, bm_fg_mini = null;
     WorldPoint sizeOpened = new WorldPoint(200f, 200f),
             sizeClosed = new WorldPoint(sizeDefaultX, sizeDefaultX),
             sizeDefault = new WorldPoint(2 * sizeDefaultX, 2 * sizeDefaultX);
-    ShapeDrawable d, dOut;
+//    ShapeDrawable d, dOut;
     RectF tickCircleRect = new RectF();
     int tickCircleRadius = 30;
     float sweep = 0f;
@@ -92,8 +83,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     public MyTapStyle2(IActorEditor edit, Activity activity, Integer fg) {
-        super();
-        act = activity;
+        super(activity);
         this.edit = edit;
         myview_init(fg);
 
@@ -104,17 +94,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         _paint.setTextAlign(Align.CENTER);
         _paint.setFilterBitmap(true);
 
-        innerPaint.setAntiAlias(true);
-        innerPaint.setColor(0xff222266);
-        innerPaint.setStyle(Paint.Style.STROKE);
-        innerPaint.setStrokeWidth(60);
-        innerPaint.setFilterBitmap(true);
-        innerPaint2.setAntiAlias(true);
-        innerPaint2.setColor(0xffffffff);
-        innerPaint2.setStyle(Paint.Style.STROKE);
-        innerPaint2.setStrokeWidth(10);
-        innerPaint2.setPathEffect(new DashPathEffect(new float[]{30f, 10f},
-                0));
         textPaint.setAntiAlias(true);
         textPaint.setColor(0xffffffff);
         textPaint.setTextSize(textSize);
@@ -131,19 +110,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         tickCircleRect.set(-tickCircleRadius, -tickCircleRadius,
                 tickCircleRadius, tickCircleRadius);
 
-        float r = 20f;
-        d = new ShapeDrawable(new RoundRectShape(new float[]{r, r, r, r, r,
-                r, r, r}, null, null));
-        d.getPaint().setAntiAlias(true);
-        d.getPaint().setColor(0xff777777);
-        d.getPaint().setStyle(Paint.Style.FILL);
-        d.getPaint().setStrokeWidth(4);
-        dOut = new ShapeDrawable(new RoundRectShape(new float[]{r, r, r, r,
-                r, r, r, r}, null, null));
-        dOut.getPaint().setAntiAlias(true);
-        dOut.getPaint().setColor(0xffeeeeee);
-        dOut.getPaint().setStyle(Paint.Style.STROKE);
-        dOut.getPaint().setStrokeWidth(4);
     }
 
     boolean inited = false;
@@ -222,7 +188,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         canvas.restore();
         Actor actor = getActor();
         if (actor instanceof IValueArray) {
-            showPath(canvas, (IValueArray<IPoint>) getActor());
+            ShowInstance.showPath(canvas, (IValueArray<IPoint>) actor);
         } else if (actor instanceof IValue) {
             Object val = ((IValue<?>) actor)._valueGet();
             String tag = "";
@@ -232,21 +198,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
                 ShowInstance.showInstance(canvas, val, cp, textPaint, _paint, tag);
         }
         return true;
-    }
-
-    public void showPath(Canvas canvas, IValueArray<IPoint> points) {
-        Path path = null;
-        for (IPoint p : points._valueGetAll())
-            if (path == null) {
-                path = new Path();
-                path.moveTo(p.x(), p.y());
-            } else {
-                path.lineTo(p.x(), p.y());
-            }
-        if (path != null) {
-            canvas.drawPath(path, innerPaint);
-            canvas.drawPath(path, innerPaint2);
-        }
     }
 
 
@@ -260,7 +211,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
     @Override
     public MyTapStyle2 setColor(int _color) {
-        d.getPaint().setColor(_color);
         return this;
     }
 
@@ -313,7 +263,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             return;
         try {
             edit.editTap()
-                    .add(new AndroidActor.AndroidTTS(act, CodingLib.talk(actor.getTag(), commit)))
+                    .add(new AndroidActor.AndroidTTS(getOwnActivity(), CodingLib.talk(actor.getTag(), commit)))
                     .save();
         } catch (ChainException e) {
             e.printStackTrace();
@@ -335,19 +285,14 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     @Override
     public boolean onScrolled(IEditor edit, IPoint pos, IPoint vp) {
         setCenter(pos);
-//        if (edit.checkAndConnect(this, true)) {
-//            edit.kickTapDraw(this);
-//            return true;
-//        }
         return false;
     }
 
     @Override
     public AndroidView setColorCode(ColorCode colorCode) {
         ColorMatrixColorFilter cMatrix = AndroidColorCode.getColorMatrix(colorCode);
-        d.getPaint().setColorFilter(cMatrix);
-        innerPaint.setColorFilter(cMatrix);
-        innerPaint2.setColorFilter(cMatrix);
+//        pathInnerPaint.setColorFilter(cMatrix);
+//        pathInnerPaint2.setColorFilter(cMatrix);
         _paint.setColorFilter(cMatrix);
         return super.setColorCode(colorCode);
     }
@@ -357,27 +302,26 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public void onFocus(LinkBooleanSet booleanSet) {
         if (booleanSet == null || booleanSet.isEmpty()) {
             setColorCode(ColorCode.CLEAR);
-            log("%s unfocused", getTag());
+//            log("%s unfocused", getTag());
         } else for (LinkType ac : booleanSet) {
             setColorCode(ColorLib.getLinkColor(ac));
-            log("%s(%s) focused", getTag(), ac.toString());
+//            log("%s(%s) focused", getTag(), ac.toString());
         }
     }
 
     @Override
-    public void onSelected(IEditor edit, IPoint pos) {
+    public void onSelected(IActorEditor edit, IPoint pos) {
         Actor actor = getActor();
         if (actor instanceof IStep) {
             ((IStep) actor).onStep();
-            Log.w("test", "onStep called");
+//            Log.w("test", "onStep called");
         } else if (actor instanceof IValueArray) {
-            ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(act, this, actor);
-            e.registerToManager(edit.editTap());
+            SelectedTapLockEnvelope e = new SelectedTapLockEnvelope(getOwnActivity(), this, actor);
+            e.registerToManager(edit.editTap(), edit);
         } else if (actor instanceof IValue) {
             Object val = ((IValue) actor)._valueGet();
-            ExtensionButtonEnvelope e = new ExtensionButtonEnvelope(act, this, val);
-            e.registerToManager(edit.editTap());
-//			edit.getEventHandler().getFocusControl().large();
+            SelectedTapLockEnvelope e = new SelectedTapLockEnvelope(getOwnActivity(), this, val);
+            e.registerToManager(edit.editTap(), edit);
         }
     }
 
@@ -387,99 +331,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         LinkType lt = (iActorTap == this) ? linkType : linkType.reverse();
         edit.editTap().remove((Actor) getAccessoryTap(lt));
         unsetAccessoryTap(lt);
-    }
-
-    public class ExtensionButtonEnvelope implements IRelease {
-        ActorTap setter, exit, restart;
-        ViewActor setterText;
-        IActorTap t;
-
-
-        ExtensionButtonEnvelope(Activity act, IActorTap _p, Object val2) {
-            t = _p;
-            if (val2 instanceof String) {
-                setterText = new AndroidActor.AndroidTextInput(act, (IValue) _p.getActor());
-                setterText._valueGet().setOffset(_p);
-                return;
-            } else if (val2 instanceof IValueArray) {
-                setter = new MySetPathTapStyle(_p, BitmapMaker.makeOrReuse(
-                        "pathExt", R.drawable.widen, 200, 200));
-            } else if (val2 instanceof IPoint) {
-                setter = new MySetPointTapStyle(_p, BitmapMaker.makeOrReuse(
-                        "pointExt", R.drawable.widen, 200, 200));
-            } else if (val2 instanceof Integer) {
-                setter = new MySetIntegerTapStyle(_p);
-            } else if (val2 instanceof Float) {
-                setter = new MySetFloatTapStyle(_p);
-            } else if (val2 instanceof MyFloat) {
-                setter = new MySetPedalTapStyle(_p);
-            } else if (val2 instanceof Calendar) {
-                setter = new MySetTimeTapStyle(_p, BitmapMaker.makeOrReuse(
-                        "pointExt", R.drawable.widen, 200, 200));
-            } else {
-                return;
-            }
-
-            exit = new MyExitOptionTapStyle(_p, BitmapMaker.makeOrReuse(
-                    "exit", R.drawable.dust, 70, 70));
-            exit.setCenter(new WorldPoint(180f, -180f));
-            exit.setColorCode(ColorCode.RED);
-            restart = new MyRestartOptionTapStyle(_p, BitmapMaker.makeOrReuse(
-                    "restart", R.drawable.reload, 70, 70));
-            restart.setCenter(new WorldPoint(180f, 180f));
-            restart.setColorCode(ColorCode.BLUE);
-        }
-
-        public boolean registerToManager(ActorManager manager) {
-            if (setter != null) {
-                manager.add(setter);
-            } else {
-                if (setterText != null)
-                    manager.add(setterText);
-                else
-                    return false;
-            }
-            if (exit != null)
-                manager.add(exit);
-            if (restart != null)
-                manager.add(restart);
-            manager.save();
-            edit.lockReleaseTap(this);
-            return true;
-        }
-
-        public void clear(IEditor edit) {
-            ActorManager manager = edit.editTap();
-            if (setter != null) {
-                manager.remove(setter);
-                setter = null;
-            }
-            if (exit != null) {
-                manager.remove(exit);
-                exit = null;
-            }
-            if (restart != null) {
-                manager.remove(restart);
-                restart = null;
-            }
-            if (setterText != null) {
-                manager.remove(setterText);
-                setterText = null;
-            }
-        }
-
-        public IActorTap getTap() {
-            return t;
-        }
-
-        @Override
-        public boolean onRelease(IEditor edit, IPoint pos) {
-            boolean rtn = false;
-            if (setter instanceof IRelease)
-                rtn = ((IRelease) setter).onRelease(edit, pos);
-            clear(edit);
-            return rtn;
-        }
     }
 
 
@@ -515,7 +366,6 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelope);
         actorManager.add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
-//        edit.highlightConnectables(linkType, t, classEnvelope);
     }
 
 
@@ -606,7 +456,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
-        AndroidActor.AndroidImageView errorMark = new AndroidActor.AndroidImageView(act, R.drawable.error);
+        AndroidActor.AndroidImageView errorMark = new AndroidActor.AndroidImageView(getOwnActivity(), R.drawable.error);
         errorMark.setColorCode(ColorCode.RED)
                 .setPercent(new WorldPoint(200f, 200f));
         errorMark._valueGet().setOffset(t);

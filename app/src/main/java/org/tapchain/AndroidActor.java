@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -41,29 +40,21 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import org.tapchain.ColorLib.ColorCode;
+import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Actor.Mover;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.IPathListener;
-import org.tapchain.core.Connector;
 import org.tapchain.core.D2Point;
 import org.tapchain.core.IBoostable;
 import org.tapchain.core.ICommit;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IStep;
 import org.tapchain.core.IValue;
-import org.tapchain.core.LinkType;
-import org.tapchain.core.PathType;
 import org.tapchain.core.PhysicalPoint;
 import org.tapchain.core.Self;
-import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IWindow;
-import org.tapchain.game.ISensorView;
-import org.tapchain.realworld.R;
-import org.tapchain.realworld.TapChainView;
-import org.tapchain.realworld.TapChainView.OverlayPopup;
+import org.tapchain.core.actors.ViewActor;
+import org.tapchain.realworld.IIntentHandler;
+import org.tapchain.realworld.OverlayPopupView;
 import org.tapchain.viewlib.IShapeBoundary;
 
 import java.io.File;
@@ -78,15 +69,6 @@ public class AndroidActor {
 	static final int IMAGE_SEARCH = 123;
 	static final int IMAGE_SEARCH2 = 124;
 
-
-	public static IWindow getWindow(Activity activity) {
-		return ((TapChainView) activity).getActorWindow();
-	}
-
-	public static Resources getResources(Activity activity) {
-		return activity.getResources();
-	}
-
 	public static void makeAlert(final Activity act, final String alert) {
 		act.runOnUiThread(new Runnable() {
 			@Override
@@ -98,7 +80,8 @@ public class AndroidActor {
 	}
 
 	public static int intent_register(Activity activity, int TAG, IntentHandler h) {
-		((TapChainView) activity).addIntentHandler(TAG, h);
+        if(activity instanceof IIntentHandler)
+            ((IIntentHandler) activity).addIntentHandler(TAG, h);
 		return TAG;
 	}
 
@@ -366,7 +349,7 @@ public class AndroidActor {
 			Parcelable, IViewAndroidUser, IShapeBoundary, IAndroidActivityOwner {
 		private Paint paint = new Paint();
 		IShapeBoundary bound;
-        Activity act = null;
+        private Activity act = null;
 
         AndroidView() {
             super();
@@ -437,14 +420,12 @@ public class AndroidActor {
 		private Drawable drawable =  new Drawable() {
 			@Override
 			public void draw(Canvas arg0) {
-//				super.draw(arg0);
 				view_user(arg0, getRawSize().multiplyNew(0.5f),
 						getRawSize(), AndroidView.this.getAlpha());
 			}
 
 			@Override
 			public int getOpacity() {
-//				super.getOpacity();
 				return PixelFormat.TRANSLUCENT;
 			}
 
@@ -542,7 +523,6 @@ public class AndroidActor {
 	}
 
 	public static class AndroidImageView extends AndroidView {
-//
 		Bitmap bm_base = null;
 		protected Bitmap bm_scaled = null;
 		Matrix matrix = new Matrix();
@@ -554,7 +534,6 @@ public class AndroidActor {
 
 		public AndroidImageView(Activity activity) {
 			super(activity);
-			// setPullClass(Integer.class);
 		}
 
 		public AndroidImageView(Activity activity, Integer resource) {
@@ -995,7 +974,6 @@ public class AndroidActor {
 		@Override
 		public boolean _valueSet(String value) {
 			text = value;
-//			clearPush();
 			return true;
 		}
 
@@ -1007,7 +985,6 @@ public class AndroidActor {
 		@Override
 		public void onStep() {
 			interruptStep();
-//			L("Restarter tickled").go(interruptStep());
 		}
 
 	}
@@ -1046,26 +1023,20 @@ public class AndroidActor {
 		public void ctrlStart() throws ChainException, InterruptedException {
 			Intent i = new Intent(android.content.Intent.ACTION_SENDTO)
 					.setData(Uri.parse(dest))
-					// .putExtra(android.content.Intent.EXTRA_SUBJECT,
-					// title.sync_pop())
-					.putExtra(android.content.Intent.EXTRA_SUBJECT, ""/*
-																	 * (String)
-																	 * pull()
-																	 */)
+					.putExtra(android.content.Intent.EXTRA_SUBJECT, "")
 					.putExtra(android.content.Intent.EXTRA_TEXT, pull());
 			intent(getOwnActivity(), i);
-
 		}
 	}
 
 	public static class AndroidOverlay extends AndroidView {
-		OverlayPopup p;
+		OverlayPopupView p;
 		View v;
 
 		public AndroidOverlay(Activity activity) {
 			super(activity);
 			v = createObjectByUIThread();
-			p = new OverlayPopup(getOwnActivity());
+			p = new OverlayPopupView(getOwnActivity());
 		}
 
 		protected View createObjectByUIThread() {
@@ -1078,13 +1049,9 @@ public class AndroidActor {
 
 		@Override
 		protected void addViewToAnimation() {
-			// setSize(new WorldPoint(300f, 300f));
 			p.setFocusable(true);
 			p.setPopupView(getFace());
-			final IPoint screenp = ((TapChainView) getOwnActivity()).getCanvas()
-					.getScreenPosition(getCenter().x(), getCenter().y());
-			move(screenp);
-			// p.getContentView().requestFocus();
+			move();
 		}
 
 		@Override
@@ -1106,31 +1073,21 @@ public class AndroidActor {
 			v.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 				@Override
 				public void onFocusChange(final View v, final boolean hasFocus) {
-					// if (hasFocus) {
-					// } else {
 					AndroidOverlay.this.interruptEnd();
-					// }
 				}
 			});
 			v.setOnTouchListener(new View.OnTouchListener() {
 				@Override
 				public boolean onTouch(View arg0, MotionEvent arg1) {
 					AndroidOverlay.this.interruptEnd();
-					// p.dismiss();
 					return true;
 				}
 			});
 			return v;
 		}
 
-		public void move(final IPoint point) {
-			if (p != null)
-				getOwnActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        p.show((int) point.x(), (int) point.y());
-                    }
-                });
+		public void move() {
+            p.showMiddle();
 		}
 	}
 
@@ -1144,92 +1101,85 @@ public class AndroidActor {
 
 		@Override
 		protected View createObjectByUIThread() {
-			return new EditText(getOwnActivity());
-		}
+			final EditText e = new EditText(getOwnActivity());
+            e.setBackgroundColor(0xff333333);
+            e.setWidth(200);
+            e.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(final View v, final boolean hasFocus) {
+
+                    InputMethodManager inputMethodManager = (InputMethodManager) getOwnActivity()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (hasFocus) {
+                        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                        // inputMethodManager.showSoftInputFromInputMethod(v.getWindowToken(),
+                        // WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                    } else {
+                        inputMethodManager.hideSoftInputFromWindow(
+                                v.getWindowToken(), 0);
+                        text._valueSet(e.getText().toString());
+                        e.setText(text._valueGet());
+                        if (text instanceof ICommit)
+                            ((ICommit) text)._commit();
+                        AndroidTextInput.this.interruptEnd();
+                    }
+                }
+            });
+            return e;
+        }
 
 		@Override
 		protected View getFace() {
-			final EditText e = (EditText) getObjectByUIThread();
+			EditText e = (EditText) getObjectByUIThread();
 			p.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 			p.setFocusable(true);
-			e.setBackgroundColor(0xff333333);
-			e.setWidth(200);
 			e.setFocusable(true);
-			e.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-				@Override
-				public void onFocusChange(final View v, final boolean hasFocus) {
-
-					InputMethodManager inputMethodManager = (InputMethodManager) getOwnActivity()
-							.getSystemService(Context.INPUT_METHOD_SERVICE);
-					if (hasFocus) {
-						// inputMethodManager.showSoftInputFromInputMethod(v.getWindowToken(),
-						// WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-					} else {
-						inputMethodManager.hideSoftInputFromWindow(
-								v.getWindowToken(), 0);
-						text._valueSet(e.getText().toString());
-						if (text instanceof ICommit)
-							((ICommit) text)._commit();
-						AndroidTextInput.this.interruptEnd();
-					}
-				}
-			});
-			e.setText(text._valueGet());
 			return e;
 		}
 
 	}
 
-	public static class AndroidImageOverlay extends AndroidImageView {
-		OverlayPopup p;
-
-		public AndroidImageOverlay(Activity activity, Integer i) {
-			super(activity, i);
-			// p.setFocusable(true);
-			// p.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-		}
-
-		@Override
-		protected void addViewToAnimation() {
-			p = new OverlayPopup(getOwnActivity());
-			p.setPopupView(getFace());
-			final IPoint screenp = ((TapChainView) getOwnActivity()).getCanvas()
-					.getScreenPosition(getCenter().x(), getCenter().y());
-			move(screenp);
-		}
-
-		@Override
-		protected void removeViewFromAnimation() {
-			getOwnActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    p.dismiss();
-                }
-            });
-		}
-
-		public View getFace() {
-			ImageView v = new ImageView(getOwnActivity());
-			v.setImageBitmap(bm_scaled);
-			return v;
-		}
-
-		@Override
-		public void move_user(IPoint vp) {
-			IPoint point = ((TapChainView) getOwnActivity()).getCanvas()
-					.getScreenPosition(getCenter().x(), getCenter().y());
-			move(point);
-		}
-
-		public void move(final IPoint point) {
-			getOwnActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    p.show((int) point.x(), (int) point.y());
-                }
-            });
-		}
-	}
+//	public static class AndroidImageOverlay extends AndroidImageView {
+//		OverlayPopup p;
+//
+//		public AndroidImageOverlay(Activity activity, Integer i) {
+//			super(activity, i);
+//			// p.setFocusable(true);
+//			// p.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+//		}
+//
+//		@Override
+//		protected void addViewToAnimation() {
+//			p = new OverlayPopup(getOwnActivity());
+//			p.setPopupView(getFace());
+//			final IPoint screenp = ((TapChainView) getOwnActivity()).getCanvas()
+//					.getScreenPosition(getCenter().x(), getCenter().y());
+//			move(screenp);
+//		}
+//
+//		@Override
+//		protected void removeViewFromAnimation() {
+//			getOwnActivity().runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    p.dismiss();
+//                }
+//            });
+//		}
+//
+//		public View getFace() {
+//			ImageView v = new ImageView(getOwnActivity());
+//			v.setImageBitmap(bm_scaled);
+//			return v;
+//		}
+//
+//		@Override
+//		public void move_user(IPoint vp) {
+//			IPoint point = ((TapChainView) getOwnActivity()).getCanvas()
+//					.getScreenPosition(getCenter().x(), getCenter().y());
+//			move(point);
+//		}
+//
 
 	public static class AndroidTTS extends AndroidControllable<Self, Void, Void, Void> implements
 			IntentHandler {

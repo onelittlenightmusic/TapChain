@@ -47,6 +47,6 @@ public class MySetPathTapStyle extends OptionTapStyle implements IScrollHandler 
 
 	@Override
 	public void onScroll(IEditor edit, IActorTap tap, IPoint pos, IPoint vp) {
-		getParentTap().setMyActorValue(new D2Point(pos/*(WorldPoint)pos.subNew(getParentTap().getCenter())*/, vp));
+		getParentTap().setMyActorValue(new D2Point(pos, vp));
 	}
 }

@@ -3,7 +3,8 @@ package org.tapchain;
 import java.io.Serializable;
 
 import org.tapchain.AndroidActor.AndroidView;
-import org.tapchain.ColorLib.ColorCode;
+import org.tapchain.editor.ColorLib;
+import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.LinkBooleanSet;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.ClassEnvelope;

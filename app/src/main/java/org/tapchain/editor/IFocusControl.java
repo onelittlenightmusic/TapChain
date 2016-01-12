@@ -1,6 +1,5 @@
 package org.tapchain.editor;
 
-import org.tapchain.IFocusable;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.LinkType;

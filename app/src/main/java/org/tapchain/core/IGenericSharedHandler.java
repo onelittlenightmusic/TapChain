@@ -2,14 +2,9 @@ package org.tapchain.core;
 
 import android.content.res.Resources;
 
-import org.tapchain.IFocusable;
-import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
 import org.tapchain.editor.IFocusControl;
 import org.tapchain.editor.ITap;
 import org.tapchain.editor.TapChainEditor;
-
-import java.util.Collection;
 
 /**
  * Created by hiro on 2015/05/20.

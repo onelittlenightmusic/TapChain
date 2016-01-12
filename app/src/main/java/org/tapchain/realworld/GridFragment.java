@@ -25,7 +25,7 @@ import java.util.ArrayList;
  */
 public class GridFragment extends Fragment {
     static final String VIEW_SELECT = "SELECT";
-    GridShow show = GridShow.HIDE;
+    GridShowState show = GridShowState.HIDE;
     int _width = ViewGroup.LayoutParams.MATCH_PARENT,
             _height = ViewGroup.LayoutParams.MATCH_PARENT;
     boolean autohide = false;
@@ -153,7 +153,7 @@ public class GridFragment extends Fragment {
         return true;
     }
 
-    public void show(GridShow _show) {
+    public void show(GridShowState _show) {
         show = _show;
         FragmentTransaction ft = getActivity().getFragmentManager()
                 .beginTransaction();
@@ -182,8 +182,8 @@ public class GridFragment extends Fragment {
     }
 
     public boolean toggle() {
-        show((show == GridShow.HIDE) ? GridShow.HALF : GridShow.HIDE);
-        return show != GridShow.HIDE;
+        show((show == GridShowState.HIDE) ? GridShowState.HALF : GridShowState.HIDE);
+        return show != GridShowState.HIDE;
     }
 
     public void setAutohide() {
@@ -192,7 +192,7 @@ public class GridFragment extends Fragment {
 
     public void kickAutohide() {
         if (autohide)
-            show(GridShow.HIDE);
+            show(GridShowState.HIDE);
     }
 
     public void enable() {

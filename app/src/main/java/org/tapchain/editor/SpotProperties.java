@@ -1,9 +1,8 @@
-package org.tapchain;
-
-import org.tapchain.MyFocusControl.SpotGroupLayout;
-import org.tapchain.core.IPoint;
+package org.tapchain.editor;
 
 import android.graphics.Bitmap;
+
+import org.tapchain.core.IPoint;
 
 //		public class MyBeamTapStyle extends BeamTapStyle implements IRelease, IFocusable {
 //			/**
@@ -36,11 +35,10 @@ import android.graphics.Bitmap;
 //			}
 //		}
 //		
-		class SpotProperties {
+		public class SpotProperties {
 			private Bitmap bitmap;
 			private IPoint margin;
-			private SpotGroupLayout layout;
-			SpotProperties(Bitmap bitmap, IPoint margin) {
+			public SpotProperties(Bitmap bitmap, IPoint margin) {
 				this.setBitmap(bitmap);
 				this.setMargin(margin);
 			}

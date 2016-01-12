@@ -1,5 +1,7 @@
 package org.tapchain;
 
+import android.app.Activity;
+
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
@@ -28,6 +30,10 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	public ActorTap() {
 		super();
 	}
+
+    public ActorTap(Activity act) {
+        super(act);
+    }
 
 	@Override
 	public void setMyActor(Actor mytapchain) {
@@ -91,7 +97,7 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	@Override
 	public IActorTap setAccessoryTap(Object key, IActorTap tap) {
 		if(tapSet == null)
-			tapSet = new HashMap<Object, IActorTap>();
+			tapSet = new HashMap<>();
 		return tapSet.put(key, tap);
 	}
 

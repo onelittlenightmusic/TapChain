@@ -18,7 +18,6 @@ public class MySetPointTapStyle extends OptionTapStyle implements IScrollHandler
 	float radi = 10f;
 	Paint focuspaint = new Paint();
 	Bitmap bm_fg = null;
-//	IPoint offset = new WorldPoint(100, 100);
 
 	MySetPointTapStyle(IActorTap _p, Bitmap bm_fg) {
 		super(_p);
@@ -30,11 +29,7 @@ public class MySetPointTapStyle extends OptionTapStyle implements IScrollHandler
 	@Override
 	public void view_init() {
 		getPaint().setColor(0x77ffffff);
-//		if(getParentTap()._valueGet().getEffect() == IPoint.WPEffect.POS)
-//			setParentPointValue(getParentTap()._valueGet());
 			setCenter(getParentTap()._valueGet());
-//		else
-//			_valueGet().setOffset(getParentTap(), false);
 		focuspaint.setColor(0x40ffffff);
 		focuspaint.setAntiAlias(true);
 	}
@@ -50,9 +45,6 @@ public class MySetPointTapStyle extends OptionTapStyle implements IScrollHandler
 
 	@Override
 	public void onScroll(IEditor edit, IActorTap tap, IPoint pos, IPoint vp) {
-//		if(getParentTap()._valueGet().getEffect() != IPoint.WPEffect.POS)
-//			getParentTap().setMyActorValue(pos.subNew(getParentTap().getCenter()));
-//		else
 			setCenter(pos);
 			getParentTap().setMyActorValue(vp/*.plusNew(offset)*/);
 	}

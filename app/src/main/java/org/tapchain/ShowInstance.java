@@ -1,13 +1,16 @@
 package org.tapchain;
 
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Typeface;
 import android.graphics.drawable.NinePatchDrawable;
 import android.util.Log;
 
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IPoint.WPEffect;
+import org.tapchain.core.IValueArray;
 import org.tapchain.game.CarEngineer.Angle;
 import org.tapchain.game.CarEngineer.RotationAcceleration;
 import org.tapchain.game.CarEngineer.Speed;
@@ -25,6 +28,8 @@ public class ShowInstance {
 	static NinePatchDrawable npd_num = null;
 	static NinePatchDrawable npd_word = null;
 	static NinePatchDrawable npd_inside = null;
+    static Paint pathInnerPaint = new Paint(),
+                pathInnerPaint2 = new Paint();
 	static {
 		int textSize = 50;
 		circlePaintFill.setAntiAlias(true);
@@ -40,16 +45,25 @@ public class ShowInstance {
 		smallText.setColor(0xffffffff);
 		smallText.setTextAlign(Paint.Align.CENTER);
 		smallText.setTypeface(Typeface.DEFAULT_BOLD);
+        pathInnerPaint.setAntiAlias(true);
+        pathInnerPaint.setColor(0xff222266);
+        pathInnerPaint.setStyle(Paint.Style.STROKE);
+        pathInnerPaint.setStrokeWidth(60);
+        pathInnerPaint.setFilterBitmap(true);
+        pathInnerPaint2.setAntiAlias(true);
+        pathInnerPaint2.setColor(0xffffffff);
+        pathInnerPaint2.setStyle(Paint.Style.STROKE);
+        pathInnerPaint2.setStrokeWidth(10);
+        pathInnerPaint2.setPathEffect(new DashPathEffect(new float[]{30f, 10f},
+                0));
 	}
-	static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint innerPaint2*/, String tag) {
+	static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint pathInnerPaint2*/, String tag) {
         //Show Background Color Circle
         circlePaintFill.setColor(0xaa000000+tag.hashCode());
         canvas.drawCircle(cp.x(), cp.y(), 30, circlePaintFill);
         circlePaintFill.setColor(0xccffffff);
 
 		if (val instanceof Integer) {
-//			float r = 25f;
-//			showInteger(canvas, r, (Integer) val, cp.x(), cp.y());
             DrawLib.drawStringCenter(canvas, cp, val.toString(), textPaint);
 		} else if (val instanceof Float) {
 			DrawLib.drawStringCenter(canvas, cp, String.format("%.2f",((Float)val)), textPaint);
@@ -74,7 +88,24 @@ public class ShowInstance {
 		return true;
 	}
 
-	public static void showPoint(Canvas canvas, IPoint value, IPoint center, Paint innerPaint) {
+
+    public static void showPath(Canvas canvas, IValueArray<IPoint> points) {
+        Path path = null;
+        for (IPoint p : points._valueGetAll())
+            if (path == null) {
+                path = new Path();
+                path.moveTo(p.x(), p.y());
+            } else {
+                path.lineTo(p.x(), p.y());
+            }
+        if (path != null) {
+            canvas.drawPath(path, pathInnerPaint);
+            canvas.drawPath(path, pathInnerPaint2);
+        }
+    }
+
+
+    public static void showPoint(Canvas canvas, IPoint value, IPoint center, Paint innerPaint) {
 		IPoint screenp;
 		if (value.getEffect() == WPEffect.POS) {
 			screenp = value;
@@ -100,42 +131,42 @@ public class ShowInstance {
 
 	}
 
-	public void showInteger2(Canvas canvas, float r, int val, float x, float y) {
-		circlePaintFill.setStrokeWidth(10);
-		for (int i = 1; i <= val % 10; i++)
-			canvas.drawCircle(x
-					+ (float) (r * Math.sin(Math.PI * 0.2f * i)), y
-					+ (float) (r * Math.cos(Math.PI * 0.2f * i)) - r,
-					r * 0.4f, circlePaintFill);
-		if (val >= 10) {
-			circlePaintFill
-					.setStrokeWidth(circlePaintFill.getStrokeWidth() * 2);
-			showInteger(canvas, r * 2.5f, val / 10, x, y - r);
-		}
+//	public void showInteger2(Canvas canvas, float r, int val, float x, float y) {
+//		circlePaintFill.setStrokeWidth(10);
+//		for (int i = 1; i <= val % 10; i++)
+//			canvas.drawCircle(x
+//					+ (float) (r * Math.sin(Math.PI * 0.2f * i)), y
+//					+ (float) (r * Math.cos(Math.PI * 0.2f * i)) - r,
+//					r * 0.4f, circlePaintFill);
+//		if (val >= 10) {
+//			circlePaintFill
+//					.setStrokeWidth(circlePaintFill.getStrokeWidth() * 2);
+//			showInteger(canvas, r * 2.5f, val / 10, x, y - r);
+//		}
+//
+//	}
 
-	}
-
-	static float[] dicex = new float[] { -1f, 1f, -1f, 1f, -1f, 1f, 0f, 0f};
-	static float[] dicey = new float[] { -1f, 1f, 1f, -1f, 0f, 0f, -1f, 1f};
-	public static void showInteger(Canvas canvas, float r, int val, float x, float y) {
-		circlePaintFill.setStrokeWidth(10);
-		int offset = val % 10;
-		int even = offset - offset%2;
-		int odd = offset%2;
-		for (int i = 0; i < even; i++)
-			canvas.drawCircle(x	+ r * dicex[i],
-					y + r * dicey[i],
-					r * 0.45f, circlePaintFill);
-		if(odd == 1)
-			canvas.drawCircle(x, y, r*0.5f, circlePaintFill);
-		if (val >= 10) {
-			circlePaintFill
-					.setStrokeWidth(circlePaintFill.getStrokeWidth() * 2);
-			showInteger(canvas, r, val / 10, x -
-					3*r, y);
-		}
-
-	}
+//	static float[] dicex = new float[] { -1f, 1f, -1f, 1f, -1f, 1f, 0f, 0f};
+//	static float[] dicey = new float[] { -1f, 1f, 1f, -1f, 0f, 0f, -1f, 1f};
+//	public static void showInteger(Canvas canvas, float r, int val, float x, float y) {
+//		circlePaintFill.setStrokeWidth(10);
+//		int offset = val % 10;
+//		int even = offset - offset%2;
+//		int odd = offset%2;
+//		for (int i = 0; i < even; i++)
+//			canvas.drawCircle(x	+ r * dicex[i],
+//					y + r * dicey[i],
+//					r * 0.45f, circlePaintFill);
+//		if(odd == 1)
+//			canvas.drawCircle(x, y, r*0.5f, circlePaintFill);
+//		if (val >= 10) {
+//			circlePaintFill
+//					.setStrokeWidth(circlePaintFill.getStrokeWidth() * 2);
+//			showInteger(canvas, r, val / 10, x -
+//					3*r, y);
+//		}
+//
+//	}
 
 	public static void showCalendar(Canvas canvas, Calendar obj, IPoint _point, float l) {
 		float diam = l * dm, diah = l * dh;

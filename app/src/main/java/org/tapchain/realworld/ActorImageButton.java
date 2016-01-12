@@ -14,7 +14,7 @@ import org.tapchain.editor.TapChainEditor;
  */
 public class ActorImageButton extends ActorImage implements
         View.OnTouchListener, GestureDetector.OnGestureListener {
-    OverlayPopup p;
+    OverlayPopupView p;
     final MainActivity act;
     final Factory<Actor> factory;
     final TapChainEditor.FACTORY_KEY key;
@@ -68,7 +68,7 @@ public class ActorImageButton extends ActorImage implements
     public boolean onDown(MotionEvent e) {
         getParent().requestDisallowInterceptTouchEvent(true);
         if (p == null)
-            p = new OverlayPopup(act);
+            p = new OverlayPopupView(act);
         p.setPopupView(factory, num);
         GridFragment f0 = act.getGrid();
         if (f0 != null) {

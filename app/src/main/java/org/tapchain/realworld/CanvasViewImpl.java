@@ -8,8 +8,7 @@ import android.graphics.Rect;
 import android.os.Vibrator;
 import android.view.SurfaceHolder;
 
-import org.tapchain.PaletteSort;
-import org.tapchain.TapChainGoalTap;
+import org.tapchain.editor.PaletteSort;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IBlueprintInitialization;
 import org.tapchain.editor.IActorTap;
@@ -18,11 +17,11 @@ import org.tapchain.editor.TapChainEditor;
 /**
  * Created by hiro on 2015/12/29.
  */
-public class CanvasViewImpl2 extends WritingView {
+public class CanvasViewImpl extends TapChainWritingView {
     Rect r = new Rect();
     private TapChainEditor editor;
 
-    public CanvasViewImpl2(Context context) {
+    public CanvasViewImpl(Context context) {
         super(context);
         paint.setColor(0xff303030);
         paint.setStyle(Paint.Style.FILL);
@@ -48,8 +47,6 @@ public class CanvasViewImpl2 extends WritingView {
 
     @Override
     public void myDraw(Canvas canvas) {
-        canvas.drawText("Goal = " + TapChainGoalTap.printState(), 20, 100,
-                paint_text);
         canvas.setMatrix(matrix);
         getEditor().show(canvas);
         getEditor().userShow(canvas);

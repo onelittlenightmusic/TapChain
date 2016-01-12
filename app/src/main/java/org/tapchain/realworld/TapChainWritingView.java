@@ -13,11 +13,11 @@ import org.tapchain.editor.ITap;
 /**
  * Created by hiro on 2015/12/27.
  */
-public abstract class WritingView extends TapChainSurfaceView {
+public abstract class TapChainWritingView extends TapChainSurfaceView {
     IActorTap selected;
     Matrix savedMatrix = new Matrix();
 
-    public WritingView(Context context) {
+    public TapChainWritingView(Context context) {
         super(context);
 //            setSize(300, 300);
         move(-100, -100);
@@ -65,7 +65,7 @@ public abstract class WritingView extends TapChainSurfaceView {
                         getPosition(e2.getX(), e2.getY())))
                     return true;
                 move(-v.x(), -v.y());
-                WritingView.this.onDraw();
+                TapChainWritingView.this.onDraw();
                 return true;
             }
 

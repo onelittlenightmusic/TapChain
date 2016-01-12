@@ -1,18 +1,23 @@
 package org.tapchain.realworld;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.tapchain.IntentHandler;
 import org.tapchain.core.Actor;
+import org.tapchain.core.Chain;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.TapChainEditor;
 
 /**
  *
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IIntentHandler {
+    SparseArray<IntentHandler> intentHandlers = new SparseArray<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (getGrid() != null)
-            getGrid().show(GridShow.HALF);
+            getGrid().show(GridShowState.HALF);
     }
 
     @Override
@@ -154,5 +159,25 @@ public class MainActivity extends AppCompatActivity {
         return getCanvas().getEditor();
     }
 
+    @Override
+    public void addIntentHandler(int requestCode, IntentHandler h) {
+        intentHandlers.put(requestCode, h);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK)
+            return;
+        if (intentHandlers.get(requestCode) != null)
+            try {
+                intentHandlers.get(requestCode).onIntent(resultCode, data);
+            } catch (Chain.ChainException e) {
+                e.printStackTrace();
+            }
+        else
+            add(TapChainEditor.FACTORY_KEY.ALL, data.getIntExtra("TEST", 0), 0f, 0f);
+        return;
+    }
 
 }

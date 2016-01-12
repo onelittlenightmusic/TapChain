@@ -1,6 +1,6 @@
 package org.tapchain;
 
-import org.tapchain.ColorLib.ColorCode;
+import org.tapchain.editor.ColorLib.ColorCode;
 
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;

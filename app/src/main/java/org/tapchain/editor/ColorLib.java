@@ -1,11 +1,11 @@
-package org.tapchain;
+package org.tapchain.editor;
 
 import java.util.HashMap;
 
 import org.tapchain.core.LinkType;
 
 public class ColorLib {
-	public static enum ColorCode {
+	public enum ColorCode {
 		CLEAR, RED, GREEN, YELLOW, BLUE;
 	}
 	
@@ -19,7 +19,7 @@ public class ColorLib {
 		}
 	};
 	
-	static ColorCode getLinkColor(LinkType al) {
+	public static ColorCode getLinkColor(LinkType al) {
 		return colorMap.get(al);
 	}
 }

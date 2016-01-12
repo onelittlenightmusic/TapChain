@@ -14,7 +14,7 @@ import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
-import org.tapchain.QueueingTheory.Processor;
+import org.tapchain.realworld.queueing.QueueingTheory.Processor;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Exp;
 import org.tapchain.core.Actor.IntegerGenerator;
@@ -41,7 +41,6 @@ import org.tapchain.game.ElectricityFactory;
 import org.tapchain.game.Motor;
 import org.tapchain.realworld.R;
 
-import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
 @SuppressWarnings("serial")
@@ -49,7 +48,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     // 1.Initialization
     final Actor v2 = new Actor();
-    TapChainGoalTap goal;
     boolean magnet = false;
     Actor touch = null;
     Activity act = null;
@@ -291,22 +289,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     // 2.Getters and setters
 
-    @Override
-    public void log(String... s) {
-        switch (s.length) {
-            case 0:
-                break;
-            case 1:
-                Log.w(s[0], "");
-                break;
-            case 2:
-            default:
-                Log.w(s[0], s[1]);
-                break;
-        }
-        getWindow().log(s);
-        return;
-    }
+
 
     public boolean magnetToggle() {
         magnet = !magnet;
@@ -322,11 +305,6 @@ public class TapChainAndroidEditor extends TapChainEditor {
         return rtn;
     }
 
-//    @Override
-//    public void showFamily(IActorTap tap) {
-////        tap.getCenter().plus(10f * (float) Math.random() - 5f, 10f * (float) Math.random() - 5f);
-//    }
-
     public class BubbleTapStyle extends MyTapStyle2 {
         public BubbleTapStyle() {
             super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
@@ -339,7 +317,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
         }
 
         public Bitmap bubble_init() {
-            return null;// bitmapmaker.makeOrReuse(getName(),
+            return null;
         }
     }
 

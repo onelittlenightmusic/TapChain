@@ -11,8 +11,8 @@ import org.junit.runner.RunWith;
 import org.tapchain.core.Actor;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
+import org.tapchain.realworld.IIntentHandler;
 import org.tapchain.realworld.MainActivity;
-import org.tapchain.realworld.TapChainView;
 
 import static java.lang.Thread.sleep;
 

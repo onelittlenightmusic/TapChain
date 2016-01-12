@@ -1,14 +1,16 @@
 package org.tapchain;
 
 import org.tapchain.core.ClassEnvelope;
-import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
+import org.tapchain.editor.ColorLib;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IEditor;
 import org.tapchain.editor.IFocusControl;
+import org.tapchain.editor.IFocusable;
 import org.tapchain.realworld.R;
+import org.tapchain.editor.SpotProperties;
 
 import java.util.HashMap;
 

@@ -18,9 +18,9 @@ import org.tapchain.core.PathType;
 import org.tapchain.core.TapMath;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ColorLib;
+import org.tapchain.editor.IActorEditor;
 import org.tapchain.realworld.R;
-import org.tapchain.realworld.TapChainView;
 
 import java.util.Arrays;
 import java.util.Queue;
@@ -138,23 +138,11 @@ public class BubblePathTap extends PathTap implements ISelectable {
             this.obj = obj;
         }
 
-        public void tick() {
-            b += inclement;
-        }
-
         public float get() {
             return b;
         }
 
-        public boolean over() {
-            return b >= 1.0f;
-        }
-
         public Object getObject() { return obj; }
-    }
-
-    public void addPoint(int  time, Object obj) {
-        bl.add(new Pos(time, obj));
     }
 
     @Override
@@ -164,7 +152,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
         final Object tmp_obj = objcache;
         final String tmp_objtag = objtag;
         AndroidActor.AndroidView view
-                = new AndroidActor.AndroidView(TapChainView.getNow()) {
+                = new AndroidActor.AndroidView(getOwnActivity()) {
             @Override
             public boolean view_user(Canvas canvas, IPoint sp, IPoint iPoint,
                                      int alpha) {
@@ -188,7 +176,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
     }
 
     @Override
-    public void onSelected(IEditor edit, IPoint pos) {
+    public void onSelected(IActorEditor edit, IPoint pos) {
         IPath path = getMyPath();
         edit.edit().disconnect(path);
     }

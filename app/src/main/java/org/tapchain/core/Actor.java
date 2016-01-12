@@ -9,8 +9,8 @@ import org.tapchain.core.ActorChain.IRecorder;
 import org.tapchain.core.ActorChain.ISound;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.ChainException;
-import org.tapchain.core.Chain.ConnectionResultPath;
 import org.tapchain.core.Chain.ConnectionResultOutConnector;
+import org.tapchain.core.Chain.ConnectionResultPath;
 import org.tapchain.core.Chain.IPathListener;
 import org.tapchain.core.Chain.PieceErrorCode;
 import org.tapchain.core.ClassLib.ClassLibReturn;
@@ -18,8 +18,6 @@ import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
-import org.tapchain.editor.TapChainEditor.InteractionType;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -58,7 +56,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     private Boolean animation_loop = false, live = false;
     IActorBlueprint blueprint = null;
     ConcurrentLinkedQueue<Actor> members = new ConcurrentLinkedQueue<Actor>();
-    LinkedList<Integer> generation = new LinkedList<Integer>();
     private int time = 0;
 
     // 1.Initialization
@@ -1029,32 +1026,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    public static class CollidableHandler extends CollidableRegister implements
-            IActorCollideHandler {
-        public CollidableHandler() {
-            super();
-        }
-
-        @Override
-        public boolean onCollide(IEditor edit, IView v1, Collection<Actor> v2,
-                                 IPoint pos) {
-            Collection<? extends IPiece> pieces;
-            if (v2 == null)
-                pieces = getParentChain().getPieces();
-            else {
-                pieces = v2;
-            }
-            for (IPiece o : pieces)
-                if (o instanceof IView)
-                    if (o != v1)
-                        if (edit.getInteract().checkTouchType((IView) o, v1) != InteractionType.NONE) {
-                            ((Controllable) v1).interruptEnd();
-                            return true;
-                        }
-            return false;
-        }
-
-    }
 
     public static class ScrollableAdjuster extends
             EffectorSkelton<IPiece, Integer> {
@@ -1112,7 +1083,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     public static abstract class ValueArrayEffector<EFFECT> extends
             ValueEffector<EFFECT> implements IValueArray<EFFECT> {
         Iterator<EFFECT> value_itr = null;
-        Collection<EFFECT> values = new ConcurrentLinkedQueue<EFFECT>();
+        ConcurrentLinkedQueue<EFFECT> values = new ConcurrentLinkedQueue<EFFECT>();
         EFFECT lastVal = null;
 
         public ValueArrayEffector() {
@@ -1162,6 +1133,10 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return increment();
         }
 
+        @Override
+        public EFFECT _valueGetLast() {
+            return values.peek();
+        }
     }
 
     public static class ArrayJumper extends ValueArrayEffector<IPoint> {
