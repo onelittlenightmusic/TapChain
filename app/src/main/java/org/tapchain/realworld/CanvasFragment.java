@@ -43,7 +43,19 @@ public class CanvasFragment extends Fragment {
             view = new CanvasViewImpl(act);
             if(editor == null) {
                 editor = new TapChainAndroidEditor(view, act.getResources(), act);
-                editor.kickTapDraw(null);
+
+                try {
+                    editor.editBlueprint()
+                            .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Actor$WordGenerator"), "A", false)
+                            .setViewArg(getResources().getIdentifier("a" , "drawable", getActivity().getPackageName()))
+                            .setTag("Word")
+                            //                .setLogLevel()
+                            .save();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                editor.invalidate();
             }
             view.setEditor(editor);
         }
@@ -70,12 +82,18 @@ public class CanvasFragment extends Fragment {
 
 
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = view.getEditor().addActorFromBlueprint(key, tag, pos);
+        EditorReturn editorReturn = editor.addActorFromBlueprint(key, tag, pos);
+        //TODO: resolve duplication
+        IPoint resultPoint = editorReturn.getTap()._valueGet();
+        if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
+            //Centering
+            view._onFlingBackgroundTo(pos.x(), pos.y());
+
         if (editorReturn == null)
             return null;
         if (vec == null)
             return editorReturn.getActor();
-        view.getEditor().onFling(editorReturn.getTap(), vec);
+        view.onFling(editorReturn.getTap(), vec);
         return editorReturn.getActor();
     }
 
@@ -92,12 +110,19 @@ public class CanvasFragment extends Fragment {
     }
 
     public Actor add(TapChainEditor.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = view.getEditor().addActorFromBlueprint(key, code, pos);
+        EditorReturn editorReturn = editor.addActorFromBlueprint(key, code, pos);
+
+        //TODO: resolve duplication
+        IPoint resultPoint = editorReturn.getTap()._valueGet();
+        if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
+            //Centering
+            view._onFlingBackgroundTo(pos.x(), pos.y());
+
         if (editorReturn == null)
             return null;
         if (vec == null)
             return editorReturn.getActor();
-        view.getEditor().onFling(editorReturn.getTap(), vec);
+        view.onFling(editorReturn.getTap(), vec);
         return editorReturn.getActor();
     }
 

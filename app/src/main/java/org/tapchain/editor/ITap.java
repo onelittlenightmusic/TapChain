@@ -6,7 +6,6 @@ import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.IPiece;
 
 public interface ITap extends IView {
-//	boolean hasEventHandler();
-//	IGenericSharedHandler getSharedHandler();
 	boolean contains(IPoint iPoint);
+    void invalidate();
 }

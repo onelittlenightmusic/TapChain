@@ -351,7 +351,7 @@ public class AndroidActor {
 		IShapeBoundary bound;
         private Activity act = null;
 
-        AndroidView() {
+        public AndroidView() {
             super();
             __setPointObject(new PhysicalPoint());
             setShapeBoundary(this);

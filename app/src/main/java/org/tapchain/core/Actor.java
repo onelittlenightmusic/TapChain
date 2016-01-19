@@ -1372,7 +1372,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         @Override
         public boolean actorRun(Actor act) throws ChainException {
             L("Restarter calling").go(getTarget(false).restart());
-            L("Restarter invalidate()").go(getTarget(false).invalidate());
+            getTarget(false).invalidate();
             return false;
         }
 
@@ -1393,7 +1393,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         @Override
         public boolean actorRun(Actor act) throws ChainException {
             L("LogPrinter").go(getTarget(false).printLastExecLog());
-            L("LogPrinter invalidate()").go(getTarget(false).invalidate());
+            getTarget(false).invalidate();
             return false;
         }
 

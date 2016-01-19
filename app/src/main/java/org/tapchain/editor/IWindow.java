@@ -9,4 +9,5 @@ public interface IWindow {
 	void showPalette(PaletteSort sort);
     boolean isInWindow(float x, float y);
     IPoint getMiddlePoint();
+    void run(Runnable runnable);
 }

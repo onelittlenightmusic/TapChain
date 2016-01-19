@@ -246,14 +246,13 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 		return true;
 	}
 	boolean invalidating = false;
-	public ChainPiece invalidate() {
+	public void invalidate() {
 		tick(Packet.HeartBeat);//1 is dummy data for onTick handlers
         //If invalidating is on(so this piece was kicked) but main thread stops at _waitNext,
         //Then this calls kick() again to wake up main thread.
         if(getParentChain() != null)
             getParentChain().kick(this);
         invalidating = true;
-		return this;
 	}
 
 	public IPiece start() {

@@ -14,6 +14,7 @@ import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
+import org.tapchain.core.TapLib;
 import org.tapchain.realworld.queueing.QueueingTheory.Processor;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Exp;
@@ -47,9 +48,6 @@ import java.util.concurrent.CountDownLatch;
 public class TapChainAndroidEditor extends TapChainEditor {
 
     // 1.Initialization
-    final Actor v2 = new Actor();
-    boolean magnet = false;
-    Actor touch = null;
     Activity act = null;
 
     public TapChainAndroidEditor(IWindow w, Resources r, Activity activity) {
@@ -63,14 +61,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 BubblePathTap.class, new AndroidInteractionStyle(),
                 aeh, aeh));
         // setInteract(new LocalInteraction());
-        geos.add(new Geometry(
-                new WorldPoint(100f, 0f), new WorldPoint(200f, 0f), new WorldPoint(300f, 0f),
-                new WorldPoint(100f, 100f), new WorldPoint(200f, 100f), new WorldPoint(300f, 100f),
-                new WorldPoint(100f, 200f), new WorldPoint(200f, 200f), new WorldPoint(300f, 200f),
-                new WorldPoint(100f, 300f), new WorldPoint(200f, 300f), new WorldPoint(300f, 300f),
-                new WorldPoint(100f, 400f), new WorldPoint(200f, 400f), new WorldPoint(300f, 400f)));
+//        geos.add(new Geometry(
+//                new WorldPoint(100f, 0f), new WorldPoint(200f, 0f), new WorldPoint(300f, 0f),
+//                new WorldPoint(100f, 100f), new WorldPoint(200f, 100f), new WorldPoint(300f, 100f),
+//                new WorldPoint(100f, 200f), new WorldPoint(200f, 200f), new WorldPoint(300f, 200f),
+//                new WorldPoint(100f, 300f), new WorldPoint(200f, 300f), new WorldPoint(300f, 300f),
+//                new WorldPoint(100f, 400f), new WorldPoint(200f, 400f), new WorldPoint(300f, 400f)));
         // Making list of pieces
-        getBlueprintManager()
+        editBlueprint()
                 .add(AndroidActor.AndroidImageView.class, act, R.drawable.star1)
                 .setViewArg(R.drawable.star2)
                 .setTag("Star")
@@ -229,58 +227,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .add(Motor.MotorPedal.class).setViewArg(R.drawable.pedal).setTag("Motor Pedal").save()
         ;
 
-        try {
-            getBlueprintManager()
-                    .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Actor$WordGenerator"), "A", false)
-                    .setViewArg(R.drawable.a)
-                    .setTag("Word")
-    //                .setLogLevel()
-                    .save();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
 
-        editTap()
-                .add(touch = new AndroidView() {
-                    Paint paint_ = new Paint();
-
-                    public void view_init() throws ChainException {
-                        IPoint p = (WorldPoint) pullInActor().getObject();
-                        setCenter(p);
-                        ITap t = searchTouchedTap(p);
-                        int c = Color.BLACK;
-                        if (t != null) {
-                            c = Color.WHITE;
-                        }
-                        setColor(c);
-                        setSize(new WorldPoint(100f, 100f));
-                        setAlpha(100);
-                    }
-
-                    @Override
-                    public boolean view_user(Canvas canvas, IPoint sp,
-                                             IPoint size, int alpha) {
-                        paint_.setColor(getColor());
-                        paint_.setAlpha(alpha);
-                        canvas.drawCircle(sp.x(), sp.y(), size.x(), paint_);
-                        return false;
-                    }
-                }.setLinkClass(LinkType.PULL, Object.class).setLinkClass(LinkType.TO_CHILD, ViewActor.class))
-                ._in()
-                .add(new Actor.EffectorSkelton<ViewActor, Integer>() {
-                    @Override
-                    public boolean actorRun(Actor act) throws ChainException {
-                        getTarget().addSize(new WorldPoint(30f, 0f));
-                        getTarget().setAlpha(
-                                getTarget().getAlpha() - 10);
-                        invalidate();
-                        return increment();
-                    }
-                }.initEffectValue(1, 10))
-                .next(new Actor.Reset().setContinue(true))._out()
-                .save();
-//        freezeToggle();
-//        freezeToggle();
     }
 
     public void setActivity(Activity act) {
@@ -291,20 +238,16 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
 
 
-    public boolean magnetToggle() {
-        magnet = !magnet;
-        return magnet;
-    }
 
 
     // 3.Changing state
-    @Override
-    public ITap onDown(IPoint iPoint) {
-        ITap rtn = super.onDown(iPoint);
-        touch.offer(iPoint);
-        return rtn;
-    }
-
+//    @Override
+//    public ITap onDown(IPoint iPoint) {
+//        ITap rtn = super.onDown(iPoint);
+//        touch.offer(iPoint);
+//        return rtn;
+//    }
+//
     public class BubbleTapStyle extends MyTapStyle2 {
         public BubbleTapStyle() {
             super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
@@ -321,7 +264,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
         }
     }
 
-    public class AndroidInteractionStyle extends Actor.Relation implements
+    public class AndroidInteractionStyle implements
             IActionStyle {
         CountDownLatch c = new CountDownLatch(1);
         ViewActor a, b;
@@ -329,26 +272,18 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
         AndroidInteractionStyle() {
             super();
-            setLinkClass(LinkType.PUSH, IPoint.class);
+//            setLinkClass(LinkType.PUSH, IPoint.class);
         }
 
-        @Override
-        public boolean relation_impl(ViewActor _a, ViewActor _b)
-                throws InterruptedException {
-            c.await();
-            c = new CountDownLatch(1);
-            pushInActor(a.getCenter().multiplyNew(0.5f)
-                    .plusNew(b.getCenter().multiplyNew(0.5f)), "");
-            return true;// checkTouch(a, b);
-        }
-
-        @Override
-        public IPoint pointOnAdd(IPoint raw) {
-            if (magnet)
-                return raw.copy().plus(50f, 50f).round(100).unsetDif();
-            else
-                return raw.unsetDif();
-        }
+//        @Override
+//        public boolean relation_impl(ViewActor _a, ViewActor _b)
+//                throws InterruptedException {
+//            c.await();
+//            c = new CountDownLatch(1);
+//            pushInActor(a.getCenter().multiplyNew(0.5f)
+//                    .plusNew(b.getCenter().multiplyNew(0.5f)), "");
+//            return true;// checkTouch(a, b);
+//        }
 
         @Override
         public InteractionType checkTouchType(IView f1, IView f2) {
@@ -518,32 +453,32 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
     }
 
-    @Override
-    public boolean onLongPress(IActorTap selected) {
-        boolean rtn = super.onLongPress(selected);
-        if(selected == null)
-            return false;
-        if (rtn) {
-            AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
-            a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
-            a._valueGet().setOffset(selected);
-            editTap()
-                    .add(a)
-                    ._in()
-                    .add(new Actor.Sleep(2000))
-                    .next(new Actor.Ender())
-                    ._out()
-                    .save();
-        }
-        Actor a = (selected).getActor();
-        a.setLogLevel(true);
-        a.setLogTag("test");
-        Log.w("test", String.format("%s's setLogLevel true(lock:%s[%s], state:%s)",
-                a.getTag(), a.getLockStatus() ? "free" : "locked",
-                a.getLockTag(),
-                a.getState()));
-        a.printLastExecLog();
-        return rtn;
-    }
+//    @Override
+//    public boolean onLongPress(IActorTap selected) {
+//        boolean rtn = super.onLongPress(selected);
+//        if(selected == null)
+//            return false;
+//        if (rtn) {
+//            AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
+//            a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
+//            a._valueGet().setOffset(selected);
+//            editTap()
+//                    .add(a)
+//                    ._in()
+//                    .add(new Actor.Sleep(2000))
+//                    .next(new Actor.Ender())
+//                    ._out()
+//                    .save();
+//        }
+//        Actor a = (selected).getActor();
+//        a.setLogLevel(true);
+//        a.setLogTag("test");
+//        Log.w("test", String.format("%s's setLogLevel true(lock:%s[%s], state:%s)",
+//                a.getTag(), a.getLockStatus() ? "free" : "locked",
+//                a.getLockTag(),
+//                a.getState()));
+//        a.printLastExecLog();
+//        return rtn;
+//    }
 
 }

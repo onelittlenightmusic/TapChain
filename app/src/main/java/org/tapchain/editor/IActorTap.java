@@ -10,7 +10,6 @@ import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
 
 public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap, IPiece<Actor> {
-	ControllableSignal interrupt(ControllableSignal end);
 	Actor getActor();
 	Object getMyActorValue();
 	boolean setMyActorValue(Object obj);
@@ -26,5 +25,4 @@ public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap, IPiec
 	IActorTap unsetAccessoryTap(Object key);
 	IPoint getRecentPoint();
 	void setRecentPoint(IPoint p);
-    boolean isFamilyTo(IActorTap a);
 }

@@ -61,7 +61,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
                         (int) e2.getRawY()))
                     return true;
                 IPoint v = getVector(-distanceX, -distanceY);
-                if(getEditor().scroll(selected, v,
+                if(scroll(selected, v,
                         getPosition(e2.getX(), e2.getY())))
                     return true;
                 move(-v.x(), -v.y());
@@ -73,16 +73,24 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                    float velocityY) {
-                return getEditor().onFling(selected, getVector(velocityX, velocityY));
+                return TapChainWritingView.this.onFling(selected, getVector(velocityX, velocityY));
             }
 
             @Override
             public void onLongPress(MotionEvent e) {
-                getEditor().onLongPress(selected);
+                TapChainWritingView.this.onLongPress(selected);
                 setMode(CAPTURED);
             }
         });
     }
+
+    protected abstract boolean scroll(IActorTap selected, IPoint v, IPoint position);
+
+    protected abstract ITap onDown(IPoint position);
+
+    protected abstract boolean onLongPress(IActorTap selected);
+
+    protected abstract boolean onFling(IActorTap selected, IPoint vector);
 
     public boolean onTouchEvent(MotionEvent ev) {
         if (gdetect.onTouchEvent(ev))
@@ -90,7 +98,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
         int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                ITap selectedTap = getEditor().onDown(getPosition(ev.getX(), ev.getY()));
+                ITap selectedTap = onDown(getPosition(ev.getX(), ev.getY()));
                 if (selectedTap instanceof IActorTap)
                     selected = (IActorTap) selectedTap;
                 else
@@ -136,6 +144,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
         return true;
     }
 
+
     /**
      * @return the editor
      */
@@ -146,9 +155,6 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
 
     public abstract void resetRegistration();
 
-    @Override
-    public boolean onSecondTouch(final IPoint wp) {
-        return getEditor().onLockedScroll(selected, wp);
-    }
+
 
 }

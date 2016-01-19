@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
+import android.os.AsyncTask;
 import android.text.DynamicLayout;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
@@ -116,14 +117,14 @@ public abstract class TapChainSurfaceView
                                int height) {
         window_size.x = getWidth();
         window_size.y = getHeight();
-        getEditor().kickTapDraw(null);
+        getEditor().invalidate();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         window_size.x = getWidth();
         window_size.y = getHeight();
-        getEditor().kickTapDraw(null);
+        getEditor().invalidate();
     }
 
     public abstract TapChainEditor getEditor();
@@ -198,6 +199,17 @@ public abstract class TapChainSurfaceView
 
     @Override
     public void showPalette(final PaletteSort sort) {
+    }
+
+    @Override
+    public void run(final Runnable runnable) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                runnable.run();
+                return null;
+            }
+        }.execute();
     }
 
     public static IPoint getPosition(float x, float y, Matrix matrix) {

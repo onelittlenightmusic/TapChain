@@ -42,14 +42,23 @@ public class EditorManager extends ActorManager {
 
 	Map<PieceState, Actor> plist = new EnumMap<PieceState, Actor>(
 			PieceState.class);
-	private int intervalMs = 0;
+    public EditorManager() {
+        super();
+        tapManager = new ActorManager();
+        getTapManager().createChain(50).getChain().setName("System");
+        createChain(100).getChain().setAutoEnd(false).setName("User");
+        Actor ptmp = null;
+        List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
+                0xff777777, 0xff447777, 0xff774444);
+        for (PieceState state : PieceState.values()) {
+            ptmp = new Actor.Colorer().color_init(colors.get(state.ordinal()))
+                    .setParentType(PathType.OFFER).boost();
+            tapManager.add(ptmp).save();
+            plist.put(state, ptmp);
+        }
+    }
 
-	public EditorManager() {
-		super();
-		tapManager = new ActorManager();
-		getTapManager().createChain(50).getChain().setName("System");
-		createChain(100).getChain().setAutoEnd(false).setName("User");
-	}
+	private int intervalMs = 0;
 
 	public EditorManager(EditorManager e) {
 		super(e);
@@ -90,18 +99,6 @@ public class EditorManager extends ActorManager {
 		if (dictPath.get(path) != null)
 			return dictPath.get(path);
 		return null;
-	}
-
-	protected void init() {
-		Actor ptmp = null;
-		List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
-				0xff777777, 0xff447777, 0xff774444);
-		for (PieceState state : PieceState.values()) {
-			ptmp = new Actor.Colorer().color_init(colors.get(state.ordinal()))
-					.setParentType(PathType.OFFER).boost();
-			tapManager.add(ptmp).save();
-			plist.put(state, ptmp);
-		}
 	}
 
 	protected void setAllCallback(IControlCallback control) {

@@ -155,19 +155,4 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 		recent = p;
 	}
 
-    @Override
-    public boolean isFamilyTo(IActorTap a) {
-        Actor thisActor = getActor(), aActor = a.getActor();
-        if(thisActor == null || aActor == null)
-            return false;
-        return checkParent(thisActor, aActor) || checkParent(aActor, thisActor);
-    }
-
-    boolean checkParent(Actor child, Actor parent) {
-        ClassEnvelope clz = child.getLinkClassFromLib(LinkType.FROM_PARENT);
-        if (clz == null) {
-            return false;
-        }
-        return clz.isAssignableFrom(parent.getLinkClassFromLib(LinkType.TO_CHILD));
-    }
 }
