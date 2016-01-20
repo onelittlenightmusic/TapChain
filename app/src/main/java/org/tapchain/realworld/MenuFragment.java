@@ -121,7 +121,7 @@ public class MenuFragment extends Fragment {
 //                    @Override
 //                    public void onClick(View v) {
 //                        try {
-//                            Log.w("JSON TEST", getEditor().edit().getChain().toJSON().toString());
+//                            Log.w("JSON TEST", getEditor().editActor().getChain().toJSON().toString());
 //                        } catch (JSONException e) {
 //                            e.printStackTrace();
 //                        }

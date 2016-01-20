@@ -4,9 +4,7 @@ import org.tapchain.ActorTap;
 import org.tapchain.PathTap;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorChain.IView;
-import org.tapchain.core.ActorInputException;
 import org.tapchain.core.ActorManager;
-import org.tapchain.core.ActorPullException;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.Chain;
 import org.tapchain.core.Chain.ChainException;
@@ -17,6 +15,7 @@ import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IConnectHandler;
 import org.tapchain.core.IErrorHandler;
+import org.tapchain.core.ILogHandler;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
@@ -42,10 +41,14 @@ public class EditorManager extends ActorManager {
 
 	Map<PieceState, Actor> plist = new EnumMap<PieceState, Actor>(
 			PieceState.class);
+
+    /**
+     * Constructor
+     */
     public EditorManager() {
         super();
         tapManager = new ActorManager();
-        getTapManager().createChain(50).getChain().setName("System");
+        editTap().createChain(50).getChain().setName("System");
         createChain(100).getChain().setAutoEnd(false).setName("User");
         Actor ptmp = null;
         List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
@@ -60,6 +63,10 @@ public class EditorManager extends ActorManager {
 
 	private int intervalMs = 0;
 
+    /***
+     * Copy constructor
+     * @param e
+     */
 	public EditorManager(EditorManager e) {
 		super(e);
 		tapManager = e.tapManager;
@@ -77,7 +84,7 @@ public class EditorManager extends ActorManager {
 		return this;
 	}
 
-	public ActorManager getTapManager() {
+	public ActorManager editTap() {
 		return tapManager;
 	}
 
@@ -89,7 +96,7 @@ public class EditorManager extends ActorManager {
 		return dictPiece.keySet();
 	}
 
-	public IActorTap getTap(Actor bp) {
+	public IActorTap toTap(Actor bp) {
 		if (dictPiece.get(bp) != null)
 			return dictPiece.get(bp);
 		return null;
@@ -102,7 +109,7 @@ public class EditorManager extends ActorManager {
 	}
 
 	protected void setAllCallback(IControlCallback control) {
-		getTapManager().SetCallback(control);
+		editTap().SetCallback(control);
 		SetCallback(control);
 	}
 
@@ -111,7 +118,7 @@ public class EditorManager extends ActorManager {
 		return;
 	}
 
-	public EditorReturn addAndInstallView(IBlueprint<Actor> blueprint, IPoint nowPoint) throws ChainException {
+	protected EditorReturn addAndInstallView(IBlueprint<Actor> blueprint, IPoint nowPoint) throws ChainException {
         Actor rtn = blueprint.newInstance(this);
         Blueprint view = (Blueprint)blueprint.getView();
         if (view != null) {
@@ -126,7 +133,7 @@ public class EditorManager extends ActorManager {
 	ActorTap __setPieceView(Actor actor, final Blueprint bp)
 			throws ChainException {
 		final ActorTap _view;
-		final ActorManager manager = getTapManager();
+		final ActorManager manager = editTap();
 		_view = (ActorTap) bp.newInstance(manager);
 		if (_view == null)
 			throw new ChainException(actor, "view not created");
@@ -175,7 +182,7 @@ public class EditorManager extends ActorManager {
 			if(rtn != null) {
 				if(addView && blueprintForPathTap != null) {
 					//PathTap instantiation
-					IActorTap xTap = getTap(x), yTap = getTap(y);
+					IActorTap xTap = toTap(x), yTap = toTap(y);
 					IBlueprint newBlueprintForPath = blueprintForPathTap.copyAndRenewArg()
 							.addArg(yTap, xTap, yp, xp, rtn.getResult());
 					IPathTap pathTap = __setPathView(rtn.getResult(), newBlueprintForPath);
@@ -202,7 +209,7 @@ public class EditorManager extends ActorManager {
 	IPathTap __setPathView(IPath path, IBlueprint _vReserve) {
 		final PathTap _view;
 		try {
-			ActorManager manager = getTapManager();
+			ActorManager manager = editTap();
 			_view = (PathTap) _vReserve.newInstance(manager);
 			manager.save();
 			_view.setEditor(manager);
@@ -245,13 +252,13 @@ public class EditorManager extends ActorManager {
 	void __unsetView(Actor bp) {
 		if (bp == null)
 			return;
-		IActorTap v = getTap(bp);
+		IActorTap v = toTap(bp);
 		dictPiece.remove(bp);
 		if (v == null)
 			return;
 		if(v instanceof ITapControlInterface)
 			((ITapControlInterface)v).unsetActor();
-		getTapManager().remove((Actor) v);
+		editTap().remove((Actor) v);
 		return;
 	}
 
@@ -277,7 +284,7 @@ public class EditorManager extends ActorManager {
 		if (v == null)
 			return;
 		v.unsetMyPath();
-		getTapManager().remove(v);
+		editTap().remove(v);
 		return;
 	}
 
@@ -305,4 +312,10 @@ public class EditorManager extends ActorManager {
 		return this;
 	}
 
+    @Override
+    public EditorManager setLog(ILogHandler l) {
+        super.setLog(l);
+        editTap().setLog(l);
+        return this;
+    }
 }

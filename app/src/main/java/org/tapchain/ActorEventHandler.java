@@ -99,11 +99,11 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 //            case TOUCH_BOTTOM:
 //            case TOUCH_RIGHT:
 //            case TOUCH_LEFT:
-//                if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
+//                if (editActor.connect(a1, LinkType.FROM_PARENT, a2)) {
 //                    Log.w("Test", String.format("Parent %s to Child %s Succeeded", a1.getTag(), a2.getTag()));
 //                    break;
 //                }
-//                if (edit.connect(a1, LinkType.TO_CHILD, a2)) {
+//                if (editActor.connect(a1, LinkType.TO_CHILD, a2)) {
 //                    Log.w("Test", String.format("Child %s to Parent %s Succeeded", a2.getTag(), a1.getTag()));
 //                    break;
 //                }
@@ -116,23 +116,23 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 //            case INSIDE:
 //                boolean connect = false;
 //                if (t1 instanceof IAttachHandler) {
-//                    connect = ((IAttachHandler) t1).onTouch(edit, t2, a1, a2);
+//                    connect = ((IAttachHandler) t1).onTouch(editActor, t2, a1, a2);
 ////                } else {
-////                    if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
+////                    if (editActor.connect(a1, LinkType.FROM_PARENT, a2)) {
 ////                        t2._valueGet().setOffset(t1, true);
 ////                        connect = true;
 ////                    }
 //                }
 //                if (!connect) {
 //                    t1.setCenter(new WorldPoint(0, 100).setDif());
-//                    edit.editTap()
+//                    editActor.editTap()
 //                            .add(new AndroidActor.AndroidSound2(act, addSoundFail)).save();
 //                }
 //
 //                return false;
 //            case OUTSIDE:
 //                if (a1.isConnectedTo(a2, PathType.FAMILY)) {
-//                    edit.editTap().disconnect(a1, a2);
+//                    editActor.editTap().disconnect(a1, a2);
 //                    t1._valueGet().unsetOffset(t2, true);
 //                }
 //                break;

@@ -116,7 +116,7 @@ public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelop
 		if(!ce0.raw.equals(raw)) {
 				Map<Type, Type> rtn = ClassLib.getParameterizedTypeOld(ce0.raw, parameters, raw);
 				if(rtn != null)
-//					log(String.format("<> MAP %s", rtn.toString()));
+//					addLog(String.format("<> MAP %s", rtn.toString()));
 				parameters = new ArrayList<Type>(rtn.values());
 		}
 //			return false;

@@ -147,14 +147,12 @@ public abstract class TapChainSurfaceView
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    @Override
     public void move(float vx, float vy) {
         IPoint v = getScreenVector(-vx, -vy);
         matrix.postTranslate(v.x(), v.y());
         matrix.invert(inverse);
     }
 
-    @Override
     public boolean isInWindow(float x, float y) {
         IPoint d = getScreenPosition(x, y);
         if (window_size.x() < d.x() || 0 > d.x() || window_size.y() < d.y() || 0 > d.y()) {

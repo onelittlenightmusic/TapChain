@@ -78,6 +78,7 @@ public class SelectedTapLockEnvelope implements IRelease {
         if (restart != null)
             manager.add(restart);
         manager.save();
+        edit.lockReleaseTap(this);
         return true;
     }
 

@@ -5,6 +5,7 @@ import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IBlueprint;
+import org.tapchain.core.IManager;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
@@ -13,7 +14,7 @@ import org.tapchain.core.LinkType;
 import java.util.Collection;
 import java.util.List;
 
-public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
+public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManager<ACTOR, ACTOR> {
     /**
      * Check if an actor tap touches any other actor taps, then connect their actors.
      *
@@ -49,14 +50,6 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
      */
     ACTOR toActor(VIEW view);
 
-    /**
-     * Get a manager for editing actor and actor tap.
-     * For adding or removing actor, this is the first step.
-     * And when you add actor by this return, actor tap will be added automatically by
-     * instantiating tap blueprint style that you set.
-     * @return Actormanager for editing actors.
-     */
-    ActorManager edit();
 
     /**
      * Get a manager for editing only taps (not actors).
@@ -71,8 +64,6 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> {
     IActionStyle getInteract();
 
     Factory getFactory();
-
-    void log(String... strings);
 
     /**
      * Invalidate taps view

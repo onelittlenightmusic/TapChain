@@ -95,8 +95,8 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 
 	@Override
-	public IManager<IBlueprint, IPiece> remove(IBlueprint bp) {
-		return null;
+	public void remove(IBlueprint bp) {
+		return;
 	}
 
 	@Override

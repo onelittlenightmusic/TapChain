@@ -231,9 +231,8 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 
 
 	@Override
-	public PieceManager remove(PIECE bp) {
-		((ChainPiece) bp).end();
-		return this;
+	public void remove(PIECE bp) {
+		bp.end();
 	}
 
 	public PieceManager refreshPieceView(PIECE bp, PIECE obj) {

@@ -190,13 +190,13 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 	}
 
 //	@Override
-//	public void onRelease(IEditor edit, IPoint pos) {
-//		super.onRelease(edit, pos);
+//	public void onRelease(IEditor editActor, IPoint pos) {
+//		super.onRelease(editActor, pos);
 //		MyCableTapStyle balloon = this;
 //		LinkType ac = balloon.getLink();
 //		IActorTap parent = balloon.getParentTap();
 //		ClassEnvelope ce = balloon.getClassEnvelope();
-//		edit.highlightConnectables(ac.reverse(), parent, ce);
+//		editActor.highlightConnectables(ac.reverse(), parent, ce);
 //
 //	}
 

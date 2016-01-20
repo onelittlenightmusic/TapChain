@@ -49,7 +49,7 @@ public class Manager<T extends IPiece> implements IManager<T, T> {
 	@Override
 	public IManager<T, T> log(String... s) {
 		if (log != null)
-			log.log(s);
+			log.addLog(s);
 		return this;
 	}
 
@@ -81,8 +81,8 @@ public class Manager<T extends IPiece> implements IManager<T, T> {
 	}
 
 	@Override
-	public IManager<T, T> remove(T bp) {
-		return null;
+	public void remove(T bp) {
+		return;
 	}
 
 	@Override

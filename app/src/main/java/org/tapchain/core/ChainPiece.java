@@ -158,7 +158,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	public <T> T __log(T obj, String tag) {
 		if (_root_chain != null && _root_chain.log != null)
 			if (logFlag) {
-				_root_chain.log.log((logTag == null)?String.format("[%s]%s",mynum,getTag()):logTag,
+				_root_chain.log.addLog((logTag == null)?String.format("[%s]%s",mynum,getTag()):logTag,
 					String.format("|%s| %s -> %s", header,tag, obj));
 			}
 		return obj;
@@ -167,7 +167,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	public <T> T __logout(T obj, String tag) {
 		if (_root_chain != null && _root_chain.log != null)
 			if (logFlag) {
-				_root_chain.log.log((logTag == null)?String.format("[%s]%s",mynum,getTag()):logTag,
+				_root_chain.log.addLog((logTag == null)?String.format("[%s]%s",mynum,getTag()):logTag,
 						String.format("|%s| %s <- %s", header,tag, obj));
 			}
 		return obj;

@@ -178,6 +178,6 @@ public class BubblePathTap extends PathTap implements ISelectable {
     @Override
     public void onSelected(IActorEditor edit, IPoint pos) {
         IPath path = getMyPath();
-        edit.edit().disconnect(path);
+        edit.disconnect(path);
     }
 }

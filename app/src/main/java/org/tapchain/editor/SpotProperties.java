@@ -18,8 +18,8 @@ import org.tapchain.core.IPoint;
 //			}
 //
 //			@Override
-//			public void onRelease(IPoint pos, IEdit edit) {
-//				super.onRelease(pos, edit);
+//			public void onRelease(IPoint pos, IEdit editActor) {
+//				super.onRelease(pos, editActor);
 //				changeFocus(al, this, clazz);
 //			}
 //			

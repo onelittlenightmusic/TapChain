@@ -195,9 +195,9 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 	
 	@Override
-	public ActorManager remove(Actor actor) {
+	public void remove(Actor actor) {
 		if (actor == null)
-			return this;
+            return;
 		unsetPieceView(actor);
 		actor.onRemove(newSession());
 		for (Actor partner : actor.getPartners()) {
@@ -205,7 +205,7 @@ public class ActorManager extends PieceManager<Actor> {
 		}
 		super.remove(actor);
 		actor.end();
-		return this;
+		return;
 	}
 	
 	public void restart(IPiece pieceBody) {

@@ -2368,7 +2368,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //                        new Packet(bm.addLocal((Class<? extends Actor>) obj)
 //                                .getBlueprint().newInstance(maker), this));
 //            } catch (ChainException e) {
-//                maker.log(e.errorMessage);
+//                maker.addLog(e.errorMessage);
 //            }
 //            clearPull();
 //        }

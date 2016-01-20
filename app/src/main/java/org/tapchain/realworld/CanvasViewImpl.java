@@ -19,7 +19,6 @@ import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IPressed;
 import org.tapchain.core.IScrollable;
-import org.tapchain.core.ISelectable;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
@@ -125,13 +124,11 @@ public class CanvasViewImpl extends TapChainWritingView {
         canvas.drawText(
                 "UserView = "
                         + Integer.toString(getEditor()
-                        .edit()
                         .getChain().getViewNum()),
                 20, 60, paint_text);
         canvas.drawText(
                 "UserEffect = "
                         + Integer.toString(getEditor()
-                        .edit()
                         .getChain().getPieces()
                         .size()), 20, 80,
                 paint_text);

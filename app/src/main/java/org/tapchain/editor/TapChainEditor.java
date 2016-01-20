@@ -40,10 +40,10 @@ import java.util.List;
  * style for tap instantiation and ActorManager for editing actors and taps.
  */
 @SuppressWarnings("serial")
-public abstract class TapChainEditor implements IControlCallback, ILogHandler,
+public abstract class TapChainEditor extends EditorManager implements IControlCallback, ILogHandler,
 		IActorEditor {
 	IWindow win = null;
-	public EditorManager editorManager = new EditorManager();
+//	public EditorManager editorManager = new EditorManager();
     HashMap<FACTORY_KEY, Factory<Actor>> factories = new HashMap<>();
 	Factory<Actor> factory = new Factory<Actor>(),
 			recent = new Factory<>(), relatives = new Factory<>(),
@@ -66,8 +66,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	protected TapChainEditor(IWindow w) {
 		setWindow(w);
 		goalBlueprintManager = new ActorBlueprintManager<Actor>(goalFactory);
-		editorManager.setAllCallback(this);
-		editorManager.setPathInterval(1000);
+		setAllCallback(this);
+		setPathInterval(1000);
 		setLog(this);
         factories.put(FACTORY_KEY.ALL, factory);
         factories.put(FACTORY_KEY.LOG, recent);
@@ -78,7 +78,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	public void reset() {
 		for (Actor p : getActors())
-			edit().remove(p);
+			remove(p);
 	}
 
 	// 2.Getters and setters
@@ -93,7 +93,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
     @Override
-    public void log(String... s) {
+    public void addLog(String... s) {
         win.log(s);
         return;
     }
@@ -120,29 +120,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         }
     }
 
-
-	@Override
-	public ActorManager editTap() {
-		return editorManager.getTapManager()/*.newSession()*/;
-	}
-
-
-	@Override
-	public ActorManager edit() {
-		return editorManager/*.newSession()*/;
-	}
-
-    @Override
-	public Collection<IActorTap> getTaps() {
-		return editorManager.getTaps();
-	}
-
-    @Override
-	public Collection<Actor> getActors() {
-		return editorManager.getActors();
-	}
-
-    /**
+   /**
      * Get
      * @param pt
      * @return
@@ -154,13 +132,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	public BlueprintManager<Actor> editBlueprint() {
 		return blueprintManager;
 	}
-
-
-	@Override
-	public IActorTap toTap(Actor actor) {
-		return editorManager.getTap(actor);
-	}
-
 
 	@Override
 	public Actor toActor(IActorTap tap) {
@@ -174,11 +145,6 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		return styles.getActionStyle();
 	}
 
-	public void setLog(ILogHandler l) {
-		editorManager.getTapManager().setLog(l);
-		editorManager.setLog(l);
-	}
-
     /**
      * Set StyleCollection. This is the first step for instantiation actors and taps.
      * @param s
@@ -188,8 +154,8 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 		blueprintManager.setOuterInstanceForInner(s.getOuter());
 		blueprintManager.setDefaultView(s.getView());
 		Blueprint connbp = blueprintManager.createTapBlueprint(s.getConnect());
-		editorManager.setPathBlueprint(connbp);
-		editorManager.setActorConnectHandler(s.getConnectHandler());
+		setPathBlueprint(connbp);
+		setActorConnectHandler(s.getConnectHandler());
 		goalBlueprintManager.setOuterInstanceForInner(s.getOuter());
 	}
 
@@ -201,7 +167,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 
 	@Override
 	public void invalidate() {
-		editorManager.getTapManager().getChain().kick(null);
+		editTap().getChain().kick(null);
 	}
 
 
@@ -224,7 +190,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
             case REMOVE:
                 if (p == null)
                     return false;
-                edit().remove(p);
+                remove(p);
                 return false;
             default:
                 if (t1 instanceof ISelectable)
@@ -296,7 +262,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
     public boolean freezeToggle() {
-        return edit().getChain().getCtrl().Toggle();
+        return getChain().getCtrl().Toggle();
     }
 
 
@@ -329,6 +295,38 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
     }
 
     /**
+	 * Create an actor instance from its blueprint.
+	 *
+	 * @param blueprint
+	 *            the actor blueprint
+	 * @param iPoint
+	 *            position where the actor instance is added
+	 * @return the created actor instance and the its tap instance
+	 */
+
+    private EditorReturn addActor(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
+        try {
+            // Create new instance actor
+            EditorReturn rtn = addAndInstallView(blueprint, iPoint);
+            save();
+
+            final Actor actor = rtn.getActor();
+            final IActorTap tap = rtn.getTap();
+            win.run(new Runnable() {
+                public void run() {
+                    getEventHandler().onAdd(actor, tap, blueprint, iPoint);
+                    getEventHandler().createFocus(tap);
+                    getFactory(FACTORY_KEY.LOG).Register(blueprint);
+                }
+            });
+            return rtn;
+        } catch (ChainException e) {
+            error(e);
+        }
+        return null;
+    }
+
+    /**
      * Create an actor instance from its blueprint.
      *
      * @param b
@@ -347,43 +345,11 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
         return rtn;
     }
 
-    /**
-	 * Create an actor instance from its blueprint.
-	 *
-	 * @param blueprint
-	 *            the actor blueprint
-	 * @param iPoint
-	 *            position where the actor instance is added
-	 * @return the created actor instance and the its tap instance
-	 */
-
-    private EditorReturn addActor(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
-        try {
-            // Create new instance actor
-            EditorReturn rtn = editorManager.addAndInstallView(blueprint, iPoint);
-            editorManager.save();
-
-            final Actor actor = rtn.getActor();
-            final IActorTap tap = rtn.getTap();
-            win.run(new Runnable() {
-                public void run() {
-                    getEventHandler().onAdd(actor, tap, blueprint, iPoint);
-                    getEventHandler().createFocus(tap);
-                    getFactory(FACTORY_KEY.LOG).Register(blueprint);
-                }
-            });
-            return rtn;
-        } catch (ChainException e) {
-            editorManager.error(e);
-        }
-        return null;
-    }
-
     public void start() {
-		if (editorManager.getChain() == null) {
+		if (getChain() == null) {
 			return;
 		}
-		editorManager.getChain().getOperator().start();
+		getChain().getOperator().start();
 		return;
 	}
 
@@ -392,7 +358,7 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 	}
 
 	public void userShow(Object canvas) {
-		edit().getChain().Show(canvas);
+		getChain().Show(canvas);
 	}
 
 	@Override
@@ -560,16 +526,16 @@ public abstract class TapChainEditor implements IControlCallback, ILogHandler,
 			return false;
 		switch (al) {
 		case PUSH:
-			return edit().append(a2, PathType.OFFER, a1,
+			return append(a2, PathType.OFFER, a1,
 					PathType.OFFER, true) != null;
 		case PULL:
-			return edit().append(a1, PathType.OFFER, a2,
+			return append(a1, PathType.OFFER, a2,
 					PathType.OFFER, true) != null;
 		case TO_CHILD:
-			return edit().append(a2, PathType.FAMILY, a1,
+			return append(a2, PathType.FAMILY, a1,
 					PathType.FAMILY, true) != null;
 		case FROM_PARENT:
-			return edit().append(a1, PathType.FAMILY, a2,
+			return append(a1, PathType.FAMILY, a2,
 					PathType.FAMILY, true) != null;
 		default:
 			return false;

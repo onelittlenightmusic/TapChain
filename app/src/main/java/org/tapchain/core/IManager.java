@@ -5,7 +5,7 @@ import org.tapchain.core.Chain.ChainException;
 /** Manager.
  * Manager is model class in TapChain.
  * TapChain creates and edits chains of piece class.
- * Manager has permission to create and edit chains.
+ * Manager has permission to create and editActor chains.
  * @author Hiro Osaki/android
  *
  * @param <T> Piece class
@@ -109,5 +109,5 @@ public interface IManager<T, U> {
 	//4.Termination: none
 
 	public IManager<T, U> _in(T piece);
-	public IManager<T, U> remove(T bp);
+	void remove(T bp);
 	}

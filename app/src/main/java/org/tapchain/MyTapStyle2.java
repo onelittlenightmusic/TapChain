@@ -302,10 +302,10 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public void onFocus(LinkBooleanSet booleanSet) {
         if (booleanSet == null || booleanSet.isEmpty()) {
             setColorCode(ColorCode.CLEAR);
-//            log("%s unfocused", getTag());
+//            addLog("%s unfocused", getTag());
         } else for (LinkType ac : booleanSet) {
             setColorCode(ColorLib.getLinkColor(ac));
-//            log("%s(%s) focused", getTag(), ac.toString());
+//            addLog("%s(%s) focused", getTag(), ac.toString());
         }
     }
 
