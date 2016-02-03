@@ -27,4 +27,5 @@ public abstract class PushOut<VALUE> extends Actor.Filter<VALUE, VALUE, VALUE> {
             val._valueSet(0);
         }
     }
+
 }

@@ -62,70 +62,22 @@ public class MenuFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_menu, container, false);
         ImageButton finish = (ImageButton)v.findViewById(R.id.finish);
-        finish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((MainActivity)getActivity()).finish();
-            }
-        });
+        finish.setOnClickListener(v1 -> getActivity().finish());
         ImageButton dustbox = (ImageButton)v.findViewById(R.id.dustbox);
-        dustbox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((MainActivity)getActivity()).getEditor().reset();
-            }
-        });
+        dustbox.setOnClickListener(v1 -> ((MainActivity)getActivity()).getEditor().reset());
         final ImageButton menuToggle = (ImageButton)v.findViewById(R.id.menuToggle);
-        menuToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                        boolean gridshow = false;
-                        GridFragment f = ((MainActivity)getActivity()).getGrid();
-                        if (f != null) {
-                            gridshow = f.toggle();
-                        }
-                        if (gridshow)
-                            menuToggle.setImageResource(R.drawable.pulldown);
-                        else
-                            menuToggle.setImageResource(R.drawable.pullup);
-            }
+        menuToggle.setOnClickListener(v1 -> {
+                    boolean gridshow = false;
+                    GridFragment f = ((MainActivity)getActivity()).getGrid();
+                    if (f != null) {
+                        gridshow = f.toggle();
+                    }
+                    if (gridshow)
+                        menuToggle.setImageResource(R.drawable.pulldown);
+                    else
+                        menuToggle.setImageResource(R.drawable.pullup);
         });
         return v;
     }
-
-    //        addButton(view_bottom_left, R.drawable.dust, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        getEditor().reset();
-//                    }
-//                });
-//        addButton(view_bottom_left, R.drawable.pullup, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        boolean gridshow = false;
-//                        GridFragment f = getGrid();
-//                        if (f != null) {
-//                            gridshow = f.toggle();
-//                        }
-//                        if (gridshow)
-//                            ((ImageView) v)
-//                                    .setImageResource(R.drawable.pulldown);
-//                        else
-//                            ((ImageView) v).setImageResource(R.drawable.pullup);
-//                    }
-//                });
-//        addButton(view_bottom_left, R.drawable.config, true,
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        try {
-//                            Log.w("JSON TEST", getEditor().editActor().getChain().toJSON().toString());
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                });
 
 }

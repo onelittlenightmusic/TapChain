@@ -23,7 +23,7 @@ public class QueuedABPM<TYPE extends Actor> extends ActorBlueprintManager<TYPE> 
 	}
 
 	@Override
-	public BlueprintManager<TYPE> add(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> add(Class<? extends TYPE> _cls) {
 		setNow(new QueueBlueprint(_cls));
 		return this;
 	}
@@ -81,7 +81,7 @@ public class QueuedABPM<TYPE extends Actor> extends ActorBlueprintManager<TYPE> 
 			Object[] objs = qb.getTapArg();
 			if(cls != null) {
 				if(cls instanceof Class)
-					super.add((Class<? extends Actor>)cls);
+					super.add((Class<? extends TYPE>)cls);
 				else if(cls instanceof IDesigner)
 					super.add((IDesigner)cls);
 				else if(cls instanceof IEffector)

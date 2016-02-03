@@ -39,12 +39,8 @@ public class ActorManager extends PieceManager<Actor> {
         );
 
 	}
-	@Override
-	public ActorManager createChain() {
-		setChain(new ActorChain());
-		return this;
-	}
-	public ActorManager createChain(int time) {
+
+    public ActorManager createChain(int time) {
 		setChain(new ActorChain(time));
 		return this;
 	}
@@ -227,13 +223,8 @@ public class ActorManager extends PieceManager<Actor> {
 	public ActorManager unsetPieceView(Actor bp) {
 		return this;
 	}
-	
-	@Override
-	public ActorManager refreshPieceView(Actor bp, Actor obj) {
-		return this;
-	}
 
-	public interface IStatusHandler<T> {
+    public interface IStatusHandler<T> {
         void changeViewState(PieceState state);
 		int tickView(T t, Packet obj);
 		void pushView(T t, Object obj);

@@ -18,12 +18,12 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 		super(ab, args);
 	}
 
-	public ActorBlueprint(Class<? extends IPiece> _cls, Actor... _args) {
+	public ActorBlueprint(Class<? extends Actor> _cls, Actor... _args) {
 		super(_cls, _args);
 	}
 	
 	@Override
-	protected Blueprint setBlueprintClass(Class<? extends IPiece> _cls) {
+	protected Blueprint setBlueprintClass(Class<? extends Actor> _cls) {
 		super.setBlueprintClass(_cls);
 		checkAndRegisterToActorLib();
 		return this;

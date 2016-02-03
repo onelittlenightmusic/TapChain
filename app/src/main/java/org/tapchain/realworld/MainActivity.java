@@ -59,21 +59,21 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
 
     /**
      * Make a actor from actor tag
-     * @param key
-     * @param actorTag
+     * @param key the key of factory to which actor will be added
+     * @param tag actor tag
      * @return generated actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String actorTag) {
-        return getCanvas().add(key, actorTag);
+    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
+        return getCanvas().add(key, tag);
     }
 
     /**
      * Make a actor from actor tag and set location
-     * @param key
-     * @param tag
-     * @param x
-     * @param y
-     * @return
+     * @param key the key of factory to which you are going to add actor
+     * @param tag actor tag
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @return added actor
      */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
         return getCanvas().add(key, tag, x, y);
@@ -81,13 +81,13 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
 
     /**
      * Make a actor from actor tag and set both location and motion
-     * @param key
-     * @param tag
-     * @param x
-     * @param y
-     * @param dx
-     * @param dy
-     * @return
+     * @param key key of factory to which actor will be added
+     * @param tag actor tag
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @param dx x of first velocity
+     * @param dy y of first velocity
+     * @return added actor
      */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float dx,
                      float dy) {
@@ -96,9 +96,9 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
 
     /**
      * Make a actor from actor id
-     * @param key
-     * @param id
-     * @return
+     * @param key key of factory to which actor will be added
+     * @param id actor id
+     * @return added actor
      */
     public Actor add(TapChainEditor.FACTORY_KEY key, int id) {
         return getCanvas().add(key, id);
@@ -106,31 +106,37 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
 
     /**
      * Make a actor from actor id and set location
-     * @param key
-     * @param code
-     * @param x
-     * @param y
-     * @return
+     * @param key key of factory to which actor will be added
+     * @param id actor id
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y) {
-        return getCanvas().add(key, code, x, y);
+    public Actor add(TapChainEditor.FACTORY_KEY key, int id, float x, float y) {
+        return getCanvas().add(key, id, x, y);
     }
 
     /**
      * Make a actor from actor id and set both location and motion
      * @param key
      * @param code
-     * @param x
-     * @param y
-     * @param dx
-     * @param dy
-     * @return
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @param dx x of first velocity
+     * @param dy y of first velocity
+     * @return added actor
      */
     public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float dx,
                      float dy) {
         return getCanvas().add(key, code, x, y, dx, dy);
     }
 
+    /**
+     * Connect an actor to another actor
+     * @param a1 actor which connect to another
+     * @param type connection type as LinkType
+     * @param a2 actor which is connected from a1
+     */
     public void connect(Actor a1, LinkType type, Actor a2) {
         getEditor().connect(a1, type, a2);
     }

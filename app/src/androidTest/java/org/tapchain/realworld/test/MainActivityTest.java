@@ -3,6 +3,7 @@ package org.tapchain.realworld.test;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,6 +14,8 @@ import org.tapchain.core.LinkType;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
 import org.tapchain.realworld.IIntentHandler;
 import org.tapchain.realworld.MainActivity;
+
+import java.lang.reflect.ParameterizedType;
 
 import static java.lang.Thread.sleep;
 
@@ -75,6 +78,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
                 b = view.add(FACTORY_KEY.ALL, "Accumulate", 250, 500));
         sleepSecond();
         view.connect(a, LinkType.PULL, b);
+//        try {
+////            Log.w("test", ((ParameterizedType)a.getClass().getMethod("getInputDummy").getGenericReturnType()).getRawType().toString());
+//            Log.w("test", a.getClass().getMethod("getOutputDummy").getGenericReturnType().toString());
+//            Log.w("test", a.getClass().getMethod("getParentDummy").getGenericReturnType().toString());
+//            Log.w("test", a.getClass().getMethod("getValueDummy").getGenericReturnType().toString());
+//            Log.w("test", Actor.getParameters(a.getClass(), Actor.Controllable.class).toString());
+//        } catch (NoSuchMethodException e) {
+//            e.printStackTrace();
+//        }
         sleepSecond(10000);
         assertTrue(true);
     }
@@ -97,4 +109,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             e.printStackTrace();
         }
     }
+
+
 }

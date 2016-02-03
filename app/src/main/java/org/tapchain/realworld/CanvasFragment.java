@@ -42,7 +42,7 @@ public class CanvasFragment extends Fragment {
         if (view == null) {
             view = new CanvasViewImpl(act);
             if(editor == null) {
-                editor = new TapChainAndroidEditor(view, act.getResources(), act);
+                editor = new TapChainAndroidEditor(view, act);
 
                 try {
                     editor.editBlueprint()
@@ -63,19 +63,42 @@ public class CanvasFragment extends Fragment {
     }
 
     public static CanvasFragment getCanvas(Activity act) {
-        CanvasFragment f = (CanvasFragment) act.getFragmentManager()
+        return (CanvasFragment) act.getFragmentManager()
                 .findFragmentByTag(CANVAS);
-        return f;
     }
 
+    /**
+     * Make a actor from actor tag
+     * @param key the key of factory to which actor will be added
+     * @param tag actor tag
+     * @return generated actor
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
         return add(key, tag, null, null);
     }
 
+    /**
+     * Make a actor from actor tag and set location
+     * @param key the key of factory to which you are going to add actor
+     * @param tag actor tag
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @return
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
         return add(key, tag, view.getPosition(x, y), null);
     }
 
+    /**
+     * Make a actor from actor tag and set both location and motion
+     * @param key key of factory to which actor will be added
+     * @param tag actor tag
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @param dx x of first velocity
+     * @param dy y of first velocity
+     * @return
+     */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
         return add(key, tag, view.getPosition(x, y), view.getVector(vx, vy));
     }
@@ -83,34 +106,60 @@ public class CanvasFragment extends Fragment {
 
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
         EditorReturn editorReturn = editor.addActorFromBlueprint(key, tag, pos);
+        if (editorReturn == null)
+            return null;
         //TODO: resolve duplication
         IPoint resultPoint = editorReturn.getTap()._valueGet();
         if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
 
-        if (editorReturn == null)
-            return null;
         if (vec == null)
             return editorReturn.getActor();
         view.onFling(editorReturn.getTap(), vec);
         return editorReturn.getActor();
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code) {
-        return add(key, code, null, null);
+    /**
+     * Make a actor from actor id
+     * @param key key of factory to which actor will be added
+     * @param id actor id
+     * @return added actor
+     */
+    public Actor add(TapChainEditor.FACTORY_KEY key, int id) {
+        return add(key, id, null, null);
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y) {
-        return add(key, code, view.getPosition(x, y), null);
+    /**
+     * Make a actor from actor id and set location
+     * @param key key of factory to which actor will be added
+     * @param id actor id
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @return added actor
+     */
+    public Actor add(TapChainEditor.FACTORY_KEY key, int id, float x, float y) {
+        return add(key, id, view.getPosition(x, y), null);
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float vx, float vy) {
-        return add(key, code, view.getPosition(x, y), view.getVector(vx, vy));
+    /**
+     * Make a actor from actor id and set both location and motion
+     * @param key
+     * @param code
+     * @param x x of location where actor will be added
+     * @param y y of location where actor will be added
+     * @param dx x of first velocity
+     * @param dy y of first velocity
+     * @return added actor
+     */
+    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float dx, float dy) {
+        return add(key, code, view.getPosition(x, y), view.getVector(dx, dy));
     }
 
     public Actor add(TapChainEditor.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
         EditorReturn editorReturn = editor.addActorFromBlueprint(key, code, pos);
+        if (editorReturn == null)
+            return null;
 
         //TODO: resolve duplication
         IPoint resultPoint = editorReturn.getTap()._valueGet();
@@ -118,8 +167,6 @@ public class CanvasFragment extends Fragment {
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
 
-        if (editorReturn == null)
-            return null;
         if (vec == null)
             return editorReturn.getActor();
         view.onFling(editorReturn.getTap(), vec);

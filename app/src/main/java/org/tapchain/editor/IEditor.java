@@ -78,7 +78,13 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManag
 
     List<IBlueprint<ACTOR>> highlightConnectables(LinkType reverse, IActorTap target, ClassEnvelope ce);
 
-    boolean connect(ACTOR a1, LinkType al, ACTOR a2);
+    /**
+     * Connect an actor to another actor
+     * @param a1 actor which connect to another
+     * @param type connection type as LinkType
+     * @param a2 actor which is connected from a1
+     */
+    boolean connect(ACTOR a1, LinkType type, ACTOR a2);
 
     void lockReleaseTap(IRelease t);
 

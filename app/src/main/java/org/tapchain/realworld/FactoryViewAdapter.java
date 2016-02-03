@@ -30,23 +30,17 @@ public class FactoryViewAdapter extends BaseAdapter implements Factory.ValueChan
 
     @Override
     public void notifyChange() {
-        act.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                f = Factory.copy(act.getEditor().getFactory(key));
-                FactoryViewAdapter.this.notifyDataSetChanged();
-            }
+        act.runOnUiThread(() -> {
+            f = Factory.copy(act.getEditor().getFactory(key));
+            FactoryViewAdapter.this.notifyDataSetChanged();
         });
     }
 
     @Override
     public void invalidate() {
-        act.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                f = Factory.copy(act.getEditor().getFactory(key));
-                _parent.invalidate();
-            }
+        act.runOnUiThread(() -> {
+            f = Factory.copy(act.getEditor().getFactory(key));
+            _parent.invalidate();
         });
     }
 
@@ -54,8 +48,7 @@ public class FactoryViewAdapter extends BaseAdapter implements Factory.ValueChan
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null || convertView.getTag() == null
                 || !convertView.getTag().equals(f.get(position).getTag())) {
-            ActorImageButton v = new ActorImageButton(act, f, key, position);
-            convertView = v;
+            convertView = new ActorImageButton(act, f, key, position);
         }
         convertView.setId(300 + position);
         return convertView;

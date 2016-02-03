@@ -17,15 +17,19 @@ import org.tapchain.core.Actor.Exp;
 import org.tapchain.core.Actor.IntegerGenerator;
 import org.tapchain.core.Actor.WordGenerator;
 import org.tapchain.core.ActorChain.IView;
+import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.D2Point;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
+import org.tapchain.core.LinkType;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.PathThru;
 import org.tapchain.core.actors.PushOut;
 import org.tapchain.core.actors.ViewActor;
+import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IFocusable;
 import org.tapchain.editor.IWindow;
 import org.tapchain.editor.TapChainEditor;
 import org.tapchain.game.CarEngineer;
@@ -42,13 +46,13 @@ public class TapChainAndroidEditor extends TapChainEditor {
     // 1.Initialization
     Activity act = null;
 
-    public TapChainAndroidEditor(IWindow w, Resources r, Activity activity) {
+    public TapChainAndroidEditor(IWindow w, Activity activity) {
         super(w);
 
         act = activity;
         BitmapMaker.setActivity(act);
         // Setting styles
-        ActorEventHandler aeh = new ActorEventHandler(this, r, activity);
+        ActorEventHandler aeh = new ActorEventHandler(this, activity);
         setStyle(new StyleCollection(this, BubbleTapStyle.class,
                 BubblePathTap.class, new AndroidInteractionStyle(),
                 aeh, aeh));
@@ -472,5 +476,57 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //        a.printLastExecLog();
 //        return rtn;
 //    }
+
+
+
+    @Override
+    protected void createFocus(IActorTap v) {
+        final Actor actor = v.getActor();
+        ClassEnvelope firstClassEnvelope = null;
+        LinkType first = null;
+        IFocusable firstSpot = null;
+        if (actor == null || actor == getFocusControl().getTargetActor()) {
+            return;
+        }
+        getFocusControl().clearAllFocusables();
+
+        for (LinkType al : LinkType.values()) {
+            ClassEnvelope clz = actor.getLinkClassFromLib(al);
+            if (clz == null) {
+                continue;
+            }
+
+            //Create beam view
+            IFocusable spot = null;
+            switch (al) {
+                case PUSH:
+                    MyBeamTapStyle beam = new MyBeamTapStyle(act.getResources(), v, al, clz);
+                    if (v instanceof MyTapStyle2)
+                        beam.init(((MyTapStyle2) v).getOffsetVectorRawCopy());
+                    spot = beam;
+                    break;
+                case TO_CHILD:
+                    spot = new MySpotOptionTapStyle(v, al, clz);
+                    break;
+                default:
+                    continue;
+            }
+
+            getFocusControl().addFocusable(spot, al);
+            if (first == null/* spotLatest == al*/) {
+                first = al;
+                firstClassEnvelope = clz;
+                firstSpot = spot;
+            }
+        }
+        if(firstSpot == null) {
+            changeFocus(null, null, null);
+            return;
+        }
+        getFocusControl().save(editTap());
+        getFocusControl().setTargetActor(actor);
+        changeFocus(first, firstSpot, firstClassEnvelope);
+    }
+
 
 }

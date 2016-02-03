@@ -474,7 +474,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         String pullTag = "";
         String pushTag = nowTag;
 
-        // 1.Initialization
+        // 1.Initialization　
         public Controllable() {
             super();
         }
@@ -509,6 +509,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
                 }
             }
         }
+
+        public INPUT getInputDummy() { return null; }
+        public OUTPUT getOutputDummy() { return null; }
+        public PARENT getParentDummy() { return null; }
+        public VALUE getValueDummy() { return null; }
 
         public INPUT pull() throws ChainException {
             Packet input = L("pull()").go(super.pullInActor());
@@ -812,12 +817,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             setAutoEnd();
         }
 
-        public Effector(Object obj, Class<?> target) {
-            super(obj, target);
-            setAutoStart();
-            setAutoEnd();
-        }
-
         public Effector setParentType(PathType type) {
             parent_type = type;
             return this;
@@ -1083,7 +1082,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     public static abstract class ValueArrayEffector<EFFECT> extends
             ValueEffector<EFFECT> implements IValueArray<EFFECT> {
         Iterator<EFFECT> value_itr = null;
-        ConcurrentLinkedQueue<EFFECT> values = new ConcurrentLinkedQueue<EFFECT>();
+        ConcurrentLinkedQueue<EFFECT> values = new ConcurrentLinkedQueue<>();
         EFFECT lastVal = null;
 
         public ValueArrayEffector() {
@@ -2382,26 +2381,26 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     public interface IFunc<VALUE, INPUT, OUTPUT> extends
             IDesigner<VALUE, INPUT, OUTPUT> {
-        public OUTPUT func(IValue<VALUE> val, INPUT in);
+        OUTPUT func(IValue<VALUE> val, INPUT in);
     }
 
     public interface IGenerator<OUTPUT> extends IDesigner<OUTPUT, Void, OUTPUT> {
-        public OUTPUT generate();
+        OUTPUT generate();
     }
 
     public interface IConsumer<INPUT> extends IDesigner<INPUT, INPUT, Void> {
-        public void consume(INPUT in);
+        void consume(INPUT in);
     }
 
     public interface IEffector<PARENT, EFFECT> {
-        public void effect(PARENT _t, EFFECT _e) throws ChainException;
+        void effect(PARENT _t, EFFECT _e) throws ChainException;
     }
 
     public interface IDesigner<VALUE, INPUT, OUTPUT> {
-        public void init(IValue<VALUE> val);
+        void init(IValue<VALUE> val);
     }
 
-    final static CopyOnWriteArrayList<Class<?>> initedClass = new CopyOnWriteArrayList<Class<?>>();
+    final static CopyOnWriteArrayList<Class<?>> initedClass = new CopyOnWriteArrayList<>();
     final static Map<LinkType, String> linkTypeName = new HashMap<LinkType, String>() {
         {
             put(LinkType.TO_CHILD, "VALUE");

@@ -36,11 +36,11 @@ public class EditorManager extends ActorManager {
 	IActorConnectHandler actorConnectHandler;
 	Blueprint blueprintForPathTap;
 
-	ConcurrentHashMap<Actor, IActorTap> dictPiece = new ConcurrentHashMap<Actor, IActorTap>();
-	ConcurrentHashMap<IPath, PathTap> dictPath = new ConcurrentHashMap<IPath, PathTap>();
+	ConcurrentHashMap<Actor, IActorTap> dictPiece = new ConcurrentHashMap<>();
+	ConcurrentHashMap<IPath, PathTap> dictPath = new ConcurrentHashMap<>();
 
-	Map<PieceState, Actor> plist = new EnumMap<PieceState, Actor>(
-			PieceState.class);
+	Map<PieceState, Actor> plist = new EnumMap<>(
+            PieceState.class);
 
     /**
      * Constructor
@@ -50,7 +50,7 @@ public class EditorManager extends ActorManager {
         tapManager = new ActorManager();
         editTap().createChain(50).getChain().setName("System");
         createChain(100).getChain().setAutoEnd(false).setName("User");
-        Actor ptmp = null;
+        Actor ptmp;
         List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
                 0xff777777, 0xff447777, 0xff774444);
         for (PieceState state : PieceState.values()) {
@@ -65,7 +65,7 @@ public class EditorManager extends ActorManager {
 
     /***
      * Copy constructor
-     * @param e
+     * @param e EditorManager to copy
      */
 	public EditorManager(EditorManager e) {
 		super(e);
@@ -115,8 +115,7 @@ public class EditorManager extends ActorManager {
 
 	public void onMoveView(IView v, IPoint wp) {
 		v.setCenter(wp);
-		return;
-	}
+    }
 
 	protected EditorReturn addAndInstallView(IBlueprint<Actor> blueprint, IPoint nowPoint) throws ChainException {
         Actor rtn = blueprint.newInstance(this);
@@ -211,14 +210,14 @@ public class EditorManager extends ActorManager {
 		try {
 			ActorManager manager = editTap();
 			_view = (PathTap) _vReserve.newInstance(manager);
+            if (_view == null)
+                return null;
 			manager.save();
 			_view.setEditor(manager);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
-		if (_view == null)
-			return null;
 		dictPath.put(path, _view);
 		_view.setMyPath(path);
 		path.setStatusHandler(new IStatusHandler<IPath>() {
@@ -259,8 +258,7 @@ public class EditorManager extends ActorManager {
 		if(v instanceof ITapControlInterface)
 			((ITapControlInterface)v).unsetActor();
 		editTap().remove((Actor) v);
-		return;
-	}
+    }
 
 	@Override
 	public IPath disconnect(IPiece x, IPiece y) {
@@ -285,13 +283,11 @@ public class EditorManager extends ActorManager {
 			return;
 		v.unsetMyPath();
 		editTap().remove(v);
-		return;
-	}
+    }
 
 	public void setPathInterval(int intervalMs) {
 		this.intervalMs = intervalMs;
-		return;
-	}
+    }
 
     public int getPathInterval() {
         return intervalMs;
@@ -304,12 +300,6 @@ public class EditorManager extends ActorManager {
 			bp.initNum();
 		}
 		dictPiece.put(bp, v);
-	}
-
-	@Override
-	public ActorManager refreshPieceView(Actor bp, Actor obj) {
-		onRefreshView(bp, obj);
-		return this;
 	}
 
     @Override

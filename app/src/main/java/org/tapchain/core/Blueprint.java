@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import org.tapchain.core.Chain.ChainException;
 
 public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONSerializable {
-	Class<? extends IPiece> cls = null;
+	Class<? extends PIECE> cls = null;
 	ArrayList<ConnectionBlueprint> connect = new ArrayList<ConnectionBlueprint>();
 	ArrayList<IBlueprint> children = new ArrayList<IBlueprint>();
 	IBlueprint view = null;
@@ -27,7 +27,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		This = new TmpInstance(this).setParent(this);
 	}
 
-	public Blueprint(Class<? extends IPiece> _cls, PIECE... _args) {
+	public Blueprint(Class<? extends PIECE> _cls, PIECE... _args) {
 		this();
 		setBlueprintClass(_cls);
 		setVar(_args);
@@ -85,7 +85,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			return this;
 		}
 
-	protected Blueprint setBlueprintClass(Class<? extends IPiece> _cls) {
+	protected Blueprint setBlueprintClass(Class<? extends PIECE> _cls) {
 		cls = _cls;
 
 		return this;
@@ -118,12 +118,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		return this;
 	}
 
-	// 3.Changing state
-	public TmpInstance newReservation() {
-		return This();
-	}
-
-	protected PIECE __newRawInstance(Class<?>[] types, Object[] args)
+    protected PIECE __newRawInstance(Class<?>[] types, Object[] args)
 			throws IllegalAccessException, InstantiationException,
 			IllegalArgumentException, SecurityException,
 			InvocationTargetException, NoSuchMethodException {
@@ -142,7 +137,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 				}
 				return (PIECE) c.newInstance(args);
 			}
-		return (PIECE) cls.newInstance();
+		return cls.newInstance();
 	}
 
 	public PIECE __newInstance(IManager<PIECE, PIECE> maker, Class<?>[] types,
@@ -179,8 +174,8 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 
 	protected PIECE __newInstance(IManager<PIECE, PIECE> maker)
 			throws ChainException {
-		ArrayList<Class<?>> _types = new ArrayList<Class<?>>();
-		ArrayList<Object> _obj = new ArrayList<Object>();
+		ArrayList<Class<?>> _types = new ArrayList<>();
+		ArrayList<Object> _obj = new ArrayList<>();
 		if (parent_obj != null) {
 			_types.add(parent_type);
 			_obj.add(parent_obj);
@@ -189,10 +184,11 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			_types.addAll(params.getClasses());
 			_obj.addAll(params.getObjects());
 		}
-		PIECE rtn = null;
+		PIECE rtn;
 		if (_types.isEmpty())
 			rtn = __newInstance(maker, null, null);
-		rtn = __newInstance(maker, _types.toArray(new Class<?>[] {}),
+        else
+    		rtn = __newInstance(maker, _types.toArray(new Class<?>[] {}),
 				_obj.toArray());
 		return rtn;
 	}
@@ -283,8 +279,8 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		ArrayList<Object> obj;
 
 		public ParamArray() {
-			cls = new ArrayList<Class<?>>();
-			obj = new ArrayList<Object>();
+			cls = new ArrayList<>();
+			obj = new ArrayList<>();
 		}
 
 		public void add(Class<?> _cls, Object _obj) {

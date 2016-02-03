@@ -16,23 +16,14 @@ import android.util.Log;
 public class ClassLib {
 	final static HashMap<Class<?>, Map<Class<?>, ClassLibReturnInner>> inited2 = new HashMap<Class<?>, Map<Class<?>, ClassLibReturnInner>>();
 
-	static StringBuilder sb = new StringBuilder();
-
-	public static ClassLibReturn getParameterizedType(Class<?> cls) {
-		List<Type> res = new ArrayList<Type>();
-		return getParameterizedTypeInner(cls, null).getRtn();
-	}
-
 	public static ClassLibReturn getParameterizedType(Class<?> cls,
 			Class<?> target) {
-		List<Type> res = new ArrayList<Type>();
 		ClassLibReturnInner rtn = getParameterizedTypeInner(cls, target);
 		return rtn.getRtn();
 	}
 
 	public static ClassLibReturn getParameterizedTypeOld(Class<?> cls,
 			List<Type> newList, Class<?> target) {
-		List<Type> res = new ArrayList<Type>();
 		ClassLibReturnInner rtn2 = getParameterizedTypeInner(cls, target);
 		ClassLibReturn convert = new ClassLibReturn();
 		int i = 0;
@@ -49,7 +40,6 @@ public class ClassLib {
 	public static ClassLibReturnInner getParameterizedTypeInner(Class<?> cls,
 			Class<?> target) {
 		log(String.format(">>>>>%s, target=%s", cls.getSimpleName(), target.getSimpleName()));
-		ClassLibReturn rtn;
 		ClassLibReturnInner rtn2;
 		if (target != null && inited2.containsKey(target) && inited2.get(target).containsKey(cls)) {
 			rtn2 = inited2.get(target).get(cls).copy();
@@ -142,9 +132,6 @@ public class ClassLib {
 		return zeroList;
 	}
 
-	public static int getParameterizedTypeNum(Class<?> parent) {
-		return getParameterizedType(parent).size();
-	}
 
 	public static void convertToOriginalType(List<Type> res,
 			Map<Type, Type> convert) {
@@ -179,7 +166,7 @@ public class ClassLib {
 		for (Entry<Type, Type> kv : rtn.getRtn().entrySet()) {
 			Type rtnValue = kv.getValue();
 			if (rtnValue instanceof ParameterizedType) {
-				ptypes.put(kv.getKey(), (ParameterizedType) rtnValue);
+				ptypes.put(kv.getKey(), rtnValue);
 			}
 		}
 		for (Entry<Type, Type> kv : ptypes.entrySet()) {

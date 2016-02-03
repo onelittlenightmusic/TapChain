@@ -82,8 +82,7 @@ public class Manager<T extends IPiece> implements IManager<T, T> {
 
 	@Override
 	public void remove(T bp) {
-		return;
-	}
+    }
 
 	@Override
 	public IManager<T, T> _in(IPiece piece) {

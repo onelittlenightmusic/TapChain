@@ -55,7 +55,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return new Blueprint(bp, args);
 	}
 
-	public Blueprint create(Class<? extends IPiece> _cls) {
+	public Blueprint create(Class<? extends TYPE> _cls) {
 		return new Blueprint(_cls);
 	}
 
@@ -109,15 +109,15 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	 * @param _cls Actor class
 	 * @return BlueprintManagers
 	 */
-	public BlueprintManager<TYPE> add(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> add(Class<? extends TYPE> _cls) {
 		return addWithOuterObject(_cls, outer);
 	}
 
-    public BlueprintManager<TYPE> add(Class<? extends Actor> _cls, Object... args) {
+    public BlueprintManager<TYPE> add(Class<? extends TYPE> _cls, Object... args) {
         return addWithOuterObject(_cls, outer).arg(args);
     }
 
-    public BlueprintManager<TYPE> addWithOuterObject(Class<? extends Actor> _cls, Object... outer) {
+    public BlueprintManager<TYPE> addWithOuterObject(Class<? extends TYPE> _cls, Object... outer) {
 		if(outer == null)
 			return add(create(_cls));
 		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
@@ -208,13 +208,14 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	
 	@SuppressWarnings("serial")
 	public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IDesigner<VALUE, INPUT, OUTPUT> designer) {
-		Class<? extends Actor> rtn = createFromDesigner(designer);
+		Class rtn = createFromDesigner(designer);
 		addWithOuterObject(rtn, designer);
 		return this;
 	}
 	
 	public <PARENT, EFFECT> BlueprintManager<TYPE> addEffector(final IEffector<PARENT, EFFECT> effector) {
-		return addWithOuterObject(createEffector(effector).getClass());
+        Class rtn = createEffector(effector).getClass();
+        return addWithOuterObject(rtn);
 	}
 	
 
@@ -242,7 +243,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		reserved = getRoot().addLocal(_pbp);
 		return this;
 	}
-	public BlueprintManager<TYPE> addLocal(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> addLocal(Class<? extends TYPE> _cls) {
 		return addLocal(create(_cls));
 	}
 	@Override
@@ -272,22 +273,22 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 	
-	public BlueprintManager<TYPE> teacher(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> teacher(Class<? extends TYPE> _cls) {
 		return teacher(create(_cls));
 	}
-	public BlueprintManager<TYPE> young(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> young(Class<? extends TYPE> _cls) {
 		return next(create(_cls));
 	}
-	public BlueprintManager<TYPE> parent(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> parent(Class<? extends TYPE> _cls) {
 		return parent(create(_cls));
 	}
-	public BlueprintManager<TYPE> child(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> child(Class<? extends TYPE> _cls) {
 		return child(create(_cls));
 	}
-	public BlueprintManager<TYPE> because(Class<? extends Actor> _cls) {
+	public BlueprintManager<TYPE> because(Class<? extends TYPE> _cls) {
 		return because(create(_cls));
 	}
-	public BlueprintManager<TYPE> teacher(Actor bp, Actor... args) {
+	public BlueprintManager<TYPE> teacher(TYPE bp, TYPE... args) {
 		return teacher(new PieceBlueprintStatic(bp), args);
 	}
 	public BlueprintManager<TYPE> and(Actor bp) {
@@ -331,7 +332,8 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		reserved = marked;
 		return this;
 	}
-	public BlueprintManager<TYPE> setSystem(Class<? extends ViewActor> _cls) {
+
+	public BlueprintManager<TYPE> setSystem(Class<? extends TYPE> _cls) {
 		IBlueprint blueprint;
 		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
 				|| _cls.isLocalClass()

@@ -10,15 +10,6 @@ import org.tapchain.editor.TapChainEditor;
  * Created by hiro on 2015/05/20.
  */
 public interface IGenericSharedHandler<EDITOR, ACTOR extends IPiece, VIEW extends ITap> {
-    void onLockedScroll(EDITOR edit, VIEW startTap, IPoint wp);
     boolean onAttach(VIEW t1, VIEW t2, ACTOR chainPiece, ACTOR chainPiece2, TapChainEditor.InteractionType type);
     void onAdd(ACTOR p, VIEW v, IBlueprint b, IPoint pos);
-//    public void onPullLocked(VIEW t, ActorPullException e);
-//    public void onPullUnlocked(VIEW t, ActorPullException ePull);
-
-    IFocusControl getFocusControl();
-    Resources getResources();
-
-    void createFocus(VIEW t);
-
 }

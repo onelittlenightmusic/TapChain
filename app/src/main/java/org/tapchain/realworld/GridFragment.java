@@ -30,7 +30,6 @@ public class GridFragment extends Fragment {
             _height = ViewGroup.LayoutParams.MATCH_PARENT;
     boolean autohide = false;
     ImageView ShowingDisabled;
-    Activity act = null;
     TabHost tabH;
     ArrayList<TapChainEditor.FACTORY_KEY> factoryList = new ArrayList<>();
 
@@ -87,22 +86,17 @@ public class GridFragment extends Fragment {
 
         // setup must be called if the tabhost is programmatically created.
         tabH.setup();
-        addTab(tabH, "TS1", "[ + ]", TapChainEditor.FACTORY_KEY.ALL,
+        addTab(tabH, "TS1", TapChainEditor.FACTORY_KEY.ALL,
                 0xaa000000, R.drawable.plus);
-        addTab(tabH, "TS2", "[ V ]", TapChainEditor.FACTORY_KEY.LOG,
+        addTab(tabH, "TS2", TapChainEditor.FACTORY_KEY.LOG,
                 0xaa220000, R.drawable.history);
-        addTab(tabH, "TS3", "[ <=> ]", TapChainEditor.FACTORY_KEY.RELATIVES,
+        addTab(tabH, "TS3", TapChainEditor.FACTORY_KEY.RELATIVES,
                 0xaa000022, R.drawable.relatives);
         ImageView img = new ImageView(act);
         img.setImageDrawable(getResources()
                 .getDrawable(R.drawable.pulldown));
         tabWidget.addView(img);
-        tabWidget.getChildAt(3).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggle();
-            }
-        });
+        tabWidget.getChildAt(3).setOnClickListener(v -> toggle());
         darkMask = new FrameLayout(act);
         darkMask.addView(tabH);
         darkMask.setLayoutParams(new FrameLayout.LayoutParams(_width,
@@ -114,19 +108,16 @@ public class GridFragment extends Fragment {
         return darkMask;
     }
 
-    public void addTab(TabHost h, String _tag, String label,
+    public void addTab(TabHost h, String _tag,
                        final TapChainEditor.FACTORY_KEY key, final int color, int resource) {
         TabHost.TabSpec ts = h.newTabSpec(_tag);
         ts.setIndicator(""/* label */, getResources().getDrawable(resource));
-        ts.setContent(new TabHost.TabContentFactory() {
-            public View createTabContent(String tag) {
-                return new ActorSelector(getActivity(), key, color);
-            }
+        ts.setContent(tag -> {
+            return new ActorSelector(getActivity(), key, color);
         });
         // ts1.setContent(new Intent(this,Tab1.class));
         h.addTab(ts);
         factoryList.add(key);
-        return;
 
     }
 
@@ -147,10 +138,7 @@ public class GridFragment extends Fragment {
         int w = getView().getWidth();
         int h = getView().getHeight();
 
-        if (rx < x || rx > x + w || ry < y || ry > y + h) {
-            return false;
-        }
-        return true;
+        return !(rx < x || rx > x + w || ry < y || ry > y + h);
     }
 
     public void show(GridShowState _show) {
@@ -177,17 +165,9 @@ public class GridFragment extends Fragment {
         show(show);
     }
 
-    public String getShowState() {
-        return show.toString();
-    }
-
     public boolean toggle() {
         show((show == GridShowState.HIDE) ? GridShowState.HALF : GridShowState.HIDE);
         return show != GridShowState.HIDE;
-    }
-
-    public void setAutohide() {
-        autohide = !autohide;
     }
 
     public void kickAutohide() {
@@ -214,19 +194,18 @@ public class GridFragment extends Fragment {
 
     public static GridFragment getGrid(Activity act) {
         // [APIv11]
-        GridFragment f = (GridFragment) act.getFragmentManager()
+        return (GridFragment) act.getFragmentManager()
                 .findFragmentByTag(VIEW_SELECT);
-        return f;
     }
 
     public Pair<Integer, Integer> checkDisplayAndRotate() {
         DisplayMetrics metrix = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrix);
         if (metrix.widthPixels > metrix.heightPixels)
-            return new Pair<>(metrix.widthPixels * 1 / 2,
+            return new Pair<>(metrix.widthPixels / 2,
                     ViewGroup.LayoutParams.MATCH_PARENT);
         return new Pair<>(ViewGroup.LayoutParams.MATCH_PARENT,
-                metrix.heightPixels * 1 / 2);
+                metrix.heightPixels / 2);
     }
 
     public static void create(MainActivity mainActivity, int id) {

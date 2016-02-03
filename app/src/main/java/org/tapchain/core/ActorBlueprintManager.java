@@ -16,7 +16,7 @@ public class ActorBlueprintManager<TYPE extends Actor> extends BlueprintManager<
 	}
 
 	@Override
-	public Blueprint create(Class<? extends IPiece> _cls) {
+	public Blueprint create(Class<? extends TYPE> _cls) {
 		return new ActorBlueprint(_cls);
 	}
 	

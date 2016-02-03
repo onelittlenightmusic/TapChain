@@ -40,18 +40,15 @@ public class OverlayPopupView extends PopupWindow {
     }
 
     public void show(final int x, final int y) {
-        act.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (v == null)
-                    return;
-                if (!isShowing())
-                    showAtLocation(((Activity) act).findViewById(R.id.overlay),
-                            Gravity.NO_GRAVITY, x - v.getWidth() / 2,
-                            y - v.getHeight() / 2);
-                else
-                    update(x - v.getWidth() / 2, y - v.getHeight() / 2, -1, -1);
-            }
+        act.runOnUiThread(() -> {
+            if (v == null)
+                return;
+            if (!isShowing())
+                showAtLocation(act.findViewById(R.id.overlay),
+                        Gravity.NO_GRAVITY, x - v.getWidth() / 2,
+                        y - v.getHeight() / 2);
+            else
+                update(x - v.getWidth() / 2, y - v.getHeight() / 2, -1, -1);
         });
     }
 

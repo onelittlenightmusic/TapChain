@@ -38,9 +38,8 @@ public abstract class TapChainSurfaceView
     Matrix inverse = new Matrix();
     Paint paint = new Paint(), paint_text = new Paint();
     WorldPoint window_size = new WorldPoint();
-    String log = "";
     TextPaint mTextPaint = new TextPaint();
-    DynamicLayout mTextLayout;
+    final DynamicLayout mTextLayout;
     static final int NONE = 0;
     static final int ZOOM = 1;
     static final int CAPTURED = 2;
@@ -66,29 +65,24 @@ public abstract class TapChainSurfaceView
     }
 
     public void onDraw() {
-        ((Activity) getContext()).runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                Canvas canvas = null;
-                try {
-                    canvas = getHolder().lockCanvas();
-                    if (canvas == null) {
-                        return;
-                    }
-                    paintBackground(canvas);
-                    myDraw(canvas);
-                    canvas.save();
-                    canvas.translate(20, 120);
-                    synchronized (mTextLayout) {
-                        mTextLayout.draw(canvas);
-                    }
-                    canvas.restore();
-                } finally {
-                    if (canvas != null)
-                        getHolder().unlockCanvasAndPost(canvas);
+        ((Activity) getContext()).runOnUiThread(() -> {
+            Canvas canvas = null;
+            try {
+                canvas = getHolder().lockCanvas();
+                if (canvas == null) {
+                    return;
                 }
-
+                paintBackground(canvas);
+                myDraw(canvas);
+                canvas.save();
+                canvas.translate(20, 120);
+                synchronized (mTextLayout) {
+                    mTextLayout.draw(canvas);
+                }
+                canvas.restore();
+            } finally {
+                if (canvas != null)
+                    getHolder().unlockCanvasAndPost(canvas);
             }
 
         });
@@ -109,7 +103,6 @@ public abstract class TapChainSurfaceView
     }
 
     public void paintBackground(Canvas canvas) {
-        return;
     }
 
     @Override
@@ -155,10 +148,7 @@ public abstract class TapChainSurfaceView
 
     public boolean isInWindow(float x, float y) {
         IPoint d = getScreenPosition(x, y);
-        if (window_size.x() < d.x() || 0 > d.x() || window_size.y() < d.y() || 0 > d.y()) {
-            return false;
-        }
-        return true;
+        return !(window_size.x() < d.x() || 0 > d.x() || window_size.y() < d.y() || 0 > d.y());
     }
 
 

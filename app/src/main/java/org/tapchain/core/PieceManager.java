@@ -10,22 +10,22 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	PIECE mark = null;
 	protected Chain chain = null;
 	PIECE pt = null, pt_b = null;
-	IControlCallback cc_cache = new IControlCallback() {
-		public boolean onCalled() {
-			return true;
-		}
-	};
+	IControlCallback cc_cache = () -> true;
 
 	// 1.Initialization
 	public PieceManager() {
 	}
 
+    /**
+     * copy constructor
+     * @param m PieceManager to copy (but not copy pointers in PieceManager)
+     */
 	public PieceManager(PieceManager m) {
 		this();
 	}
 
 	public PieceManager newSession() {
-		return new PieceManager().setChain(chain);
+		return new PieceManager(this).setChain(chain);
 	}
 
 	// 2.Getters and setters
@@ -33,14 +33,7 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return pt;
 	}
 
-	public PieceManager createChain() {
-		chain = new Chain();
-		if (cc_cache != null)
-			chain.setCallback(cc_cache);
-		return this;
-	}
-
-	public PieceManager setChain(Chain c) {
+    public PieceManager setChain(Chain c) {
 		chain = c;
 		return this;
 	}
@@ -119,7 +112,8 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		} catch (ChainException e) {
 			e.printStackTrace();
 		}
-		rtn.setConnectionClass(cls);
+        assert rtn != null;
+        rtn.setConnectionClass(cls);
 		return rtn;
 	}
 
@@ -154,7 +148,7 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 			return io;
 	}
 
-	public PieceManager student(PIECE cp, PIECE... args) {
+	public PieceManager student(PIECE cp) {
 		if (pt != null)
 			__side(pt, cp, PathType.OFFER);
 		add(cp);
@@ -174,7 +168,7 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return this;
 	}
 
-	public PieceManager old(PIECE cp, IPiece... args) {
+	public PieceManager old(PIECE cp) {
 		__then(pt, cp);
 		add(cp);
 		return this;
@@ -235,13 +229,8 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		bp.end();
 	}
 
-	public PieceManager refreshPieceView(PIECE bp, PIECE obj) {
-		return this;
-	}
 
-
-
-	public IPath disconnect(IPiece x, IPiece y) {
+    public IPath disconnect(IPiece x, IPiece y) {
 		if (x instanceof ChainPiece)
 			((ChainPiece) x).postAppend();
 		if (y instanceof ChainPiece)

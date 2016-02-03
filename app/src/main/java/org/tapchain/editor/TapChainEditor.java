@@ -1,9 +1,9 @@
 package org.tapchain.editor;
 
 import org.tapchain.ActorTap;
+import org.tapchain.MyFocusControl;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorBlueprintManager;
-import org.tapchain.core.ActorManager;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.BlueprintInitialization;
 import org.tapchain.core.BlueprintManager;
@@ -45,14 +45,13 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 	IWindow win = null;
 //	public EditorManager editorManager = new EditorManager();
     HashMap<FACTORY_KEY, Factory<Actor>> factories = new HashMap<>();
-	Factory<Actor> factory = new Factory<Actor>(),
+	Factory<Actor> factory = new Factory<>(),
 			recent = new Factory<>(), relatives = new Factory<>(),
 			goalFactory = new Factory<>();
 	protected ActorBlueprintManager<Actor> blueprintManager = new ActorBlueprintManager<>(
 			factory), goalBlueprintManager = null;
 	private StyleCollection styles = null;
-	protected List<Geometry> geos = new ArrayList<Geometry>();
-	private IPoint nextConnectivityPoint = null;
+    private IPoint nextConnectivityPoint = null;
     ISensorView sensorView = null;
     public enum FACTORY_KEY {
         ALL, LOG, RELATIVES
@@ -65,7 +64,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
 	protected TapChainEditor(IWindow w) {
 		setWindow(w);
-		goalBlueprintManager = new ActorBlueprintManager<Actor>(goalFactory);
+		goalBlueprintManager = new ActorBlueprintManager<>(goalFactory);
 		setAllCallback(this);
 		setPathInterval(1000);
 		setLog(this);
@@ -95,7 +94,6 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     @Override
     public void addLog(String... s) {
         win.log(s);
-        return;
     }
 
 	public Factory<Actor> getFactory() {
@@ -147,7 +145,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
     /**
      * Set StyleCollection. This is the first step for instantiation actors and taps.
-     * @param s
+     * @param s StyleCollection
      */
 	public void setStyle(StyleCollection s) {
 		styles = s;
@@ -174,7 +172,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     /**
      * Single touch.
      * @param point touched point
-     * @return
+     * @return boolean true if event is consumed, or false if error occurs
      */
     public boolean onSingleTouch(IPoint point) {
         ITap t1 = searchTouchedTap(point);
@@ -184,7 +182,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
         Actor p = null;
         if (t1 instanceof IActorTap) {
             p = toActor((ActorTap) t1);
-            getEventHandler().createFocus((IActorTap) t1);
+            createFocus((IActorTap) t1);
         }
         switch (editmode) {
             case REMOVE:
@@ -261,10 +259,6 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 		return rtn;
 	}
 
-    public boolean freezeToggle() {
-        return getChain().getCtrl().Toggle();
-    }
-
 
     private IBlueprint factoryToBlueprint(FACTORY_KEY key, int num) {
         Factory<Actor> f = factories.get(key);
@@ -312,18 +306,22 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
             final Actor actor = rtn.getActor();
             final IActorTap tap = rtn.getTap();
-            win.run(new Runnable() {
-                public void run() {
-                    getEventHandler().onAdd(actor, tap, blueprint, iPoint);
-                    getEventHandler().createFocus(tap);
-                    getFactory(FACTORY_KEY.LOG).Register(blueprint);
-                }
+            win.run(() -> {
+                getEventHandler().onAdd(actor, tap, blueprint, iPoint);
+                createFocus(tap);
+                getFactory(FACTORY_KEY.LOG).Register(blueprint);
             });
+            combo(tap);
             return rtn;
         } catch (ChainException e) {
             error(e);
         }
         return null;
+    }
+
+    public void combo(IActorTap t) {
+        Actor actorNew = toActor(t), aTarget = getFocusControl().getTargetActor();
+        connect(aTarget, getFocusControl().getLinkType(), actorNew);
     }
 
     /**
@@ -341,8 +339,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
         if (pos == null) {
             pos = getNextPos();
         }
-        EditorReturn rtn = addActor(b, pos);
-        return rtn;
+        return addActor(b, pos);
     }
 
     public void start() {
@@ -350,8 +347,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 			return;
 		}
 		getChain().getOperator().start();
-		return;
-	}
+    }
 
 	public void show(Object canvas) {
 		editTap().getChain().Show(canvas);
@@ -519,12 +515,17 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 			b.unhighlight();
 		}
 	}
-
+    /**
+     * Connect an actor to another actor
+     * @param a1 actor which connect to another
+     * @param type connection type as LinkType
+     * @param a2 actor which is connected from a1
+     */
 	@Override
-	public boolean connect(Actor a1, LinkType al, Actor a2) {
-		if (al == null)
+	public boolean connect(Actor a1, LinkType type, Actor a2) {
+		if (type == null)
 			return false;
-		switch (al) {
+		switch (type) {
 		case PUSH:
 			return append(a2, PathType.OFFER, a1,
 					PathType.OFFER, true) != null;
@@ -555,10 +556,17 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
         if(spot == null)
             return;
         setNextPos(spot.getCenter());
-        getEventHandler().getFocusControl().unfocusAll(spot);
-        spot.focus(getEventHandler().getFocusControl(), al);
-        getEventHandler().getFocusControl().setSpotActorLink(al);
+        getFocusControl().unfocusAll(spot);
+        spot.focus(getFocusControl(), al);
+        getFocusControl().setSpotActorLink(al);
     }
 
+    protected void createFocus(IActorTap v) {
+    }
 
+    MyFocusControl focusControl = new MyFocusControl();
+
+    protected MyFocusControl getFocusControl() {
+        return focusControl;
+    }
 }
