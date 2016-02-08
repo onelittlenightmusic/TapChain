@@ -1,11 +1,10 @@
 package org.tapchain.core;
 
 
-import org.tapchain.core.Actor.IConsumer;
-import org.tapchain.core.Actor.IDesigner;
+import android.util.Log;
+
 import org.tapchain.core.Actor.IEffector;
 import org.tapchain.core.Actor.IFunc;
-import org.tapchain.core.Actor.IGenerator;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.ChainPiece.PieceState;
 
@@ -137,50 +136,67 @@ public class ActorManager extends PieceManager<Actor> {
 	}
 	
 	@SuppressWarnings("serial")
-	public <VALUE, INPUT, OUTPUT> ActorManager addDesigner(final IDesigner<VALUE, INPUT, OUTPUT> designer) {
-		Actor adding = null;
-		if(designer instanceof IFunc)
-			adding = new Actor.Filter<VALUE, INPUT, OUTPUT>() {
-				@Override
-				public OUTPUT func(IValue<VALUE> val, INPUT in) {
-					return ((IFunc<VALUE, INPUT, OUTPUT>)designer).func(val, in);
-				}
-
-				@Override
-				public void init(IValue<VALUE> val) {
-					designer.init(val);
-				}
-			};
-		else if(designer instanceof IConsumer)
-			adding = new Actor.ValueConsumer<VALUE>() {
-				@Override
-				public void init(IValue<VALUE> val) {
-					designer.init(val);
-				}
-
-				@Override
-				public void consume(VALUE in) {
-					((IConsumer<VALUE>)designer).consume(in);
-				}
-			};
-		else if(designer instanceof IGenerator)
-			adding = new Actor.Generator<VALUE>() {
-				@Override
-				public void init(IValue<VALUE> val) {
-					designer.init(val);
-				}
-
-				@Override
-				public VALUE generate() {
-					return ((IGenerator<VALUE>)designer).generate();
-				}
-			};
-		if(adding != null)
+	public <VALUE, INPUT, OUTPUT> ActorManager add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+		Actor adding;
+//		if(designer instanceof IFunc)
+			adding = new Actor.FilterSkelton<>(func, init).setLogLevel(true);
+        Log.w("test", "Func created");
+//		else if(designer instanceof IConsumer)
+//			adding = new Actor.ValueConsumer<VALUE>() {
+//				@Override
+//				public void init(IValue<VALUE> val) {
+//					designer.init(val);
+//				}
+//
+//				@Override
+//				public void consume(VALUE in) {
+//					((IConsumer<VALUE>)designer).consume(in);
+//				}
+//			};
+//		else if(designer instanceof IGenerator)
+//			adding = new Actor.Generator<VALUE>() {
+//				@Override
+//				public void init(IValue<VALUE> val) {
+//					designer.init(val);
+//				}
+//
+//				@Override
+//				public VALUE generate() {
+//					return ((IGenerator<VALUE>)designer).generate();
+//				}
+//			};
+//		if(adding != null)
 			add(adding);
 		return this;
 	}
-	
-	public <PARENT, EFFECT> ActorManager addEffector(final IEffector<PARENT, EFFECT> effector) {
+
+    public <OUTPUT> ActorManager add(final Actor.IGenerator<OUTPUT> generator, final OUTPUT init) {
+        add(new Actor.GeneratorSkelton<>(generator, init).setLogLevel(true));
+        Log.w("test", "Generator created");
+        return this;
+    }
+
+    public <VALUE, INPUT> ActorManager add(final Actor.IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+        add(new Actor.ConsumerSkelton<>(consumer, init).setLogLevel(true));
+        Log.w("test", "Consumer created");
+        return this;
+    }
+
+    public <VALUE, INPUT, OUTPUT> ActorManager pushTo(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+        Actor a = getPiece();
+        add(func, init);
+        _appendOffer(a, getPiece());
+        return this;
+    }
+
+    public <VALUE, INPUT> ActorManager pushTo(final Actor.IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+        Actor a = getPiece();
+        add(consumer, init);
+        _appendOffer(a, getPiece());
+        return this;
+    }
+
+    public <PARENT, EFFECT> ActorManager addEffector(final IEffector<PARENT, EFFECT> effector) {
 		add(new Actor.OriginalEffector<PARENT, EFFECT>() {
             @Override
             public void effect(PARENT _t, EFFECT _e) throws ChainException {

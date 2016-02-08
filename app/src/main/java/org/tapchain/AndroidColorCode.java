@@ -43,9 +43,8 @@ public class AndroidColorCode {
 		colorMatrix.setSaturation(0f); // Remove Colour
 		colorMatrix.set(color); // Apply the Red
 
-		ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(
-				colorMatrix);
-		return colorFilter;
+        return new ColorMatrixColorFilter(
+                colorMatrix);
 	}
 
 }

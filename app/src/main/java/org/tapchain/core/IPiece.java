@@ -17,7 +17,7 @@ public interface IPiece<PARTNER extends IPiece> {
 	 * @return ConnectionResultO object
 	 * @throws ChainException
 	 */
-	public ConnectionResultOutConnector appended(PathType type, IPiece from, Output output) throws ChainException;
+    ConnectionResultOutConnector appended(PathType type, IPiece from, Output output) throws ChainException;
 
 	/** Check and append this piece to target piece.
 	 * @param type Packtype of this piece
@@ -26,37 +26,37 @@ public interface IPiece<PARTNER extends IPiece> {
 	 * @return ConnectionResultIO object
 	 * @throws ChainException
 	 */
-	public ConnectionResultPath appendTo(PathType type, IPiece target_piece,
-			PathType type_target) throws ChainException;
+    ConnectionResultPath appendTo(PathType type, IPiece target_piece,
+                                  PathType type_target) throws ChainException;
 
 	/** Check and detach this piece from target piece.
 	 * @param _cp_end IPiece of target piece
 	 * @throws ChainException
 	 */
-	public void detached(IPiece _cp_end);
+    void detached(IPiece _cp_end);
 
 	Collection<PARTNER> getPartners(PathType pathType, boolean out);
 
-	public void setPartner(IPath chainPath, IPiece _cp_start, PathType type_in);
+	void setPartner(IPath chainPath, IPiece _cp_start, PathType type_in);
 
-	public IPath detach(IPiece y);
+	IPath detach(IPiece y);
 
-	public Collection<PARTNER> getPartners();
+	Collection<PARTNER> getPartners();
 
 	/** Check connection between this object and secondpiece.
 	 * @param target
 	 * @return True when this object and secondpiece are connected.
 	 */
-	public boolean isConnectedTo(IPiece target);
-	public boolean isConnectedTo(IPiece target, PathType type);
-	public boolean isConnectedTo(PathType type, boolean out);
+    boolean isConnectedTo(IPiece target);
+	boolean isConnectedTo(IPiece target, PathType type);
+	boolean isConnectedTo(PathType type, boolean out);
 
-    public IPiece end();
+    IPiece end();
 
-	public String getName();
-	public int getId();
+	String getName();
+	int getId();
 
-	public <T> T __exec(T obj, String flg);
+	<T> T __exec(T obj, String flg);
 
 	PathType getPackType(IPiece cp);
 
@@ -64,8 +64,8 @@ public interface IPiece<PARTNER extends IPiece> {
 
 	InPathPack getInPack(PathType packtype);
 	
-	public String getTag();
-	public void setTag(String tag);
+	String getTag();
+	void setTag(String tag);
 
     ChainPiece.LogCase L(String format);
 }

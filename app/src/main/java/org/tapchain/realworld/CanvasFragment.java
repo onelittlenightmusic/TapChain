@@ -3,13 +3,16 @@ package org.tapchain.realworld;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.tapchain.TapChainAndroidEditor;
 import org.tapchain.core.Actor;
+import org.tapchain.core.ActorManager;
 import org.tapchain.core.IPoint;
+import org.tapchain.core.IValue;
 import org.tapchain.editor.EditorReturn;
 import org.tapchain.editor.TapChainEditor;
 
@@ -24,6 +27,7 @@ public class CanvasFragment extends Fragment {
 //    Activity act;
     static String CANVAS = "Canvas";
     TapChainEditor editor;
+    IValue<Integer> last;
 
     public CanvasFragment() {
         super();
@@ -55,6 +59,13 @@ public class CanvasFragment extends Fragment {
                     e.printStackTrace();
                 }
 
+                ActorManager e = editor.editTap();
+//                e.add(new Actor.GeneratorSkelton<>(()->1, 0));
+                e.add(()->1, 0)
+                        .pushTo((IValue<Integer> v, Integer i) -> i + 1, 0)
+                        .pushTo((IValue<Integer> v, Integer i) -> { v._valueSet(i); Log.w("test", "OK"); }, 0);
+                last = (IValue<Integer>)e.getPiece();
+                e.save();
                 editor.invalidate();
             }
             view.setEditor(editor);
@@ -95,8 +106,8 @@ public class CanvasFragment extends Fragment {
      * @param tag actor tag
      * @param x x of location where actor will be added
      * @param y y of location where actor will be added
-     * @param dx x of first velocity
-     * @param dy y of first velocity
+     * @param vx x of first velocity
+     * @param vy y of first velocity
      * @return
      */
     public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {

@@ -29,7 +29,7 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	}
 
 	// 2.Getters and setters
-	public IPiece getPiece() {
+	public PIECE getPiece() {
 		return pt;
 	}
 
@@ -148,45 +148,48 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 			return io;
 	}
 
-	public PieceManager student(PIECE cp) {
-		if (pt != null)
-			__side(pt, cp, PathType.OFFER);
-		add(cp);
-		return this;
-	}
-
-	PieceManager __then(PIECE cpbase, PIECE target) {
-		if (pt != null)
-			append(cpbase, PathType.EVENT, target, PathType.EVENT, false);
-		return this;
-	}
 
 	@Override
-	public PieceManager next(PIECE cp) {
-		__then(cp, pt);
+	public PieceManager nextEvent(PIECE cp) {
+		_appendNextEventToPrevEvent(cp, pt);
 		add(cp);
 		return this;
 	}
 
-	public PieceManager old(PIECE cp) {
-		__then(pt, cp);
+	public PieceManager prevEvent(PIECE cp) {
+		_appendNextEventToPrevEvent(pt, cp);
 		add(cp);
 		return this;
 	}
 
-	PieceManager prev(PIECE cp) {
-		append(pt, PathType.PASSTHRU, cp, PathType.PASSTHRU, false);
+    PieceManager prevPassThru(PIECE cp) {
+        append(pt, PathType.PASSTHRU, cp, PathType.PASSTHRU, false);
+        add(cp);
+        return this;
+    }
+
+    PieceManager nextPassThru(PIECE cp) {
+        append(cp, PathType.PASSTHRU, pt, PathType.PASSTHRU, false);
+        add(cp);
+        return this;
+    }
+
+    @Override
+    public PieceManager pullFrom(PIECE cp) {
+		_appendOffer(cp, pt);
 		add(cp);
 		return this;
 	}
 
-	public PieceManager teacher(PIECE cp) {
-		__side(cp, pt, PathType.OFFER);
-		add(cp);
-		return this;
-	}
+    @Override
+    public PieceManager pushTo(PIECE cp) {
+        if (pt != null)
+            _appendOffer(pt, cp);
+        add(cp);
+        return this;
+    }
 
-	public PieceManager error(ChainException e) {
+    public PieceManager error(ChainException e) {
 		return this;
 	}
 
@@ -238,15 +241,21 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return x.detach(y);
 	}
 
-	PieceManager __next(PIECE to, PIECE from, PathType stack) {
-		append(from, stack, to, PathType.PASSTHRU, false);
+	PieceManager _appendPassThru(PIECE to, PIECE from) {
+		append(from, PathType.PASSTHRU, to, PathType.PASSTHRU, false);
 		return this;
 	}
 
-	PieceManager __side(PIECE to, PIECE from, PathType stack) {
-		append(from, stack, to, PathType.OFFER, false);
+	PieceManager _appendOffer(PIECE to, PIECE from) {
+		append(from, PathType.OFFER, to, PathType.OFFER, false);
 		return this;
 	}
+
+    PieceManager _appendNextEventToPrevEvent(PIECE cpbase, PIECE target) {
+        if (pt != null)
+            append(cpbase, PathType.EVENT, target, PathType.EVENT, false);
+        return this;
+    }
 
 	public IPath disconnect(IPath path) {
 		path.detach();

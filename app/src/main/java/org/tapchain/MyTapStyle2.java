@@ -465,7 +465,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
                 )
                 ._in()
                 .add(new Actor.Reset(false)/*.setLogLevel(true)*/)
-                .old(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
+                .prevEvent(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
                 .save();
 
         //Create error balloon

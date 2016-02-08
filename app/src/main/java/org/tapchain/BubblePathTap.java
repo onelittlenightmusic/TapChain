@@ -169,7 +169,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
                 ._in()
                 .add(new PathMover(this, 0.04f, 24).once()/*.setLogLevel(true)*/)
                 .add(new Actor.Counter(25-1).once()/*.setLogLevel(true)*/)
-                .next(new Actor.Reset(false).once())
+                .nextEvent(new Actor.Reset(false).once())
                 .save();
 
         return 25;

@@ -56,22 +56,22 @@ public interface IManager<T, U> {
 	 * @return Manager object.
 	 */
     IManager<T, U> save();
-	/** Add new teacher object to chain.
+	/** Add new pullFrom object to chain.
 	 * Teacher object means a piece that input information to current piece.
 	 * [Caution] Until save() is called, this modification
 	 * @param obj Teacher object to be added to chain.
-	 * @param args Options
 	 * @return Manager object (this).
 	 */
-    IManager<T, U> teacher(T obj, U... args);
-	
+    IManager<T, U> pullFrom(T obj);
+//    IManager<T, U> pushTo(T obj);
+
 	/** Add new younger object to chain.
 	 * Younger object means a subsequent piece after the current piece. 
 	 * [Caution] Until save() is called, this modification
 	 * @param obj Next object
 	 * @return Manager object (this).
 	 */
-    IManager<T, U> next(T obj);
+//    IManager<T, U> nextEvent(T obj);
 	
 	/** Go back to MARKED POINTER.
 	 * This method sets MARKED POINTER (the internal "current piece" pointer) to the piece previously marked with _mark() method.
@@ -96,12 +96,12 @@ public interface IManager<T, U> {
 	 * @return Manager object (this).
 	 */
     IManager<T, U> error(ChainException e);
-	/** Exit from this editorManager back to the parent editorManager.
+	/** Exit from this editorManager back to the offerToFamily editorManager.
 	 * @return Parent editorManager object.
 	 */
     IManager<T, U> _out();
 	/** Go into child editorManager. The returned editorManager copes with current pointer object.
-	 * To exit back to previous editorManager which is called "parent editorManager",
+	 * To exit back to previous editorManager which is called "offerToFamily editorManager",
 	 * you can call _out().
 	 * @return Child editorManager object.
 	 */

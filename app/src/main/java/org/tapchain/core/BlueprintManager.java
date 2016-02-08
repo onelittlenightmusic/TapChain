@@ -2,11 +2,9 @@ package org.tapchain.core;
 
 import java.lang.reflect.Modifier;
 
-import org.tapchain.core.Actor.IConsumer;
-import org.tapchain.core.Actor.IDesigner;
+import org.tapchain.core.Actor.IInit;
 import org.tapchain.core.Actor.IEffector;
 import org.tapchain.core.Actor.IFunc;
-import org.tapchain.core.Actor.IGenerator;
 import org.tapchain.core.Blueprint.PieceBlueprintStatic;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.actors.ViewActor;
@@ -142,59 +140,59 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 	
 
-	public static <VALUE, INPUT, OUTPUT> Class<? extends Actor> createFromDesigner(final IDesigner<VALUE, INPUT, OUTPUT> designer) {
-		if(designer instanceof IFunc){
+	public static <VALUE, INPUT, OUTPUT> Class<? extends Actor> createFromDesigner(final IFunc<VALUE, INPUT, OUTPUT> func, final IInit<VALUE> init) {
+//		if(init instanceof IFunc){
 			class LocalFilter extends Actor.Filter<VALUE, INPUT, OUTPUT> {
 				public LocalFilter() {
-					super(designer, IDesigner.class);
+					super(init, IInit.class);
 //					_valueSet(init);
 				}
 				@Override
 				public OUTPUT func(IValue<VALUE> val, INPUT in) {
-					return ((IFunc<VALUE, INPUT, OUTPUT>)designer).func(val, in);
+					return func.func(val, in);
 				}
 
 				@Override
 				public void init(IValue<VALUE> val) {
-					designer.init(val);
+					init.init(val);
 				}
 			};
 			return LocalFilter.class;
-		}
-		else if(designer instanceof IConsumer) {
-			class LocalConsumer extends Actor.ValueConsumer<VALUE> {
-				public LocalConsumer() {
-					super(designer, IDesigner.class);
-				}
-				@Override
-				public void consume(VALUE in) {
-					((IConsumer<VALUE>)designer).consume(in);
-				}
-
-				@Override
-				public void init(IValue<VALUE> val) {
-					designer.init(val);
-				}
-			};
-			return LocalConsumer.class;
-		}
-		else if(designer instanceof IGenerator) {
-			class LocalGenerator extends Actor.Generator<VALUE> {
-				public LocalGenerator() {
-					super(designer, IDesigner.class);
-				}
-				@Override
-				public VALUE generate() {
-					return ((IGenerator<VALUE>)designer).generate();
-				}
-				@Override
-				public void init(IValue<VALUE> val) {
-					designer.init(val);
-				}
-			};
-			return LocalGenerator.class;
-		}
-		return null;
+//		}
+//		else if(init instanceof IConsumer) {
+//			class LocalConsumer extends Actor.ValueConsumer<VALUE> {
+//				public LocalConsumer() {
+//					super(init, IDesigner.class);
+//				}
+//				@Override
+//				public void consume(VALUE in) {
+//					((IConsumer<VALUE>)init).consume(in);
+//				}
+//
+//				@Override
+//				public void init(IValue<VALUE> val) {
+//					init.init(val);
+//				}
+//			};
+//			return LocalConsumer.class;
+//		}
+//		else if(init instanceof IGenerator) {
+//			class LocalGenerator extends Actor.Generator<VALUE> {
+//				public LocalGenerator() {
+//					super(init, IDesigner.class);
+//				}
+//				@Override
+//				public VALUE generate() {
+//					return ((IGenerator<VALUE>)init).generate();
+//				}
+//				@Override
+//				public void init(IValue<VALUE> val) {
+//					init.init(val);
+//				}
+//			};
+//			return LocalGenerator.class;
+//		}
+//		return null;
 	}
 	
 	public static <PARENT, EFFECT> Actor createEffector(final IEffector<PARENT, EFFECT> effector) {
@@ -207,9 +205,9 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 	
 	@SuppressWarnings("serial")
-	public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IDesigner<VALUE, INPUT, OUTPUT> designer) {
-		Class rtn = createFromDesigner(designer);
-		addWithOuterObject(rtn, designer);
+	public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final IInit<VALUE> init) {
+		Class rtn = createFromDesigner(func, init);
+		addWithOuterObject(rtn, func);
 		return this;
 	}
 	
@@ -247,20 +245,20 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return addLocal(create(_cls));
 	}
 	@Override
-	public BlueprintManager<TYPE> teacher(IBlueprint _pbp, IPiece... args) {
+	public BlueprintManager<TYPE> pullFrom(IBlueprint _pbp) {
 		IBlueprint past = reserved;
 		addLocal(_pbp);
 		past.append(PathType.OFFER, reserved, PathType.OFFER);
 		return this;
 	}
-	@Override
-	public BlueprintManager<TYPE> next(IBlueprint _pbp) {
+
+	public BlueprintManager<TYPE> nextPassThru(IBlueprint _pbp) {
 		IBlueprint past = reserved;
 		addLocal(_pbp);
 		reserved.append(PathType.PASSTHRU, past, PathType.PASSTHRU);
 		return this;
 	}
-	public BlueprintManager<TYPE> parent(Blueprint _pbp) {
+	public BlueprintManager<TYPE> offerToFamily(Blueprint _pbp) {
 		IBlueprint past = reserved;
 		addLocal(_pbp);
 		past.append(PathType.OFFER, reserved, PathType.FAMILY);
@@ -273,42 +271,48 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 	
-	public BlueprintManager<TYPE> teacher(Class<? extends TYPE> _cls) {
-		return teacher(create(_cls));
+	public BlueprintManager<TYPE> pullFrom(Class<? extends TYPE> _cls) {
+		return pullFrom(create(_cls));
 	}
-	public BlueprintManager<TYPE> young(Class<? extends TYPE> _cls) {
-		return next(create(_cls));
+	public BlueprintManager<TYPE> nextEvent(Class<? extends TYPE> _cls) {
+		return nextPassThru(create(_cls));
 	}
-	public BlueprintManager<TYPE> parent(Class<? extends TYPE> _cls) {
-		return parent(create(_cls));
+	public BlueprintManager<TYPE> offerToFamily(Class<? extends TYPE> _cls) {
+		return offerToFamily(create(_cls));
 	}
 	public BlueprintManager<TYPE> child(Class<? extends TYPE> _cls) {
 		return child(create(_cls));
 	}
-	public BlueprintManager<TYPE> because(Class<? extends TYPE> _cls) {
-		return because(create(_cls));
+	public BlueprintManager<TYPE> prevEvent(Class<? extends TYPE> _cls) {
+		return prevEvent(create(_cls));
 	}
-	public BlueprintManager<TYPE> teacher(TYPE bp, TYPE... args) {
-		return teacher(new PieceBlueprintStatic(bp), args);
+	public BlueprintManager<TYPE> pullFrom(TYPE bp, TYPE... args) {
+		return pullFrom(new PieceBlueprintStatic(bp));
 	}
 	public BlueprintManager<TYPE> and(Actor bp) {
-		return next(new PieceBlueprintStatic(bp));
+		return nextPassThru(new PieceBlueprintStatic(bp));
 	}
-	public BlueprintManager<TYPE> parent(Actor bp) {
-		return parent(new PieceBlueprintStatic(bp));
+	public BlueprintManager<TYPE> offerToFamily(Actor bp) {
+		return offerToFamily(new PieceBlueprintStatic(bp));
 	}
 	public BlueprintManager<TYPE> child(Actor bp) {
 		return child(new PieceBlueprintStatic(bp));
 	}
-	public BlueprintManager<TYPE> because(Actor bp) {
-		return because(new PieceBlueprintStatic(bp));
-	}
-	public BlueprintManager<TYPE> because(Blueprint _pbp) {
-		IBlueprint past = reserved;
-		addLocal(_pbp);
-		past.append(PathType.EVENT, reserved, PathType.EVENT);
-		return this;
-	}
+    public BlueprintManager<TYPE> prevEvent(Actor bp) {
+        return prevEvent(new PieceBlueprintStatic(bp));
+    }
+    public BlueprintManager<TYPE> prevEvent(Blueprint _pbp) {
+        IBlueprint past = reserved;
+        addLocal(_pbp);
+        past.append(PathType.EVENT, reserved, PathType.EVENT);
+        return this;
+    }
+    public BlueprintManager<TYPE> nextEvent(Blueprint _pbp) {
+        IBlueprint past = reserved;
+        addLocal(_pbp);
+        reserved.append(PathType.EVENT, past, PathType.EVENT);
+        return this;
+    }
 	@Override
 	public BlueprintManager<TYPE> save() {
 		factory.Register(getRoot());

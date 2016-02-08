@@ -10,12 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.tapchain.core.Actor;
+import org.tapchain.core.ActorManager;
+import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
+import org.tapchain.editor.TapChainEditor;
 import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
-import org.tapchain.realworld.IIntentHandler;
 import org.tapchain.realworld.MainActivity;
-
-import java.lang.reflect.ParameterizedType;
 
 import static java.lang.Thread.sleep;
 
@@ -25,6 +25,7 @@ import static java.lang.Thread.sleep;
 @RunWith(AndroidJUnit4.class)
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     MainActivity view;
+
     public MainActivityTest() {
         super(MainActivity.class);
     }
@@ -87,13 +88,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 //        } catch (NoSuchMethodException e) {
 //            e.printStackTrace();
 //        }
+//        runAction((ta, tb) -> 1, "A", new Object(){});
         sleepSecond(10000);
         assertTrue(true);
     }
 
     @After
     public void end() {
-        if(view != null)
+        if (view != null)
             view.finishThisFromOutside();
         sleepSecond(2000);
     }
@@ -110,5 +112,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         }
     }
 
-
+    interface TwoArgumentFunction<T, K, V> {
+        T f(K arg1, V arg2);
+    }
+    public <T, K, V> T runAction(final TwoArgumentFunction<T, K, V> action, final K arg1, final V arg2) {
+        return action.f(arg1, arg2);
+    }
 }

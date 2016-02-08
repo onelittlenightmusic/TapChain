@@ -121,7 +121,7 @@ public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelop
 		}
 //			return false;
 		if(parameters.size() <= arguments.size()) {
-			//It checks whether parent class uses erasure. If erasure is used, this method always returns true.
+			//It checks whether offerToFamily class uses erasure. If erasure is used, this method always returns true.
 			//Otherwise this checks parameter inheritance.
 			for(int i = 0; i < parameters.size(); i++) {
 				Type parametergot = parameters.get(i);

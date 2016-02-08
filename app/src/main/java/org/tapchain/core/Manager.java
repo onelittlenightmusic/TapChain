@@ -22,12 +22,17 @@ public class Manager<T extends IPiece> implements IManager<T, T> {
 	}
 
 	@Override
-	public IManager<T, T> teacher(T obj, T... args) {
+	public IManager<T, T> pullFrom(T obj) {
 		return this;
 	}
 
-	@Override
-	public IManager<T, T> next(T obj) {
+//    @Override
+    public IManager<T, T> pushTo(T obj) {
+        return null;
+    }
+
+//    @Override
+	public IManager<T, T> nextEvent(T obj) {
 		return this;
 	}
 

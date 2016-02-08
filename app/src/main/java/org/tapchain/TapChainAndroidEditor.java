@@ -1,7 +1,6 @@
 package org.tapchain;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
@@ -25,7 +24,7 @@ import org.tapchain.core.IState;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.core.actors.PathThru;
+import org.tapchain.core.actors.PassThru;
 import org.tapchain.core.actors.PushOut;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorTap;
@@ -145,7 +144,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setTag("PushOut")
                 .save()
 
-                .add(PathThru.IntegerPassThru.class)
+                .add(PassThru.IntegerPassThru.class)
                 .setViewArg(R.drawable.right2)
                 .setTag("PassThru")
                 .save()
@@ -462,7 +461,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //                    .add(a)
 //                    ._in()
 //                    .add(new Actor.Sleep(2000))
-//                    .next(new Actor.Ender())
+//                    .nextEvent(new Actor.Ender())
 //                    ._out()
 //                    .save();
 //        }

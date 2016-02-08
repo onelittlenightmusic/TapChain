@@ -12,6 +12,7 @@ import android.text.DynamicLayout;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -47,7 +48,7 @@ public abstract class TapChainSurfaceView
     int mode = NONE;
     float oldDist = 0f;
     PointF mid = new PointF();
-    SpannableStringBuilder buf = new SpannableStringBuilder();
+    StringBuilder buf = new StringBuilder();
 
     public TapChainSurfaceView(Context context) {
         super(context);
@@ -90,8 +91,12 @@ public abstract class TapChainSurfaceView
 
     public abstract void myDraw(Canvas canvas);
 
-
+    StringBuffer strBuf = new StringBuffer();
     public void log(String... strings) {
+        for(String s: strings)
+            strBuf.append(s);
+        Log.i("test", strBuf.toString());
+        strBuf.setLength(0);
         synchronized(mTextLayout) {
             for (String s : strings) {
                 buf.append(s);

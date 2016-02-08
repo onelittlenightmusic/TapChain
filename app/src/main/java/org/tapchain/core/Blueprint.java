@@ -157,7 +157,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 					for (PIECE b : var) {
 						if (b == null)
 							continue;
-						maker.teacher(b);
+						maker.pullFrom(b);
 						maker._gotomark();
 					}
 			}

@@ -3,7 +3,7 @@ package org.tapchain.core;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 
-import org.tapchain.core.Actor.IDesigner;
+import org.tapchain.core.Actor.IInit;
 import org.tapchain.core.Actor.IEffector;
 
 public class QueuedABPM<TYPE extends Actor> extends ActorBlueprintManager<TYPE> {
@@ -30,8 +30,8 @@ public class QueuedABPM<TYPE extends Actor> extends ActorBlueprintManager<TYPE> 
 
 	@Override
 	public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(
-			IDesigner<VALUE, INPUT, OUTPUT> designer) {
-		setNow(new QueueBlueprint(designer));
+            Actor.IFunc<VALUE, INPUT, OUTPUT> func, IInit<VALUE> init) {
+		setNow(new QueueBlueprint(func, init));
 		return this;
 	}
 
@@ -82,8 +82,8 @@ public class QueuedABPM<TYPE extends Actor> extends ActorBlueprintManager<TYPE> 
 			if(cls != null) {
 				if(cls instanceof Class)
 					super.add((Class<? extends TYPE>)cls);
-				else if(cls instanceof IDesigner)
-					super.add((IDesigner)cls);
+				else if(cls instanceof Actor.IFunc)
+					super.add((Actor.IFunc)cls, null);
 				else if(cls instanceof IEffector)
 					super.addEffector((IEffector)cls);
 				else
@@ -117,8 +117,8 @@ public class QueuedABPM<TYPE extends Actor> extends ActorBlueprintManager<TYPE> 
 		public QueueBlueprint(Class<? extends Actor> cls) {
 			this.cls = cls;
 		}
-		public QueueBlueprint(IDesigner designer) {
-			this.cls = designer;
+		public QueueBlueprint(Actor.IFunc func, IInit designer) {
+			this.cls = func;
 		}
 		public QueueBlueprint(IEffector effector) {
 			this.cls = effector;

@@ -86,7 +86,7 @@ public class CanvasViewImpl extends TapChainWritingView {
                     return increment();
                 }
             }.initEffectValue(1, 10))
-            .next(new Actor.Reset().setContinue(true))._out()
+            .nextEvent(new Actor.Reset().setContinue(true))._out()
             .save();
     }
 
@@ -269,7 +269,7 @@ public class CanvasViewImpl extends TapChainWritingView {
                     .add(a)
                     ._in()
                     .add(new Actor.Sleep(2000))
-                    .next(new Actor.Ender())
+                    .nextEvent(new Actor.Ender())
                     ._out()
                     .save();
 //        }

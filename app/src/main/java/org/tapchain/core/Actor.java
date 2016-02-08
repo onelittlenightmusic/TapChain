@@ -1,5 +1,7 @@
 package org.tapchain.core;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.tapchain.core.ActorChain.IActorInit;
@@ -7,7 +9,6 @@ import org.tapchain.core.ActorChain.IControllable;
 import org.tapchain.core.ActorChain.ILight;
 import org.tapchain.core.ActorChain.IRecorder;
 import org.tapchain.core.ActorChain.ISound;
-import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultOutConnector;
 import org.tapchain.core.Chain.ConnectionResultPath;
@@ -19,7 +20,6 @@ import org.tapchain.core.PathPack.OutPathPack.Output;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorTap;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     static Map<LinkType, HashMap<Class<?>, ClassEnvelope>> mapLinkClass
             = new HashMap<LinkType, HashMap<Class<?>, ClassEnvelope>>() {
         {
-            for(LinkType linkType: LinkType.values())
+            for (LinkType linkType : LinkType.values())
                 put(linkType, new HashMap<Class<?>, ClassEnvelope>());
         }
     };
@@ -327,7 +327,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         Actor target;
         try {
             target = (Actor) (i.getPiece());
-            if(target == null)
+            if (target == null)
                 throw new ChainException(this, "Actor: target is not an Actor");
         } catch (ClassCastException e1) {
             throw new ChainException(this, "Actor: target is not an Actor");
@@ -370,7 +370,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         try {
             rtn = in.input();
         } catch (InterruptedException e) {
-            throw new ChainException(this, "Interrupted.",PieceErrorCode.INTERRUPT);
+            throw new ChainException(this, "Interrupted.", PieceErrorCode.INTERRUPT);
         }
         if (rtn.isEmpty()) {
             if (in.getPathMainClass() == null)
@@ -455,7 +455,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     public static class Controllable<VALUE, INPUT, OUTPUT, PARENT> extends Loop
             implements IControllable {
         CountDownLatch wake = new CountDownLatch(1);
-        BlockingQueue<ControllableSignal> continueSignalQueue = new LinkedBlockingQueue<ControllableSignal>(
+        BlockingQueue<ControllableSignal> continueSignalQueue = new LinkedBlockingQueue<>(
                 Integer.MAX_VALUE);
         boolean autostart = false;
         boolean autoend = false;
@@ -484,6 +484,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             Class<? extends Controllable> thisClass = this.getClass();
             Class<?> sampleClass = sample.getClass();
             staticOverrideLinks(thisClass, sampleClass, targetClass);
+            __setAssociatedClasses(thisClass);
         }
 
         public void __initValue(ClassEnvelope classEnvelope) {
@@ -510,19 +511,30 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             }
         }
 
-        public INPUT getInputDummy() { return null; }
-        public OUTPUT getOutputDummy() { return null; }
-        public PARENT getParentDummy() { return null; }
-        public VALUE getValueDummy() { return null; }
+        public INPUT getInputDummy() {
+            return null;
+        }
+
+        public OUTPUT getOutputDummy() {
+            return null;
+        }
+
+        public PARENT getParentDummy() {
+            return null;
+        }
+
+        public VALUE getValueDummy() {
+            return null;
+        }
 
         public INPUT pull() throws ChainException {
             Packet input = L("pull()").go(super.pullInActor());
             pullTag = input.getTag();
-            return (INPUT)input.getObject();
+            return (INPUT) input.getObject();
         }
 
         public void push(OUTPUT output) {
-            super.pushInActor(output, pushTag==null?output.toString()+getTag():pushTag);
+            super.pushInActor(output, pushTag == null ? output.toString() + getTag() : pushTag);
             pushTag = null;
         }
 
@@ -663,6 +675,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return this;
 
         }
+
         @Override
         public void ctrlStart() throws ChainException, InterruptedException {
         }
@@ -702,6 +715,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public String getNowTag() {
             return nowTag;
         }
+
         protected void setNowTag(String now) {
             nowTag = now;
         }
@@ -742,7 +756,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         };
         private Boolean _cont = null, _reset = null, _error = null;
 
-        private ControllableSignal(Boolean cont, Boolean reset, Boolean error) {
+        ControllableSignal(Boolean cont, Boolean reset, Boolean error) {
             _cont = cont;
             _reset = reset;
             _error = error;
@@ -766,7 +780,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     }
 
     public interface IControllableInterruption {
-        public boolean onDo(Controllable c);
+        boolean onDo(Controllable c);
     }
 
     public static abstract class Sound extends Actor.Controllable implements
@@ -904,14 +918,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return cache;
         }
 
-        public Class<?> getParameterClass() {
-            if (type == null) {
-                ParameterizedType pt = (ParameterizedType) this.getClass()
-                        .getGenericSuperclass();
-                type = (Class<?>) pt.getActualTypeArguments()[0];
-            }
-            return type;
-        }
     }
 
     public static abstract class OriginalEffector<Parent, Effect> extends
@@ -929,34 +935,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public abstract void effect(Parent _t, Effect _e) throws ChainException;
-    }
-
-    public static class Booster extends OriginalEffector<IBoostable, Float> {
-
-        public Booster() {
-            super();
-            initEffectValue(0f, 1);
-            once();
-        }
-
-        @Override
-        public void effect(IBoostable _t, Float _e) throws ChainException {
-            _t.boost(_e * 10f);
-        }
-    }
-
-    public static class Charger extends OriginalEffector<IChargeable, Float> {
-
-        public Charger() {
-            super();
-            initEffectValue(0f, 1);
-            once();
-        }
-
-        @Override
-        public void effect(IChargeable _t, Float _e) throws ChainException {
-            _t.charge(_e * 10f);
-        }
     }
 
     public static abstract class Register<V, E> extends EffectorSkelton<V, E> {
@@ -984,79 +962,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public abstract void unregister() throws ChainException;
     }
 
-    public static class ScrollableRegister extends
-            Register<IRegister, IScrollHandler> {
-
-        public ScrollableRegister() {
-            super();
-        }
-
-        @Override
-        public void register() throws ChainException {
-            IRegister _t = getTarget();
-            _t.registerHandler(_valueGet());
-        }
-
-        @Override
-        public void unregister() throws ChainException {
-            IRegister _t = getTarget();
-            _t.unregisterHandler(_valueGet());
-        }
-    }
-
-    public static class CollidableRegister extends
-            Register<ICollideRegister, IActorCollideHandler> {
-
-        public CollidableRegister() {
-            super();
-        }
-
-        @Override
-        public void register() throws ChainException {
-            ICollideRegister _t = getTarget();
-            _t.registerCollideHandler(_valueGet());
-        }
-
-        @Override
-        public void unregister() throws ChainException {
-            ICollideRegister _t = getTarget();
-            _t.unregisterCollideHandler(_valueGet());
-        }
-
-    }
-
-
-    public static class ScrollableAdjuster extends
-            EffectorSkelton<IPiece, Integer> {
-        IChainAdapter a;
-
-        public ScrollableAdjuster() {
-            super();
-            unsetAutoEnd();
-        }
-
-        @Override
-        public void ctrlStart() throws ChainException, InterruptedException {
-            super.ctrlStart();
-            final Collection<IPiece> pieces = getParentChain().getPieces();
-            a = new IChainAdapter<Actor>() {
-                @Override
-                public void adapterRun(Collection<Actor> obj) {
-                    for (Object o2 : pieces)
-                        if (o2 instanceof ICollidable)
-                            ((ICollidable) o2).onCollideInternal(null,
-                                    (IView) o2, obj, null);
-                }
-            };
-            getParentChain().registerAdapter(a);
-        }
-
-        @Override
-        public void ctrlStop() {
-            super.ctrlStop();
-            getParentChain().unregisterAdapter(a);
-        }
-    }
 
     public static abstract class ViewTxn<E> extends
             OriginalEffector<ViewActor, E> {
@@ -1194,6 +1099,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             this();
             initEffectValue(p, duration);
         }
+
         @Override
         public boolean _valueSet(IPoint p) {
             if (cache == null)
@@ -1596,7 +1502,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     @SuppressWarnings("unchecked")
     public static abstract class Filter<VALUE, INPUT, OUTPUT> extends
             Controllable<Self, INPUT, OUTPUT, Void> implements
-            IFunc<VALUE, INPUT, OUTPUT>, IValue<VALUE>, ICommit {
+            IFunc<VALUE, INPUT, OUTPUT>, IValue<VALUE>, IInit<VALUE>, ICommit {
         VALUE o;
         INPUT event;
 
@@ -1605,16 +1511,16 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             setAutoStart();
             setAutoEnd();
             setControlled(false);
-            init(this);
+//            init(this);
         }
 
         public Filter(Object obj, Class<?> target) {
             super(obj, target);
-            setLoop(null);
+//            setLoop(null);
             setAutoStart();
             setAutoEnd();
             setControlled(false);
-            init(this);
+//            init(this);
         }
 
         @Override
@@ -1660,6 +1566,35 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return input;
         }
 
+        @Override
+        public boolean actorInit() throws ChainException {
+            super.actorInit();
+            init(this);
+            return true;
+        }
+    }
+
+    public static class FilterSkelton<VALUE, INPUT, OUTPUT> extends Filter<VALUE, INPUT, OUTPUT> {
+        IFunc<VALUE, INPUT, OUTPUT> _func;
+        VALUE _init;
+
+        public FilterSkelton(IFunc<VALUE, INPUT, OUTPUT> f, VALUE i) {
+            super(f, IFunc.class);
+            _func = f;
+            _init = i;
+        }
+
+        @Override
+        public void init(IValue<VALUE> val) {
+            val._valueSet(_init);
+            Log.w("test", "filter initialized");
+        }
+
+        @Override
+        public OUTPUT func(IValue<VALUE> val, INPUT in) {
+            Log.w("test", "filter func called");
+            return _func.func(val, in);
+        }
     }
 
     public static abstract class IntegerFilter extends
@@ -1717,6 +1652,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public FloatFilter() {
             super();
         }
+
         @Override
         public void init(IValue<Float> val) {
             _valueSet(1f);
@@ -1796,6 +1732,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public StringFilter() {
             super();
         }
+
         @Override
         public void init(IValue<String> val) {
             _valueSet("");
@@ -1845,21 +1782,20 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     public abstract static class Consumer<VALUE, INPUT> extends
             Controllable<Self, INPUT, Void, Void> implements IValue<VALUE>,
-            IConsumer<INPUT> {
+            IConsumer<VALUE, INPUT>, IInit<VALUE> {
         VALUE value;
 
         public Consumer() {
             super();
             setAutoStart();
             setAutoEnd();
-            init(this);
         }
 
         public Consumer(Object obj, Class<?> target) {
             super(obj, target);
             setAutoStart();
             setAutoEnd();
-            init(this);
+//            init(this);
         }
 
         @Override
@@ -1876,9 +1812,39 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         @Override
         public boolean actorRun(Actor act) throws ChainException,
                 InterruptedException {
-            consume(pull());
+            consume(this, pull());
             invalidate();
             return true;
+        }
+
+        @Override
+        public boolean actorInit() throws ChainException {
+            super.actorInit();
+            init(this);
+            return true;
+        }
+    }
+
+    public static class ConsumerSkelton<VALUE, INPUT> extends Consumer<VALUE, INPUT> {
+        IConsumer<VALUE, INPUT> _consumer;
+        VALUE _init;
+
+        public ConsumerSkelton(IConsumer<VALUE, INPUT> c, VALUE i) {
+            super(c, IConsumer.class);
+            _consumer = c;
+            _init = i;
+        }
+
+
+        @Override
+        public void consume(IValue<VALUE> val, INPUT in) {
+            _consumer.consume(val, in);
+        }
+
+        @Override
+        public void init(IValue<VALUE> val) {
+            Log.w("test", String.format("consumer initialized by %s", _init.toString()));
+            val._valueSet(_init);
         }
     }
 
@@ -1888,12 +1854,12 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void consume(Object in) {
-            _valueSet(CodingLib.encode(in));
+        public void consume(IValue<String> val, Object in) {
+            val._valueSet(CodingLib.encode(in));
         }
 
         @Override
-        public void init(IValue<Object> val) {
+        public void init(IValue<String> val) {
             val._valueSet("");
         }
     }
@@ -1908,8 +1874,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void consume(INPUT in) {
-            _valueSet(in);
+        public void consume(IValue<INPUT> val, INPUT in) {
+            val._valueSet(in);
         }
 
     }
@@ -1922,7 +1888,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public Memory() {
             super();
             setAutoStart();
-            // setLoop(null);
         }
 
         public Memory(Object obj, Class<?> target) {
@@ -1943,21 +1908,20 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     }
 
     public static abstract class Generator<OUTPUT> extends Actor.Memory<OUTPUT>
-            implements ICommit, IGenerator<OUTPUT> {
+            implements ICommit, IGenerator<OUTPUT>, IInit<OUTPUT> {
         OUTPUT output;
 
         // 1.Initialization
         public Generator() {
             super();
-            setLoop(null);
-            init(this);
+//            init(this);
         }
 
         public Generator(OUTPUT obj, Boolean hippo) {
             this();
-            setLoop(null);
+//            setLoop(null);
             setMemoryState(hippo);
-            init(this);
+//            init(this);
             _valueSet(obj);
         }
 
@@ -1997,7 +1961,29 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return generate();
         }
 
+        @Override
+        public boolean actorInit() throws ChainException {
+            super.actorInit();
+            init(this);
+            Log.w("test", "generator initialized by");
+            return true;
+        }
+    }
 
+    public static class GeneratorSkelton<OUTPUT> extends Generator<OUTPUT> {
+        IGenerator _generator;
+        OUTPUT _init;
+
+        public GeneratorSkelton(IGenerator<OUTPUT> g, OUTPUT i) {
+            super(g, IGenerator.class);
+            _generator = g;
+            _init = i;
+        }
+
+        @Override
+        public void init(IValue<OUTPUT> val) {
+            val._valueSet(_init);
+        }
     }
 
     public static class PointGenerator extends Generator<IPoint> {
@@ -2038,10 +2024,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             super();
         }
 
-        public IntegerGenerator(Integer obj, Boolean hippo) {
-            super(obj, hippo);
-        }
-
         @Override
         public void init(IValue<Integer> val) {
             val._valueSet(0);
@@ -2055,8 +2037,17 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void onStep() {
-            _valueSet(_valueGet()+1);
+            _valueSet(_valueGet() + 1);
             interruptStep();
+        }
+
+        boolean inited = false;
+
+        @Override
+        public void init(IValue<Integer> val) {
+            if (inited) return;
+            inited = true;
+            super.init(val);
         }
     }
 
@@ -2344,7 +2335,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //    public static class ManagerPiece<T extends IPiece> extends StandAlonePiece {
 //        BlueprintManager bm;
 //        PieceManager maker;
-//        IPiece parent;
+//        IPiece offerToFamily;
 //
 //        // 1.Initialization
 //        public ManagerPiece() {
@@ -2353,15 +2344,15 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //
 //        public ManagerPiece(T pb) {
 //            this();
-//            parent = pb;
+//            offerToFamily = pb;
 //        }
 //
 //        @SuppressWarnings("unchecked")
 //        @Override
 //        public void OnPushed(Connector p, Object obj)
 //                throws InterruptedException {
-//            if (parent != null)
-//                bm.setOuterInstanceForInner(parent);
+//            if (offerToFamily != null)
+//                bm.setOuterInstanceForInner(offerToFamily);
 //            try {
 //                outputAllSimple(PathType.FAMILY,
 //                        new Packet(bm.addLocal((Class<? extends Actor>) obj)
@@ -2379,24 +2370,23 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //        }
 //    }
 
-    public interface IFunc<VALUE, INPUT, OUTPUT> extends
-            IDesigner<VALUE, INPUT, OUTPUT> {
+    public interface IFunc<VALUE, INPUT, OUTPUT> {
         OUTPUT func(IValue<VALUE> val, INPUT in);
     }
 
-    public interface IGenerator<OUTPUT> extends IDesigner<OUTPUT, Void, OUTPUT> {
+    public interface IGenerator<OUTPUT> {
         OUTPUT generate();
     }
 
-    public interface IConsumer<INPUT> extends IDesigner<INPUT, INPUT, Void> {
-        void consume(INPUT in);
+    public interface IConsumer<VALUE, INPUT> {
+        void consume(IValue<VALUE> val, INPUT in);
     }
 
     public interface IEffector<PARENT, EFFECT> {
         void effect(PARENT _t, EFFECT _e) throws ChainException;
     }
 
-    public interface IDesigner<VALUE, INPUT, OUTPUT> {
+    public interface IInit<VALUE> {
         void init(IValue<VALUE> val);
     }
 
@@ -2433,7 +2423,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         JSONObject rtn = new JSONObject();
         rtn.put("Tag", getTag());
         rtn.put("Class", getClass().getName());
-        for(Actor a: getPartners()) {
+        for (Actor a : getPartners()) {
             rtn.accumulate("Connection", a.getName());
         }
         return rtn;

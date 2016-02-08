@@ -83,9 +83,6 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 		}
 	}
 
-	public void init(Object... obj) {
-	}
-	
 	public void initNum() {
 		mynum = Chain.n++;
 	}
