@@ -489,18 +489,18 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         public void __initValue(ClassEnvelope classEnvelope) {
             if (classEnvelope != null && this instanceof IValue) {
-                if (((IValue) this)._valueGet() != null)
+                if (((IValue) this)._get() != null)
                     return;
                 Class<?> cls = classEnvelope.getRawClass();
                 if (IPoint.class.isAssignableFrom(cls)) {
                     return;
                 } else if (cls == Integer.class) {
-                    ((IValue) this)._valueSet(1);
+                    ((IValue) this)._set(1);
                     return;
                 }
 
                 try {
-                    ((IValue) this)._valueSet(cls.newInstance());
+                    ((IValue) this)._set(cls.newInstance());
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 } catch (InstantiationException e) {
@@ -902,19 +902,19 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         public EffectorSkelton<Parent, Effect> initEffectValue(Effect val,
                                                                int duration) {
-            _valueSet(val);
+            _set(val);
             setDuration(duration);
             return this;
         }
 
         @Override
-        public boolean _valueSet(Effect value) {
+        public boolean _set(Effect value) {
             cache = /* effect_val = */value;
             return true;
         }
 
         @Override
-        public Effect _valueGet() {
+        public Effect _get() {
             return cache;
         }
 
@@ -927,7 +927,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public boolean actorRun(Actor act) throws ChainException {
             Parent _t = getTarget();
             synchronized (_t) {
-                effect(_t, _valueGet());
+                effect(_t, _get());
             }
             invalidate();
             return increment();
@@ -979,7 +979,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void effect(IValue<EFFECT> _t, EFFECT _e) throws ChainException {
-            L("ValueEffector valueSet").go(_t._valueSet(_e));
+            L("ValueEffector valueSet").go(_t._set(_e));
 
         }
     }
@@ -1021,7 +1021,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public synchronized boolean _valueSet(EFFECT val) {
+        public synchronized boolean _set(EFFECT val) {
             addEffectValue(val);
             notifyAll();
             return true;
@@ -1072,7 +1072,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public IPoint _valueGetNext() {
-            D2Point p = ((D2Point) super._valueGet());
+            D2Point p = ((D2Point) super._get());
             if (p == null)
                 return null;
             return p.getVector();
@@ -1101,7 +1101,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean _valueSet(IPoint p) {
+        public boolean _set(IPoint p) {
             if (cache == null)
                 cache = new WorldPoint().setDif();
             cache.set(p.multiply(0.1f));
@@ -1130,7 +1130,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean _valueSet(IPoint p) {
+        public boolean _set(IPoint p) {
             if (cache == null)
                 cache = new WorldPoint();
             cache.set(p);
@@ -1157,7 +1157,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void effect(IValue<IPoint> _t, IPoint _e) throws ChainException {
-            _t._valueSet(center.subNew(_e).multiplyNew(coeff).setDif());
+            _t._set(center.subNew(_e).multiplyNew(coeff).setDif());
         }
 
 
@@ -1348,8 +1348,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public boolean actorRun(Actor act) throws ChainException {
-            L("ValueLog").go(_valueSet(getTarget(false)._valueLog()));
-            push(_valueGet().toString());
+            L("ValueLog").go(_set(getTarget(false)._valueLog()));
+            push(_get().toString());
             return false;
         }
 
@@ -1359,13 +1359,13 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean _valueSet(Object value) {
+        public boolean _set(Object value) {
             log = value;
             return true;
         }
 
         @Override
-        public Object _valueGet() {
+        public Object _get() {
             return log;
         }
 
@@ -1539,13 +1539,13 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean _valueSet(VALUE value) {
+        public boolean _set(VALUE value) {
             o = value;
             return true;
         }
 
         @Override
-        public VALUE _valueGet() {
+        public VALUE _get() {
             return o;
         }
 
@@ -1554,7 +1554,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             if (event != null) {
                 // clearPush();
                 offer(event);
-                return _valueGet();
+                return _get();
             }
             return null;
         }
@@ -1586,7 +1586,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<VALUE> val) {
-            val._valueSet(_init);
+            val._set(_init);
             Log.w("test", "filter initialized");
         }
 
@@ -1601,7 +1601,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             Filter<Integer, Integer, Integer> {
         @Override
         public void init(IValue<Integer> val) {
-            val._valueSet(1);
+            val._set(1);
         }
 
     }
@@ -1613,8 +1613,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Integer func(IValue<Integer> val, Integer obj) {
-            int rtn = obj + val._valueGet();
-            // _valueSet(rtn);
+            int rtn = obj + val._get();
+            // _set(rtn);
             return rtn;
         }
 
@@ -1628,7 +1628,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Integer func(IValue<Integer> val, Integer obj) {
-            int rtn = obj * val._valueGet();
+            int rtn = obj * val._get();
             return rtn;
         }
     }
@@ -1640,8 +1640,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Integer func(IValue<Integer> val, Integer obj) {
-            Integer i = obj + val._valueGet();
-            _valueSet(i);
+            Integer i = obj + val._get();
+            _set(i);
             return i;
         }
     }
@@ -1655,7 +1655,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<Float> val) {
-            _valueSet(1f);
+            _set(1f);
 
         }
     }
@@ -1667,7 +1667,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Float func(IValue<Float> val, Float obj) {
-            float rtn = obj + val._valueGet();
+            float rtn = obj + val._get();
             return rtn;
         }
 
@@ -1680,7 +1680,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Float func(IValue<Float> val, Float obj) {
-            return obj - val._valueGet() * (float) Math.log(Math.random());
+            return obj - val._get() * (float) Math.log(Math.random());
         }
     }
 
@@ -1696,7 +1696,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public Float func(IValue<Float> val, Float in) {
             count++;
             sum += in;
-            val._valueSet(sum / (float) count);
+            val._set(sum / (float) count);
             return in;
         }
     }
@@ -1708,7 +1708,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Float func(IValue<Float> val, Float obj) {
-            float rtn = obj * val._valueGet();
+            float rtn = obj * val._get();
             return rtn;
         }
     }
@@ -1720,8 +1720,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Float func(IValue<Float> val, Float obj) {
-            Float sum = obj + val._valueGet();
-            _valueSet(sum);
+            Float sum = obj + val._get();
+            _set(sum);
             return sum;
         }
     }
@@ -1735,7 +1735,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<String> val) {
-            _valueSet("");
+            _set("");
         }
     }
 
@@ -1746,7 +1746,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public String func(IValue<String> val, Object obj) {
-            return CodingLib.encode(obj) + val._valueGet();
+            return CodingLib.encode(obj) + val._get();
         }
 
     }
@@ -1799,13 +1799,13 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean _valueSet(VALUE v) {
+        public boolean _set(VALUE v) {
             value = v;
             return true;
         }
 
         @Override
-        public VALUE _valueGet() {
+        public VALUE _get() {
             return value;
         }
 
@@ -1844,7 +1844,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         @Override
         public void init(IValue<VALUE> val) {
             Log.w("test", String.format("consumer initialized by %s", _init.toString()));
-            val._valueSet(_init);
+            val._set(_init);
         }
     }
 
@@ -1855,29 +1855,13 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void consume(IValue<String> val, Object in) {
-            val._valueSet(CodingLib.encode(in));
+            val._set(CodingLib.encode(in));
         }
 
         @Override
         public void init(IValue<String> val) {
-            val._valueSet("");
+            val._set("");
         }
-    }
-
-    public static abstract class ValueConsumer<INPUT> extends Consumer<INPUT, INPUT> {
-        public ValueConsumer() {
-            super();
-        }
-
-        public ValueConsumer(Object obj, Class<?> target) {
-            super(obj, target);
-        }
-
-        @Override
-        public void consume(IValue<INPUT> val, INPUT in) {
-            val._valueSet(in);
-        }
-
     }
 
     public abstract static class Memory<OUTPUT> extends
@@ -1922,7 +1906,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //            setLoop(null);
             setMemoryState(hippo);
 //            init(this);
-            _valueSet(obj);
+            _set(obj);
         }
 
         public Generator(Object obj, Class<?> target) {
@@ -1936,19 +1920,19 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean _valueSet(OUTPUT value) {
+        public boolean _set(OUTPUT value) {
             output = value;
             return true;
         }
 
         @Override
-        public OUTPUT _valueGet() {
+        public OUTPUT _get() {
             return output;
         }
 
         @Override
         public OUTPUT generate() {
-            OUTPUT out = _valueGet();
+            OUTPUT out = _get();
             if (out != null) {
                 push(out);
             }
@@ -1982,7 +1966,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<OUTPUT> val) {
-            val._valueSet(_init);
+            val._set(_init);
         }
     }
 
@@ -1999,7 +1983,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<IPoint> val) {
-            val._valueSet(new WorldPoint());
+            val._set(new WorldPoint());
         }
     }
 
@@ -2014,7 +1998,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<String> val) {
-            val._valueSet("");
+            val._set("");
         }
     }
 
@@ -2026,7 +2010,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<Integer> val) {
-            val._valueSet(0);
+            val._set(0);
         }
     }
 
@@ -2037,7 +2021,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void onStep() {
-            _valueSet(_valueGet() + 1);
+            _set(_get() + 1);
             interruptStep();
         }
 
@@ -2062,23 +2046,23 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         public FloatGenerator plus(Float i) {
-            _valueSet(_valueGet() + i);
+            _set(_get() + i);
             return this;
         }
 
         public FloatGenerator multiply(Float f) {
-            _valueSet(_valueGet() * f);
+            _set(_get() * f);
             return this;
         }
 
         public FloatGenerator minus(Float i) {
-            _valueSet(_valueGet() - i);
+            _set(_get() - i);
             return this;
         }
 
         @Override
         public void init(IValue<Float> val) {
-            val._valueSet(0f);
+            val._set(0f);
         }
     }
 
@@ -2114,15 +2098,15 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public Float generate() {
-            return now += -_valueGet() * (float) Math.log(Math.random());
+            return now += -_get() * (float) Math.log(Math.random());
         }
 
         @Override
         public Object _commit() {
-            if (_valueGet() != null) {
+            if (_get() != null) {
                 for (int i = 0; i < count; i++)
                     push(generate());
-                return _valueGet();
+                return _get();
             }
             return null;
         }
@@ -2291,7 +2275,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public void init(IValue<WorldPoint> val) {
-            val._valueSet(new WorldPoint());
+            val._set(new WorldPoint());
         }
     }
 
@@ -2329,62 +2313,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-//    /**
-//     * @author hiro
-//     */
-//    public static class ManagerPiece<T extends IPiece> extends StandAlonePiece {
-//        BlueprintManager bm;
-//        PieceManager maker;
-//        IPiece offerToFamily;
-//
-//        // 1.Initialization
-//        public ManagerPiece() {
-//            super();
-//        }
-//
-//        public ManagerPiece(T pb) {
-//            this();
-//            offerToFamily = pb;
-//        }
-//
-//        @SuppressWarnings("unchecked")
-//        @Override
-//        public void OnPushed(Connector p, Object obj)
-//                throws InterruptedException {
-//            if (offerToFamily != null)
-//                bm.setOuterInstanceForInner(offerToFamily);
-//            try {
-//                outputAllSimple(PathType.FAMILY,
-//                        new Packet(bm.addLocal((Class<? extends Actor>) obj)
-//                                .getBlueprint().newInstance(maker), this));
-//            } catch (ChainException e) {
-//                maker.addLog(e.errorMessage);
-//            }
-//            clearPull();
-//        }
-//
-//        @Override
-//        public void addFromFactory(ActorManager maker) {
-//            super.addFromFactory(maker);
-//            this.maker = maker;
-//        }
-//    }
-
-    public interface IFunc<VALUE, INPUT, OUTPUT> {
-        OUTPUT func(IValue<VALUE> val, INPUT in);
-    }
-
-    public interface IGenerator<OUTPUT> {
-        OUTPUT generate();
-    }
-
-    public interface IConsumer<VALUE, INPUT> {
-        void consume(IValue<VALUE> val, INPUT in);
-    }
-
-    public interface IEffector<PARENT, EFFECT> {
-        void effect(PARENT _t, EFFECT _e) throws ChainException;
-    }
 
     public interface IInit<VALUE> {
         void init(IValue<VALUE> val);

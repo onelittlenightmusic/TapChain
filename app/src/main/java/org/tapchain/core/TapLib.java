@@ -42,7 +42,7 @@ public class TapLib {
 	
 	public static synchronized void setTap(IActorTap t1) {
 		removeTap(t1);
-		IPoint newKey = t1._valueGet().copy();
+		IPoint newKey = t1._get().copy();
 		LinkedList<IActorTap> tList = (LinkedList<IActorTap>) map.get(newKey);
 		if(tList == null) {
 			tList = new LinkedList<IActorTap>();
@@ -78,7 +78,7 @@ public class TapLib {
 
 	public static void setTap(IPathTap tp) {
 		removeTap(tp);
-		IPoint newKey = tp._valueGet().copy();
+		IPoint newKey = tp._get().copy();
 		LinkedList<IPathTap> tList = (LinkedList<IPathTap>) mapPath.get(newKey);
 		if(tList == null) {
 			tList = new LinkedList<IPathTap>();

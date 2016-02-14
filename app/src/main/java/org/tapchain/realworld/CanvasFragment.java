@@ -3,16 +3,14 @@ package org.tapchain.realworld;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.tapchain.TapChainAndroidEditor;
 import org.tapchain.core.Actor;
-import org.tapchain.core.ActorManager;
+import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPoint;
-import org.tapchain.core.IValue;
 import org.tapchain.editor.EditorReturn;
 import org.tapchain.editor.TapChainEditor;
 
@@ -27,7 +25,6 @@ public class CanvasFragment extends Fragment {
 //    Activity act;
     static String CANVAS = "Canvas";
     TapChainEditor editor;
-    IValue<Integer> last;
 
     public CanvasFragment() {
         super();
@@ -59,13 +56,6 @@ public class CanvasFragment extends Fragment {
                     e.printStackTrace();
                 }
 
-                ActorManager e = editor.editTap();
-//                e.add(new Actor.GeneratorSkelton<>(()->1, 0));
-                e.add(()->1, 0)
-                        .pushTo((IValue<Integer> v, Integer i) -> i + 1, 0)
-                        .pushTo((IValue<Integer> v, Integer i) -> { v._valueSet(i); Log.w("test", "OK"); }, 0);
-                last = (IValue<Integer>)e.getPiece();
-                e.save();
                 editor.invalidate();
             }
             view.setEditor(editor);
@@ -120,7 +110,7 @@ public class CanvasFragment extends Fragment {
         if (editorReturn == null)
             return null;
         //TODO: resolve duplication
-        IPoint resultPoint = editorReturn.getTap()._valueGet();
+        IPoint resultPoint = editorReturn.getTap()._get();
         if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
@@ -172,8 +162,8 @@ public class CanvasFragment extends Fragment {
         if (editorReturn == null)
             return null;
 
-        //TODO: resolve duplication
-        IPoint resultPoint = editorReturn.getTap()._valueGet();
+        //TODO: DRY
+        IPoint resultPoint = editorReturn.getTap()._get();
         if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
@@ -196,4 +186,36 @@ public class CanvasFragment extends Fragment {
     public static void create(MainActivity mainActivity, int id) {
         FragmentFactory.create(mainActivity, CanvasFragment.class, id, CANVAS);
     }
+
+    public Actor add(IBlueprint<Actor> b, float x, float y) {
+        return add(b, view.getPosition(x, y), null);
+    }
+
+    public Actor add(IBlueprint<Actor> b, float x, float y, float vx, float vy) {
+        return add(b, view.getPosition(x, y), view.getVector(vx, vy));
+    }
+    /**
+     * Make a actor from actor id and set both location and motion
+     * @param b
+     * @param pos
+     * @param vec
+     * @return
+     */
+    public Actor add(IBlueprint<Actor> b, IPoint pos, IPoint vec) {
+        EditorReturn editorReturn = editor.addActorFromBlueprint(b, pos);
+        if (editorReturn == null)
+            return null;
+
+        //TODO: DRY
+        IPoint resultPoint = editorReturn.getTap()._get();
+        if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
+            //Centering
+            view._onFlingBackgroundTo(pos.x(), pos.y());
+
+        if (vec == null)
+            return editorReturn.getActor();
+        view.onFling(editorReturn.getTap(), vec);
+        return editorReturn.getActor();
+    }
+
 }

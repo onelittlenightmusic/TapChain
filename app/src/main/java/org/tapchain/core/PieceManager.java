@@ -269,5 +269,15 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	public void logLocal(String format, String... l) {
 //		Log.w("PieceManager", String.format(format, l));
 	}
-	
+
+    public <VALUE, INPUT, OUTPUT> PieceManager<PIECE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+        return this;
+    };
+    public <OUTPUT> PieceManager<PIECE> add(final IGenerator<OUTPUT> generator, final OUTPUT init) {
+        return this;
+    };
+    public <VALUE, INPUT> PieceManager<PIECE> add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+        return this;
+    };
+
 }

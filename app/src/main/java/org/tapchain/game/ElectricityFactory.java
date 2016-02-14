@@ -6,11 +6,11 @@ import org.tapchain.core.IValue;
 public class ElectricityFactory extends Actor.Generator<Electricity> {
 	public ElectricityFactory() {
 		super();
-		_valueSet(new Electricity());
+		_set(new Electricity());
 	}
 
 	@Override
 	public void init(IValue<Electricity> val) {
-		val._valueSet(new Electricity());
+		val._set(new Electricity());
 	}
 }

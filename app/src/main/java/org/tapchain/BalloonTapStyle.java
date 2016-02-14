@@ -203,7 +203,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
         OptionTapStyle balloon = null;
         balloon = new BalloonTapStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
         balloon.setCenter(new WorldPoint(100f, 100f));
-        balloon._valueGet().setOffset(t);
+        balloon._get().setOffset(t);
         return balloon;
     }
 }

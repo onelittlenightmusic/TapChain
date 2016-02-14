@@ -29,14 +29,14 @@ public class MySetTimeTapStyle extends OptionTapStyle implements IScrollHandler,
 		@Override
 		public void view_init() {
 			getPaint().setColor(0x77ffffff);
-			_valueGet().setOffset(getParentTap());
+			_get().setOffset(getParentTap());
 		}
 
 		@Override
 		public boolean view_user(Canvas canvas, IPoint cp, IPoint size,
 				int alpha) {
 			DrawLib.drawBitmapCenter(canvas, bm_fg, cp, getPaint());
-			IPoint _point = getParentTap()._valueGet();
+			IPoint _point = getParentTap()._get();
 			Object obj = getParentTap().getMyActorValue();
 			if(obj instanceof Calendar) {
 				ShowInstance.showCalendar(canvas, (Calendar)obj, _point, 150f);

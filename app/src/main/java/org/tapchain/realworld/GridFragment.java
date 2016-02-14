@@ -112,9 +112,7 @@ public class GridFragment extends Fragment {
                        final TapChainEditor.FACTORY_KEY key, final int color, int resource) {
         TabHost.TabSpec ts = h.newTabSpec(_tag);
         ts.setIndicator(""/* label */, getResources().getDrawable(resource));
-        ts.setContent(tag -> {
-            return new ActorSelector(getActivity(), key, color);
-        });
+        ts.setContent(tag -> new SelectGridView(getActivity(), key, color));
         // ts1.setContent(new Intent(this,Tab1.class));
         h.addTab(ts);
         factoryList.add(key);

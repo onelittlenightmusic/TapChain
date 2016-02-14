@@ -6,11 +6,9 @@ import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Chain;
-import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
-import org.tapchain.core.LinkType;
 import org.tapchain.core.Packet;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
@@ -141,7 +139,7 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	@Override
 	public Object getMyActorValue() {
 		if(getActor() instanceof IValue)
-			return ((IValue) getActor())._valueGet();
+			return ((IValue) getActor())._get();
 		return null;
 	}
 

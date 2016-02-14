@@ -30,7 +30,7 @@
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/menuToggle"
+            android:id="@+id/menu_toggle"
             android:src="@drawable/pulldown"
             android:background="@null"/>
 

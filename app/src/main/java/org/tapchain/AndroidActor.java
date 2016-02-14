@@ -395,7 +395,7 @@ public class AndroidActor {
 		}
 		
 		public boolean contains(IPoint iPoint) {
-			return bound.contains(iPoint, getCenter(), getSize()._valueGet());
+			return bound.contains(iPoint, getCenter(), getSize()._get());
 		}
 		
 		public void setShapeBoundary(IShapeBoundary sp) {
@@ -570,7 +570,7 @@ public class AndroidActor {
 					return this;
 			}
 			super.setSize(size);
-			IPoint s = getSize()._valueGet();
+			IPoint s = getSize()._get();
 			bm_scaled = Bitmap.createScaledBitmap(bm_base, (int) s.x(),
 					(int) s.y(), true);
 			return this;
@@ -648,21 +648,21 @@ public class AndroidActor {
 		}
 
 		@Override
-		public boolean _valueSet(IPoint d2p) {
+		public boolean _set(IPoint d2p) {
 			IPoint pos = d2p;
 			if(d2p instanceof D2Point) {
 				IPoint vp = ((D2Point) d2p).getVector();
 				if (vlimit <= 0)
-					super._valueSet(vp);
+					super._set(vp);
 				else {
-					IPoint p = pos.subNew(_valueGet()).setDif();
+					IPoint p = pos.subNew(_get()).setDif();
 					if (vlimit < p.getAbs())
-						super._valueSet(p.ein().multiply(vlimit));
+						super._set(p.ein().multiply(vlimit));
 					else
-						super._valueSet(p);
+						super._set(p);
 				}
 			} else {
-				super._valueSet(d2p);
+				super._set(d2p);
 			}
 			return true;
 
@@ -950,7 +950,7 @@ public class AndroidActor {
         @Override
 		public void onIntent(int resultCode, Intent data) {
 			if (resultCode != android.app.Activity.RESULT_OK) {
-				_valueSet("");
+				_set("");
 				return;
 			}
 			// get the returned value
@@ -962,7 +962,7 @@ public class AndroidActor {
 			for (int i = 0; i < results.size(); i++) {
 				buffer.append(results.get(i));
 			}
-			_valueSet(results.get(0));
+			_set(results.get(0));
 			push(text);
 		}
 
@@ -972,13 +972,13 @@ public class AndroidActor {
 		}
 
 		@Override
-		public boolean _valueSet(String value) {
+		public boolean _set(String value) {
 			text = value;
 			return true;
 		}
 
 		@Override
-		public String _valueGet() {
+		public String _get() {
 			return text;
 		}
 
@@ -1117,8 +1117,8 @@ public class AndroidActor {
                     } else {
                         inputMethodManager.hideSoftInputFromWindow(
                                 v.getWindowToken(), 0);
-                        text._valueSet(e.getText().toString());
-                        e.setText(text._valueGet());
+                        text._set(e.getText().toString());
+                        e.setText(text._get());
                         if (text instanceof ICommit)
                             ((ICommit) text)._commit();
                         AndroidTextInput.this.interruptEnd();

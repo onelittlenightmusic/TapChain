@@ -91,7 +91,7 @@ public class PathTap extends AndroidView implements IPathTap {
 		}
 
 		@Override
-		public IPoint _valueGet() {
+		public IPoint _get() {
 			// values is not initialized so that it cannot be assigned
 			beta += dif;
 			if(beta > 1.0f)

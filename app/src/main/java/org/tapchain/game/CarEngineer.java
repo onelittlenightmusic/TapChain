@@ -24,8 +24,8 @@ public class CarEngineer {
 		}
 		@Override
 		public void effect(Tire input, AccelAngle _e) throws ChainException {
-			input._valueGet().set((_e.get()+input._valueGet().get()));
-			input._valueGet().increment();
+			input._get().set((_e.get()+input._get().get()));
+			input._get().increment();
 		}
 	}
 	
@@ -37,16 +37,16 @@ public class CarEngineer {
 		
 		public Brake() {
 			super();
-			_valueSet(new RotationAcceleration());
+			_set(new RotationAcceleration());
 			setControlled(true);
 //			setPull(true);
 		}
 		@Override
 		public RotationAcceleration func(IValue<RotationAcceleration> val, BrakeAngle input) {
 			Float angleSpeed = -input.get();
-			val._valueGet().set(angleSpeed < 0f ? angleSpeed : 0f);
+			val._get().set(angleSpeed < 0f ? angleSpeed : 0f);
 //			input.increment();
-			return val._valueGet();
+			return val._get();
 		}
 
 		@Override
@@ -63,16 +63,16 @@ public class CarEngineer {
 
 		public Engine2() {
 			super();
-			_valueSet(new RotationAcceleration());
+			_set(new RotationAcceleration());
 			setControlled(true);
 //			setPull(true);
 		}
 		@Override
 		public RotationAcceleration func(IValue<RotationAcceleration> val, AccelAngle input) {
 			Float angleSpeed = input.get();
-			val._valueGet().set(angleSpeed > 0f ? angleSpeed : 0f);
+			val._get().set(angleSpeed > 0f ? angleSpeed : 0f);
 //			input.increment();
-			return val._valueGet();
+			return val._get();
 		}
 
 		@Override
@@ -92,15 +92,15 @@ public class CarEngineer {
 		Float maxSpeed = 200f;
 		public Tire() {
 			super();
-			super._valueSet(new Speed());
+			super._set(new Speed());
 		}
 		@Override
 		public Void func(IValue<Speed> val, RotationAcceleration input) {
-			float nextSpeed = val._valueGet().get() + tireRadius*input.get();
+			float nextSpeed = val._get().get() + tireRadius*input.get();
 			if(nextSpeed < 0f) nextSpeed = 0f;
 			else if(nextSpeed > maxSpeed) nextSpeed = maxSpeed;
-			val._valueGet().set(nextSpeed);
-			val._valueGet().increment();
+			val._get().set(nextSpeed);
+			val._get().increment();
 			return null;
 		}
 
@@ -110,13 +110,13 @@ public class CarEngineer {
 		}
 
 		@Override
-		public boolean _valueSet(Speed value) {
+		public boolean _set(Speed value) {
 			try {
-				((ViewActor)getParent(PathType.FAMILY))._valueSet(value);
+				((ViewActor)getParent(PathType.FAMILY))._set(value);
 			} catch (ChainException e) {
 				e.printStackTrace();
 			}
-			return super._valueSet(value);
+			return super._set(value);
 		}
 		
 	}
@@ -137,9 +137,9 @@ public class CarEngineer {
 		public IPoint getPosXY(Float pos) {
 			if(lastPoint == null) {
 				lastPos = pos;
-				return lastPoint = _valueGet();
+				return lastPoint = _get();
 			}
-			IPoint newPoint = (nextGoal == null) ? _valueGet() : nextGoal;
+			IPoint newPoint = (nextGoal == null) ? _get() : nextGoal;
 			for(float restd = pos - lastPos; ;) {
 				IPoint vec = newPoint.subNew(lastPoint);
 				float dist = vec.getAbs();
@@ -149,7 +149,7 @@ public class CarEngineer {
 					break;
 				} else {
 					lastPoint = newPoint;
-					newPoint = _valueGet();
+					newPoint = _get();
 					restd -= dist;
 				}
 			}
@@ -160,8 +160,8 @@ public class CarEngineer {
 		
 		@Override
 		public void effect(IValue<IPoint> _t, IPoint _e) throws ChainException {
-			Speed s = (Speed)_t._valueGet();
-			L("1.202 ValueEffector valueSet").go(_t._valueSet(s.set(getPosXY(s.getPos()))));
+			Speed s = (Speed)_t._get();
+			L("1.202 ValueEffector valueSet").go(_t._set(s.set(getPosXY(s.getPos()))));
 		}
 	}
 	
@@ -181,7 +181,7 @@ public class CarEngineer {
 
 		@Override
 		public void init(IValue<AccelAngle> val) {
-			val._valueSet(new AccelAngle());
+			val._set(new AccelAngle());
 		}
 	}
 	
@@ -195,7 +195,7 @@ public class CarEngineer {
 
 		@Override
 		public void init(IValue<BrakeAngle> val) {
-			val._valueSet(new BrakeAngle());
+			val._set(new BrakeAngle());
 		}
 	}
 	

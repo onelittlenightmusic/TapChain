@@ -65,7 +65,7 @@ public class MenuFragment extends Fragment {
         finish.setOnClickListener(v1 -> getActivity().finish());
         ImageButton dustbox = (ImageButton)v.findViewById(R.id.dustbox);
         dustbox.setOnClickListener(v1 -> ((MainActivity)getActivity()).getEditor().reset());
-        final ImageButton menuToggle = (ImageButton)v.findViewById(R.id.menuToggle);
+        final ImageButton menuToggle = (ImageButton)v.findViewById(R.id.menu_toggle);
         menuToggle.setOnClickListener(v1 -> {
                     boolean gridshow = false;
                     GridFragment f = ((MainActivity)getActivity()).getGrid();

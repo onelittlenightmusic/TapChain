@@ -190,7 +190,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         if (actor instanceof IValueArray) {
             ShowInstance.showPath(canvas, (IValueArray<IPoint>) actor);
         } else if (actor instanceof IValue) {
-            Object val = ((IValue<?>) actor)._valueGet();
+            Object val = ((IValue<?>) actor)._get();
             String tag = "";
             if (actor instanceof Controllable)
                 tag = ((Controllable) actor).getNowTag();
@@ -240,12 +240,12 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public boolean setMyActorValue(Object obj) {
         Actor actor = getActor();
         if (actor instanceof IValueArray) {
-            ((IValueArray) actor)._valueSet(obj);
+            ((IValueArray) actor)._set(obj);
         } else if (actor instanceof IValue) {
             IValue v = (IValue) actor;
-            Object val = v._valueGet();
+            Object val = v._get();
             if (val.getClass().isAssignableFrom(obj.getClass())) {
-                v._valueSet(obj);
+                v._set(obj);
                 invalidate();
             }
         }
@@ -319,7 +319,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             SelectedTapLockEnvelope e = new SelectedTapLockEnvelope(getOwnActivity(), this, actor);
             e.registerToManager(edit.editTap(), edit);
         } else if (actor instanceof IValue) {
-            Object val = ((IValue) actor)._valueGet();
+            Object val = ((IValue) actor)._get();
             SelectedTapLockEnvelope e = new SelectedTapLockEnvelope(getOwnActivity(), this, val);
             e.registerToManager(edit.editTap(), edit);
         }
@@ -391,8 +391,8 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     boolean isZero = true;
 
     public void setOffsetVector() {
-        partnersOffsetAverage._valueGet().clear();
-        WorldPoint average = (WorldPoint) partnersOffsetAverageRaw._valueGet().clear();
+        partnersOffsetAverage._get().clear();
+        WorldPoint average = (WorldPoint) partnersOffsetAverageRaw._get().clear();
         Collection<Actor> col1 = getActor().getPartners(LinkType.PULL);
         Collection<Actor> col2 = getActor().getPartners(LinkType.PUSH);
         isZero = col1.isEmpty() || col2.isEmpty();
@@ -405,7 +405,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             average.setOffset(edit.toTap(vec2), divCol2);
         }
         if (!isZero)
-            partnersOffsetAverage._valueSet(average);
+            partnersOffsetAverage._set(average);
     }
 
     private Value<IPoint> partnersOffsetAverage = new Value<IPoint>(new WorldPoint(0f, 0f));
@@ -422,13 +422,13 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
     public WorldPoint getOffsetVectorRawCopy() {
         boolean pullZero = false;
-        WorldPoint rtn = new WorldPoint(partnersOffsetAverageRaw._valueGet());
+        WorldPoint rtn = new WorldPoint(partnersOffsetAverageRaw._get());
         if (getActor().getPartners(LinkType.PULL).size() == 0) {
-            rtn.sub(this._valueGet());
+            rtn.sub(this._get());
             pullZero = true;
         }
         if (getActor().getPartners(LinkType.PUSH).size() == 0) {
-            rtn.plus(this._valueGet());
+            rtn.plus(this._get());
             //Pull and Push are both no connection
             if (pullZero)
                 rtn = new WorldPoint(150f, 0f);
@@ -459,7 +459,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         AndroidActor.AndroidImageView errorMark = new AndroidActor.AndroidImageView(getOwnActivity(), R.drawable.error);
         errorMark.setColorCode(ColorCode.RED)
                 .setPercent(new WorldPoint(200f, 200f));
-        errorMark._valueGet().setOffset(t);
+        errorMark._get().setOffset(t);
         edit.editTap()
                 .add(errorMark
                 )

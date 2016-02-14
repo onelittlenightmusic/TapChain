@@ -1,12 +1,15 @@
 package org.tapchain.realworld;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
 import org.tapchain.core.Actor;
 import org.tapchain.core.Factory;
+import org.tapchain.core.IBlueprint;
 import org.tapchain.editor.TapChainEditor;
 
 /**
@@ -16,21 +19,52 @@ public class ActorImageButton extends ActorImage implements
         View.OnTouchListener, GestureDetector.OnGestureListener {
     OverlayPopupView p;
     final MainActivity act;
-    final Factory<Actor> factory;
-    final TapChainEditor.FACTORY_KEY key;
-    final int num;
     private GestureDetector touchDetector;
+    Factory<Actor> factory;
+    TapChainEditor.FACTORY_KEY key;
+    int num;
 
-    ActorImageButton(Context c, Factory<Actor> f, TapChainEditor.FACTORY_KEY key, final int j) {
-        super(c, f, j);
+    public ActorImageButton(Context context, AttributeSet attr) {
+        super(context, attr);
+        registerToFactory();
+        act = (MainActivity) context;
+        touchDetector = new GestureDetector(act, this);
+//        factory = ((MainActivity)context).getEditor().getFactory(TapChainEditor.FACTORY_KEY.ALL);
+//        this.key = TapChainEditor.FACTORY_KEY.ALL;
+//        num = 0;
+        setOnTouchListener(this);
+        TypedArray a= context.obtainStyledAttributes(
+                attr,
+                R.styleable.ActorImageButton);
+        String factory_key = a.getString(R.styleable.ActorImageButton_factoryKey);
+        Integer num_in_factory = a.getInteger(R.styleable.ActorImageButton_numInFactory, 0);
+        TapChainEditor.FACTORY_KEY key = TapChainEditor.FACTORY_KEY.valueOf(factory_key);
+//        init(context, key, null, num_in_factory);
+        factory = ((MainActivity)context).getEditor().getFactory(key);
+//        if(factory == null)
+//            factory = ((MainActivity)c).getEditor().getFactory(key);
+        init(factory.get(num_in_factory));
+    }
+
+    ActorImageButton(Context c, IBlueprint<Actor> blueprint) {
+        super(c, blueprint);
         registerToFactory();
         act = (MainActivity) c;
         touchDetector = new GestureDetector(act, this);
-        factory = f;
-        this.key = key;
-        num = j;
+//        factory = f;
+//        this.key = key;
+//        num = j;
         setOnTouchListener(this);
+//        init(c, key, f, j);
     }
+
+//    public void init(Context c, TapChainEditor.FACTORY_KEY key, Factory<Actor> f, final int j) {
+//        factory = f;
+//        if(f == null)
+//            factory = ((MainActivity)c).getEditor().getFactory(key);
+//        num = j;
+//        this.key = key;
+//    }
 
     private GridFragment returnPaletteAble() {
         GridFragment f1 = act.getGrid();
@@ -52,11 +86,11 @@ public class ActorImageButton extends ActorImage implements
                 if (f1 != null
                         && f1.contains((int) event.getRawX(),
                         (int) event.getRawY())) {
-                    act.add(key, num);
+                    act.add(b);
                 } else {
                     float x = event.getRawX();
                     float y = event.getRawY();
-                    act.add(key, num, x, y);
+                    act.add(b, x, y);
                 }
                 p.dismiss();
                 break;
@@ -69,7 +103,7 @@ public class ActorImageButton extends ActorImage implements
         getParent().requestDisallowInterceptTouchEvent(true);
         if (p == null)
             p = new OverlayPopupView(act);
-        p.setPopupView(factory, num);
+        p.setPopupView(b);
         GridFragment f0 = act.getGrid();
         if (f0 != null) {
             f0.disable();
@@ -95,7 +129,7 @@ public class ActorImageButton extends ActorImage implements
             p.dismiss();
             return true;
         }
-        act.add(key, num, e2.getRawX(), e2.getRawY(), velocityX,
+        act.add(b, e2.getRawX(), e2.getRawY(), velocityX,
                 velocityY);
         p.dismiss();
         return true;

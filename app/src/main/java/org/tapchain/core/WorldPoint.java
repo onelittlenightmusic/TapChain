@@ -109,7 +109,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		float rtn = 0;
 		if(offset != null) {
 			for (Map.Entry<IValue<IPoint>, Float> pt: offset.entrySet())
-				rtn += pt.getKey()._valueGet().x() * pt.getValue();
+				rtn += pt.getKey()._get().x() * pt.getValue();
 		}
 		return rtn;
 	}
@@ -118,7 +118,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		float rtn = 0;
 		if(offset != null) {
 			for (Map.Entry<IValue<IPoint>,Float> pt: offset.entrySet())
-				rtn += pt.getKey()._valueGet().y() * pt.getValue();
+				rtn += pt.getKey()._get().y() * pt.getValue();
 		}
 		return rtn;
 	}
@@ -216,7 +216,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 			offset = new HashMap<IValue<IPoint>, Float>();
 		if(offset.containsKey(pt))
 			return this;
-		if(pt == null || pt._valueGet() == this)
+		if(pt == null || pt._get() == this)
 			return this;
 		offset.put(pt, alpha);
 		return this;
@@ -228,7 +228,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		setOffset(pt);
 		if(keep)
 			set(oldx, oldy);
-//		Log.w("test", String.format("setOffset %s", pt._valueGet().getDetails(), keep));
+//		Log.w("test", String.format("setOffset %s", pt._get().getDetails(), keep));
 		return this;
 	}
 

@@ -32,7 +32,7 @@ public class SelectedTapLockEnvelope implements IRelease {
         t = _p;
         if (val2 instanceof String) {
             setterText = new AndroidActor.AndroidTextInput(act, (IValue) _p.getActor());
-            setterText._valueGet().setOffset(_p);
+            setterText._get().setOffset(_p);
             return;
         } else if (val2 instanceof IValueArray) {
             setter = new MySetSquarePathTapStyle(_p, BitmapMaker.makeOrReuse(

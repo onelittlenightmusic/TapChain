@@ -264,7 +264,7 @@ public class CanvasViewImpl extends TapChainWritingView {
 //        if (rtn) {
             AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
             a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
-            a._valueGet().setOffset(selected);
+            a._get().setOffset(selected);
             getEditor().editTap()
                     .add(a)
                     ._in()
@@ -356,7 +356,7 @@ public class CanvasViewImpl extends TapChainWritingView {
     private void round(IActorTap startTap2) {
 //        if (styles == null || getInteract() == null)
 //            return;
-        startTap2._valueSet(pointOnAdd((startTap2._valueGet())));
+        startTap2._set(pointOnAdd((startTap2._get())));
 
         TapLib.setTap(startTap2);
         startTap2.invalidate();

@@ -6,7 +6,6 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.ActorBlueprintManager;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.BlueprintInitialization;
-import org.tapchain.core.BlueprintManager;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ClassEnvelope;
@@ -28,7 +27,6 @@ import org.tapchain.core.StyleCollection;
 import org.tapchain.core.TapLib;
 import org.tapchain.game.ISensorView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,7 +46,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 	Factory<Actor> factory = new Factory<>(),
 			recent = new Factory<>(), relatives = new Factory<>(),
 			goalFactory = new Factory<>();
-	protected ActorBlueprintManager<Actor> blueprintManager = new ActorBlueprintManager<>(
+	protected ActorBlueprintManager blueprintManager = new ActorBlueprintManager(
 			factory), goalBlueprintManager = null;
 	private StyleCollection styles = null;
     private IPoint nextConnectivityPoint = null;
@@ -64,7 +62,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
 	protected TapChainEditor(IWindow w) {
 		setWindow(w);
-		goalBlueprintManager = new ActorBlueprintManager<>(goalFactory);
+		goalBlueprintManager = new ActorBlueprintManager(goalFactory);
 		setAllCallback(this);
 		setPathInterval(1000);
 		setLog(this);
@@ -127,7 +125,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 		return TapLib.getTaps(pt);
 	}
 
-	public BlueprintManager<Actor> editBlueprint() {
+	public ActorBlueprintManager editBlueprint() {
 		return blueprintManager;
 	}
 
@@ -432,7 +430,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
         IBlueprintInitialization data = null;
         Actor p = selected.getActor();
         if (p instanceof IValue) {
-            Object v = ((IValue) p)._valueGet();
+            Object v = ((IValue) p)._get();
             data = standbyRegistration(f, v, p.getTag());
         }
 		return data;

@@ -29,7 +29,7 @@ public class MySetPointTapStyle extends OptionTapStyle implements IScrollHandler
 	@Override
 	public void view_init() {
 		getPaint().setColor(0x77ffffff);
-			setCenter(getParentTap()._valueGet());
+			setCenter(getParentTap()._get());
 		focuspaint.setColor(0x40ffffff);
 		focuspaint.setAntiAlias(true);
 	}
@@ -38,7 +38,7 @@ public class MySetPointTapStyle extends OptionTapStyle implements IScrollHandler
 	public boolean view_user(Canvas canvas, IPoint cp, IPoint size,
 			int alpha) {
 		DrawLib.drawBitmapCenter(canvas, bm_fg, cp, getPaint());
-		IPoint _point = getParentTap()._valueGet();
+		IPoint _point = getParentTap()._get();
 		canvas.drawCircle(_point.x(), _point.y(), 300, focuspaint);
 		return true;
 	}

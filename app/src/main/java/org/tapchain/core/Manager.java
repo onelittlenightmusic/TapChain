@@ -2,7 +2,7 @@ package org.tapchain.core;
 
 import org.tapchain.core.Chain.ChainException;
 
-public class Manager<T extends IPiece> implements IManager<T, T> {
+public abstract class Manager<T extends IPiece> implements IManager<T, T> {
 //	IErrorHandler error = null;
 	ILogHandler log = null;
 

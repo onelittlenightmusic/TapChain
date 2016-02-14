@@ -5,11 +5,11 @@ public class PointValue extends Value<IPoint> {
 	public PointValue(IPoint iPoint, IPoint f) {
 		super(iPoint);
 		this.f = f;
-		_valueSet(iPoint);
+		_set(iPoint);
 	}
 
 	@Override
-	public IPoint _valueGet() {
+	public IPoint _get() {
 		if(val instanceof WorldPoint)
 			return ((WorldPoint)val).scalerNew(f);
 		return val;

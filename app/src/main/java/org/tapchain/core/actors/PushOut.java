@@ -9,8 +9,8 @@ import org.tapchain.core.IValue;
 public abstract class PushOut<VALUE> extends Actor.Filter<VALUE, VALUE, VALUE> {
     @Override
     public VALUE func(IValue<VALUE> val, VALUE in) {
-        VALUE tmp = val._valueGet();
-        val._valueSet(in);
+        VALUE tmp = val._get();
+        val._set(in);
         return tmp;
     }
 
@@ -24,7 +24,7 @@ public abstract class PushOut<VALUE> extends Actor.Filter<VALUE, VALUE, VALUE> {
     public static class IntegerPushOut extends PushOut<Integer> {
         @Override
         public void init(IValue<Integer> val) {
-            val._valueSet(0);
+            val._set(0);
         }
     }
 

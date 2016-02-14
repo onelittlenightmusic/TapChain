@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import org.tapchain.IntentHandler;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Chain;
+import org.tapchain.core.IBlueprint;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.TapChainEditor;
 
@@ -24,8 +25,8 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CanvasFragment.create(this, R.id.fragment);
-        GridFragment.create(this, R.id.fragment2);
+        CanvasFragment.create(this, R.id.canvas_fragment);
+        GridFragment.create(this, R.id.grid_fragment);
     }
 
     @Override
@@ -129,6 +130,23 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
     public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float dx,
                      float dy) {
         return getCanvas().add(key, code, x, y, dx, dy);
+    }
+
+    /**
+     * Make a actor from Blueprint
+     * @param b
+     * @return
+     */
+    public Actor add(IBlueprint<Actor> b) {
+        return getCanvas().add(b, null, null);
+    }
+
+    public Actor add(IBlueprint<Actor> b, float x, float y) {
+        return getCanvas().add(b, x, y);
+    }
+
+    public Actor add(IBlueprint<Actor> b, float rawX, float rawY, float velocityX, float velocityY) {
+        return getCanvas().add(b, rawX, rawY, velocityX, velocityY);
     }
 
     /**

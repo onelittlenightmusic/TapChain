@@ -49,13 +49,13 @@ public class VirtualActor extends Controllable implements IValue<String>, IValue
 	}
 	
 	@Override
-	public boolean _valueSet(String value) {
+	public boolean _set(String value) {
 		this.value = value;
 		return true;
 	}
 
 	@Override
-	public String _valueGet() {
+	public String _get() {
 		return value;
 	}
 	String dest = "";

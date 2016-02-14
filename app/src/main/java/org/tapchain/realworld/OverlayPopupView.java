@@ -10,6 +10,8 @@ import android.widget.PopupWindow;
 
 import org.tapchain.core.Actor;
 import org.tapchain.core.Factory;
+import org.tapchain.core.IBlueprint;
+import org.tapchain.editor.TapChainEditor;
 
 /**
  * Created by hiro on 2015/12/26.
@@ -25,8 +27,8 @@ public class OverlayPopupView extends PopupWindow {
                 ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    public void setPopupView(Factory<Actor> f, int i) {
-        v = new ActorImage(act, f, i);
+    public void setPopupView(IBlueprint<Actor> b) {
+        v = new ActorImage(act, b);
         setContentView(v);
         // The following line is to prevent PopupWindow from drawing odd
         // background.

@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
+import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
@@ -21,6 +22,7 @@ import org.tapchain.core.D2Point;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
+import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.WorldPoint;
@@ -220,6 +222,9 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .add(Motor.class).setViewArg(R.drawable.motor).setTag("Small motor").save()
                 .add(Motor.class).setViewArg(R.drawable.motor2).setTag("Large motor").save()
                 .add(Motor.MotorPedal.class).setViewArg(R.drawable.pedal).setTag("Motor Pedal").save()
+                .add(()->1, 0).setViewArg(R.drawable.motor).setTag("Generator").save()
+                .add((IValue<Integer> v, Integer i) -> i + 1, 0).setViewArg(R.drawable.motor).setTag("Filter").save()
+                .add((IValue<Integer> v, Integer i) -> { v._set(i); Log.w("test", String.format("OK %d", i)); }, 0).setViewArg(R.drawable.motor).setTag("Consumer").save()
         ;
 
 
@@ -456,7 +461,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //        if (rtn) {
 //            AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
 //            a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
-//            a._valueGet().setOffset(selected);
+//            a._get().setOffset(selected);
 //            editTap()
 //                    .add(a)
 //                    ._in()

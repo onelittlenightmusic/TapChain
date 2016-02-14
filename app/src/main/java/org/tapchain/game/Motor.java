@@ -25,13 +25,13 @@ public class Motor extends Controllable<Self, Electricity, Void, Void> implement
 	}
 
 	@Override
-	public boolean _valueSet(Float value) {
+	public boolean _set(Float value) {
 		speed = value;
 		return true;
 	}
 
 	@Override
-	public Float _valueGet() {
+	public Float _get() {
 		return speed;
 	}
 }

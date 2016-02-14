@@ -10,7 +10,6 @@ import org.tapchain.editor.IActorTap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.util.Log;
 
 public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandler, IRelease {
 	/**
@@ -32,7 +31,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	@Override
 	public void view_init() {
 		getPaint().setColor(0x77ffffff);
-		_valueGet().setOffset(getParentTap());
+		_get().setOffset(getParentTap());
 		standardpaint.setColor(0x40ffffff);
 		standardpaint.setAntiAlias(true);
 		standardpaint.setTextAlign(Paint.Align.CENTER);
@@ -46,7 +45,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	@Override
 	public boolean view_user(Canvas canvas, IPoint cp, IPoint size,
 			int alpha) {
-		IPoint _point = getParentTap()._valueGet();
+		IPoint _point = getParentTap()._get();
 		float d = 150f;
 		RectF r = new RectF(_point.x()-d, _point.y()-d,_point.x()+d, _point.y()+d);
 		for (int i = 0; i < 10; i++) {

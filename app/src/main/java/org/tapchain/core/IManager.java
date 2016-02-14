@@ -110,4 +110,34 @@ public interface IManager<T, U> {
 
 	IManager<T, U> _in(T piece);
 	void remove(T bp);
-	}
+
+    /**
+     *
+     * @param func
+     * @param init
+     * @param <VALUE>
+     * @param <INPUT>
+     * @param <OUTPUT>
+     * @return
+     */
+    <VALUE, INPUT, OUTPUT> IManager<T, U> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init);
+
+    /**
+     *
+     * @param generator
+     * @param init
+     * @param <OUTPUT>
+     * @return
+     */
+    <OUTPUT> IManager<T, U> add(final IGenerator<OUTPUT> generator, final OUTPUT init);
+
+    /**
+     *
+     * @param consumer
+     * @param init
+     * @param <VALUE>
+     * @param <INPUT>
+     * @return
+     */
+    <VALUE, INPUT> IManager<T, U> add(final IConsumer<VALUE, INPUT> consumer, final VALUE init);
+}

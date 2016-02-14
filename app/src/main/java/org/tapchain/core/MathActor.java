@@ -12,7 +12,7 @@ public class MathActor {
 		}
 		@Override
 		public void effect(IValue<EFFECT> _t, EFFECT _e) throws ChainException {
-			L("mathEffect").go(_t._valueSet(mathEffect(_t._valueGet(), _e)));
+			L("mathEffect").go(_t._set(mathEffect(_t._get(), _e)));
 		}
 		public EFFECT mathEffect(EFFECT x, EFFECT y) {
 			return x;

@@ -161,13 +161,13 @@ public class ViewActor extends
     }
 
     @Override
-    public boolean _valueSet(IPoint value) {
+    public boolean _set(IPoint value) {
         setCenter(value);
         return true;
     }
 
     @Override
-    public IPoint _valueGet() {
+    public IPoint _get() {
         return getCenter();
     }
 
@@ -180,13 +180,13 @@ public class ViewActor extends
         }
 
         @Override
-        public boolean _valueSet(IPoint value) {
+        public boolean _set(IPoint value) {
             ViewActor.this.setSize(value);
             return true;
         }
 
         @Override
-        public IPoint _valueGet() {
+        public IPoint _get() {
             return ViewActor.this.getRawSize();
         }
 

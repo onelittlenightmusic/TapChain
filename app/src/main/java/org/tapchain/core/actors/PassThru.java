@@ -1,6 +1,7 @@
 package org.tapchain.core.actors;
 
 import org.tapchain.core.Actor;
+import org.tapchain.core.IFunc;
 import org.tapchain.core.IValue;
 
 /**

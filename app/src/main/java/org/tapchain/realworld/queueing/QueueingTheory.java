@@ -18,7 +18,7 @@ public class QueueingTheory {
 		@Override
 		public Float func(IValue<Float> val, Float in) {
 			count ++;
-			float elapsedTime = - _valueGet() * (float)Math.log(Math.random());
+			float elapsedTime = - _get() * (float)Math.log(Math.random());
 			if(lastOutput < in) {
 				lastInput = in;
 				lastOutput = in + elapsedTime;

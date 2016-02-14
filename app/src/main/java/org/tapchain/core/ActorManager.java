@@ -3,8 +3,6 @@ package org.tapchain.core;
 
 import android.util.Log;
 
-import org.tapchain.core.Actor.IEffector;
-import org.tapchain.core.Actor.IFunc;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.ChainPiece.PieceState;
 
@@ -135,7 +133,7 @@ public class ActorManager extends PieceManager<Actor> {
 		return add(new Actor().setActor(actor));
 	}
 	
-	@SuppressWarnings("serial")
+    @Override
 	public <VALUE, INPUT, OUTPUT> ActorManager add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
 		Actor adding;
 //		if(designer instanceof IFunc)
@@ -170,13 +168,15 @@ public class ActorManager extends PieceManager<Actor> {
 		return this;
 	}
 
-    public <OUTPUT> ActorManager add(final Actor.IGenerator<OUTPUT> generator, final OUTPUT init) {
+    @Override
+    public <OUTPUT> ActorManager add(final IGenerator<OUTPUT> generator, final OUTPUT init) {
         add(new Actor.GeneratorSkelton<>(generator, init).setLogLevel(true));
         Log.w("test", "Generator created");
         return this;
     }
 
-    public <VALUE, INPUT> ActorManager add(final Actor.IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+    @Override
+    public <VALUE, INPUT> ActorManager add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
         add(new Actor.ConsumerSkelton<>(consumer, init).setLogLevel(true));
         Log.w("test", "Consumer created");
         return this;
@@ -189,7 +189,7 @@ public class ActorManager extends PieceManager<Actor> {
         return this;
     }
 
-    public <VALUE, INPUT> ActorManager pushTo(final Actor.IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+    public <VALUE, INPUT> ActorManager pushTo(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
         Actor a = getPiece();
         add(consumer, init);
         _appendOffer(a, getPiece());

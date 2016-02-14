@@ -24,6 +24,6 @@ public class BlueprintInitialization
 	
 	@Override
 	public void init(IPiece rtn) {
-		((IValue)rtn)._valueSet(getObject());
+		((IValue)rtn)._set(getObject());
 	}
 }

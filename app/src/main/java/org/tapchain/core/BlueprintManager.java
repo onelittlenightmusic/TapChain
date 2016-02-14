@@ -2,9 +2,6 @@ package org.tapchain.core;
 
 import java.lang.reflect.Modifier;
 
-import org.tapchain.core.Actor.IInit;
-import org.tapchain.core.Actor.IEffector;
-import org.tapchain.core.Actor.IFunc;
 import org.tapchain.core.Blueprint.PieceBlueprintStatic;
 import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.actors.ViewActor;
@@ -140,24 +137,24 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 	
 
-	public static <VALUE, INPUT, OUTPUT> Class<? extends Actor> createFromDesigner(final IFunc<VALUE, INPUT, OUTPUT> func, final IInit<VALUE> init) {
+//	public static <VALUE, INPUT, OUTPUT> Class<? extends Actor> createBlueprintFromDesigner(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
 //		if(init instanceof IFunc){
-			class LocalFilter extends Actor.Filter<VALUE, INPUT, OUTPUT> {
-				public LocalFilter() {
-					super(init, IInit.class);
-//					_valueSet(init);
-				}
-				@Override
-				public OUTPUT func(IValue<VALUE> val, INPUT in) {
-					return func.func(val, in);
-				}
-
-				@Override
-				public void init(IValue<VALUE> val) {
-					init.init(val);
-				}
-			};
-			return LocalFilter.class;
+//			class LocalFilter extends Actor.Filter<VALUE, INPUT, OUTPUT> {
+//				public LocalFilter() {
+//					super(init, IInit.class);
+////					_set(init);
+//				}
+//				@Override
+//				public OUTPUT func(IValue<VALUE> val, INPUT in) {
+//					return func.func(val, in);
+//				}
+//
+//				@Override
+//				public void init(IValue<VALUE> val) {
+//					val._set(init);
+//				}
+//			};
+//			return LocalFilter.class;
 //		}
 //		else if(init instanceof IConsumer) {
 //			class LocalConsumer extends Actor.ValueConsumer<VALUE> {
@@ -193,7 +190,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 //			return LocalGenerator.class;
 //		}
 //		return null;
-	}
+//	}
 	
 	public static <PARENT, EFFECT> Actor createEffector(final IEffector<PARENT, EFFECT> effector) {
 		return new Actor.OriginalEffector<PARENT,EFFECT>() {
@@ -204,14 +201,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		};
 	}
 	
-	@SuppressWarnings("serial")
-	public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final IInit<VALUE> init) {
-		Class rtn = createFromDesigner(func, init);
-		addWithOuterObject(rtn, func);
-		return this;
-	}
-	
-	public <PARENT, EFFECT> BlueprintManager<TYPE> addEffector(final IEffector<PARENT, EFFECT> effector) {
+    public <PARENT, EFFECT> BlueprintManager<TYPE> addEffector(final IEffector<PARENT, EFFECT> effector) {
         Class rtn = createEffector(effector).getClass();
         return addWithOuterObject(rtn);
 	}
@@ -398,4 +388,15 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		error = handle;
 		return this;
 	}
+
+    public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+        return this;
+    };
+    public <OUTPUT> BlueprintManager<TYPE> add(final IGenerator<OUTPUT> generator, final OUTPUT init) {
+        return this;
+    };
+    public <VALUE, INPUT> BlueprintManager<TYPE> add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+        return this;
+    };
+
 }
