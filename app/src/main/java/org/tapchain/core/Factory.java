@@ -102,7 +102,7 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 
 	public List<IBlueprint<PIECE>> getConnectables(LinkType ac,
 			ClassEnvelope classEnvelope) {
-		List<IBlueprint<PIECE>> bl = new ArrayList<IBlueprint<PIECE>>();
+		List<IBlueprint<PIECE>> bl = new ArrayList<>();
         if (classEnvelope == null) {
             return bl;
         }
@@ -116,14 +116,25 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
             if (clz == null) {
                 continue;
             }
-            if ((EnumSet.of(LinkType.PULL, LinkType.FROM_PARENT)
-                    .contains(ac) && clz
-                    .isAssignableFrom(classEnvelope))
-                    || (EnumSet.of(LinkType.PUSH,
-                            LinkType.TO_CHILD).contains(ac) && classEnvelope
-                            .isAssignableFrom(clz))) {
-                bl.add(b);
+            switch(ac) {
+                case PULL:
+                case FROM_PARENT:
+                    if(clz.isAssignableFrom(classEnvelope))
+                        bl.add(b);
+                    break;
+                default:
+                    if(classEnvelope.isAssignableFrom(clz))
+                        bl.add(b);
+                    break;
             }
+//            if ((EnumSet.of(LinkType.PULL, LinkType.FROM_PARENT)
+//                    .contains(ac) && clz
+//                    .isAssignableFrom(classEnvelope))
+//                    || (EnumSet.of(LinkType.PUSH,
+//                            LinkType.TO_CHILD).contains(ac) && classEnvelope
+//                            .isAssignableFrom(clz))) {
+//                bl.add(b);
+//            }
 		}
 		return bl;
 	}

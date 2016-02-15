@@ -40,22 +40,22 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         IPieceHead, JSONSerializable {
-    static Map<LinkType, HashMap<Class<?>, ClassEnvelope>> mapLinkClass
-            = new HashMap<LinkType, HashMap<Class<?>, ClassEnvelope>>() {
-        {
-            for (LinkType linkType : LinkType.values())
-                put(linkType, new HashMap<Class<?>, ClassEnvelope>());
-        }
+    static Map<Class<?>, HashMap<LinkType, ClassEnvelope>> mapLinkClass
+            = new HashMap<Class<?>, HashMap<LinkType, ClassEnvelope>>() {
+//        {
+//            for (LinkType linkType : LinkType.values())
+//                put(linkType, new HashMap<>());
+//        }
     };
 
-    static Map<Class<?>, LinkedList<LinkType>> classLimits = new HashMap<Class<?>, LinkedList<LinkType>>();
+    static Map<Class<?>, LinkedList<LinkType>> classLimits = new HashMap<>();
 
     // Parts of logic implementations
     private IActorInit _actorInit = null;
     private IActor _actor = null;
     private Boolean animation_loop = false, live = false;
     IActorBlueprint blueprint = null;
-    ConcurrentLinkedQueue<Actor> members = new ConcurrentLinkedQueue<Actor>();
+    ConcurrentLinkedQueue<Actor> members = new ConcurrentLinkedQueue<>();
     private int time = 0;
 
     // 1.Initialization
@@ -63,35 +63,40 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         super();
         super.setFunc(this);
         setInPackType(PathType.OFFER, InPathPack.Input.FIRST);
-        staticInitializeLinks(this.getClass());
-        __setAssociatedClasses(this.getClass());
+        Map<LinkType, ClassEnvelope> connectables = staticInitializeLinks(this.getClass());
+        __setAssociatedClasses(this.getClass(), connectables);
     }
 
 
-    public static void staticInitializeLinks(Class<? extends IPiece> registeredClass) {
+    public static Map<LinkType, ClassEnvelope> staticInitializeLinks(Class<? extends IPiece> registeredClass) {
         if (initedClass.contains(registeredClass))
-            return;
+            return __getMap(registeredClass);
+        Map<LinkType, ClassEnvelope> rtn = null;
         if (Controllable.class.isAssignableFrom(registeredClass)) {
             ClassLibReturn classReturn = getParameters(registeredClass, /* userParameters, */
                     Controllable.class);
-            staticRegisterLinkClass(registeredClass, classReturn);
+            rtn = staticRegisterLinkClass(registeredClass, classReturn);
         }
-        initedClass.add(registeredClass);
+        return rtn;
+//        initedClass.add(registeredClass);
     }
 
-    public static void staticOverrideLinks(Class<? extends IPiece> registeredClass,
+    public static Map<LinkType, ClassEnvelope> staticOverrideLinks(Class<? extends IPiece> registeredClass,
                                            Class<?> sampleClass,
                                            Class<?> baseClass) {
+        Map<LinkType, ClassEnvelope> rtn = null;
         if (Controllable.class.isAssignableFrom(registeredClass)) {
             ClassLibReturn classReturn = getParameters(sampleClass, /* userParameters, */
                     baseClass);
-            staticRegisterLinkClass(registeredClass, classReturn);
+            rtn = staticRegisterLinkClass(registeredClass, classReturn);
+//            initedClass.add(registeredClass);
         }
-        initedClass.add(registeredClass);
+        return rtn;
     }
 
-    public static void staticRegisterLinkClass(Class<? extends IPiece> cls, ClassLibReturn classReturn) {
+    public static Map<LinkType, ClassEnvelope> staticRegisterLinkClass(Class<? extends IPiece> cls, ClassLibReturn classReturn) {
         ClassEnvelope parameter;
+        __initLinkClass(cls);
         for (Entry<LinkType, String> e : linkTypeName.entrySet()) {
             parameter = classReturn.searchByName(e.getValue());
             if (parameter == null) {
@@ -106,6 +111,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             else if (rawType != Void.class && !staticHasClassLimit(cls, link))
                 __addLinkClass(cls, link, parameter);
         }
+        return __getMap(cls);
     }
 
     @Override
@@ -123,7 +129,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     public static void staticAddClassLimit(Class<?> thisClass, LinkType limitedLink) {
         if (!classLimits.containsKey(thisClass))
-            classLimits.put(thisClass, new LinkedList<LinkType>());
+            classLimits.put(thisClass, new LinkedList<>());
         classLimits.get(thisClass).add(limitedLink);
     }
 
@@ -136,26 +142,27 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         return ClassLib.getParameterizedType(parent, target);
     }
 
-    public void __setAssociatedClasses(Class<?> cc) {
+    public void __setAssociatedClasses(Class<?> cc, Map<LinkType, ClassEnvelope> connectables) {
         for (LinkType al : LinkType.values())
             setLinkClass(al, __collectClass(cc, al));
     }
 
-    private static ClassEnvelope __get(Class<?> cc,
-                                       Map<Class<?>, ClassEnvelope> m) {
-        return m.get(cc);
-    }
-
     public static ClassEnvelope getLinkClassFromLib(Class<?> cc, LinkType ac) {
-        return __get(cc, __getMap(ac));
+        if (!mapLinkClass.containsKey(cc))
+            return null;
+        return __getMap(cc).get(ac);
     }
 
     public ClassEnvelope getLinkClassFromLib(LinkType linkType) {
         return getLinkClassFromLib(this.getClass(), linkType);
     }
 
-    private static Map<Class<?>, ClassEnvelope> __getMap(LinkType ac) {
-        return mapLinkClass.get(ac);
+    private static Map<LinkType, ClassEnvelope> __getMap(Class<?> cc) {
+        return mapLinkClass.get(cc);
+    }
+
+    private static Map<LinkType, ClassEnvelope> __initLinkClass(Class<?> cls) {
+        return mapLinkClass.put(cls, new HashMap<>());
     }
 
     public static ClassEnvelope __collectClass(Class<?> cc, LinkType ac) {
@@ -164,26 +171,16 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         return getLinkClassFromLib(cc, ac);
     }
 
-    protected static void __add(Class<?> cc, Map<Class<?>, ClassEnvelope> m,
-                                ClassEnvelope clz) {
-        m.put(cc, clz);
-    }
-
-    protected static void __add(Class<?> cc, Map<Class<?>, ClassEnvelope> m,
-                                Class<?>... clz) {
-        m.put(cc, new ClassEnvelope(Arrays.asList(clz)));
-    }
-
     protected static void __addLinkClass(Class<?> cc, LinkType linkType,
                                          Class<?> clz) {
-        __add(cc, __getMap(linkType), clz);
+         __addLinkClass(cc, linkType, new ClassEnvelope(Arrays.asList(clz)));
         log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
 
     }
 
     protected static void __addLinkClass(Class<?> cc, LinkType linkType,
                                          ClassEnvelope clz) {
-        __add(cc, __getMap(linkType), clz);
+        __getMap(cc).put(linkType, clz);
         log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
     }
 
@@ -483,8 +480,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             super();
             Class<? extends Controllable> thisClass = this.getClass();
             Class<?> sampleClass = sample.getClass();
-            staticOverrideLinks(thisClass, sampleClass, targetClass);
-            __setAssociatedClasses(thisClass);
+            Map<LinkType, ClassEnvelope> connectables = staticOverrideLinks(thisClass, sampleClass, targetClass);
+            __setAssociatedClasses(thisClass, connectables);
         }
 
         public void __initValue(ClassEnvelope classEnvelope) {
@@ -2329,13 +2326,15 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     };
 
     public static void classLoadToLib(Class<? extends Actor> cls, ActorBlueprint bp) {
-        if (initedClass.contains(cls))
-            return;
+//        if (initedClass.contains(cls))
+//            return;
+        Actor instance;
         try {
-            bp.newInstance(null);
+            instance = bp.newInstance(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
+//        return instance.getLinkClassFromLib();
     }
 
     /**

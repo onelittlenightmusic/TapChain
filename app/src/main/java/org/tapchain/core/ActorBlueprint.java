@@ -38,23 +38,23 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 	}
 
 	protected void checkAndRegisterToActorLib() {
-		if(Actor.class.isAssignableFrom(cls)) {
-			Class<? extends Actor> clsActor = (Class<? extends Actor>) cls;
-			Actor.classLoadToLib(clsActor, this);
-		}
+//		if(Actor.class.isAssignableFrom(cls)) {
+//			Class<? extends Actor> clsActor = cls;
+			Actor.classLoadToLib(cls, this);
+//		}
 	}
 
 	public ClassEnvelope getConnectClass(LinkType ac) {
         return Actor.getLinkClassFromLib(cls, ac);
 	}
 
-	@Override
-	public ClassEnvelope getLinkClasses(LinkType al) {
-		ClassEnvelope rtn = Actor.__collectClass(getBlueprintClass(), al);
-		log("%s's %s getLinkedClasses is %s", getTag(), al.toString(), (rtn==null)?"null":rtn.getSimpleName());
-		return rtn;
-	}
-	
+//	@Override
+//	public ClassEnvelope getLinkClasses(LinkType al) {
+//		ClassEnvelope rtn = Actor.__collectClass(getBlueprintClass(), al);
+//		log("%s's %s getLinkedClasses is %s", getTag(), al.toString(), (rtn==null)?"null":rtn.getSimpleName());
+//		return rtn;
+//	}
+
 	
 	@Override
 	public Actor __newInstance(IManager<Actor, Actor> maker) throws ChainException {

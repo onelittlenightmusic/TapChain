@@ -32,7 +32,7 @@ public class VirtualActor extends Controllable implements IValue<String>, IValue
 		} catch (IllegalAccessException e) {
 //			e.printStackTrace();
 		}
-		__setAssociatedClasses(c);
+//		__setAssociatedClasses(c);
 	}
 	
 	public VirtualActor(IBlueprint b) {
