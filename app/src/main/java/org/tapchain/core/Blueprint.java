@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.tapchain.core.Chain.ChainException;
 
 public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONSerializable {
 	Class<? extends PIECE> cls = null;

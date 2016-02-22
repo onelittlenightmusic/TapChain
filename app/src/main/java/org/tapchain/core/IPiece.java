@@ -1,6 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultPath;
 import org.tapchain.core.Chain.ConnectionResultOutConnector;
 import org.tapchain.core.PathPack.InPathPack;

@@ -1,9 +1,6 @@
 package org.tapchain.core;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.tapchain.core.Blueprint.TmpInstance;
-import org.tapchain.core.Chain.ChainException;
 
 /** Blueprint interface.
  * Blueprint interface is the template of mutable objects.

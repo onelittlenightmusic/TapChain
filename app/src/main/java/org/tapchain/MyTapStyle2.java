@@ -16,7 +16,7 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.ActorInputException;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.ActorPullException;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.ClassLib;

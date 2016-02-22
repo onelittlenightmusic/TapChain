@@ -7,7 +7,7 @@ import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.Chain;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ChainPiece.PieceState;

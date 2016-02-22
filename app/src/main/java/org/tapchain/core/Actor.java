@@ -1,5 +1,6 @@
 package org.tapchain.core;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -9,7 +10,6 @@ import org.tapchain.core.ActorChain.IControllable;
 import org.tapchain.core.ActorChain.ILight;
 import org.tapchain.core.ActorChain.IRecorder;
 import org.tapchain.core.ActorChain.ISound;
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultOutConnector;
 import org.tapchain.core.Chain.ConnectionResultPath;
 import org.tapchain.core.Chain.IPathListener;
@@ -40,13 +40,13 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         IPieceHead, JSONSerializable {
-    static Map<Class<?>, HashMap<LinkType, ClassEnvelope>> mapLinkClass
-            = new HashMap<Class<?>, HashMap<LinkType, ClassEnvelope>>() {
-//        {
-//            for (LinkType linkType : LinkType.values())
-//                put(linkType, new HashMap<>());
-//        }
-    };
+//    static Map<Class<?>, HashMap<LinkType, ClassEnvelope>> mapLinkClass
+//            = new HashMap<Class<?>, HashMap<LinkType, ClassEnvelope>>() {
+////        {
+////            for (LinkType linkType : LinkType.values())
+////                put(linkType, new HashMap<>());
+////        }
+//    };
 
     static Map<Class<?>, LinkedList<LinkType>> classLimits = new HashMap<>();
 
@@ -57,61 +57,58 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     IActorBlueprint blueprint = null;
     ConcurrentLinkedQueue<Actor> members = new ConcurrentLinkedQueue<>();
     private int time = 0;
+    HashMap<LinkType, ClassEnvelope> linkClasses = new HashMap<>();
 
     // 1.Initialization
     public Actor() {
         super();
         super.setFunc(this);
         setInPackType(PathType.OFFER, InPathPack.Input.FIRST);
-        Map<LinkType, ClassEnvelope> connectables = staticInitializeLinks(this.getClass());
-        __setAssociatedClasses(this.getClass(), connectables);
+        __setAssociatedClasses(initializeLinks(this.getClass()));
     }
 
 
-    public static Map<LinkType, ClassEnvelope> staticInitializeLinks(Class<? extends IPiece> registeredClass) {
-        if (initedClass.contains(registeredClass))
-            return __getMap(registeredClass);
-        Map<LinkType, ClassEnvelope> rtn = null;
-        if (Controllable.class.isAssignableFrom(registeredClass)) {
-            ClassLibReturn classReturn = getParameters(registeredClass, /* userParameters, */
-                    Controllable.class);
-            rtn = staticRegisterLinkClass(registeredClass, classReturn);
-        }
-        return rtn;
-//        initedClass.add(registeredClass);
+    public Map<LinkType, ClassEnvelope> initializeLinks(Class<? extends IPiece> registeredClass) {
+////        if (initedClass.contains(registeredClass))
+////            return __getMap(registeredClass);
+//        if (Controllable.class.isAssignableFrom(registeredClass)) {
+//            ClassLibReturn classReturn = getParameters(registeredClass, /* userParameters, */
+//                    Controllable.class);
+//            return  staticRegisterLinkClass(registeredClass, classReturn);
+//        }
+//        return getLinkClassesFromLib();
+////        initedClass.add(registeredClass);
+        return overrideLinks(registeredClass, registeredClass, Controllable.class);
     }
 
-    public static Map<LinkType, ClassEnvelope> staticOverrideLinks(Class<? extends IPiece> registeredClass,
-                                           Class<?> sampleClass,
-                                           Class<?> baseClass) {
-        Map<LinkType, ClassEnvelope> rtn = null;
+    public Map<LinkType, ClassEnvelope> overrideLinks(Class<? extends IPiece> registeredClass,
+                                                             Class<?> sampleClass,
+                                                             Class<?> baseClass) {
         if (Controllable.class.isAssignableFrom(registeredClass)) {
             ClassLibReturn classReturn = getParameters(sampleClass, /* userParameters, */
                     baseClass);
-            rtn = staticRegisterLinkClass(registeredClass, classReturn);
+            return staticRegisterLinkClass(registeredClass, classReturn);
 //            initedClass.add(registeredClass);
         }
-        return rtn;
+        return getLinkClassesFromLib();
     }
 
-    public static Map<LinkType, ClassEnvelope> staticRegisterLinkClass(Class<? extends IPiece> cls, ClassLibReturn classReturn) {
+    public Map<LinkType, ClassEnvelope> staticRegisterLinkClass(Class<? extends IPiece> cls, ClassLibReturn classReturn) {
         ClassEnvelope parameter;
-        __initLinkClass(cls);
+//        __initLinkClass(cls);
         for (Entry<LinkType, String> e : linkTypeName.entrySet()) {
             parameter = classReturn.searchByName(e.getValue());
             if (parameter == null) {
                 continue;
             }
             LinkType link = e.getKey();
-            Type rawType = Void.class;
-            if (parameter != null)
-                rawType = parameter.getRawType();
+            Type rawType = parameter.getRawType();
             if (rawType == Self.class)
                 __addLinkClass(cls, link, cls);
             else if (rawType != Void.class && !staticHasClassLimit(cls, link))
                 __addLinkClass(cls, link, parameter);
         }
-        return __getMap(cls);
+        return getLinkClassesFromLib();
     }
 
     @Override
@@ -142,45 +139,44 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         return ClassLib.getParameterizedType(parent, target);
     }
 
-    public void __setAssociatedClasses(Class<?> cc, Map<LinkType, ClassEnvelope> connectables) {
+    public void __setAssociatedClasses(Map<LinkType, ClassEnvelope> connectables) {
         for (LinkType al : LinkType.values())
-            setLinkClass(al, __collectClass(cc, al));
+            setLinkClass(al, connectables.get(al));
     }
 
-    public static ClassEnvelope getLinkClassFromLib(Class<?> cc, LinkType ac) {
-        if (!mapLinkClass.containsKey(cc))
-            return null;
-        return __getMap(cc).get(ac);
+    public ClassEnvelope getLinkClassFromLib(LinkType ac) {
+//        if (!mapLinkClass.containsKey(cc))
+//            return null;
+        return linkClasses.get(ac);
     }
 
-    public ClassEnvelope getLinkClassFromLib(LinkType linkType) {
-        return getLinkClassFromLib(this.getClass(), linkType);
+//    public ClassEnvelope getLinkClassFromLib(LinkType linkType) {
+//        return getLinkClassFromLib(this.getClass(), linkType);
+//    }
+
+    public Map<LinkType, ClassEnvelope> getLinkClassesFromLib() {
+        return linkClasses;
     }
 
-    private static Map<LinkType, ClassEnvelope> __getMap(Class<?> cc) {
-        return mapLinkClass.get(cc);
-    }
+//    private Map<LinkType, ClassEnvelope> __getMap() {
+//        return linkClasses;
+//    }
+//
+//    private static Map<LinkType, ClassEnvelope> __initLinkClass(Class<?> cls) {
+//        return mapLinkClass.put(cls, new HashMap<>());
+//    }
 
-    private static Map<LinkType, ClassEnvelope> __initLinkClass(Class<?> cls) {
-        return mapLinkClass.put(cls, new HashMap<>());
-    }
-
-    public static ClassEnvelope __collectClass(Class<?> cc, LinkType ac) {
-        if (cc == null || cc == Actor.class)
-            return null;
-        return getLinkClassFromLib(cc, ac);
-    }
-
-    protected static void __addLinkClass(Class<?> cc, LinkType linkType,
+    protected void __addLinkClass(Class<?> cc, LinkType linkType,
                                          Class<?> clz) {
          __addLinkClass(cc, linkType, new ClassEnvelope(Arrays.asList(clz)));
         log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
 
     }
 
-    protected static void __addLinkClass(Class<?> cc, LinkType linkType,
+    protected void __addLinkClass(Class<?> cc, LinkType linkType,
                                          ClassEnvelope clz) {
-        __getMap(cc).put(linkType, clz);
+        getLinkClassesFromLib().put(linkType, clz);
+//        linkClasses.put(linkType, clz);
         log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
     }
 
@@ -272,7 +268,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     // 3.Changing state
 
     @Override
-    public int compareTo(Actor obj) {
+    public int compareTo(@NonNull Actor obj) {
         return -mynum + obj.mynum;
     }
 
@@ -459,14 +455,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         // boolean auto = false;
         boolean error = false;
 
-        final static Map<LinkType, String> linkType = new HashMap<LinkType, String>() {
-            {
-                put(LinkType.TO_CHILD, "VALUE");
-                put(LinkType.PULL, "INPUT");
-                put(LinkType.PUSH, "OUTPUT");
-                put(LinkType.FROM_PARENT, "PARENT");
-            }
-        };
         String nowTag = Integer.toString(getId());
         String pullTag = "";
         String pushTag = nowTag;
@@ -480,50 +468,47 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             super();
             Class<? extends Controllable> thisClass = this.getClass();
             Class<?> sampleClass = sample.getClass();
-            Map<LinkType, ClassEnvelope> connectables = staticOverrideLinks(thisClass, sampleClass, targetClass);
-            __setAssociatedClasses(thisClass, connectables);
+            __setAssociatedClasses(overrideLinks(thisClass, sampleClass, targetClass));
         }
 
-        public void __initValue(ClassEnvelope classEnvelope) {
-            if (classEnvelope != null && this instanceof IValue) {
-                if (((IValue) this)._get() != null)
-                    return;
-                Class<?> cls = classEnvelope.getRawClass();
-                if (IPoint.class.isAssignableFrom(cls)) {
-                    return;
-                } else if (cls == Integer.class) {
-                    ((IValue) this)._set(1);
-                    return;
-                }
+//        public void __initValue(ClassEnvelope classEnvelope) {
+//            if (classEnvelope != null && this instanceof IValue) {
+//                if (((IValue) this)._get() != null)
+//                    return;
+//                Class<?> cls = classEnvelope.getRawClass();
+//                if (IPoint.class.isAssignableFrom(cls)) {
+//                    return;
+//                } else if (cls == Integer.class) {
+//                    ((IValue) this)._set(1);
+//                    return;
+//                }
+//
+//                try {
+//                    ((IValue) this)._set(cls.newInstance());
+//                } catch (IllegalArgumentException | InstantiationException e) {
+//                    e.printStackTrace();
+//                } catch (IllegalAccessException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
 
-                try {
-                    ((IValue) this)._set(cls.newInstance());
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        public INPUT getInputDummy() {
-            return null;
-        }
-
-        public OUTPUT getOutputDummy() {
-            return null;
-        }
-
-        public PARENT getParentDummy() {
-            return null;
-        }
-
-        public VALUE getValueDummy() {
-            return null;
-        }
-
+//        public INPUT getInputDummy() {
+//            return null;
+//        }
+//
+//        public OUTPUT getOutputDummy() {
+//            return null;
+//        }
+//
+//        public PARENT getParentDummy() {
+//            return null;
+//        }
+//
+//        public VALUE getValueDummy() {
+//            return null;
+//        }
+//
         public INPUT pull() throws ChainException {
             Packet input = L("pull()").go(super.pullInActor());
             pullTag = input.getTag();
@@ -818,12 +803,22 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    public static class Effector<VALUE, INPUT, OUTPUT, PARENT> extends
-            Controllable<VALUE, INPUT, OUTPUT, PARENT> {
+    public static abstract class Effector<Parent, Effect> extends
+            Controllable<Self, Void, Void, Parent> implements IValue<Effect>,
+            IEffector<Parent, Effect> {
         PathType parent_type = PathType.FAMILY;
+        private int _i = 0, _duration = 0;
+        Effect /* effect_val = null, */cache = null;
+        Class<?> type = null;
 
         public Effector() {
             super();
+            setAutoStart();
+            setAutoEnd();
+        }
+
+        public Effector(Object obj, Class<?> target) {
+            super(obj, target);
             setAutoStart();
             setAutoEnd();
         }
@@ -833,34 +828,19 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return this;
         }
 
-        public PARENT getTarget() throws ChainException {
+        public Parent getTarget() throws ChainException {
             return getTarget(true);
         }
 
-        public PARENT getTarget(boolean wait) throws ChainException {
+        public Parent getTarget(boolean wait) throws ChainException {
             try {
-                return (PARENT) getParent(parent_type, wait);
+                return (Parent) getParent(parent_type, wait);
             } catch (ClassCastException e) {
                 throw new ChainException(this,
                         "EffectSkelton: Failed to get Parent",
                         parent_type.getErrorCode());
             }
         }
-    }
-
-    public static class EffectorSkelton<Parent, Effect> extends
-            Effector<Self, Effect, Effect, Parent> implements IValue<Effect> {
-        // private T target_view = null, target_cache = null;
-        private int _i = 0, _duration = 0;
-        Effect /* effect_val = null, */cache = null;
-        Class<?> type = null;
-        boolean pull = false;
-
-        public EffectorSkelton() {
-            super();
-            __initValue(getLinkClassFromLib(this.getClass(), LinkType.PUSH));
-        }
-
         @Override
         public boolean actorInit() throws ChainException {
             super.actorInit();
@@ -868,15 +848,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return true;
         }
 
-        public void setPull(boolean p) {
-            pull = p;
-        }
+//        public void setPull(boolean p) {
+//            pull = p;
+//        }
 
-        public boolean getPull() {
-            return pull;
-        }
-
-        public EffectorSkelton<Parent, Effect> setCounter(int _i) {
+        public Effector<Parent, Effect> setCounter(int _i) {
             this._i = _i;
             return this;
         }
@@ -897,7 +873,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             _duration = d;
         }
 
-        public EffectorSkelton<Parent, Effect> initEffectValue(Effect val,
+        public Effector<Parent, Effect> initEffectValue(Effect val,
                                                                int duration) {
             _set(val);
             setDuration(duration);
@@ -915,26 +891,41 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             return cache;
         }
 
-    }
-
-    public static abstract class OriginalEffector<Parent, Effect> extends
-            EffectorSkelton<Parent, Effect> implements
-            IEffector<Parent, Effect> {
         @Override
         public boolean actorRun(Actor act) throws ChainException {
-            Parent _t = getTarget();
-            synchronized (_t) {
-                effect(_t, _get());
+            Parent _p = getTarget();
+            synchronized (_p) {
+                effect(_p, this);
             }
             invalidate();
             return increment();
         }
 
         @Override
-        public abstract void effect(Parent _t, Effect _e) throws ChainException;
+        public abstract void effect(Parent _parent, IValue<Effect> _effect_val) throws ChainException;
     }
 
-    public static abstract class Register<V, E> extends EffectorSkelton<V, E> {
+    public static class EffectorSkelton<Parent, Effect> extends
+            Effector<Parent, Effect> {
+        IEffector<Parent, Effect> _effector;
+
+        public EffectorSkelton(IEffector<Parent, Effect> ef, Effect i, int duration) {
+            super(ef, IEffector.class);
+            _effector = ef;
+            initEffectValue(i, duration);
+        }
+
+        @Override
+        public void effect(Parent _parent, IValue<Effect> _effect_val) throws ChainException {
+            _effector.effect(_parent, _effect_val);
+        }
+    }
+
+    public static abstract class OriginalEffector<Parent, Effect> extends
+            Effector<Parent, Effect> {
+    }
+
+    public static abstract class Register<V, E> extends Effector<V, E> {
 
         public Register() {
             super();
@@ -942,10 +933,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public boolean actorRun(Actor act) throws ChainException,
-                InterruptedException {
+        public void effect(V _p, IValue<E> _e) throws ChainException {
             register();
-            return true;
         }
 
         @Override
@@ -975,8 +964,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(IValue<EFFECT> _t, EFFECT _e) throws ChainException {
-            L("ValueEffector valueSet").go(_t._set(_e));
+        public void effect(IValue<EFFECT> _parent, IValue<EFFECT> _effect_val) throws ChainException {
+            L("ValueEffector valueSet").go(_parent._set(_effect_val._get()));
 
         }
     }
@@ -990,7 +979,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public ValueArrayEffector() {
             super();
             setDuration(-1);
-            setPull(false);
+//            setPull(false);
         }
 
         @Override
@@ -1025,10 +1014,15 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
+        public synchronized EFFECT _get() {
+            return _valueGetNext();
+        }
+
+        @Override
         public boolean actorRun(Actor act) throws ChainException {
             IValue<EFFECT> _t = getTarget();
             synchronized (_t) {
-                effect(_t, _valueGetNext());
+                effect(_t, this);
             }
             invalidate();
             return increment();
@@ -1153,8 +1147,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(IValue<IPoint> _t, IPoint _e) throws ChainException {
-            _t._set(center.subNew(_e).multiplyNew(coeff).setDif());
+        public void effect(IValue<IPoint> _parent, IValue<IPoint> _effect_val) throws ChainException {
+            _parent._set(center.subNew(_effect_val._get()).multiplyNew(coeff).setDif());
         }
 
 
@@ -1171,8 +1165,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(ViewActor _t, WorldPoint _e) throws ChainException {
-            _t.setPercent(_t.getPercent().plusNew(_e));
+        public void effect(ViewActor _parent, IValue<WorldPoint> _effect_val) throws ChainException {
+            _parent.setPercent(_parent.getPercent().plusNew(_effect_val._get()));
         }
     }
 
@@ -1187,20 +1181,20 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(ViewActor _t, WorldPoint _e) throws ChainException {
-            _t.setSize(_e.setDif());
+        public void effect(ViewActor _parent, IValue<WorldPoint> _effect_val) throws ChainException {
+            _parent.setSize(_effect_val._get().copy().setDif());
         }
     }
 
-    public static class ControllableEffector extends
-            Effector<Self, Void, Void, Controllable> {
+//    public static class ControllableEffector extends
+//            Effector<Self, Void, Void, Controllable> {
+//
+//        public ControllableEffector() {
+//            super();
+//        }
+//    }
 
-        public ControllableEffector() {
-            super();
-        }
-    }
-
-    public static class Sleep extends ControllableEffector {
+    public static class Sleep extends Effector<Controllable, Void> {
         int sleepinterval = 2000;
 
         public Sleep() {
@@ -1212,15 +1206,26 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             setSleepTime(interval);
         }
 
+//        @Override
+//        public boolean actorRun(Actor act) throws ChainException {
+//            try {
+//                Thread.sleep(sleepinterval);
+//            } catch (InterruptedException e) {
+//                throw new ChainException(this, "SleepEffect: Interrupted",
+//                        PieceErrorCode.INTERRUPT);
+//            }
+//            return false;
+//        }
+
         @Override
-        public boolean actorRun(Actor act) throws ChainException {
+        public void effect(Controllable _parent, IValue<Void> _effect_val) throws ChainException {
             try {
                 Thread.sleep(sleepinterval);
             } catch (InterruptedException e) {
                 throw new ChainException(this, "SleepEffect: Interrupted",
                         PieceErrorCode.INTERRUPT);
             }
-            return false;
+//            return false;
         }
 
         public Sleep setSleepTime(int _interval) {
@@ -1229,7 +1234,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public static class Reset extends ControllableEffector implements IStep {
+    public static class Reset extends Effector<Controllable, ControllableSignal> implements IStep {
         boolean cont = false;
 
         public Reset() {
@@ -1241,15 +1246,23 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             setContinue(_cont);
         }
 
+//        @Override
+//        public boolean actorRun(Actor act) throws ChainException {
+//            getTarget(false).interrupt(
+//                    cont ? ControllableSignal.RESTART : ControllableSignal.END);
+//            return false;
+//        }
+
         @Override
-        public boolean actorRun(Actor act) throws ChainException {
-            getTarget(false).interrupt(
-                    cont ? ControllableSignal.RESTART : ControllableSignal.END);
-            return false;
+        public void effect(Controllable _parent, IValue<ControllableSignal> _effect_val) throws ChainException {
+            _parent.interrupt(_effect_val._get());
+//            return false;
+
         }
 
         public Reset setContinue(boolean cont) {
             this.cont = cont;
+            _set(cont ? ControllableSignal.RESTART : ControllableSignal.END);
             return this;
         }
 
@@ -1265,17 +1278,24 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     }
 
 
-    public static class Restarter extends ControllableEffector implements IStep {
+    public static class Restarter extends Effector<Controllable, Void> implements IStep {
         public Restarter() {
             super();
             unsetAutoStart();
         }
 
+//        @Override
+//        public boolean actorRun(Actor act) throws ChainException {
+//            L("Restarter calling").go(getTarget(false).restart());
+//            getTarget(false).invalidate();
+//            return false;
+//        }
+
         @Override
-        public boolean actorRun(Actor act) throws ChainException {
-            L("Restarter calling").go(getTarget(false).restart());
-            getTarget(false).invalidate();
-            return false;
+        public void effect(Controllable _parent, IValue<Void> _effect_val) throws ChainException {
+            L("Restarter calling").go(_parent.restart());
+//            getTarget(false).invalidate();
+
         }
 
         @Override
@@ -1285,18 +1305,24 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    public static class LogPrinter extends ControllableEffector implements
+    public static class LogPrinter extends Effector<Controllable, String> implements
             IStep {
         public LogPrinter() {
             super();
             unsetAutoStart();
         }
 
+//        @Override
+//        public boolean actorRun(Actor act) throws ChainException {
+//            L("LogPrinter").go(getTarget(false).printLastExecLog());
+//            getTarget(false).invalidate();
+//            return false;
+//        }
+
         @Override
-        public boolean actorRun(Actor act) throws ChainException {
-            L("LogPrinter").go(getTarget(false).printLastExecLog());
-            getTarget(false).invalidate();
-            return false;
+        public void effect(Controllable _parent, IValue<String> _effect_val) throws ChainException {
+            L("LogPrinter").go(_parent.printLastExecLog());
+
         }
 
         @Override
@@ -1306,36 +1332,35 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    public static class LogEnabler extends ControllableEffector implements
-            IStep {
-        boolean level = false;
-
-        public LogEnabler() {
-            super();
-            unsetAutoStart();
-        }
-
-        @Override
-        public boolean actorRun(Actor act) throws ChainException {
-            return false;
-        }
-
-        @Override
-        public void onStep() {
-            level = !level;
-            try {
-                getTarget().setLogLevel(level);
-            } catch (ChainException e) {
-                e.printStackTrace();
-            }
-            interruptStep();
-        }
-
-    }
+//    public static class LogEnabler extends ControllableEffector implements
+//            IStep {
+//        boolean level = false;
+//
+//        public LogEnabler() {
+//            super();
+//            unsetAutoStart();
+//        }
+//
+//        @Override
+//        public boolean actorRun(Actor act) throws ChainException {
+//            return false;
+//        }
+//
+//        @Override
+//        public void onStep() {
+//            level = !level;
+//            try {
+//                getTarget().setLogLevel(level);
+//            } catch (ChainException e) {
+//                e.printStackTrace();
+//            }
+//            interruptStep();
+//        }
+//
+//    }
 
     public static class ValueLogPrinter extends
-            Effector<Self, Void, String, IValueLog> implements IStep,
-            IValue<Object> {
+            Effector<IValueLog, Object> implements IStep {
         Object log;
 
         public ValueLogPrinter() {
@@ -1343,11 +1368,16 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             unsetAutoStart();
         }
 
+//        @Override
+//        public boolean actorRun(Actor act) throws ChainException {
+//            L("ValueLog").go(_set(getTarget(false)._valueLog()));
+////            push(_get().toString());
+//            return false;
+//        }
+
         @Override
-        public boolean actorRun(Actor act) throws ChainException {
-            L("ValueLog").go(_set(getTarget(false)._valueLog()));
-            push(_get().toString());
-            return false;
+        public void effect(IValueLog _p, IValue<Object> _e) throws ChainException {
+            L("ValueLog").go(_set(_p._valueLog()));
         }
 
         @Override
@@ -1384,8 +1414,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(ViewActor _t, Integer _e) throws ChainException {
-            _t.setAlpha(_t.getAlpha() + _e);
+        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+            _t.setAlpha(_t.getAlpha() + _e._get());
         }
     }
 
@@ -1439,8 +1469,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(ViewActor _t, Integer _e) throws ChainException {
-            _t.setAngle(_t.getAngle() + _e);
+        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+            _t.setAngle(_t.getAngle() + _e._get());
         }
     }
 
@@ -1451,8 +1481,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(ViewActor _t, Integer _e) throws ChainException {
-            _t.setColor(_e);
+        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+            _t.setColor(_e._get());
         }
     }
 
@@ -1463,8 +1493,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public void effect(ViewActor _t, Integer _e) throws ChainException {
-            _t.setColor(_t.getColor() + _e);
+        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+            _t.setColor(_t.getColor() + _e._get());
         }
     }
 
@@ -1861,8 +1891,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public abstract static class Memory<OUTPUT> extends
-            Controllable<Self, Void, OUTPUT, Void> implements IValue<OUTPUT> {
+    public abstract static class Memory<VALUE, OUTPUT> extends
+            Controllable<Self, Void, OUTPUT, Void> implements IValue<VALUE> {
         Boolean state = true;
 
         // 1.Initialization
@@ -1888,9 +1918,9 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    public static abstract class Generator<OUTPUT> extends Actor.Memory<OUTPUT>
-            implements ICommit, IGenerator<OUTPUT>, IInit<OUTPUT> {
-        OUTPUT output;
+    public static abstract class Generator<VALUE, OUTPUT> extends Actor.Memory<VALUE, OUTPUT>
+            implements ICommit, IGenerator<VALUE, OUTPUT>, IInit<VALUE> {
+        VALUE output;
 
         // 1.Initialization
         public Generator() {
@@ -1898,7 +1928,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //            init(this);
         }
 
-        public Generator(OUTPUT obj, Boolean hippo) {
+        public Generator(VALUE obj, Boolean hippo) {
             this();
 //            setLoop(null);
             setMemoryState(hippo);
@@ -1912,34 +1942,25 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         @Override
         public boolean actorRun(Actor act) throws ChainException, InterruptedException {
-            generate();
+            generate(this);
             return super.actorRun(act);
         }
 
         @Override
-        public boolean _set(OUTPUT value) {
+        public boolean _set(VALUE value) {
             output = value;
             return true;
         }
 
         @Override
-        public OUTPUT _get() {
+        public VALUE _get() {
             return output;
-        }
-
-        @Override
-        public OUTPUT generate() {
-            OUTPUT out = _get();
-            if (out != null) {
-                push(out);
-            }
-            return out;
         }
 
         @Override
         public Object _commit() {
 //			interruptRestart();
-            return generate();
+            return generate(this);
         }
 
         @Override
@@ -1951,23 +1972,56 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public static class GeneratorSkelton<OUTPUT> extends Generator<OUTPUT> {
-        IGenerator _generator;
-        OUTPUT _init;
+    public static abstract class SimpleGenerator<OUTPUT> extends Generator<OUTPUT, OUTPUT> {
+        public SimpleGenerator() {
+            super();
+        }
 
-        public GeneratorSkelton(IGenerator<OUTPUT> g, OUTPUT i) {
+        public SimpleGenerator(OUTPUT obj, Boolean hippo) {
+            super(obj, hippo);
+        }
+
+        public SimpleGenerator(Object obj, Class<?> target) {
+            super(obj, target);
+        }
+
+        @Override
+        public OUTPUT generate(IValue<OUTPUT> val) {
+            OUTPUT out = _get();
+            if (out != null) {
+                push(out);
+            }
+            return out;
+        }
+    }
+
+    public static class GeneratorSkelton<VALUE, OUTPUT> extends Generator<VALUE, OUTPUT> {
+        IGenerator<VALUE, OUTPUT> _generator;
+        VALUE _init;
+
+        public GeneratorSkelton(IGenerator<VALUE, OUTPUT> g, VALUE i) {
             super(g, IGenerator.class);
             _generator = g;
             _init = i;
         }
 
         @Override
-        public void init(IValue<OUTPUT> val) {
+        public void init(IValue<VALUE> val) {
             val._set(_init);
         }
+
+        @Override
+        public OUTPUT generate(IValue<VALUE> val) {
+            OUTPUT out = _generator.generate(this);
+            if (out != null) {
+                push(out);
+            }
+            return out;
+        }
+
     }
 
-    public static class PointGenerator extends Generator<IPoint> {
+    public static class PointGenerator extends SimpleGenerator<IPoint> {
 
         public PointGenerator() {
             super();
@@ -1984,7 +2038,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public static class WordGenerator extends Generator<String> {
+    public static class WordGenerator extends SimpleGenerator<String> {
         public WordGenerator() {
             super();
         }
@@ -1999,7 +2053,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public static class IntegerGenerator extends Generator<Integer> {
+    public static class IntegerGenerator extends SimpleGenerator<Integer> {
 
         public IntegerGenerator() {
             super();
@@ -2032,7 +2086,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public static class FloatGenerator extends Generator<Float> {
+    public static class FloatGenerator extends SimpleGenerator<Float> {
 
         public FloatGenerator() {
             super();
@@ -2063,7 +2117,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     }
 
-    public static class Time extends Generator<Calendar> {
+    public static class Time extends SimpleGenerator<Calendar> {
 
         public Time() {
             super(Calendar.getInstance(), false);
@@ -2094,7 +2148,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
 
         @Override
-        public Float generate() {
+        public Float generate(IValue<Float> val) {
             return now += -_get() * (float) Math.log(Math.random());
         }
 
@@ -2102,7 +2156,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         public Object _commit() {
             if (_get() != null) {
                 for (int i = 0; i < count; i++)
-                    push(generate());
+                    push(generate(this));
                 return _get();
             }
             return null;
@@ -2325,16 +2379,18 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         }
     };
 
-    public static void classLoadToLib(Class<? extends Actor> cls, ActorBlueprint bp) {
+    public static Map<LinkType, ClassEnvelope> classLoadToLib(ActorBlueprint bp) {
 //        if (initedClass.contains(cls))
 //            return;
         Actor instance;
         try {
             instance = bp.newInstance(null);
+            return instance.getLinkClassesFromLib();
         } catch (Exception e) {
             e.printStackTrace();
         }
 //        return instance.getLinkClassFromLib();
+        return null;
     }
 
     /**

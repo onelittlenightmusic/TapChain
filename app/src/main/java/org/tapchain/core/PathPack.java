@@ -1,6 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPathListener;
 import org.tapchain.core.Connector.DummyConnector;
 import org.tapchain.core.Connector.InConnector;

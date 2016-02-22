@@ -1,9 +1,6 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
-
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {

@@ -2,7 +2,7 @@ package org.tapchain.core.actors;
 
 import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Controllable;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IValue;
 import org.tapchain.core.IValueLog;

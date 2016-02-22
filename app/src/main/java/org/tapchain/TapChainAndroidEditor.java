@@ -222,9 +222,12 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .add(Motor.class).setViewArg(R.drawable.motor).setTag("Small motor").save()
                 .add(Motor.class).setViewArg(R.drawable.motor2).setTag("Large motor").save()
                 .add(Motor.MotorPedal.class).setViewArg(R.drawable.pedal).setTag("Motor Pedal").save()
-                .add(()->1, 0).setViewArg(R.drawable.motor).setTag("Generator").save()
-                .add((IValue<Integer> v, Integer i) -> i + 1, 0).setViewArg(R.drawable.motor).setTag("Filter").save()
-                .add((IValue<Integer> v, Integer i) -> { v._set(i); Log.w("test", String.format("OK %d", i)); }, 0).setViewArg(R.drawable.motor).setTag("Consumer").save()
+                .add(v->v._get(), 0)
+                .setViewArg(R.drawable.motor).setTag("Generator").save()
+                .add((IValue<Integer> v, Integer i) -> i + v._get(), 1)
+                .setViewArg(R.drawable.motor).setTag("Filter").save()
+                .add((IValue<Integer> v, Integer i) -> { v._set(i); Log.w("test", String.format("OK %d", i)); }, 0)
+                .setViewArg(R.drawable.motor).setTag("Consumer").save()
         ;
 
 

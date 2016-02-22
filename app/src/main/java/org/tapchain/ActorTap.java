@@ -5,7 +5,7 @@ import android.app.Activity;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
@@ -107,7 +107,7 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	}
 
     @Override
-    public void ctrlStart() throws Chain.ChainException, InterruptedException {
+    public void ctrlStart() throws ChainException, InterruptedException {
         super.ctrlStart();
         TapLib.setTap(this);
     }

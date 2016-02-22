@@ -52,7 +52,7 @@ public class MainActivityOldTest extends ActivityInstrumentationTestCase2<MainAc
     public void testSomeFunction() {
         ActorManager e = view.getEditor().editTap();
 //                e.add(new Actor.GeneratorSkelton<>(()->1, 0));
-        e.add(()->1, 0)
+        e.add((IValue<Integer> v)->1, 0)
                 .pushTo((IValue<Integer> v, Integer i) -> i + 1, 0)
                 .pushTo((IValue<Integer> v, Integer i) -> { v._set(i); Log.w("test", String.format("OK %d", i)); }, 0)
                 .save();

@@ -111,7 +111,7 @@ public class CanvasFragment extends Fragment {
             return null;
         //TODO: resolve duplication
         IPoint resultPoint = editorReturn.getTap()._get();
-        if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
+        if(!view.isInWindow(resultPoint.x(), resultPoint.y()) && pos != null)
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
 
@@ -164,7 +164,7 @@ public class CanvasFragment extends Fragment {
 
         //TODO: DRY
         IPoint resultPoint = editorReturn.getTap()._get();
-        if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
+        if(!view.isInWindow(resultPoint.x(), resultPoint.y()) && pos != null)
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
 
@@ -208,7 +208,7 @@ public class CanvasFragment extends Fragment {
 
         //TODO: DRY
         IPoint resultPoint = editorReturn.getTap()._get();
-        if(!view.isInWindow(resultPoint.x(), resultPoint.y()))
+        if(!view.isInWindow(resultPoint.x(), resultPoint.y()) && pos != null)
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
 

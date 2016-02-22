@@ -42,7 +42,7 @@ import android.widget.Toast;
 
 import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.D2Point;
 import org.tapchain.core.IBoostable;
 import org.tapchain.core.ICommit;

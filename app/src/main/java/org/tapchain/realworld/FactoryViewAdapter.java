@@ -25,22 +25,24 @@ import java.util.List;
 public class FactoryViewAdapter extends ArrayAdapter<IBlueprint<Actor>> implements Factory.ValueChangeNotifier {
     private MainActivity act;
     private GridView _parent;
+    Factory<Actor> f;
 
     public FactoryViewAdapter(Context c, GridView parent, TapChainEditor.FACTORY_KEY k) {
         super(c, R.layout.gridview_layout, ((MainActivity)c).getEditor().getFactory(k));
         act = (MainActivity) c;
         _parent = parent;
+        f = ((MainActivity)c).getEditor().getFactory(k);
         act.getEditor().getFactory(k).setNotifier(this);
     }
 
     @Override
     public void notifyChange() {
-        act.runOnUiThread(() -> FactoryViewAdapter.this.notifyDataSetChanged());
+        act.runOnUiThread(() -> {synchronized(f) {FactoryViewAdapter.this.notifyDataSetChanged();}});
     }
 
     @Override
     public void invalidate() {
-        act.runOnUiThread(() -> _parent.invalidate());
+        act.runOnUiThread(() -> {synchronized(f) {_parent.invalidate(); }});
     }
 
     @Override

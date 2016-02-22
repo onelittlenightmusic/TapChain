@@ -2,7 +2,7 @@ package org.tapchain.core.actors;
 
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorChain;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IActor;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IValue;
@@ -44,7 +44,7 @@ public class ViewActor extends
     }
 
     @Override
-    public void ctrlStart() throws Chain.ChainException, InterruptedException {
+    public void ctrlStart() throws ChainException, InterruptedException {
         super.ctrlStart();
         view_init();
         addViewToAnimation();
@@ -60,7 +60,7 @@ public class ViewActor extends
         return true;
     }
 
-    public void view_init() throws Chain.ChainException {
+    public void view_init() throws ChainException {
     }
 
     public void move_user(IPoint iPoint) {

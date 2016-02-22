@@ -1,7 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
-
 /** Manager.
  * Manager is model class in TapChain.
  * TapChain creates and edits chains of piece class.
@@ -129,7 +127,7 @@ public interface IManager<T, U> {
      * @param <OUTPUT>
      * @return
      */
-    <OUTPUT> IManager<T, U> add(final IGenerator<OUTPUT> generator, final OUTPUT init);
+    <VALUE, OUTPUT> IManager<T, U> add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init);
 
     /**
      *
@@ -140,4 +138,14 @@ public interface IManager<T, U> {
      * @return
      */
     <VALUE, INPUT> IManager<T, U> add(final IConsumer<VALUE, INPUT> consumer, final VALUE init);
+
+    /**
+     *
+     * @param effector
+     * @param init
+     * @param <PARENT>
+     * @param <EFFECT>
+     * @return
+     */
+    <PARENT, EFFECT> IManager<T, U> add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration);
 }

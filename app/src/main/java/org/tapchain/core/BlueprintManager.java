@@ -3,7 +3,6 @@ package org.tapchain.core;
 import java.lang.reflect.Modifier;
 
 import org.tapchain.core.Blueprint.PieceBlueprintStatic;
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.actors.ViewActor;
 
 import android.util.Log;
@@ -11,10 +10,10 @@ import android.util.Log;
 
 public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint, IPiece> {
 	BlueprintManager<TYPE> parentManager = null;
-	private IBlueprint root = null;
-	IBlueprint marked = null;
+	private IBlueprint<TYPE> root = null;
 	IBlueprint reserved = null;
-	IBlueprint defaultView = null;
+    IBlueprint marked = null;
+    IBlueprint defaultView = null;
 	Factory<TYPE> factory = null;
 	protected Object outer;
 	//1.Initialization
@@ -57,7 +56,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	/**
 	 * @return the root
 	 */
-	public IBlueprint getRoot() {
+	public IBlueprint<TYPE> getRoot() {
 		return root;
 	}
 
@@ -195,8 +194,8 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	public static <PARENT, EFFECT> Actor createEffector(final IEffector<PARENT, EFFECT> effector) {
 		return new Actor.OriginalEffector<PARENT,EFFECT>() {
 			@Override
-			public void effect(PARENT _t, EFFECT _e) throws ChainException {
-				effector.effect(_t, _e);
+			public void effect(PARENT _parent, IValue<EFFECT> _effect_val) throws ChainException {
+				effector.effect(_parent, _effect_val);
 			}
 		};
 	}
@@ -313,7 +312,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return factory;
 	}
 
-	public IBlueprint getBlueprint() {
+	public IBlueprint<TYPE> getBlueprint() {
 		return getRoot();
 	}
 	@Override
@@ -392,11 +391,14 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
     public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
         return this;
     };
-    public <OUTPUT> BlueprintManager<TYPE> add(final IGenerator<OUTPUT> generator, final OUTPUT init) {
+    public <VALUE, OUTPUT> BlueprintManager<TYPE> add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
         return this;
     };
     public <VALUE, INPUT> BlueprintManager<TYPE> add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
         return this;
     };
+    public <PARENT, EFFECT> BlueprintManager<TYPE> add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
+        return this;
+    }
 
 }

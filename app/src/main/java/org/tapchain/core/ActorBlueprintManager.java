@@ -39,7 +39,7 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
         return this;
     }
     @Override
-    public <OUTPUT> ActorBlueprintManager add(final IGenerator<OUTPUT> generator, final OUTPUT init) {
+    public <VALUE, OUTPUT> ActorBlueprintManager add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
         add(Actor.GeneratorSkelton.class, generator, init);
         return this;
     }
@@ -49,5 +49,20 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
         return this;
     }
 
+    @Override
+    public <PARENT, EFFECT> ActorBlueprintManager add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
+        add(Actor.EffectorSkelton.class, effector, init, duration);
+        return this;
+    }
+        @Override
+    public ActorBlueprintManager save() {
+        super.save();
+        getBlueprint().register();
+        return this;
+    }
 
+    @Override
+    public ActorBlueprint getBlueprint() {
+        return (ActorBlueprint)super.getBlueprint();
+    }
 }

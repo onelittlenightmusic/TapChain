@@ -9,7 +9,7 @@ import android.view.MenuItem;
 
 import org.tapchain.IntentHandler;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.TapChainEditor;
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
         if (intentHandlers.get(requestCode) != null)
             try {
                 intentHandlers.get(requestCode).onIntent(resultCode, data);
-            } catch (Chain.ChainException e) {
+            } catch (ChainException e) {
                 e.printStackTrace();
             }
         else

@@ -1,6 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.actors.ViewActor;
 
 @SuppressWarnings("serial")
@@ -11,8 +10,8 @@ public class MathActor {
 			once();
 		}
 		@Override
-		public void effect(IValue<EFFECT> _t, EFFECT _e) throws ChainException {
-			L("mathEffect").go(_t._set(mathEffect(_t._get(), _e)));
+		public void effect(IValue<EFFECT> _t, IValue<EFFECT> _e) throws ChainException {
+			L("mathEffect").go(_t._set(mathEffect(_t._get(), _e._get())));
 		}
 		public EFFECT mathEffect(EFFECT x, EFFECT y) {
 			return x;
@@ -64,11 +63,11 @@ public class MathActor {
 		public IntegerVerb() {
 			super();
 			setDuration(1);
-			setPull(true);
+//			setPull(true);
 		}
 		@Override
-		public void effect(V _t, Integer _e) throws ChainException {
-			verb(_t,_e);
+		public void effect(V _t, IValue<Integer> _e) throws ChainException {
+			verb(_t,_e._get());
 			if(_t instanceof ViewActor) {
 				((ViewActor) _t).invalidate();
 			}

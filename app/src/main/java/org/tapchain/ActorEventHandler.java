@@ -3,7 +3,7 @@ package org.tapchain;
 import android.app.Activity;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;

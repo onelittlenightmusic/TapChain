@@ -13,12 +13,13 @@ import android.view.SurfaceHolder;
 import org.tapchain.ActorTap;
 import org.tapchain.AndroidActor;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IActor;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IPressed;
 import org.tapchain.core.IScrollable;
+import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
@@ -53,7 +54,7 @@ public class CanvasViewImpl extends TapChainWritingView {
             .add(touch = new AndroidActor.AndroidView() {
                 Paint paint_ = new Paint();
 
-                public void view_init() throws Chain.ChainException {
+                public void view_init() throws ChainException {
                     IPoint p = (WorldPoint) pullInActor().getObject();
                     setCenter(p);
                     ITap t = getEditor().searchTouchedTap(p);
@@ -76,16 +77,10 @@ public class CanvasViewImpl extends TapChainWritingView {
                 }
             }.setLinkClass(LinkType.PULL, Object.class).setLinkClass(LinkType.TO_CHILD, ViewActor.class))
             ._in()
-            .add(new Actor.EffectorSkelton<ViewActor, Integer>() {
-                @Override
-                public boolean actorRun(Actor act) throws Chain.ChainException {
-                    getTarget().addSize(new WorldPoint(30f, 0f));
-                    getTarget().setAlpha(
-                            getTarget().getAlpha() - 10);
-                    invalidate();
-                    return increment();
-                }
-            }.initEffectValue(1, 10))
+            .add((ViewActor _p, IValue<Integer> _e) -> {
+                    _p.addSize(new WorldPoint(30f, 0f));
+                    _p.setAlpha(_p.getAlpha() - 10);
+            }, 1, 10)
             .nextEvent(new Actor.Reset().setContinue(true))._out()
             .save();
     }
@@ -308,28 +303,29 @@ public class CanvasViewImpl extends TapChainWritingView {
         float delta = 0.03f;
         int j = 0;
         IPoint wp = null;
-        IPoint initial = null;
+//        IPoint initial = null;
 
         public Accel(IPoint vp) {
             super();
             setLinkClass(LinkType.PULL, IPoint.class);
-            initial = wp = vp.copy().unsetDif();
+//            initial =
+                    wp = vp.copy().unsetDif();
         }
 
         @Override
-        public boolean actorInit() throws Chain.ChainException {
+        public boolean actorInit() throws ChainException {
             WorldPoint dummy = new WorldPoint();
             initEffectValue(dummy, 1);
             super.actorInit();
             j = 0;
             delta = 0.1f;
-            if (initial == null)
-                L( "Accel#reset").go(wp = pull());
+//            if (initial == null)
+//                L( "Accel#reset").go(wp = pull());
             return true;
         }
 
         @Override
-        public boolean actorRun(Actor act) throws Chain.ChainException {
+        public boolean actorRun(Actor act) throws ChainException {
             IPoint d = wp.multiplyNew(delta);
             initEffectValue(d, 1);
             delta -= 0.01f;

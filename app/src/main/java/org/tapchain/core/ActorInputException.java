@@ -3,7 +3,7 @@ package org.tapchain.core;
 /**
  * Created by hiro on 2015/05/13.
  */
-public class ActorInputException extends Chain.ChainException {
+public class ActorInputException extends ChainException {
     LinkType linkType;
     Actor actor;
 

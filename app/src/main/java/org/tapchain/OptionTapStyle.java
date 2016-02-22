@@ -3,7 +3,7 @@ package org.tapchain;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.editor.IEditor;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IScrollHandler;

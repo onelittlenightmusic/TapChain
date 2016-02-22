@@ -1,6 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.ConnectionResultPath;
 import org.tapchain.core.ChainController.IControlCallback;
 
@@ -273,11 +272,14 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
     public <VALUE, INPUT, OUTPUT> PieceManager<PIECE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
         return this;
     };
-    public <OUTPUT> PieceManager<PIECE> add(final IGenerator<OUTPUT> generator, final OUTPUT init) {
+    public <VALUE, OUTPUT> PieceManager<PIECE> add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
         return this;
     };
     public <VALUE, INPUT> PieceManager<PIECE> add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
         return this;
     };
 
+    public <PARENT, EFFECT> PieceManager<PIECE> add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
+        return this;
+    }
 }

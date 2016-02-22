@@ -8,7 +8,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
@@ -65,7 +65,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
     }
 
     @Override
-    public void view_init() throws Chain.ChainException {
+    public void view_init() throws ChainException {
         paint = new Paint();
         paint.setColor(Color.argb(255, 255, 255, 255));
         paint.setStyle(Paint.Style.STROKE);

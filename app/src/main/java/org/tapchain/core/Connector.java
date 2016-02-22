@@ -1,6 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IPathListener;
 import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack;
@@ -122,7 +121,7 @@ public abstract class Connector implements IConnector, Serializable {
 			getParentPath().detach();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			throw new Chain.ChainException("test");
+			throw new ChainException("test");
 		}
 	}
 
@@ -268,7 +267,7 @@ public abstract class Connector implements IConnector, Serializable {
 		}
 
 		public boolean connect(OutConnector o)
-				throws Chain.ChainException {
+				throws ChainException {
 			if (!canPair(o)) {
 				return false;
 			}
@@ -289,7 +288,7 @@ public abstract class Connector implements IConnector, Serializable {
 					listen.OnPushed(o, null);
 				}
 			} catch (InterruptedException e) {
-				throw new Chain.ChainException(this,
+				throw new ChainException(this,
 						"Connect was cancelled");
 			}
 			return true;

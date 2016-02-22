@@ -47,15 +47,15 @@ public class MainActivityTest {
 //        onView(withTagValue(is((Object) "Consumer"))).perform(click());
     }
 
-    @Test
-    public void top() {
-//        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
-//        view.connect(a, LinkType.PULL, b);
-//        onView(withId(R.id.dustbox)).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
-//        onView(allOf(withId(10001), isDisplayed(), hasItem)).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
-        onData(anything()).inAdapterView(is(instanceOf(SelectGridView.class))).atPosition(0).perform(click());
-//        onData(anything()).inAdapterView(withTagValue(equalTo("Generator"))).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
-    }
+//    @Test
+//    public void top() {
+////        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
+////        view.connect(a, LinkType.PULL, b);
+////        onView(withId(R.id.dustbox)).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
+////        onView(allOf(withId(10001), isDisplayed(), hasItem)).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
+//        onData(anything()).inAdapterView(is(instanceOf(SelectGridView.class))).atPosition(0).perform(click());
+////        onData(anything()).inAdapterView(withTagValue(equalTo("Generator"))).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
+//    }
 
 
 

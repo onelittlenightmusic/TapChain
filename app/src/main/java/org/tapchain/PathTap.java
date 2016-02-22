@@ -4,7 +4,7 @@ import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.ActorManager;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.Packet;
@@ -27,7 +27,7 @@ public class PathTap extends AndroidView implements IPathTap {
 		}
 		
 		@Override
-		public void ctrlStart() throws InterruptedException, Chain.ChainException {
+		public void ctrlStart() throws InterruptedException, ChainException {
             super.ctrlStart();
 			TapLib.setTap(this);
 		}

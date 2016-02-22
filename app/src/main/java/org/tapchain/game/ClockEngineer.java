@@ -13,12 +13,10 @@ public class ClockEngineer {
 		float theta = 0f;
 		float dt = 30f;
 		int x = 0;
-		static {
-			__addLinkClass(Pin.class, LinkType.PULL, Integer.class);
-			__addLinkClass(Pin.class, LinkType.TO_CHILD, Pin.class);
-		}
 		public Pin(Float dt) {
 			super();
+            __addLinkClass(Pin.class, LinkType.PULL, Integer.class);
+            __addLinkClass(Pin.class, LinkType.TO_CHILD, Pin.class);
 			this.dt = dt;
 		}
 		@Override

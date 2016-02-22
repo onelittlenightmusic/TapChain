@@ -33,7 +33,7 @@ public class TapChainLogicTest2 {
     @Test
     public void testSomeFunction() {
         ActorManager e = view.getEditor().editTap();
-        e.add(() -> 1, 0)
+        e.add((IValue<Integer> v) -> 1, 0)
                 .pushTo((IValue<Integer> v, Integer i) -> i + v._get(), 1)
                 .pushTo((IValue<Integer> v, Integer i) -> {
                     v._set(i);

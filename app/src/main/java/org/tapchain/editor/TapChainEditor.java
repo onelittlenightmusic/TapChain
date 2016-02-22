@@ -6,7 +6,7 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.ActorBlueprintManager;
 import org.tapchain.core.Blueprint;
 import org.tapchain.core.BlueprintInitialization;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Factory;

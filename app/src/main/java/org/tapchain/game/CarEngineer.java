@@ -1,10 +1,10 @@
 package org.tapchain.game;
 
+import org.tapchain.core.Actor;
 import org.tapchain.core.Actor.Filter;
 import org.tapchain.core.Actor.OriginalEffector;
-import org.tapchain.core.Actor.Generator;
 import org.tapchain.core.Actor.ValueArrayEffector;
-import org.tapchain.core.Chain.ChainException;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.PathType;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IValue;
@@ -20,11 +20,11 @@ public class CarEngineer {
 
 		public Engine() {
 			super();
-			setPull(true);
+//			setPull(true);
 		}
 		@Override
-		public void effect(Tire input, AccelAngle _e) throws ChainException {
-			input._get().set((_e.get()+input._get().get()));
+		public void effect(Tire input, IValue<AccelAngle> _e) throws ChainException {
+			input._get().set((_e._get().get()+input._get().get()));
 			input._get().increment();
 		}
 	}
@@ -159,13 +159,13 @@ public class CarEngineer {
 		}
 		
 		@Override
-		public void effect(IValue<IPoint> _t, IPoint _e) throws ChainException {
+		public void effect(IValue<IPoint> _t, IValue<IPoint> _e) throws ChainException {
 			Speed s = (Speed)_t._get();
 			L("1.202 ValueEffector valueSet").go(_t._set(s.set(getPosXY(s.getPos()))));
 		}
 	}
 	
-	public static class AccelPedal extends Generator<AccelAngle> {
+	public static class AccelPedal extends Actor.SimpleGenerator<AccelAngle> {
 		/**
 		 * 
 		 */
@@ -185,7 +185,7 @@ public class CarEngineer {
 		}
 	}
 	
-	public static class BrakePedal extends Generator<BrakeAngle> {
+	public static class BrakePedal extends Actor.SimpleGenerator<BrakeAngle> {
 		public BrakePedal() {
 			super();
 		}

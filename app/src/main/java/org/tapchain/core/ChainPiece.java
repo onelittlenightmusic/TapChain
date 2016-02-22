@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 import org.tapchain.core.ActorManager.IStatusHandler;
-import org.tapchain.core.Chain.ChainException;
 import org.tapchain.core.Chain.IErrorCode;
 import org.tapchain.core.Chain.Tickable;
 import org.tapchain.core.Connector.InConnector;
@@ -429,7 +428,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
 	@Override
 	public Chain.ConnectionResultPath appendTo(PathType stack, IPiece target,
-											 PathType stack_target) throws Chain.ChainException {
+											 PathType stack_target) throws ChainException {
 		super.appendTo(stack, target, stack_target);
 		InConnector i = addInPath(stack);
 		if(i == null)
@@ -446,7 +445,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
 	@Override
 	public Chain.ConnectionResultOutConnector appended(PathType stack_target, IPiece from,
-											Output type) throws Chain.ChainException {
+											Output type) throws ChainException {
 		OutConnector o = addOutPath(type, stack_target);
 		if(o == null)
 			return null;

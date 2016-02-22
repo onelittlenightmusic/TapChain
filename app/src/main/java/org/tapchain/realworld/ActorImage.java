@@ -8,7 +8,7 @@ import android.widget.ImageView;
 
 import org.tapchain.AndroidActor;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Chain;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.IPoint;
@@ -37,7 +37,7 @@ public class ActorImage extends ImageView {
                 this.b = b;
                 v = (AndroidActor.AndroidView) b.getView().newInstance(null);
 //            }
-        } catch (Chain.ChainException e) {
+        } catch (ChainException e) {
             e.printStackTrace();
         }
         a = (v != null) ? v.getDrawable() : getResources()

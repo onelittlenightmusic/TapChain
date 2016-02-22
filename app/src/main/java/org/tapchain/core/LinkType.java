@@ -43,7 +43,7 @@ public enum LinkType {
 		return _pathType;
 	}
 
-	public static LinkType fromPathType(PathType pathType, boolean out) throws Chain.ChainException {
+	public static LinkType fromPathType(PathType pathType, boolean out) throws ChainException {
 		switch(pathType) {
 			case FAMILY:
 				if(out)
@@ -56,7 +56,7 @@ public enum LinkType {
 				else
 					return PULL;
 			default:
-				throw new Chain.ChainException("No LinkType for this PathType", "LinkType", pathType);
+				throw new ChainException("No LinkType for this PathType", "LinkType", pathType);
 		}
 	}
 
@@ -64,7 +64,7 @@ public enum LinkType {
 		return _out;
 	}
 
-	public static LinkType fromPathPack(PathPack<?> pathPack) throws Chain.ChainException {
+	public static LinkType fromPathPack(PathPack<?> pathPack) throws ChainException {
 			return fromPathType(pathPack.getPathType(), pathPack instanceof PathPack.OutPathPack);
 	}
 

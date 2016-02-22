@@ -1,9 +1,10 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Chain.ChainException;
+import java.util.Map;
 
 
 public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint {
+    Map<LinkType, ClassEnvelope> links;
 
 	public ActorBlueprint() {
 		super();
@@ -25,7 +26,7 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 	@Override
 	protected Blueprint setBlueprintClass(Class<? extends Actor> _cls) {
 		super.setBlueprintClass(_cls);
-		checkAndRegisterToActorLib();
+		register();
 		return this;
 	}
 
@@ -33,19 +34,15 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 
 	protected Blueprint addLocalClass(Class<?> parent_type, Object parent_obj) {
 		super.addLocalClass(parent_type, parent_obj);
-		checkAndRegisterToActorLib();
+		register();
 		return this;
 	}
 
-	protected void checkAndRegisterToActorLib() {
-//		if(Actor.class.isAssignableFrom(cls)) {
-//			Class<? extends Actor> clsActor = cls;
-			Actor.classLoadToLib(cls, this);
-//		}
-	}
-
-	public ClassEnvelope getConnectClass(LinkType ac) {
-        return Actor.getLinkClassFromLib(cls, ac);
+	public ClassEnvelope getConnectClass(LinkType lt) {
+        if(links == null)
+            return null;
+        else
+            return links.get(lt);
 	}
 
 //	@Override
@@ -78,5 +75,9 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
         if(logLevel)
             rtn.setLogLevel(true);
         return rtn;
+    }
+
+    public void register() {
+        links = Actor.classLoadToLib(this);
     }
 }
