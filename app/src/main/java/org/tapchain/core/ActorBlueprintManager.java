@@ -35,23 +35,23 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
 
     @Override
     public <VALUE, INPUT, OUTPUT> ActorBlueprintManager add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
-        add(Actor.FilterSkelton.class, func, init);
+        add(Filter.FilterSkelton.class, func, init);
         return this;
     }
     @Override
     public <VALUE, OUTPUT> ActorBlueprintManager add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
-        add(Actor.GeneratorSkelton.class, generator, init);
+        add(Generator.GeneratorSkelton.class, generator, init);
         return this;
     }
     @Override
     public <VALUE, INPUT> ActorBlueprintManager add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
-        add(Actor.ConsumerSkelton.class, consumer, init);
+        add(Consumer.ConsumerSkelton.class, consumer, init);
         return this;
     }
 
     @Override
     public <PARENT, EFFECT> ActorBlueprintManager add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
-        add(Actor.EffectorSkelton.class, effector, init, duration);
+        add(Effector.EffectorSkelton.class, effector, init, duration);
         return this;
     }
         @Override

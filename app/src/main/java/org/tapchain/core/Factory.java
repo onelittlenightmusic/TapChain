@@ -18,12 +18,12 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
         super(factory);
     }
 
-	public Factory<PIECE> Register(IBlueprint root) {
+	public synchronized Factory<PIECE> Register(IBlueprint root) {
 		add(root);
 		return this;
 	}
 	
-	public Factory<PIECE> Register(List<IBlueprint<PIECE>> root) {
+	public synchronized Factory<PIECE> Register(List<IBlueprint<PIECE>> root) {
 		addAll(root);
 		return this;
 	}

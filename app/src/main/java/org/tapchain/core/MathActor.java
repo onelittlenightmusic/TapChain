@@ -4,7 +4,7 @@ import org.tapchain.core.actors.ViewActor;
 
 @SuppressWarnings("serial")
 public class MathActor {
-	public static class MathEffector<EFFECT> extends Actor.ValueEffector<EFFECT> {
+	public static class MathEffector<EFFECT> extends Effector.ValueEffector<EFFECT> {
 		public MathEffector(Class<? extends EFFECT> cls) {
 			super();
 			once();
@@ -59,7 +59,7 @@ public class MathActor {
 			return rtn;
 		}
 	}
-	public abstract static class IntegerVerb<V> extends Actor.OriginalEffector<V, Integer> implements IStep {
+	public abstract static class IntegerVerb<V> extends Effector<V, Integer> implements IStep {
 		public IntegerVerb() {
 			super();
 			setDuration(1);

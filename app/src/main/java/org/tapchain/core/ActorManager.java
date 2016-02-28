@@ -55,7 +55,7 @@ public class ActorManager extends PieceManager<Actor> {
 	
 	@Override
 	public Actor getPiece() {
-		return (Actor)super.getPiece();
+		return super.getPiece();
 	}
 	
 	public ActorManager setParentManager(ActorManager _parent) {
@@ -133,28 +133,28 @@ public class ActorManager extends PieceManager<Actor> {
     @Override
 	public <VALUE, INPUT, OUTPUT> ActorManager add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
 		Actor adding;
-			adding = new Actor.FilterSkelton<>(func, init)/*.setLogLevel(true)*/;
+			adding = new Filter.FilterSkelton<>(func, init)/*.setLogLevel(true)*/;
 			add(adding);
 		return this;
 	}
 
     @Override
     public <VALUE, OUTPUT> ActorManager add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
-        add(new Actor.GeneratorSkelton<>(generator, init)/*.setLogLevel(true)*/);
+        add(new Generator.GeneratorSkelton<>(generator, init)/*.setLogLevel(true)*/);
 //        Log.w("test", "Generator created");
         return this;
     }
 
     @Override
     public <VALUE, INPUT> ActorManager add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
-        add(new Actor.ConsumerSkelton<>(consumer, init)/*.setLogLevel(true)*/);
+        add(new Consumer.ConsumerSkelton<>(consumer, init)/*.setLogLevel(true)*/);
 //        Log.w("test", "Consumer created");
         return this;
     }
 
     @Override
     public <PARENT, EFFECT> ActorManager add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
-        add(new Actor.EffectorSkelton<>(effector, init, duration));
+        add(new Effector.EffectorSkelton<>(effector, init, duration));
         return this;
     }
 
@@ -183,8 +183,7 @@ public class ActorManager extends PieceManager<Actor> {
 		}
 		super.remove(actor);
 		actor.end();
-		return;
-	}
+    }
 	
 	public void restart(IPiece pieceBody) {
 		if(pieceBody instanceof ChainPiece)

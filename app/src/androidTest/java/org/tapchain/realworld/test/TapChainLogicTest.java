@@ -67,7 +67,7 @@ public class TapChainLogicTest {
 //        Actor b;
 //        b = view.add(TapChainEditor.FACTORY_KEY.ALL, "Accumulate", 250, 500);
 //        sleepSecond();
-//        view.connect(a, LinkType.PULL, b);
+//        view.link(a, LinkType.PULL, b);
 //    }
 
     @Test

@@ -1,5 +1,7 @@
 package org.tapchain.editor;
 
+import android.util.Log;
+
 import org.tapchain.ActorTap;
 import org.tapchain.MyFocusControl;
 import org.tapchain.core.Actor;
@@ -16,6 +18,7 @@ import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.IBlueprintInitialization;
 import org.tapchain.core.ILogHandler;
+import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
@@ -23,6 +26,7 @@ import org.tapchain.core.ISelectable;
 import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.PathType;
+import org.tapchain.core.PieceManager;
 import org.tapchain.core.StyleCollection;
 import org.tapchain.core.TapLib;
 import org.tapchain.game.ISensorView;
@@ -41,7 +45,6 @@ import java.util.List;
 public abstract class TapChainEditor extends EditorManager implements IControlCallback, ILogHandler,
 		IActorEditor {
 	IWindow win = null;
-//	public EditorManager editorManager = new EditorManager();
     HashMap<FACTORY_KEY, Factory<Actor>> factories = new HashMap<>();
 	Factory<Actor> factory = new Factory<>(),
 			recent = new Factory<>(), relatives = new Factory<>(),
@@ -245,6 +248,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
     //TODO: migrate to VIEW class (ex. CanvasViewImpl)
 	public boolean releaseTap(IActorTap selected, IPoint point) {
+//        Log.w("TEST", "releaseTap called");
         boolean rtn = false;
         /*else */
         if(hasLockReleaseTap() && unlockReleaseTap(point))
@@ -319,7 +323,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
     public void combo(IActorTap t) {
         Actor actorNew = toActor(t), aTarget = getFocusControl().getTargetActor();
-        connect(aTarget, getFocusControl().getLinkType(), actorNew);
+        link(aTarget, getFocusControl().getLinkType(), actorNew);
     }
 
     /**
@@ -427,13 +431,12 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     public IBlueprintInitialization standbyRegistration(Factory<?> f, IActorTap selected) {
         if(selected == null)
             return null;
-        IBlueprintInitialization data = null;
         Actor p = selected.getActor();
         if (p instanceof IValue) {
             Object v = ((IValue) p)._get();
-            data = standbyRegistration(f, v, p.getTag());
+            return standbyRegistration(f, v, p.getTag());
         }
-		return data;
+		return null;
 	}
 
 	private IBlueprintInitialization standbyRegistration(Factory<?> f,
@@ -467,8 +470,8 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 
     IActorTap highlighted = null;
 	@Override
-	public List<IBlueprint<Actor>> highlightConnectables(LinkType ac,
-                                                         IActorTap target, ClassEnvelope classEnvelope) {
+	public List<IBlueprint<Actor>> highlightLinkables(LinkType ac,
+                                                      IActorTap target, ClassEnvelope classEnvelope) {
         List<IBlueprint<Actor>> rtn = setLastHighlighted(ac, classEnvelope);
         //Reset privious highlighted target's highlight.
         if (highlighted != null) {
@@ -490,7 +493,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 	}
 
     public List<IBlueprint<Actor>> setLastHighlighted(LinkType ac, ClassEnvelope classEnvelope) {
-        unhighlightAllConnectables();
+        unhighlightAllLinkables();
         //Coloring connectable blueprints with LinkType's color.
         List<IBlueprint<Actor>> bl = getFactory().getConnectables(ac.reverse(), classEnvelope);
         if (bl.size() == 0) {
@@ -507,7 +510,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     }
 
 
-    public void unhighlightAllConnectables() {
+    public void unhighlightAllLinkables() {
         //Clear all blueprints view with neutral coloring.
 		for(IBlueprint b: getFactory().getList()) {
 			b.unhighlight();
@@ -515,12 +518,12 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 	}
     /**
      * Connect an actor to another actor
-     * @param a1 actor which connect to another
+     * @param a1 actor which link to another
      * @param type connection type as LinkType
      * @param a2 actor which is connected from a1
      */
 	@Override
-	public boolean connect(Actor a1, LinkType type, Actor a2) {
+	public boolean link(Actor a1, LinkType type, Actor a2) {
 		if (type == null)
 			return false;
 		switch (type) {
@@ -542,6 +545,16 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 	}
 
     @Override
+    public IPath unlink(Actor a1, Actor a2) {
+        return disconnect(a1, a2);
+    }
+
+    @Override
+    public LinkType getLinkType(Actor a1, Actor a2) {
+        return LinkType.fromPathType(PieceManager.getPathType(a1, a2), PieceManager.isOutTo(a1, a2));
+    }
+
+    @Override
     public void shake(int duration) {
         if(sensorView != null)
             sensorView.shake(duration);
@@ -550,7 +563,7 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     @Override
     public void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz) {
         resetNextPos();
-        highlightConnectables(al, spot, clazz);
+        highlightLinkables(al, spot, clazz);
         if(spot == null)
             return;
         setNextPos(spot.getCenter());

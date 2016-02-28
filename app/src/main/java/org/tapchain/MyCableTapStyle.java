@@ -196,7 +196,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 //		LinkType ac = balloon.getLink();
 //		IActorTap offerToFamily = balloon.getParentTap();
 //		ClassEnvelope ce = balloon.getClassEnvelope();
-//		editActor.highlightConnectables(ac.reverse(), offerToFamily, ce);
+//		editActor.highlightLinkables(ac.reverse(), offerToFamily, ce);
 //
 //	}
 
@@ -205,11 +205,11 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 	public boolean onTouch(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
 		boolean rtn = false;
 			if(getTag().equals(heapOut)) {
-				if(edit.connect(a1, LinkType.PUSH, a2)) {
+				if(edit.link(a1, LinkType.PUSH, a2)) {
 					rtn = true;
 				} else {
 				}
-			} else if (edit.connect(a1, LinkType.PULL, a2)) {
+			} else if (edit.link(a1, LinkType.PULL, a2)) {
 				rtn = true;
 			} else {
 			}

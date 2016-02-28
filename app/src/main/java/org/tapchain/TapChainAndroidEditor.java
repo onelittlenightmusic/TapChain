@@ -13,12 +13,13 @@ import android.util.Log;
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Actor.Exp;
-import org.tapchain.core.Actor.IntegerGenerator;
-import org.tapchain.core.Actor.WordGenerator;
 import org.tapchain.core.ActorChain.IView;
 import org.tapchain.core.ClassEnvelope;
+import org.tapchain.core.Consumer;
 import org.tapchain.core.D2Point;
+import org.tapchain.core.Effector;
+import org.tapchain.core.Filter;
+import org.tapchain.core.Generator;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
@@ -92,7 +93,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //				.addFocusable(Actor.Booster.class).setViewArg(R.drawable.boost1).setTag("Booster")
 //				.addFocusable(Actor.Charger.class).setViewArg(R.drawable.battery1).setTag("Charger")
 
-                .add(Actor.Mover.class, new WorldPoint(1f, 0f))
+                .add(Effector.Mover.class, new WorldPoint(1f, 0f))
                 .setViewArg(R.drawable.right2)
                 .setTag("Mover")
 //                .setLogLevel()
@@ -100,18 +101,18 @@ public class TapChainAndroidEditor extends TapChainEditor {
 
 
 
-                .add(Actor.ArrayJumper.class, (Object) new WorldPoint[]{})
+                .add(Effector.ArrayJumper.class, (Object) new WorldPoint[]{})
                 .setViewArg(R.drawable.up2)
                 .setTag("Array Jumper")
 //                .setLogLevel()
                 .save()
 
-                .add(Actor.ArrayMover.class, (Object) new D2Point[]{})
+                .add(Effector.ArrayMover.class, (Object) new D2Point[]{})
                 .setViewArg(R.drawable.down2)
                 .setTag("Array Mover")
                 .save()
 
-                .add(WordGenerator.class, "A", false)
+                .add(Generator.WordGenerator.class, "A", false)
                 .setViewArg(R.drawable.a)
                 .setTag("Word")
                 .save()
@@ -133,7 +134,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //				.setTag("Camera")
 
 
-                .add(IntegerGenerator.class, 1, false)
+                .add(Generator.IntegerGenerator.class, 1, false)
                 .setViewArg(R.drawable.num)
                 .setTag("Number")
                 .save()
@@ -151,32 +152,32 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setTag("PassThru")
                 .save()
 
-                .add(Actor.PlusIntegerFilter.class)
+                .add(Filter.PlusIntegerFilter.class)
                 .setViewArg(R.drawable.plus2)
                 .setTag("Plus")/*.setLogLevel()*/
                 .save()
 
-                .add(Actor.MultiIntegerFilter.class)
+                .add(Filter.MultiIntegerFilter.class)
                 .setViewArg(R.drawable.multi2)
                 .setTag("Multi")/*.setLogLevel()*/
                 .save()
 
-                .add(Actor.SumIntegerFilter.class)
+                .add(Filter.SumIntegerFilter.class)
                 .setViewArg(R.drawable.filter)
                 .setTag("Accumulate")/*.setLogLevel()*/
                 .save()
 
-                .add(Actor.IntegerCounter.class)
+                .add(Generator.IntegerCounter.class)
                 .setViewArg(R.drawable.rotate).setTag("Counter")/*.setLogLevel()*/.save()
 
-                .add(Actor.SumIntegerFilter.class)
+                .add(Filter.SumIntegerFilter.class)
                 .setViewArg(R.drawable.plus).setTag("Sum").save()
 //				.addFocusable(FloatValue.class)
 //				.arg(1f, false)
 //				.setViewArg(R.drawable.f123)
 //				.setTag("Decimal")
 //
-                .add(Exp.class, 1f, 10000)
+                .add(Generator.Exp.class, 1f, 10000)
                 .setViewArg(R.drawable.walk)
                 .setTag("Random Walk")
                 .save()
@@ -187,15 +188,15 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //				.setTag("Limited")
 
                 .add(Processor.class).setViewArg(R.drawable.sit).setTag("Random Sit").save()
-                .add(Actor.ValueLogPrinter.class).setViewArg(R.drawable.config).setTag("Log").save()
+                .add(Effector.ValueLogPrinter.class).setViewArg(R.drawable.config).setTag("Log").save()
 
-                .add(Actor.Time.class)
+                .add(Generator.Time.class)
                 .setViewArg(R.drawable.clock).setTag("Time").save()
 
-                .add(Actor.Append.class)
+                .add(Filter.Append.class)
                 .setViewArg(R.drawable.draw).setTag("Writing").save()
 
-                .add(Actor.Show.class)
+                .add(Consumer.Show.class)
                 .setViewArg(R.drawable.draw).setTag("Show").save()
 
 //				.addFocusable(Actor.LogEnabler.class)
@@ -228,6 +229,8 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .setViewArg(R.drawable.motor).setTag("Filter").save()
                 .add((IValue<Integer> v, Integer i) -> { v._set(i); Log.w("test", String.format("OK %d", i)); }, 0)
                 .setViewArg(R.drawable.motor).setTag("Consumer").save()
+                .add((IValue<Integer> p, IValue<Integer> e) -> p._set(e._get()+p._get()), 3, 1)
+                .setViewArg(R.drawable.motor).setTag("Effector").save()
         ;
 
 
@@ -504,7 +507,7 @@ public class TapChainAndroidEditor extends TapChainEditor {
             }
 
             //Create beam view
-            IFocusable spot = null;
+            IFocusable spot;
             switch (al) {
                 case PUSH:
                     MyBeamTapStyle beam = new MyBeamTapStyle(act.getResources(), v, al, clz);

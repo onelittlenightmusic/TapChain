@@ -1,17 +1,21 @@
 package org.tapchain.core;
 
+import android.util.Log;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONSerializable {
 	Class<? extends PIECE> cls = null;
-	ArrayList<ConnectionBlueprint> connect = new ArrayList<ConnectionBlueprint>();
-	ArrayList<IBlueprint> children = new ArrayList<IBlueprint>();
+	ArrayList<ConnectionBlueprint> connect = new ArrayList<>();
+	ArrayList<IBlueprint> children = new ArrayList<>();
 	IBlueprint view = null;
 	TmpInstance<PIECE> This = null;
 	Class<?> parent_type;
@@ -123,14 +127,16 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			InvocationTargetException, NoSuchMethodException {
 		if (args != null)
 			A:for(Constructor c: cls.getConstructors()) {
-				Type[] ts = c.getParameterTypes();
-				if(ts.length != types.length)
-					continue A;
+				Class[] ts = c.getParameterTypes();
+				if(ts.length != types.length) {
+//                    log("Not assignable %d->%d", ts.length, types.length);
+                    continue A;
+                }
 				for(int i = 0; i < ts.length; i++) {
-					Class<?> t = (Class<?>)ts[i];
+//					Class<?> t = (Class<?>)ts[i];
 					Class<?> c1 = types[i];
-					if(!t.isAssignableFrom(c1)) {
-                        log("Not assignable %s->%s", t.getSimpleName(), c1.getSimpleName());
+					if(!checkAssignability(ts[i], c1)) {
+                        log("Not assignable %s->%s", ts[i].getSimpleName(), c1.getSimpleName());
                         continue A;
                     }
 				}
@@ -138,6 +144,28 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			}
 		return cls.newInstance();
 	}
+
+    private static final Map<Class<?>, Class<?>> PrimitiveWrapper
+            = new HashMap<Class<?>, Class<?>>() {
+        {
+            put(boolean.class, Boolean.class);
+            put(byte.class, Byte.class);
+            put(char.class, Character.class);
+            put(double.class, Double.class);
+            put(float.class, Float.class);
+            put(int.class, Integer.class);
+            put(long.class, Long.class);
+            put(short.class, Short.class);
+            put(void.class, Void.class);
+        }
+    };
+
+    public static boolean checkAssignability(Class<?> parent, Class<?> child) {
+        return parent.isAssignableFrom(child)
+                || (parent.isPrimitive() && PrimitiveWrapper.containsKey(parent)
+                    && PrimitiveWrapper.get(parent).isAssignableFrom(child)
+        );
+    }
 
 	public PIECE __newInstance(IManager<PIECE, PIECE> maker, Class<?>[] types,
 			Object[] args) throws ChainException {
@@ -370,7 +398,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		return tag;
 	}
 
-	ArrayList<IBlueprintInitialization> inits = new ArrayList<IBlueprintInitialization>(); 
+	ArrayList<IBlueprintInitialization> inits = new ArrayList<>();
 	@Override
 	public void setInitialization(IBlueprintInitialization i) {
 		inits.add(i);
@@ -403,7 +431,8 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
         notif.onFocus(connectSet);
 	}
 	
-	public void log(String format, String...l) {
+	public void log(String format, Object...l) {
+//        Log.w("test", String.format(format, l));
 	}
 
 	@Override

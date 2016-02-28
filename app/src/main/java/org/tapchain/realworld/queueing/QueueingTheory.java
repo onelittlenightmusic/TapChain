@@ -1,11 +1,11 @@
 package org.tapchain.realworld.queueing;
 
-import org.tapchain.core.Actor.FloatFilter;
+import org.tapchain.core.Filter;
 import org.tapchain.core.IValue;
 import org.tapchain.core.IValueLog;
 
 public class QueueingTheory {
-	public static class Processor extends FloatFilter implements IValueLog {
+	public static class Processor extends Filter.FloatFilter implements IValueLog {
 		float lastInput = 0f;
 		float lastOutput = 0f;
 		int count = 0;

@@ -1,18 +1,17 @@
 package org.tapchain.game;
 
-import org.tapchain.core.Actor;
-import org.tapchain.core.Actor.Filter;
-import org.tapchain.core.Actor.OriginalEffector;
-import org.tapchain.core.Actor.ValueArrayEffector;
 import org.tapchain.core.ChainException;
-import org.tapchain.core.PathType;
+import org.tapchain.core.Effector;
+import org.tapchain.core.Filter;
+import org.tapchain.core.Generator;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IValue;
-import org.tapchain.core.actors.ViewActor;
+import org.tapchain.core.PathType;
 import org.tapchain.core.WorldPoint;
+import org.tapchain.core.actors.ViewActor;
 
 public class CarEngineer {
-	public static class Engine extends OriginalEffector<Tire, AccelAngle> {
+	public static class Engine extends Effector<Tire, AccelAngle> {
 		/**
 		 * 
 		 */
@@ -121,7 +120,7 @@ public class CarEngineer {
 		
 	}
 	
-	public static class RepeatRoad extends ValueArrayEffector<IPoint> implements Road {
+	public static class RepeatRoad extends Effector.ValueArrayEffector<IPoint> implements Road {
 		private static final long serialVersionUID = -3203024211611501934L;
 		float radius = 300f;
 		IPoint lastPoint = null, nextGoal = null;
@@ -165,7 +164,7 @@ public class CarEngineer {
 		}
 	}
 	
-	public static class AccelPedal extends Actor.SimpleGenerator<AccelAngle> {
+	public static class AccelPedal extends Generator.SimpleGenerator<AccelAngle> {
 		/**
 		 * 
 		 */
@@ -185,7 +184,7 @@ public class CarEngineer {
 		}
 	}
 	
-	public static class BrakePedal extends Actor.SimpleGenerator<BrakeAngle> {
+	public static class BrakePedal extends Generator.SimpleGenerator<BrakeAngle> {
 		public BrakePedal() {
 			super();
 		}

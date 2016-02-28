@@ -9,8 +9,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.Effector;
 import org.tapchain.core.IValue;
 import org.tapchain.realworld.MainActivity;
+
+import java.lang.reflect.Constructor;
 
 import static java.lang.Thread.sleep;
 
@@ -40,6 +43,11 @@ public class TapChainLogicTest2 {
                     Log.w("test", String.format("OK %d", i));
                 }, 0)
                 .save();
+        StringBuilder stringBuilder = new StringBuilder();
+        for(Constructor c : Effector.EffectorSkelton.class.getConstructors())
+            for(Class cls : c.getParameterTypes())
+                stringBuilder.append(cls.toString());
+        Log.w("test", stringBuilder.toString());
     }
 
 

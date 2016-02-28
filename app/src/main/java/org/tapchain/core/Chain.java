@@ -25,7 +25,7 @@ public class Chain implements JSONSerializable {
 	ILogHandler log = null;
 	String name = "";
 	Chain(int _mode, int time) {
-		aFunc = new ConcurrentSkipListSet<IPiece>();
+		aFunc = new ConcurrentSkipListSet<>();
 		mode = _mode;
         this.time = time;
 		setCtrl(new ChainController(time));
@@ -41,20 +41,16 @@ public class Chain implements JSONSerializable {
 
 	public Chain setCallback(final IControlCallback cb) {
 		if (cb == null) {
-			getCtrl().Set(new IControlCallback() {
-				public boolean onCalled() {
-					Chain.this.notifyAllFunc();
-					return false;
-				}
-			});
+			getCtrl().Set(() -> {
+                Chain.this.notifyAllFunc();
+                return false;
+            });
 		} else {
-			getCtrl().Set(new IControlCallback() {
-				public boolean onCalled() {
-					cb.onCalled();
-					Chain.this.notifyAllFunc();
-					return false;
-				}
-			});
+			getCtrl().Set(() -> {
+                cb.onCalled();
+                Chain.this.notifyAllFunc();
+                return false;
+            });
 		}
 		return this;
 	}
@@ -96,10 +92,8 @@ public class Chain implements JSONSerializable {
                 signal.await(time, TimeUnit.MILLISECONDS);
             else
     			signal.await();
-		} catch (BrokenBarrierException e) {
-		} catch (TimeoutException e) {
-//            e.printStackTrace();
-        }
+		} catch (BrokenBarrierException | TimeoutException ignored) {
+		}
     }
 
 	public void setName(String _name) {
@@ -109,11 +103,8 @@ public class Chain implements JSONSerializable {
 	public String getName() {
 		return name;
 	}
-	public enum Flex {
-		FIXED, FLEX
-	}
 
-	public ChainPieceOperator getOperator() {
+    public ChainPieceOperator getOperator() {
 		return operator;
 	}
 
@@ -157,7 +148,7 @@ public class Chain implements JSONSerializable {
 	}
 
 	public class ChainOperator {
-		List<IPiece> q = new ArrayList<IPiece>();
+		List<IPiece> q = new ArrayList<>();
 		Chain _p = null;
 
 		public ChainOperator(Chain parent) {
@@ -253,9 +244,9 @@ public class Chain implements JSONSerializable {
 	}
 
     public interface IErrorCode {
-		public boolean isLocked();
-		public boolean isInterrupted();
-		public PathType getPathTypeLocked();
+		boolean isLocked();
+		boolean isInterrupted();
+		PathType getPathTypeLocked();
 	}
 
 	public enum PieceErrorCode implements IErrorCode {
@@ -281,14 +272,14 @@ public class Chain implements JSONSerializable {
 	}
 
 	public interface IPathListener {
-		public void OnPushed(Connector p, Object obj)
+		void OnPushed(Connector p, Object obj)
 				throws InterruptedException;
 	}
 
 	public interface Tickable {
         int tick(Packet packet);
 
-        public int getTickInterval();
+        int getTickInterval();
 	}
 
 	@Override

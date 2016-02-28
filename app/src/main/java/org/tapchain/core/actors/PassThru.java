@@ -1,13 +1,13 @@
 package org.tapchain.core.actors;
 
-import org.tapchain.core.Actor;
+import org.tapchain.core.Filter;
 import org.tapchain.core.IFunc;
 import org.tapchain.core.IValue;
 
 /**
  * Created by hiro on 2015/11/10.
  */
-public abstract class PassThru<VALUE> extends Actor.Filter<Void, VALUE, VALUE> {
+public abstract class PassThru<VALUE> extends Filter<Void, VALUE, VALUE> {
     @Override
     public VALUE func(IValue<Void> val, VALUE in) {
         return in;

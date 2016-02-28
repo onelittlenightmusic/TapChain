@@ -1,7 +1,5 @@
 package org.tapchain.core;
 
-import org.tapchain.core.Actor.Filter;
-
 import java.util.List;
 
 @SuppressWarnings("serial")

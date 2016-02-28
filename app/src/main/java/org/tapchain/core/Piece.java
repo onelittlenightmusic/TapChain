@@ -113,9 +113,18 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 			return hasInPath(pathType);
 	}
 	@Override
-	public PathType getPackType(IPiece cp) {
-		return partnerList.getPackType(cp);
+	public PathType getPathTypeTo(IPiece cp) {
+		return partnerList.getPathTypeTo(cp);
 	}
+    public Boolean isOutTo(IPiece cp) {
+        IPath p = partnerList.getPathTo(cp);
+        if(p == null)
+            return null;
+        return p.isOut(this);
+    }
+
+    @Override
+    public IPath getPathTo(IPiece cp) { return partnerList.getPathTo(cp); }
 	//3.Changing state
 
 	protected InPathPack addNewInPack(PathType type) {
@@ -228,13 +237,6 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 		return getInPack(type).input();
 	}
 	//4.Termination
-	@Override
-	public IPath detach(IPiece p) {
-		IPath partner = partnerList.getPath((ChainPiece)p);
-		if(partner == null)
-			return null;
-		return partner.detach();
-	}
 
 	@Override
 	public IPiece end() {
@@ -249,7 +251,7 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 		PartnerList() {
 			partner = new ConcurrentHashMap<PARTNER, IPath>();
 		}
-		public PathType getPackType(IPiece cp) {
+		public PathType getPathTypeTo(IPiece cp) {
 			IPath _path = null;
 			if((_path = partner.get(cp)) == null)
 				return null;
@@ -258,13 +260,13 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 		}
 		public ChainPiece.PartnerList setPartner(IPath o, PARTNER cp, PathType type) {
 			partner.put(cp, o);
-            boolean outOrIn = o.getOut(cp);
+            boolean outOrIn = o.isOut(cp);
             getPartnersByType(outOrIn).get(type).add(cp);
 			return this;
 		}
 		public ChainPiece.PartnerList unsetPartner(IPiece cp) {
 			IPath p = partner.remove(cp);
-            boolean outOrIn = p.getOut(cp);
+            boolean outOrIn = p.isOut(cp);
             for(PathType type: PathType.values())
                 getPartnersByType(outOrIn).get(type).remove(cp);
 			return this;
@@ -287,7 +289,7 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 				pair.detach();
 			partner.clear();
 		}
-		public IPath getPath(ChainPiece cp) {
+		public IPath getPathTo(IPiece cp) {
 			return partner.get(cp);
 		}
 		public Collection<PARTNER> getPartners() {
@@ -303,8 +305,8 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 //			if(getPartners().isEmpty())
 //				return rtn;
 //			for(Map.Entry<PARTNER, IPath> entry: partner.entrySet()) {
-//				if (entry.getValue().getPathType() == pathType)
-//					if(entry.getValue().getOut(piece) == outOrIn)
+//				if (entry.getValue().getPathTypeTo() == pathType)
+//					if(entry.getValue().isOut(piece) == outOrIn)
 //						rtn.add(entry.getKey());
 //			}
 //			return rtn;

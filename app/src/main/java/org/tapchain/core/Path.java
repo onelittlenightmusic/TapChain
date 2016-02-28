@@ -67,7 +67,7 @@ public class Path implements Tickable, IPath {
 	}
 
 	@Override
-	public boolean getOut(IPiece piece) {
+	public boolean isOut(IPiece piece) {
 		return _cp_start == piece;
 	}
 

@@ -50,7 +50,7 @@ public class MainActivityTest {
 //    @Test
 //    public void top() {
 ////        onView(withId(TapChainView.tapOffset+1)).perform(ViewActions.scrollTo());
-////        view.connect(a, LinkType.PULL, b);
+////        view.link(a, LinkType.PULL, b);
 ////        onView(withId(R.id.dustbox)).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
 ////        onView(allOf(withId(10001), isDisplayed(), hasItem)).perform(click()).perform(click()).perform(click()).perform(click()).perform(click()).perform(click());
 //        onData(anything()).inAdapterView(is(instanceOf(SelectGridView.class))).atPosition(0).perform(click());

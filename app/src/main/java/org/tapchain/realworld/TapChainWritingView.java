@@ -48,12 +48,19 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                return getEditor().onSingleTouch(getPosition(e.getX(), e.getY()));
+//                Log.w("Action", "onSingleTapConfirmed called");
+                getEditor().onSingleTouch(getPosition(e.getX(), e.getY()));
+                return false;
             }
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                     float distanceX, float distanceY) {
+//                Log.w("Action", "onScroll called");
+                if(mode == ZOOM) {
+                    //if second pointer has been down, this handler ends soon and continues to onTouchEvent
+                    return false;
+                }
                 if (mode == CAPTURED) {
                     return onSecondTouch(getPosition(e2.getX(), e2.getY()));
                 }
@@ -73,7 +80,9 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                                    float velocityY) {
-                return TapChainWritingView.this.onFling(selected, getVector(velocityX, velocityY));
+//                Log.w("Action", "onFling called");
+                TapChainWritingView.this.onFling(selected, getVector(velocityX, velocityY));
+                return false;
             }
 
             @Override
@@ -96,6 +105,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
         if (gdetect.onTouchEvent(ev))
             return true;
         int action = ev.getAction();
+//        Log.w(TAG, String.format("Action=%d", action));
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 ITap selectedTap = onDown(getPosition(ev.getX(), ev.getY()));
@@ -108,28 +118,30 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
             case MotionEvent.ACTION_POINTER_DOWN:
                 savedMatrix.set(matrix);
                 oldDist = spacing(ev);
-                Log.d(TAG, "oldDist=" + oldDist);
+                Log.w(TAG, "oldDist=" + oldDist);
                 midPoint(mid, ev);
                 if (oldDist > 10f) {
                     mode = ZOOM;
-                    Log.d(TAG, "mode=ZOOM");
+                    Log.w(TAG, "mode=ZOOM");
                     getEditor().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mode == ZOOM) {
+                    Log.w(TAG, "Action_Move,Zoom");
                     float newDist = spacing(ev);
-                    matrix.set(savedMatrix);
                     if (newDist > 10f) {
+                        matrix.set(savedMatrix);
                         float scale = newDist / oldDist;
                         midPoint(mid, ev);
+                        Log.w(TAG, String.format("Action_Move,Zoom,Change %f,%f,%f", scale, mid.x, mid.y));
                         matrix.postScale(scale, scale, mid.x, mid.y);
+                        onDraw();
                     }
                 } else if (mode == CAPTURED) {
+                    Log.w(TAG, "Action_Move");
                     onSecondTouch(getPosition(ev.getX(), ev.getY()));
-                    break;
                 }
-
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:

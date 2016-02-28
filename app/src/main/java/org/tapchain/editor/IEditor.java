@@ -6,6 +6,7 @@ import org.tapchain.core.Factory;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IManager;
+import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManager<ACTOR, ACTOR> {
     /**
-     * Check if an actor tap touches any other actor taps, then connect their actors.
+     * Check if an actor tap touches any other actor taps, then link their actors.
      *
      * @param selected
      *            a target actor tap which is checked
@@ -76,19 +77,21 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManag
 
     void resetNextPos();
 
-    List<IBlueprint<ACTOR>> highlightConnectables(LinkType reverse, IActorTap target, ClassEnvelope ce);
+    List<IBlueprint<ACTOR>> highlightLinkables(LinkType reverse, IActorTap target, ClassEnvelope ce);
 
     /**
      * Connect an actor to another actor
-     * @param a1 actor which connect to another
+     * @param a1 actor which link to another
      * @param type connection type as LinkType
      * @param a2 actor which is connected from a1
      */
-    boolean connect(ACTOR a1, LinkType type, ACTOR a2);
+    boolean link(ACTOR a1, LinkType type, ACTOR a2);
+    IPath unlink(ACTOR x, ACTOR y);
+    LinkType getLinkType(ACTOR a1, ACTOR a2);
 
     void lockReleaseTap(IRelease t);
 
-    void unhighlightAllConnectables();
+    void unhighlightAllLinkables();
 
     void shake(int duration);
 

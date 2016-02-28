@@ -5,6 +5,7 @@ import android.util.Log;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.ChainException;
+import org.tapchain.core.Effector;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.Packet;
@@ -79,7 +80,7 @@ public class PathTap extends AndroidView implements IPathTap {
 		return WorldPoint.zero();
 	}
 
-	public static class PathMover extends ValueEffector<IPoint> {
+	public static class PathMover extends Effector.ValueEffector<IPoint> {
 		float beta = 0f;
 		float dif = 0.01f;
 		PathTap pathTap;

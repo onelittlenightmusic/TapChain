@@ -151,12 +151,12 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
 
     /**
      * Connect an actor to another actor
-     * @param a1 actor which connect to another
+     * @param a1 actor which link to another
      * @param type connection type as LinkType
      * @param a2 actor which is connected from a1
      */
     public void connect(Actor a1, LinkType type, Actor a2) {
-        getEditor().connect(a1, type, a2);
+        getEditor().link(a1, type, a2);
     }
 
     // 2.Getters and setters

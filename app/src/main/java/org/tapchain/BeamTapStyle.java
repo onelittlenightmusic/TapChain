@@ -102,7 +102,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 	@Override
 	public boolean onTouch(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
 		boolean rtn = false;
-		if (edit.connect(a1, LinkType.PUSH, a2)) {
+		if (edit.link(a1, LinkType.PUSH, a2)) {
 			rtn = true;
 		}
 		return rtn;

@@ -7,8 +7,10 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.RectF;
+import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
+import org.tapchain.core.Effector;
 import org.tapchain.editor.ColorLib;
 import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.TapChainAndroidEditor.StateLog;
@@ -275,7 +277,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         IPoint now_size = sizeDefault.scalerNew(getGridSize());
         super.setGridSize(gs);
         WorldPoint final_size = sizeDefault.scalerNew(getGridSize());
-        NewSizer size = new NewSizer(final_size.subNew(now_size)
+        Effector.NewSizer size = new Effector.NewSizer(final_size.subNew(now_size)
                 .multiplyNew(0.25f).setDif(), 4);
         edit.editTap()._move(this)._in().add(size.once())
                 ._out().save();
@@ -464,8 +466,8 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
                 .add(errorMark
                 )
                 ._in()
-                .add(new Actor.Reset(false)/*.setLogLevel(true)*/)
-                .prevEvent(new Actor.Sleep(2000)/*.setLogLevel(true)*/)
+                .add(new Effector.Reset(false)/*.setLogLevel(true)*/)
+                .prevEvent(new Effector.Sleep(2000)/*.setLogLevel(true)*/)
                 .save();
 
         //Create error balloon
@@ -474,7 +476,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
         edit.editTap().add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
-        edit.highlightConnectables(linkType, t, classEnvelopeInLink);
+        edit.highlightLinkables(linkType, t, classEnvelopeInLink);
     }
 
     public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
@@ -482,7 +484,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         if (linkType != null) {
             edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
             t.unsetAccessoryTap(linkType);
-            edit.unhighlightAllConnectables();
+            edit.unhighlightAllLinkables();
         }
     }
 }

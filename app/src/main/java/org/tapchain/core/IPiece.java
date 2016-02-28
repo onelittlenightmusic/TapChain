@@ -38,8 +38,7 @@ public interface IPiece<PARTNER extends IPiece> {
 
 	void setPartner(IPath chainPath, IPiece _cp_start, PathType type_in);
 
-	IPath detach(IPiece y);
-
+    IPath getPathTo(IPiece cp);
 	Collection<PARTNER> getPartners();
 
 	/** Check connection between this object and secondpiece.
@@ -57,7 +56,7 @@ public interface IPiece<PARTNER extends IPiece> {
 
 	<T> T __exec(T obj, String flg);
 
-	PathType getPackType(IPiece cp);
+	PathType getPathTypeTo(IPiece cp);
 
 	OutPathPack getOutPack(PathType stack);
 

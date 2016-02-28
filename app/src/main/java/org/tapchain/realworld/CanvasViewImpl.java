@@ -14,7 +14,10 @@ import org.tapchain.ActorTap;
 import org.tapchain.AndroidActor;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ChainException;
+import org.tapchain.core.Effector;
+import org.tapchain.core.Factory;
 import org.tapchain.core.IActor;
+import org.tapchain.core.IBlueprintInitialization;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IPressed;
@@ -24,11 +27,9 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
+import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.ITap;
 import org.tapchain.editor.PaletteSort;
-import org.tapchain.core.Factory;
-import org.tapchain.core.IBlueprintInitialization;
-import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.TapChainEditor;
 
 /**
@@ -40,7 +41,6 @@ public class CanvasViewImpl extends TapChainWritingView {
     public static int vector_max = 700;//, border2 = 3 * vector_max / 2;
     boolean magnet = false;
     Actor touch = null;
-
 
     public CanvasViewImpl(Context context) {
         super(context);
@@ -55,40 +55,41 @@ public class CanvasViewImpl extends TapChainWritingView {
                 Paint paint_ = new Paint();
 
                 public void view_init() throws ChainException {
+                    setSize(new WorldPoint(100f, 100f));
+                    setAlpha(100);
+
                     IPoint p = (WorldPoint) pullInActor().getObject();
                     setCenter(p);
+
                     ITap t = getEditor().searchTouchedTap(p);
                     int c = Color.BLACK;
                     if (t != null) {
                         c = Color.WHITE;
                     }
                     setColor(c);
-                    setSize(new WorldPoint(100f, 100f));
-                    setAlpha(100);
+                    paint_.setColor(getColor());
                 }
 
                 @Override
                 public boolean view_user(Canvas canvas, IPoint sp,
                                          IPoint size, int alpha) {
-                    paint_.setColor(getColor());
                     paint_.setAlpha(alpha);
                     canvas.drawCircle(sp.x(), sp.y(), size.x(), paint_);
                     return false;
                 }
-            }.setLinkClass(LinkType.PULL, Object.class).setLinkClass(LinkType.TO_CHILD, ViewActor.class))
+            })
             ._in()
             .add((ViewActor _p, IValue<Integer> _e) -> {
                     _p.addSize(new WorldPoint(30f, 0f));
                     _p.setAlpha(_p.getAlpha() - 10);
             }, 1, 10)
-            .nextEvent(new Actor.Reset().setContinue(true))._out()
+            .nextEvent(new Effector.Reset().setContinue(true))._out()
             .save();
     }
 
     @Override
     public void paintBackground(Canvas canvas) {
         canvas.drawRect(r, paint);
-        return;
     }
 
     @Override
@@ -143,12 +144,9 @@ public class CanvasViewImpl extends TapChainWritingView {
     @Override
     public void showPalette(final PaletteSort sort) {
         final MainActivity act = (MainActivity) getContext();
-        ((Activity) getContext()).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (act.getGrid() != null)
-                    act.getGrid().setCurrentFactory(sort.getNum());
-            }
+        ((Activity) getContext()).runOnUiThread(() -> {
+            if (act.getGrid() != null)
+                act.getGrid().setCurrentFactory(sort.getNum());
         });
     }
 
@@ -263,8 +261,8 @@ public class CanvasViewImpl extends TapChainWritingView {
             getEditor().editTap()
                     .add(a)
                     ._in()
-                    .add(new Actor.Sleep(2000))
-                    .nextEvent(new Actor.Ender())
+                    .add(new Effector.Sleep(2000))
+                    .nextEvent(new Effector.Ender())
                     ._out()
                     .save();
 //        }
@@ -299,7 +297,7 @@ public class CanvasViewImpl extends TapChainWritingView {
         return true;
     }
 
-    public class Accel extends Actor.Mover {
+    public class Accel extends Effector.Mover {
         float delta = 0.03f;
         int j = 0;
         IPoint wp = null;

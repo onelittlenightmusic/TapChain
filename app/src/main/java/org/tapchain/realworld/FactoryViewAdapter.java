@@ -28,21 +28,30 @@ public class FactoryViewAdapter extends ArrayAdapter<IBlueprint<Actor>> implemen
     Factory<Actor> f;
 
     public FactoryViewAdapter(Context c, GridView parent, TapChainEditor.FACTORY_KEY k) {
-        super(c, R.layout.gridview_layout, ((MainActivity)c).getEditor().getFactory(k));
+        super(c, R.layout.gridview_layout);
         act = (MainActivity) c;
         _parent = parent;
         f = ((MainActivity)c).getEditor().getFactory(k);
+        addAll(f);
         act.getEditor().getFactory(k).setNotifier(this);
     }
 
     @Override
     public void notifyChange() {
-        act.runOnUiThread(() -> {synchronized(f) {FactoryViewAdapter.this.notifyDataSetChanged();}});
+        act.runOnUiThread(() -> {
+            clear();
+            addAll(f);
+            FactoryViewAdapter.this.notifyDataSetChanged();
+    });
     }
 
     @Override
     public void invalidate() {
-        act.runOnUiThread(() -> {synchronized(f) {_parent.invalidate(); }});
+        act.runOnUiThread(() -> {
+            clear();
+            addAll(f);
+            _parent.invalidate();
+        });
     }
 
     @Override

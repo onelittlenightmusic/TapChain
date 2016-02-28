@@ -164,7 +164,7 @@ public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelop
 	}
 	
 	public void log(String format, String... l) {
-//		Log.w("ClassEnvelope", String.format(format, l));
+//		Log.w("ClassEnvelope", String.format(format, (Object[])l));
 	}
 	
 

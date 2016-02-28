@@ -7,6 +7,7 @@ import org.tapchain.core.ChainException;
 import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IActorSharedHandler;
 import org.tapchain.core.IBlueprint;
+import org.tapchain.core.IPath;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
@@ -16,6 +17,8 @@ import org.tapchain.editor.IEditor;
 import org.tapchain.editor.IPathTap;
 import org.tapchain.editor.TapChainEditor.InteractionType;
 import org.tapchain.realworld.R;
+
+import static org.tapchain.core.LinkType.*;
 
 public class ActorEventHandler implements IActorSharedHandler, IActorConnectHandler {
     IEditor<Actor, ActorTap> edit;
@@ -31,13 +34,21 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     @Override
     public boolean onAttach(IActorTap t1, IActorTap t2, Actor a1, Actor a2, InteractionType type) {
         if(!type.touching()) {
+            //check whether actors are already connected
+            LinkType linkType = edit.getLinkType(a1, a2);
+            if(linkType != null) {
+                switch (edit.getLinkType(a1, a2)) {
+                    case FROM_PARENT:
+                    case TO_CHILD:
+                        edit.unlink(a1, a2);
+                }
+//                ;
+            }
             return false;
         }
         if(a1 != null && a2 != null) {
-            if (edit.connect(a1, LinkType.FROM_PARENT, a2)) {
-//                Log.w("Test", String.format("Parent %s to Child %s Succeeded", a1.getTag(), a2.getTag()));
-            } else if (edit.connect(a1, LinkType.TO_CHILD, a2)) {
-//                Log.w("Test", String.format("Child %s to Parent %s Succeeded", a2.getTag(), a1.getTag()));
+            if (edit.link(a1, FROM_PARENT, a2)) {
+            } else if (edit.link(a1, TO_CHILD, a2)) {
             }
         }
         if (t1 instanceof IAttachHandler) {

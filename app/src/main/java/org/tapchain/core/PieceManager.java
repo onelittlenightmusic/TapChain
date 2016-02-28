@@ -96,13 +96,13 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 				toString(pIn, tIn, pOut, tOut));
 		if (pIn.isConnectedTo(pOut)) {
 			logLocal(
-					"connect Failed: pieces are already connected %s",
+					"link Failed: pieces are already connected %s",
 					toString(pIn, tIn, pOut, tOut));
 			return null;
 		}
 		ClassEnvelope cls = __canConnect(pIn, tIn, pOut, tOut);
 		if (cls == null) {
-			logLocal("connect Failed: Argument is null %s",
+			logLocal("link Failed: Argument is null %s",
 					toString(pIn, tIn, pOut, tOut));
 			return null;
 		}
@@ -115,6 +115,20 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
         rtn.setConnectionClass(cls);
 		return rtn;
 	}
+
+    protected static <PIECE extends Piece> PathType getPathType(PIECE pIn, PIECE pOut) {
+        if(pIn != null && pOut != null)
+            return pIn.getPathTypeTo(pOut);
+        return null;
+    }
+    protected static <PIECE extends Piece> Boolean isOutTo(PIECE pIn, PIECE pOut) {
+        if(pIn != null && pOut != null)
+            return pIn.isOutTo(pOut);
+        return null;
+    }
+    protected static <PIECE extends Piece> IPath getPath(PIECE pIn, PIECE pOut) {
+        return pIn.getPathTo(pOut);
+    }
 
 	public String toString(IPiece pFrom, PathType tFrom, IPiece pTo,
 			PathType tTo) {
@@ -231,13 +245,12 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		bp.end();
 	}
 
-
-    public IPath disconnect(IPiece x, IPiece y) {
+    public IPath disconnect(PIECE x, PIECE y) {
 		if (x instanceof ChainPiece)
 			((ChainPiece) x).postAppend();
 		if (y instanceof ChainPiece)
 			((ChainPiece) y).postAppend();
-		return x.detach(y);
+		return disconnect(x.getPathTo(y));
 	}
 
 	PieceManager _appendPassThru(PIECE to, PIECE from) {

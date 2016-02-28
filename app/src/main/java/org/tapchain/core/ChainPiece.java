@@ -183,7 +183,6 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
     public class LogCase {
         String tag = null;
-        int children = 0;
         String prev;
         int prevCount;
         public LogCase(String _tag, String _prev, int _prevCount) {
@@ -420,8 +419,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 	//4.Termination
 	protected void onTerminate() throws ChainException {
 //        end();
-		return;
-	}
+    }
 
 	CountDownLatch lock = null;
 

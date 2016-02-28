@@ -11,6 +11,7 @@ import org.tapchain.core.ChainException;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ChainPiece.PieceState;
+import org.tapchain.core.Effector;
 import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IConnectHandler;
@@ -54,7 +55,7 @@ public class EditorManager extends ActorManager {
         List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
                 0xff777777, 0xff447777, 0xff774444);
         for (PieceState state : PieceState.values()) {
-            ptmp = new Actor.Colorer().color_init(colors.get(state.ordinal()))
+            ptmp = new Effector.Colorer().color_init(colors.get(state.ordinal()))
                     .setParentType(PathType.OFFER).boost();
             tapManager.add(ptmp).save();
             plist.put(state, ptmp);
@@ -177,7 +178,6 @@ public class EditorManager extends ActorManager {
 	public Chain.ConnectionResultPath connect(Actor x, PathType xp, Actor y,
 											PathType yp, boolean addView) {
 		Chain.ConnectionResultPath rtn = super.connect(x, xp, y, yp, addView);
-		try {
 			if(rtn != null) {
 				if(addView && blueprintForPathTap != null) {
 					//PathTap instantiation
@@ -197,10 +197,7 @@ public class EditorManager extends ActorManager {
 					save();
 				}
 			}
-		} catch (ChainException e) {
-			e.printStackTrace();
-		}
-		logLocal("connect ended [%s]", toString(x, xp, y, yp));
+//		logLocal("link ended [%s]", toString(x, xp, y, yp));
 
 		return rtn;
 	}
@@ -259,13 +256,6 @@ public class EditorManager extends ActorManager {
 			((ITapControlInterface)v).unsetActor();
 		editTap().remove((Actor) v);
     }
-
-	@Override
-	public IPath disconnect(IPiece x, IPiece y) {
-		IPath rtn = super.disconnect(x, y);
-		__unsetPathView(rtn);
-		return rtn;
-	}
 
 	@Override
 	public IPath disconnect(IPath path) {

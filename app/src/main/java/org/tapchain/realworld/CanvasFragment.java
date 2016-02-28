@@ -47,7 +47,7 @@ public class CanvasFragment extends Fragment {
 
                 try {
                     editor.editBlueprint()
-                            .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Actor$WordGenerator"), "A", false)
+                            .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Generator$WordGenerator"), "A", false)
                             .setViewArg(getResources().getIdentifier("a" , "drawable", getActivity().getPackageName()))
                             .setTag("Word")
                             //                .setLogLevel()

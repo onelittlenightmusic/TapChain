@@ -191,19 +191,19 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 //		return null;
 //	}
 	
-	public static <PARENT, EFFECT> Actor createEffector(final IEffector<PARENT, EFFECT> effector) {
-		return new Actor.OriginalEffector<PARENT,EFFECT>() {
-			@Override
-			public void effect(PARENT _parent, IValue<EFFECT> _effect_val) throws ChainException {
-				effector.effect(_parent, _effect_val);
-			}
-		};
-	}
+//	public static <PARENT, EFFECT> Actor createEffector(final IEffector<PARENT, EFFECT> effector) {
+//		return new Effector.OriginalEffector<PARENT,EFFECT>() {
+//			@Override
+//			public void effect(PARENT _parent, IValue<EFFECT> _effect_val) throws ChainException {
+//				effector.effect(_parent, _effect_val);
+//			}
+//		};
+//	}
 	
-    public <PARENT, EFFECT> BlueprintManager<TYPE> addEffector(final IEffector<PARENT, EFFECT> effector) {
-        Class rtn = createEffector(effector).getClass();
-        return addWithOuterObject(rtn);
-	}
+//    public <PARENT, EFFECT> BlueprintManager<TYPE> addEffector(final IEffector<PARENT, EFFECT> effector) {
+//        Class rtn = createEffector(effector).getClass();
+//        return addWithOuterObject(rtn);
+//	}
 	
 
 	public BlueprintManager<TYPE> arg(Object... objs) {

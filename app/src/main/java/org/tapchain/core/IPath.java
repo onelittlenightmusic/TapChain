@@ -30,5 +30,5 @@ public interface IPath {
 	public void start();
 
 	PathType getPathType();
-	boolean getOut(IPiece piece);
+	boolean isOut(IPiece piece);
 }
