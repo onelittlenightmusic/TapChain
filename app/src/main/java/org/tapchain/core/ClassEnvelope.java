@@ -9,7 +9,7 @@ import java.util.Map;
 import android.util.Log;
 
 public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelope> {
-	ArrayList<Type> arguments = new ArrayList<Type>();
+	ArrayList<Type> arguments = new ArrayList<>();
 	Type original;
 	Class<?> raw;
 
@@ -35,7 +35,7 @@ public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelop
 	public ClassEnvelope(ParameterizedType pt, Map<Type, Type> convert) {
 		original = pt;
 		raw = (Class<?>) pt.getRawType();
-		arguments = new ArrayList<Type>(ClassLib._getParameterizedType(pt));
+		arguments = new ArrayList<>(ClassLib._getParameterizedType(pt));
 		ClassLib.convertToOriginalType(arguments, convert);
 	}
 
@@ -112,12 +112,14 @@ public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelop
 			log("<Parent->Child> %s -> %s FALSE", toString(), ce0.toString());
 			return false;
 		}
-		ArrayList<Type> parameters = new ArrayList<Type>(ce0.arguments);
+		ArrayList<Type> parameters = new ArrayList<>(ce0.arguments);
 		if(!ce0.raw.equals(raw)) {
 				Map<Type, Type> rtn = ClassLib.getParameterizedTypeOld(ce0.raw, parameters, raw);
 				if(rtn != null)
 //					addLog(String.format("<> MAP %s", rtn.toString()));
-				parameters = new ArrayList<Type>(rtn.values());
+                {
+                    parameters = new ArrayList<>(rtn.values());
+                }
 		}
 //			return false;
 		if(parameters.size() <= arguments.size()) {

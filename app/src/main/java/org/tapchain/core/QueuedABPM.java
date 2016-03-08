@@ -44,7 +44,7 @@ public class QueuedABPM extends ActorBlueprintManager {
 //	}
 //
 //	@Override
-//	public BlueprintManager<TYPE> setViewArg(Object... objs) {
+//	public BlueprintManager<TYPE> view(Object... objs) {
 //		if(now != null)
 //			now.setTapArg(objs);
 //		return this;
@@ -86,18 +86,18 @@ public class QueuedABPM extends ActorBlueprintManager {
 //			if(args != null)
 //				super.arg(args);
 //			if(tag != null)
-//				super.setTag(tag);
+//				super.tag(tag);
 //			if(objs != null)
-//				super.setViewArg(objs);
+//				super.view(objs);
 //			super.save();
 //		}
 //		return;
 //	}
 //
 //	@Override
-//	public BlueprintManager<TYPE> setTag(String tag) {
+//	public BlueprintManager<TYPE> tag(String tag) {
 //		if(now != null)
-//			now.setTag(tag);
+//			now.tag(tag);
 //		return this;
 //	}
 //
@@ -121,7 +121,7 @@ public class QueuedABPM extends ActorBlueprintManager {
 //			this.args = args;
 //			return this;
 //		}
-//		public QueueBlueprint setTag(String tag) {
+//		public QueueBlueprint tag(String tag) {
 //			this.tag = tag;
 //			return this;
 //		}

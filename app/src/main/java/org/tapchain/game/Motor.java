@@ -19,7 +19,7 @@ public class Motor extends Controllable<Self, Electricity, Void, Void> implement
 	
 	public static class MotorPedal extends Effector<Motor, Angle> {
 		@Override
-		public void effect(Motor _t, IValue<Angle> _e) throws ChainException {
+		public void effect(IValue<Angle> _e, Motor _t) throws ChainException {
 			_t.setSpeed(_e._get());
 		}
 		

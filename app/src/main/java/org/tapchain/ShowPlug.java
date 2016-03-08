@@ -7,6 +7,7 @@ import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IPoint;
 import org.tapchain.game.CarEngineer.RotationAcceleration;
 import org.tapchain.realworld.R;
+import org.tapchain.viewlib.DrawLib;
 
 public class ShowPlug {
 	public static void showPlug(Canvas canvas, ClassEnvelope ce, IPoint pt, float theta, boolean female, Paint paint) {

@@ -7,7 +7,6 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.RectF;
-import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Effector;
@@ -50,6 +49,8 @@ import org.tapchain.editor.IEditor;
 import org.tapchain.editor.IPathTap;
 import org.tapchain.editor.ITap;
 import org.tapchain.realworld.R;
+import org.tapchain.viewlib.DrawLib;
+import org.tapchain.viewlib.ShowInstance;
 
 import java.io.Serializable;
 import java.util.Collection;

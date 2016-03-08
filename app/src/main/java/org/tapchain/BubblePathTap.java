@@ -22,6 +22,7 @@ import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.ColorLib;
 import org.tapchain.editor.IActorEditor;
 import org.tapchain.realworld.R;
+import org.tapchain.viewlib.ShowInstance;
 
 import java.util.Arrays;
 import java.util.Queue;
@@ -33,7 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class BubblePathTap extends PathTap implements ISelectable {
     ViewActor start, stop;
     PathType starttype, stoptype;
-    WorldPoint offset1 = new WorldPoint(100f, 0f), offset2 = new WorldPoint(-100f, 0f);
     Paint paint, paint2;
     IPoint sp1, sp2, sp12, sp21;
     // Tickview tickv = new Tickview();
@@ -43,8 +43,8 @@ public class BubblePathTap extends PathTap implements ISelectable {
     ClassEnvelope cls = null;
     Object objcache;
     float gamma = 0.3f;
-    private String objtag;
-//    List<IPoint> ar;
+    //    List<IPoint> ar;
+    int sampling_rate = 1, sampling_count = 0;
 
 
     public BubblePathTap(ViewActor start, ViewActor stop,
@@ -53,7 +53,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
         super();
         bm_heart = BitmapMaker.makeOrReuse(getName(),
                 R.drawable.heart_bright, 30, 30);
-        bl = new ConcurrentLinkedQueue<Pos>();
+        bl = new ConcurrentLinkedQueue<>();
         this.start = start;
         this.stop = stop;
         this.starttype = startType;
@@ -131,7 +131,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
     }
 
     public class Pos {
-        float b, inclement;
+        float b;
         Object obj;
 
         public Pos(int time, Object obj) {
@@ -146,33 +146,42 @@ public class BubblePathTap extends PathTap implements ISelectable {
         public Object getObject() { return obj; }
     }
 
+    public void setTickSamplingRate(int rate) {
+        sampling_rate = rate;
+    }
+
     @Override
     public int onTick(IPath p, final Packet _obj) {
-        this.objcache = _obj.getObject();
-        this.objtag = _obj.getTag();
-        final Object tmp_obj = objcache;
-        final String tmp_objtag = objtag;
-        AndroidActor.AndroidView view
-                = new AndroidActor.AndroidView(getOwnActivity()) {
-            @Override
-            public boolean view_user(Canvas canvas, IPoint sp, IPoint iPoint,
-                                     int alpha) {
-                ShowInstance.showInstance(canvas, tmp_obj, sp, paint2, paint2, tmp_objtag);
-                return true;
-            }
+        if(sampling_count == 0) {
+            this.objcache = _obj.getObject();
+            String objtag = _obj.getTag();
+            final Object tmp_obj = objcache;
+            final String tmp_objtag = objtag;
+            AndroidActor.AndroidView view
+                    = new AndroidActor.AndroidView(getOwnActivity()) {
+                @Override
+                public boolean view_user(Canvas canvas, IPoint sp, IPoint iPoint,
+                                         int alpha) {
+                    ShowInstance.showInstance(canvas, tmp_obj, sp, paint2, paint2, tmp_objtag);
+                    return true;
+                }
 
-        };
-        view.setColorCode(ColorLib.ColorCode.RED)
-                .setPercent(new WorldPoint(200f, 200f))/*.setLogLevel(true)*/;
-        view._get().setOffset(this);
-        view.once();
-        manager.add(view)
-                ._in()
-                .add(new PathMover(this, 0.04f, 24).once()/*.setLogLevel(true)*/)
-                .add(new Actor.Counter(25-1).once()/*.setLogLevel(true)*/)
-                .nextEvent(new Effector.Reset(false).once())
-                .save();
+            };
+            view.setColorCode(ColorLib.ColorCode.RED)
+                    .setPercent(new WorldPoint(200f, 200f))/*.setLogLevel(true)*/;
+            view._get().setOffset(this);
+            view.once();
+            manager.add(view)
+                    ._in()
+                    .add(new PathMover(this, 0.04f, 24).once()/*.setLogLevel(true)*/)
+                    .add(new Actor.Counter(25 - 1).once()/*.setLogLevel(true)*/)
+                    .nextEvent(new Effector.Reset(false).once())
+                    .save();
 
+        }
+        sampling_count++;
+        if(sampling_count >= sampling_rate)
+            sampling_count = 0;
         return 25;
     }
 

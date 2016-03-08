@@ -1,4 +1,4 @@
-package org.tapchain;
+package org.tapchain.viewlib;
 
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
@@ -6,8 +6,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Typeface;
 import android.graphics.drawable.NinePatchDrawable;
-import android.util.Log;
 
+import org.tapchain.BitmapMaker;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IPoint.WPEffect;
 import org.tapchain.core.IValueArray;
@@ -18,6 +18,7 @@ import org.tapchain.game.MyFloat;
 import org.tapchain.realworld.R;
 
 import java.util.Calendar;
+import java.util.HashMap;
 
 public class ShowInstance {
 	static Paint circlePaintFill = new Paint();
@@ -30,6 +31,34 @@ public class ShowInstance {
 	static NinePatchDrawable npd_inside = null;
     static Paint pathInnerPaint = new Paint(),
                 pathInnerPaint2 = new Paint();
+    static HashMap<Class<?>, ClassResource> classResources = new HashMap<>();
+    static class ClassResource {
+        Class<?> cls;
+        Integer image;
+        ClassDrawHandler handler;
+        <T> ClassResource(Class<? extends T> _cls, Integer img, ClassDrawHandler<T> _h) {
+            cls = _cls;
+            image = img;
+            handler = _h;
+        }
+
+        ClassResource(Class<?> _cls, Integer img) {
+            cls = _cls;
+            image = img;
+        }
+
+        Integer getImage() {
+            return image;
+        }
+
+        ClassDrawHandler getHandler() {
+            return handler;
+        }
+    }
+    public interface ClassDrawHandler<T> {
+        String toString(T obj);
+    }
+
 	static {
 		int textSize = 50;
 		circlePaintFill.setAntiAlias(true);
@@ -57,13 +86,21 @@ public class ShowInstance {
         pathInnerPaint2.setPathEffect(new DashPathEffect(new float[]{30f, 10f},
                 0));
 	}
-	static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint pathInnerPaint2*/, String tag) {
+	public static boolean showInstance(Canvas canvas, Object val, IPoint cp, Paint textPaint, Paint innerPaint/*, Paint pathInnerPaint2*/, String tag) {
         //Show Background Color Circle
         circlePaintFill.setColor(0xaa000000+tag.hashCode());
         canvas.drawCircle(cp.x(), cp.y(), 30, circlePaintFill);
         circlePaintFill.setColor(0xccffffff);
 
-		if (val instanceof Integer) {
+        if(classResources.containsKey(val.getClass())) {
+            Class<?> cls = val.getClass();
+            ClassResource clsRes = classResources.get(cls);
+            DrawLib.drawBitmapCenter(canvas, BitmapMaker.makeOrReuse(cls.getSimpleName(), clsRes.getImage()), cp, innerPaint);
+//            DrawLib.drawStringCenter(canvas, cp, "test", textPaint);
+
+            if(clsRes.getHandler() != null)
+                DrawLib.drawStringCenter(canvas, cp, clsRes.getHandler().toString(val), textPaint);
+        } else if (val instanceof Integer) {
             DrawLib.drawStringCenter(canvas, cp, val.toString(), textPaint);
 		} else if (val instanceof Float) {
 			DrawLib.drawStringCenter(canvas, cp, String.format("%.2f",((Float)val)), textPaint);
@@ -89,6 +126,12 @@ public class ShowInstance {
 	}
 
 
+    public static void addClassImage(Class<?> cls, Integer resource) {
+        classResources.put(cls, new ClassResource(cls, resource));
+    }
+    public static <T> void addClassImage(Class<? extends T> cls, Integer resource, ClassDrawHandler<T> draw) {
+        classResources.put(cls, new ClassResource(cls, resource, draw));
+    }
     public static void showPath(Canvas canvas, IValueArray<IPoint> points) {
         Path path = null;
         for (IPoint p : points._valueGetAll())
@@ -171,8 +214,8 @@ public class ShowInstance {
 	public static void showCalendar(Canvas canvas, Calendar obj, IPoint _point, float l) {
 		float diam = l * dm, diah = l * dh;
 		canvas.drawCircle(_point.x(), _point.y(), diam, focuspaint);
-			int _min = ((Calendar) obj).get(Calendar.MINUTE);
-			int _hour = ((Calendar) obj).get(Calendar.HOUR);
+			int _min = obj.get(Calendar.MINUTE);
+			int _hour = obj.get(Calendar.HOUR);
 			float min = (float)_min;
 			float hour = (float)_hour+min/60f;
 //			Log.w("test", String.format("TimeTapStyle was shown.%d:%d",(int)hour, (int)min));

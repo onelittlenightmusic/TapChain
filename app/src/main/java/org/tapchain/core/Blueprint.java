@@ -135,7 +135,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 				for(int i = 0; i < ts.length; i++) {
 //					Class<?> t = (Class<?>)ts[i];
 					Class<?> c1 = types[i];
-					if(!checkAssignability(ts[i], c1)) {
+					if(!ClassLib.checkAssignability(ts[i], c1)) {
                         log("Not assignable %s->%s", ts[i].getSimpleName(), c1.getSimpleName());
                         continue A;
                     }
@@ -145,27 +145,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		return cls.newInstance();
 	}
 
-    private static final Map<Class<?>, Class<?>> PrimitiveWrapper
-            = new HashMap<Class<?>, Class<?>>() {
-        {
-            put(boolean.class, Boolean.class);
-            put(byte.class, Byte.class);
-            put(char.class, Character.class);
-            put(double.class, Double.class);
-            put(float.class, Float.class);
-            put(int.class, Integer.class);
-            put(long.class, Long.class);
-            put(short.class, Short.class);
-            put(void.class, Void.class);
-        }
-    };
 
-    public static boolean checkAssignability(Class<?> parent, Class<?> child) {
-        return parent.isAssignableFrom(child)
-                || (parent.isPrimitive() && PrimitiveWrapper.containsKey(parent)
-                    && PrimitiveWrapper.get(parent).isAssignableFrom(child)
-        );
-    }
 
 	public PIECE __newInstance(IManager<PIECE, PIECE> maker, Class<?>[] types,
 			Object[] args) throws ChainException {

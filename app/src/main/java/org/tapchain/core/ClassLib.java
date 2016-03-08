@@ -304,5 +304,26 @@ public class ClassLib {
 //        Log.w("ClassLib", logs);
     }
 
+    private static final Map<Class<?>, Class<?>> PrimitiveWrapper
+            = new HashMap<Class<?>, Class<?>>() {
+        {
+            put(boolean.class, Boolean.class);
+            put(byte.class, Byte.class);
+            put(char.class, Character.class);
+            put(double.class, Double.class);
+            put(float.class, Float.class);
+            put(int.class, Integer.class);
+            put(long.class, Long.class);
+            put(short.class, Short.class);
+            put(void.class, Void.class);
+        }
+    };
+
+    public static boolean checkAssignability(Class<?> parent, Class<?> child) {
+        return parent.isAssignableFrom(child)
+                || (parent.isPrimitive() && PrimitiveWrapper.containsKey(parent)
+                && PrimitiveWrapper.get(parent).isAssignableFrom(child)
+        );
+    }
 }
 

@@ -210,14 +210,14 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		reserved.addArg(objs);
 		return this;
 	}
-	public BlueprintManager<TYPE> setViewArg(Object... objs) {
+	public BlueprintManager<TYPE> view(Object... objs) {
 		if(!isSetView())
 			setView(defaultView.copyAndRenewArg());
 		getView().addArg(objs);
 		return this;
 	}
 	
-	public BlueprintManager<TYPE> setTag(String tag) {
+	public BlueprintManager<TYPE> tag(String tag) {
 		getRoot().setTag(tag);
 		return this;
 	}

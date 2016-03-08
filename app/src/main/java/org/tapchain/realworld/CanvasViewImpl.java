@@ -79,7 +79,7 @@ public class CanvasViewImpl extends TapChainWritingView {
                 }
             })
             ._in()
-            .add((ViewActor _p, IValue<Integer> _e) -> {
+            .add((IValue<Integer> _e, ViewActor _p) -> {
                     _p.addSize(new WorldPoint(30f, 0f));
                     _p.setAlpha(_p.getAlpha() - 10);
             }, 1, 10)

@@ -1,6 +1,7 @@
 package org.tapchain.game;
 
 import org.tapchain.core.ChainException;
+import org.tapchain.core.Consumer;
 import org.tapchain.core.Effector;
 import org.tapchain.core.Filter;
 import org.tapchain.core.Generator;
@@ -22,7 +23,7 @@ public class CarEngineer {
 //			setPull(true);
 		}
 		@Override
-		public void effect(Tire input, IValue<AccelAngle> _e) throws ChainException {
+		public void effect(IValue<AccelAngle> _e, Tire input) throws ChainException {
 			input._get().set((_e._get().get()+input._get().get()));
 			input._get().increment();
 		}
@@ -80,7 +81,7 @@ public class CarEngineer {
 		}
 	}
 	
-	public static class Tire extends Filter<Speed, RotationAcceleration, Void> {
+	public static class Tire extends Consumer<Speed, RotationAcceleration> {
 
 		/**
 		 * 
@@ -94,13 +95,12 @@ public class CarEngineer {
 			super._set(new Speed());
 		}
 		@Override
-		public Void func(IValue<Speed> val, RotationAcceleration input) {
+		public void consume(IValue<Speed> val, RotationAcceleration input) {
 			float nextSpeed = val._get().get() + tireRadius*input.get();
 			if(nextSpeed < 0f) nextSpeed = 0f;
 			else if(nextSpeed > maxSpeed) nextSpeed = maxSpeed;
 			val._get().set(nextSpeed);
 			val._get().increment();
-			return null;
 		}
 
 		@Override
@@ -158,7 +158,7 @@ public class CarEngineer {
 		}
 		
 		@Override
-		public void effect(IValue<IPoint> _t, IValue<IPoint> _e) throws ChainException {
+		public void effect(IValue<IPoint> _e, IValue<IPoint> _t) throws ChainException {
 			Speed s = (Speed)_t._get();
 			L("1.202 ValueEffector valueSet").go(_t._set(s.set(getPosXY(s.getPos()))));
 		}

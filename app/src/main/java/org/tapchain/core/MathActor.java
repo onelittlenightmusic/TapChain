@@ -10,7 +10,7 @@ public class MathActor {
 			once();
 		}
 		@Override
-		public void effect(IValue<EFFECT> _t, IValue<EFFECT> _e) throws ChainException {
+		public void effect(IValue<EFFECT> _e, IValue<EFFECT> _t) throws ChainException {
 			L("mathEffect").go(_t._set(mathEffect(_t._get(), _e._get())));
 		}
 		public EFFECT mathEffect(EFFECT x, EFFECT y) {
@@ -66,7 +66,7 @@ public class MathActor {
 //			setPull(true);
 		}
 		@Override
-		public void effect(V _t, IValue<Integer> _e) throws ChainException {
+		public void effect(IValue<Integer> _e, V _t) throws ChainException {
 			verb(_t,_e._get());
 			if(_t instanceof ViewActor) {
 				((ViewActor) _t).invalidate();

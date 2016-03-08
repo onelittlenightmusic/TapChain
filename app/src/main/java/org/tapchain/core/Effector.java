@@ -103,14 +103,14 @@ public abstract class Effector<Parent, Effect> extends
     public boolean actorRun(Actor act) throws ChainException {
         Parent _p = getTarget();
         synchronized (_p) {
-            effect(_p, this);
+            effect(this, _p);
         }
         invalidate();
         return increment();
     }
 
     @Override
-    public abstract void effect(Parent _parent, IValue<Effect> _effect_val) throws ChainException;
+    public abstract void effect(IValue<Effect> _effect_val, Parent _parent) throws ChainException;
 
     public static class EffectorSkelton<Parent, Effect> extends
             Effector<Parent, Effect> {
@@ -123,8 +123,8 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(Parent _parent, IValue<Effect> _effect_val) throws ChainException {
-            _effector.effect(_parent, _effect_val);
+        public void effect(IValue<Effect> _effect_val, Parent _parent) throws ChainException {
+            _effector.effect(_effect_val, _parent);
         }
     }
 
@@ -140,7 +140,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(V _p, IValue<E> _e) throws ChainException {
+        public void effect(IValue<E> _e, V _p) throws ChainException {
             register();
         }
 
@@ -171,7 +171,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(IValue<EFFECT> _parent, IValue<EFFECT> _effect_val) throws ChainException {
+        public void effect(IValue<EFFECT> _effect_val, IValue<EFFECT> _parent) throws ChainException {
             L("ValueEffector valueSet").go(_parent._set(_effect_val._get()));
 
         }
@@ -229,7 +229,7 @@ public abstract class Effector<Parent, Effect> extends
         public boolean actorRun(Actor act) throws ChainException {
             IValue<EFFECT> _t = getTarget();
             synchronized (_t) {
-                effect(_t, this);
+                effect(this, _t);
             }
             invalidate();
             return increment();
@@ -354,7 +354,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(IValue<IPoint> _parent, IValue<IPoint> _effect_val) throws ChainException {
+        public void effect(IValue<IPoint> _effect_val, IValue<IPoint> _parent) throws ChainException {
             _parent._set(center.subNew(_effect_val._get()).multiplyNew(coeff).setDif());
         }
 
@@ -372,7 +372,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(ViewActor _parent, IValue<WorldPoint> _effect_val) throws ChainException {
+        public void effect(IValue<WorldPoint> _effect_val, ViewActor _parent) throws ChainException {
             _parent.setPercent(_parent.getPercent().plusNew(_effect_val._get()));
         }
     }
@@ -388,7 +388,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(ViewActor _parent, IValue<WorldPoint> _effect_val) throws ChainException {
+        public void effect(IValue<WorldPoint> _effect_val, ViewActor _parent) throws ChainException {
             _parent.setSize(_effect_val._get().copy().setDif());
         }
     }
@@ -425,7 +425,7 @@ public abstract class Effector<Parent, Effect> extends
 //        }
 
         @Override
-        public void effect(Controllable _parent, IValue<Void> _effect_val) throws ChainException {
+        public void effect(IValue<Void> _effect_val, Controllable _parent) throws ChainException {
             try {
                 Thread.sleep(sleepinterval);
             } catch (InterruptedException e) {
@@ -461,7 +461,7 @@ public abstract class Effector<Parent, Effect> extends
 //        }
 
         @Override
-        public void effect(Controllable _parent, IValue<ControllableSignal> _effect_val) throws ChainException {
+        public void effect(IValue<ControllableSignal> _effect_val, Controllable _parent) throws ChainException {
             _parent.interrupt(_effect_val._get());
 //            return false;
 
@@ -499,7 +499,7 @@ public abstract class Effector<Parent, Effect> extends
 //        }
 
         @Override
-        public void effect(Controllable _parent, IValue<Void> _effect_val) throws ChainException {
+        public void effect(IValue<Void> _effect_val, Controllable _parent) throws ChainException {
             L("Restarter calling").go(_parent.restart());
 //            getTarget(false).invalidate();
 
@@ -527,7 +527,7 @@ public abstract class Effector<Parent, Effect> extends
 //        }
 
         @Override
-        public void effect(Controllable _parent, IValue<String> _effect_val) throws ChainException {
+        public void effect(IValue<String> _effect_val, Controllable _parent) throws ChainException {
             L("LogPrinter").go(_parent.printLastExecLog());
 
         }
@@ -583,7 +583,7 @@ public abstract class Effector<Parent, Effect> extends
 //        }
 
         @Override
-        public void effect(IValueLog _p, IValue<Object> _e) throws ChainException {
+        public void effect(IValue<Object> _e, IValueLog _p) throws ChainException {
             L("ValueLog").go(_set(_p._valueLog()));
         }
 
@@ -612,7 +612,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+        public void effect(IValue<Integer> _e, ViewActor _t) throws ChainException {
             _t.setAlpha(_t.getAlpha() + _e._get());
         }
     }
@@ -624,7 +624,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+        public void effect(IValue<Integer> _e, ViewActor _t) throws ChainException {
             _t.setAngle(_t.getAngle() + _e._get());
         }
     }
@@ -636,7 +636,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+        public void effect(IValue<Integer> _e, ViewActor _t) throws ChainException {
             _t.setColor(_e._get());
         }
     }
@@ -648,7 +648,7 @@ public abstract class Effector<Parent, Effect> extends
         }
 
         @Override
-        public void effect(ViewActor _t, IValue<Integer> _e) throws ChainException {
+        public void effect(IValue<Integer> _e, ViewActor _t) throws ChainException {
             _t.setColor(_t.getColor() + _e._get());
         }
     }

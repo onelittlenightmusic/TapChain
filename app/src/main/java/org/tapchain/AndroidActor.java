@@ -55,6 +55,7 @@ import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.realworld.IIntentHandler;
 import org.tapchain.realworld.OverlayPopupView;
+import org.tapchain.viewlib.DrawLib;
 import org.tapchain.viewlib.IShapeBoundary;
 
 import java.io.File;

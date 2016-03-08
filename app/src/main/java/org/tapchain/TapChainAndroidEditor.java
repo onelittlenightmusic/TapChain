@@ -39,6 +39,7 @@ import org.tapchain.game.ElectricityFactory;
 import org.tapchain.game.Motor;
 import org.tapchain.realworld.R;
 import org.tapchain.realworld.queueing.QueueingTheory.Processor;
+import org.tapchain.viewlib.ShowInstance;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -67,172 +68,189 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //                new WorldPoint(100f, 400f), new WorldPoint(200f, 400f), new WorldPoint(300f, 400f)));
         // Making list of pieces
         editBlueprint()
-                .add(AndroidActor.AndroidImageView.class, act, R.drawable.star1)
-                .setViewArg(R.drawable.star2)
-                .setTag("Star")
-                .save()
+            .add(AndroidActor.AndroidImageView.class, act, R.drawable.star1)
+            .view(R.drawable.star2)
+            .tag("Star")
+            .save()
 
-                .add(AndroidActor.AndroidImageView.class, act, R.drawable.heart_bright)
-                .setViewArg(R.drawable.heart2)
-                .setTag("Heart")
-                .save()
+            .add(AndroidActor.AndroidImageView.class, act, R.drawable.heart_bright)
+            .view(R.drawable.heart2)
+            .tag("Heart")
+            .save()
 
-                .add(AndroidImageMovable.class, act, R.drawable.carframe,
-                        R.drawable.carframe)
-                .setViewArg(R.drawable.carframe)
-                .setTag("Car Frame")
-                .save()
+            .add(AndroidImageMovable.class, act, R.drawable.carframe,
+                    R.drawable.carframe)
+            .view(R.drawable.carframe)
+            .tag("Car Frame")
+            .save()
 
-                .add(AndroidImageMovable.class, act, R.drawable.ray_face, R.drawable.moving)
-                .setViewArg(R.drawable.ray_face)
-                .setTag("Ray")
-                .save()
+            .add(AndroidImageMovable.class, act, R.drawable.ray_face, R.drawable.moving)
+            .view(R.drawable.ray_face)
+            .tag("Ray")
+            .save()
 //
-//				.addFocusable(Actor.ScrollableAdjuster.class).setViewArg(R.drawable.flag).setTag("Adjuster")
+//				.addFocusable(Actor.ScrollableAdjuster.class).view(R.drawable.flag).tag("Adjuster")
 
-//				.addFocusable(Actor.Booster.class).setViewArg(R.drawable.boost1).setTag("Booster")
-//				.addFocusable(Actor.Charger.class).setViewArg(R.drawable.battery1).setTag("Charger")
+//				.addFocusable(Actor.Booster.class).view(R.drawable.boost1).tag("Booster")
+//				.addFocusable(Actor.Charger.class).view(R.drawable.battery1).tag("Charger")
 
-                .add(Effector.Mover.class, new WorldPoint(1f, 0f))
-                .setViewArg(R.drawable.right2)
-                .setTag("Mover")
+            .add(Effector.Mover.class, new WorldPoint(1f, 0f))
+            .view(R.drawable.right2)
+            .tag("Mover")
 //                .setLogLevel()
-                .save()
+            .save()
 
 
 
-                .add(Effector.ArrayJumper.class, (Object) new WorldPoint[]{})
-                .setViewArg(R.drawable.up2)
-                .setTag("Array Jumper")
+            .add(Effector.ArrayJumper.class, (Object) new WorldPoint[]{})
+            .view(R.drawable.up2)
+            .tag("Array Jumper")
 //                .setLogLevel()
-                .save()
+            .save()
 
-                .add(Effector.ArrayMover.class, (Object) new D2Point[]{})
-                .setViewArg(R.drawable.down2)
-                .setTag("Array Mover")
-                .save()
+            .add(Effector.ArrayMover.class, (Object) new D2Point[]{})
+            .view(R.drawable.down2)
+            .tag("Array Mover")
+            .save()
 
-                .add(Generator.WordGenerator.class, "A", false)
-                .setViewArg(R.drawable.a)
-                .setTag("Word")
-                .save()
+            .add(Generator.WordGenerator.class, "A", false)
+            .view(R.drawable.a)
+            .tag("Word")
+            .save()
 
-                .add(AndroidActor.AndroidMail.class, act, "mailto:heretic55@docomo.ne.jp")
-                .setViewArg(R.drawable.mail2)
-                .setTag("Mail to Mari")
+            .add(AndroidActor.AndroidMail.class, act, "mailto:heretic55@docomo.ne.jp")
+            .view(R.drawable.mail2)
+            .tag("Mail to Mari")
 //                .setLogLevel()
-                .save()
+            .save()
 
 
-                .add(AndroidActor.AndroidRecognizer.class, act)
-                .setViewArg(R.drawable.mic)
-                .setTag("Recognizer").setLogLevel()
-                .save()
+            .add(AndroidActor.AndroidRecognizer.class, act)
+            .view(R.drawable.mic)
+            .tag("Recognizer").setLogLevel()
+            .save()
 
 //				.addFocusable(AndroidActor.AndroidCamera.class)
-//				.setViewArg(R.drawable.pic)
-//				.setTag("Camera")
+//				.view(R.drawable.pic)
+//				.tag("Camera")
 
 
-                .add(Generator.IntegerGenerator.class, 1, false)
-                .setViewArg(R.drawable.num)
-                .setTag("Number")
-                .save()
+            .add(Generator.IntegerGenerator.class, 1, false)
+            .view(R.drawable.num)
+            .tag("Number")
+            .save()
 
-//                .add(Actor.PlusIntegerFilter.class).setViewArg(R.drawable.plus2).setTag("Plus").save()
-//                .add(Actor.MultiIntegerFilter.class).setViewArg(R.drawable.multi2).setTag("Multiply").save()
+//                .add(Actor.PlusIntegerFilter.class).view(R.drawable.plus2).tag("Plus").save()
+//                .add(Actor.MultiIntegerFilter.class).view(R.drawable.multi2).tag("Multiply").save()
 
-                .add(PushOut.IntegerPushOut.class)
-                .setViewArg(R.drawable.boost1)
-                .setTag("PushOut")
-                .save()
+            .add(PushOut.IntegerPushOut.class)
+            .view(R.drawable.boost1)
+            .tag("PushOut")
+            .save()
 
-                .add(PassThru.IntegerPassThru.class)
-                .setViewArg(R.drawable.right2)
-                .setTag("PassThru")
-                .save()
+            .add(PassThru.IntegerPassThru.class)
+            .view(R.drawable.right2)
+            .tag("PassThru")
+            .save()
 
-                .add(Filter.PlusIntegerFilter.class)
-                .setViewArg(R.drawable.plus2)
-                .setTag("Plus")/*.setLogLevel()*/
-                .save()
+            .add(Filter.PlusIntegerFilter.class)
+            .view(R.drawable.plus2)
+            .tag("Plus")/*.setLogLevel()*/
+            .save()
 
-                .add(Filter.MultiIntegerFilter.class)
-                .setViewArg(R.drawable.multi2)
-                .setTag("Multi")/*.setLogLevel()*/
-                .save()
+            .add(Filter.MultiIntegerFilter.class)
+            .view(R.drawable.multi2)
+            .tag("Multi")/*.setLogLevel()*/
+            .save()
 
-                .add(Filter.SumIntegerFilter.class)
-                .setViewArg(R.drawable.filter)
-                .setTag("Accumulate")/*.setLogLevel()*/
-                .save()
+            .add(Filter.SumIntegerFilter.class)
+            .view(R.drawable.filter)
+            .tag("Accumulate")/*.setLogLevel()*/
+            .save()
 
-                .add(Generator.IntegerCounter.class)
-                .setViewArg(R.drawable.rotate).setTag("Counter")/*.setLogLevel()*/.save()
+            .add(Generator.IntegerCounter.class)
+            .view(R.drawable.rotate).tag("Counter")/*.setLogLevel()*/.save()
 
-                .add(Filter.SumIntegerFilter.class)
-                .setViewArg(R.drawable.plus).setTag("Sum").save()
+            .add(Filter.SumIntegerFilter.class)
+            .view(R.drawable.plus).tag("Sum").save()
 //				.addFocusable(FloatValue.class)
 //				.arg(1f, false)
-//				.setViewArg(R.drawable.f123)
-//				.setTag("Decimal")
+//				.view(R.drawable.f123)
+//				.tag("Decimal")
 //
-                .add(Generator.Exp.class, 1f, 10000)
-                .setViewArg(R.drawable.walk)
-                .setTag("Random Walk")
-                .save()
+            .add(Generator.Exp.class, 1f, 10000)
+            .view(R.drawable.walk)
+            .tag("Random Walk")
+            .save()
 
 //				.addFocusable(ValueLimited.class)
 //				.arg(20, new Float(1f))
-//				.setViewArg(R.drawable.num)
-//				.setTag("Limited")
+//				.view(R.drawable.num)
+//				.tag("Limited")
 
-                .add(Processor.class).setViewArg(R.drawable.sit).setTag("Random Sit").save()
-                .add(Effector.ValueLogPrinter.class).setViewArg(R.drawable.config).setTag("Log").save()
+            .add(Processor.class).view(R.drawable.sit).tag("Random Sit").save()
+            .add(Effector.ValueLogPrinter.class).view(R.drawable.config).tag("Log").save()
 
-                .add(Generator.Time.class)
-                .setViewArg(R.drawable.clock).setTag("Time").save()
+            .add(Generator.Time.class)
+            .view(R.drawable.clock).tag("Time").save()
 
-                .add(Filter.Append.class)
-                .setViewArg(R.drawable.draw).setTag("Writing").save()
+            .add(Filter.Append.class)
+            .view(R.drawable.draw).tag("Writing").save()
 
-                .add(Consumer.Show.class)
-                .setViewArg(R.drawable.draw).setTag("Show").save()
+            .add(Consumer.Show.class)
+            .view(R.drawable.draw).tag("Show").save()
 
 //				.addFocusable(Actor.LogEnabler.class)
-//				.setViewArg(R.drawable.config).setTag("Log")
+//				.view(R.drawable.config).tag("Log")
 //
-                .add(CarEngineer.AccelPedal.class, 1f, true)
-                .setViewArg(R.drawable.pedal).setTag("Accel Pedal").save()
+            .add(CarEngineer.AccelPedal.class, 1f, true)
+            .view(R.drawable.pedal).tag("Accel Pedal").save()
 
-                .add(CarEngineer.Engine2.class)
-                .setViewArg(R.drawable.engine).setTag("Engine").save()
+            .add(CarEngineer.Engine2.class)
+            .view(R.drawable.engine).tag("Engine").save()
 
-                .add(CarEngineer.Tire.class)
-                .setViewArg(R.drawable.wheel).setTag("Tire").save()
+            .add(CarEngineer.Tire.class)
+            .view(R.drawable.wheel).tag("Tire").save()
 
-                .add(CarEngineer.BrakePedal.class, 1f, true)
-                .setViewArg(R.drawable.pedal).setTag("Brake Pedal").save()
+            .add(CarEngineer.BrakePedal.class, 1f, true)
+            .view(R.drawable.pedal).tag("Brake Pedal").save()
 
-                .add(CarEngineer.Brake.class)
-                .setViewArg(R.drawable.brake).setTag("Brake").save()
+            .add(CarEngineer.Brake.class)
+            .view(R.drawable.brake).tag("Brake").save()
 
 
-                .add(CarEngineer.RepeatRoad.class).setViewArg(R.drawable.roadback).setTag("Road").save()
-                .add(ElectricityFactory.class).setViewArg(R.drawable.electricity).setTag("Electricity").save()
-                .add(Motor.class).setViewArg(R.drawable.motor).setTag("Small motor").save()
-                .add(Motor.class).setViewArg(R.drawable.motor2).setTag("Large motor").save()
-                .add(Motor.MotorPedal.class).setViewArg(R.drawable.pedal).setTag("Motor Pedal").save()
-                .add(v->v._get(), 0)
-                .setViewArg(R.drawable.motor).setTag("Generator").save()
-                .add((IValue<Integer> v, Integer i) -> i + v._get(), 1)
-                .setViewArg(R.drawable.motor).setTag("Filter").save()
-                .add((IValue<Integer> v, Integer i) -> { v._set(i); Log.w("test", String.format("OK %d", i)); }, 0)
-                .setViewArg(R.drawable.motor).setTag("Consumer").save()
-                .add((IValue<Integer> p, IValue<Integer> e) -> p._set(e._get()+p._get()), 3, 1)
-                .setViewArg(R.drawable.motor).setTag("Effector").save()
+            .add(CarEngineer.RepeatRoad.class).view(R.drawable.roadback).tag("Road").save()
+            .add(ElectricityFactory.class).view(R.drawable.electricity).tag("Electricity").save()
+            .add(Motor.class).view(R.drawable.motor).tag("Small motor").save()
+            .add(Motor.class).view(R.drawable.motor2).tag("Large motor").save()
+            .add(Motor.MotorPedal.class).view(R.drawable.pedal).tag("Motor Pedal").save()
+//            .add(self->self._get(), 0)
+//            .view(R.drawable.motor).tag("Generator").save()
+//            .add((IValue<Integer> self, Integer i) -> i + self._get(), 1)
+//            .view(R.drawable.motor).tag("Filter").save()
+//            .add((IValue<Integer> self, Integer i) -> { self._set(i); Log.w("test", String.format("OK %d", i)); }, 0)
+//            .view(R.drawable.motor).tag("Consumer").save()
+//            .add((IValue<Integer> self, IValue<Integer> p) -> p._set(self._get()+p._get()), 3, 1)
+//            .view(R.drawable.motor).tag("Effector").save()
+                .add(self->self._get(), new Power(0f))
+                .view(R.drawable.motor)
+                .tag("Power Generator")
+                .save()
+                .add((IValue<Power> self, Power i) -> Power.plus(i, self._get()), new Power(1f))
+                .view(R.drawable.motor)
+                .tag("Power Filter")
+                .save()
+                .add((IValue<Power> self, Power i) -> { self._set(i); Log.w("test", String.format("OK %d", i.to_f())); }, new Power(0))
+                .view(R.drawable.motor)
+                .tag("Power Consumer")
+                .save()
+                .add((IValue<Power> self, IValue<Power> p) -> p._set(Power.plus(self._get(), p._get())), new Power(3), 1)
+                .view(R.drawable.motor)
+                .tag("Power Effector")
+                .save()
         ;
 
+        ShowInstance.addClassImage(Power.class, R.drawable.electricity, Power::str);
 
     }
 
@@ -243,6 +261,24 @@ public class TapChainAndroidEditor extends TapChainEditor {
     // 2.Getters and setters
 
 
+    public static class Power {
+        float p = 0f;
+        public Power(float value) {
+            p = value;
+        }
+        public float to_f() {
+            return p;
+        }
+        public String toString() {
+            return String.valueOf(p);
+        }
+        public static String str(Power power) {
+            return Float.toString(power.p);
+        }
+        public static Power plus(Power a, Power b) {
+            return new Power(a.to_f() + b.to_f());
+        }
+    }
 
 
 

@@ -3,7 +3,7 @@ package org.tapchain.game;
 import android.graphics.Canvas;
 
 import org.tapchain.AndroidActor.AndroidImageView;
-import org.tapchain.DrawLib;
+import org.tapchain.viewlib.DrawLib;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.realworld.R;

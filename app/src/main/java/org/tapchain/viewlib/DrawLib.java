@@ -1,4 +1,4 @@
-package org.tapchain;
+package org.tapchain.viewlib;
 
 import org.tapchain.core.IPoint;
 

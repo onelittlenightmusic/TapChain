@@ -52,7 +52,6 @@ public abstract class Generator<VALUE, OUTPUT> extends Actor.Memory<VALUE, OUTPU
     public boolean actorInit() throws ChainException {
         super.actorInit();
         init(this);
-        Log.w("test", "generator initialized by");
         return true;
     }
 
@@ -91,6 +90,7 @@ public abstract class Generator<VALUE, OUTPUT> extends Actor.Memory<VALUE, OUTPU
 
         @Override
         public void init(IValue<VALUE> val) {
+            Log.w("test", String.format("generatoR initialized by %s", val.toString()));
             val._set(_init);
         }
 

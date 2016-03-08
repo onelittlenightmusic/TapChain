@@ -15,6 +15,7 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
+import org.tapchain.viewlib.DrawLib;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
