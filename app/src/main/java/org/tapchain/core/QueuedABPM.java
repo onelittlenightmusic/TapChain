@@ -3,8 +3,8 @@ package org.tapchain.core;
 public class QueuedABPM extends ActorBlueprintManager {
 //	ConcurrentLinkedQueue<QueueBlueprint> queued = new ConcurrentLinkedQueue<QueueBlueprint>();
 //	QueueBlueprint now;
-	public QueuedABPM(Factory<Actor> f) {
-		super(f);
+	public QueuedABPM(Chain c, Factory<Actor> f) {
+		super(c, f);
 	}
 //
 //	public void setNow(QueueBlueprint now) {

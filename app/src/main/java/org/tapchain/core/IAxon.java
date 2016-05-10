@@ -1,7 +1,7 @@
 package org.tapchain.core;
 
 public interface IAxon<T> {
-	public static class AxonException extends Exception {
+	class AxonException extends Exception {
 		/**
 		 * 
 		 */
@@ -11,16 +11,16 @@ public interface IAxon<T> {
 			super("PathException");
 		}
 	}
-	public boolean sync_push(T i) throws InterruptedException;
-	public T sync_pop() throws InterruptedException, IAxon.AxonException;
-	public T sync_peek() throws InterruptedException, AxonException;
-	public boolean async_push(T i);
-	public int size();
-	public boolean isEmpty();
-	public void CloseWhenEmpty();
-	public void CloseForced();
-	public boolean isClosed();
-	public IAxon<T> reset();
-	public T getCache();
-	public boolean setSize(int a);
+	boolean sync_push(T i) throws InterruptedException;
+	T sync_pop() throws InterruptedException, IAxon.AxonException;
+	T sync_peek() throws InterruptedException, AxonException;
+	boolean async_push(T i);
+	int size();
+	boolean isEmpty();
+	void CloseWhenEmpty();
+	void CloseForced();
+	boolean isClosed();
+	IAxon<T> reset();
+	T getCache();
+	boolean setSize(int a);
 }

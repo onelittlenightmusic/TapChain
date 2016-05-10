@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unchecked")
-public class EditorManager extends ActorManager {
+public class Editor extends ActorManager {
 	ActorManager tapManager;
 	IActorConnectHandler actorConnectHandler;
 	Blueprint blueprintForPathTap;
@@ -46,7 +46,7 @@ public class EditorManager extends ActorManager {
     /**
      * Constructor
      */
-    public EditorManager() {
+    public Editor() {
         super();
         tapManager = new ActorManager();
         editTap().createChain(50).getChain().setName("System");
@@ -68,7 +68,7 @@ public class EditorManager extends ActorManager {
      * Copy constructor
      * @param e EditorManager to copy
      */
-	public EditorManager(EditorManager e) {
+	public Editor(Editor e) {
 		super(e);
 		tapManager = e.tapManager;
 		dictPiece = e.dictPiece;
@@ -119,7 +119,7 @@ public class EditorManager extends ActorManager {
     }
 
 	protected EditorReturn addAndInstallView(IBlueprint<Actor> blueprint, IPoint nowPoint) throws ChainException {
-        Actor rtn = blueprint.newInstance(this);
+        Actor rtn = blueprint.newInstance();
         Blueprint view = (Blueprint)blueprint.getView();
         if (view != null) {
             ActorTap v = __setPieceView(rtn, view);
@@ -132,12 +132,9 @@ public class EditorManager extends ActorManager {
 
 	ActorTap __setPieceView(Actor actor, final Blueprint bp)
 			throws ChainException {
-		final ActorTap _view;
-		final ActorManager manager = editTap();
-		_view = (ActorTap) bp.newInstance(manager);
+		final ActorTap _view = (ActorTap) bp.newInstance();
 		if (_view == null)
 			throw new ChainException(actor, "view not created");
-		manager.save();
 		dictPiece.put(actor, _view);
 		if(actor.getLogLevel())
 			((ChainPiece)_view).setLogLevel(true);
@@ -158,7 +155,7 @@ public class EditorManager extends ActorManager {
 
             @Override
             public void pushView(IPiece t, Object obj) {
-                if (_view.onPush((Actor) t, obj, manager))
+                if (_view.onPush((Actor) t, obj))
                     getChain().kick(_view);
             }
 
@@ -205,12 +202,9 @@ public class EditorManager extends ActorManager {
 	IPathTap __setPathView(IPath path, IBlueprint _vReserve) {
 		final PathTap _view;
 		try {
-			ActorManager manager = editTap();
-			_view = (PathTap) _vReserve.newInstance(manager);
+			_view = (PathTap) _vReserve.newInstance();
             if (_view == null)
                 return null;
-			manager.save();
-			_view.setEditor(manager);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -293,9 +287,8 @@ public class EditorManager extends ActorManager {
 	}
 
     @Override
-    public EditorManager setLog(ILogHandler l) {
+    public void setLog(ILogHandler l) {
         super.setLog(l);
         editTap().setLog(l);
-        return this;
     }
 }

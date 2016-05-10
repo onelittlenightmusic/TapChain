@@ -1,13 +1,13 @@
 package org.tapchain.core;
 
 public class ActorBlueprintManager extends BlueprintManager<Actor> {
-	public ActorBlueprintManager(Factory<Actor> factory) {
-		super(factory);
+	public ActorBlueprintManager(Chain root, Factory<Actor> factory) {
+		super(root, factory);
 	}
 
 	@Override
 	public Blueprint create() {
-		return new ActorBlueprint();
+		return new ActorBlueprint(getChain());
 	}
 
 	@Override
@@ -17,12 +17,12 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
 
 	@Override
 	public Blueprint create(Class<? extends Actor> _cls) {
-		return new ActorBlueprint(_cls);
+		return new ActorBlueprint(getChain(), _cls);
 	}
 	
 	@Override
 	public BlueprintManager newSession() {
-		return new ActorBlueprintManager(factory).setOuterInstanceForInner(outer);
+		return new ActorBlueprintManager(getChain(), factory).setOuterInstanceForInner(outer);
 	}
 
     @Override

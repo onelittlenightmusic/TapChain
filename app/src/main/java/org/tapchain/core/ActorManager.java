@@ -15,24 +15,13 @@ public class ActorManager extends PieceManager<Actor> {
 		super();
 	}
 	
-	public ActorManager(
-//			IErrorHandler _error,
-			ILogHandler _log)
-	{
-		this();
-		this
-		.setLog(_log)
-//		.setError(_error)
-		;
-	}
-	
 	public ActorManager(ActorManager am) {
-		this(
-//                am.error,
-                am.log
-        );
-
+		super(am);
 	}
+
+    public ActorManager(Chain chain) {
+        super(chain);
+    }
 
     public ActorManager createChain(int time) {
 		setChain(new ActorChain(time));
@@ -41,18 +30,14 @@ public class ActorManager extends PieceManager<Actor> {
 
 	@Override
 	public ActorManager newSession() {
-		return new ActorManager(this)
-			.setChain((ActorChain)chain);
+		ActorManager rtn = new ActorManager(this);
+        rtn.setChain(chain);
+        return rtn;
 	}
-	
+
+
 	//2.Getters and setters
-	public ActorManager setChain(ActorChain c) {
-		super.setChain(c);
-		if(log != null)
-			c.setLog(log);
-		return this;
-	}
-	
+
 	@Override
 	public Actor getPiece() {
 		return super.getPiece();
@@ -66,13 +51,6 @@ public class ActorManager extends PieceManager<Actor> {
 		if(parent != null)
 			return parent;
 		throw new ChainException(this, "No Parent");
-	}
-	@Override
-	public ActorManager setLog(ILogHandler _log) {
-		super.setLog(_log);
-		if(chain != null)
-			chain.setLog(_log);
-		return this;
 	}
 
 	public Actor getRoot() {

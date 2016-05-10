@@ -21,10 +21,18 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
      */
 	public PieceManager(PieceManager m) {
 		this();
+        setChain(m.getChain());
 	}
 
-	public PieceManager newSession() {
-		return new PieceManager(this).setChain(chain);
+    public PieceManager(Chain chain) {
+        this();
+        setChain(chain);
+    }
+
+    public PieceManager newSession() {
+		PieceManager rtn = new PieceManager(this);
+        rtn.setChain(chain);
+        return rtn;
 	}
 
 	// 2.Getters and setters
@@ -32,11 +40,12 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return pt;
 	}
 
-    public PieceManager setChain(Chain c) {
+    @Override
+    public void setChain(Chain c) {
 		chain = c;
-		return this;
 	}
 
+    @Override
 	public Chain getChain() {
 		return chain;
 	}
@@ -294,5 +303,12 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 
     public <PARENT, EFFECT> PieceManager<PIECE> add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
         return this;
+    }
+
+    @Override
+    public void setLog(ILogHandler _log) {
+        super.setLog(_log);
+        if(chain != null)
+            chain.setLog(_log);
     }
 }

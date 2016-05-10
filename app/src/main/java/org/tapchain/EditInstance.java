@@ -3,6 +3,7 @@ package org.tapchain;
 import android.app.Activity;
 
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.Chain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.IValue;
@@ -18,19 +19,34 @@ import org.tapchain.game.MySetPedalTapStyle;
 import org.tapchain.realworld.R;
 
 import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Created by hiro on 2016/01/06.
  */
-public class SelectedTapLockEnvelope implements IRelease {
+public class EditInstance implements IRelease {
     ActorTap setter, exit, restart;
     ViewActor setterText;
     IActorTap t;
+    static HashMap<Class<?>, ClassEditCreator> classEdits = new HashMap<>();
 
+    public interface ClassEditCreator {
+        ActorTap createEditorTap(IActorTap parent);
+    }
 
-    SelectedTapLockEnvelope(Activity act, IActorTap _p, Object val2) {
+    static void addEditCreator(Class<?> cls, ClassEditCreator cec) {
+        classEdits.put(cls, cec);
+    }
+
+    static void removeEditCreator(Class<?> cls) {
+        classEdits.remove(cls);
+    }
+
+    EditInstance(Activity act, IActorTap _p, Object val2) {
         t = _p;
-        if (val2 instanceof String) {
+        if(classEdits.containsKey(val2.getClass())) {
+            setter = classEdits.get(val2.getClass()).createEditorTap(_p);
+        } else if (val2 instanceof String) {
             setterText = new AndroidActor.AndroidTextInput(act, (IValue) _p.getActor());
             setterText._get().setOffset(_p);
             return;
@@ -64,7 +80,8 @@ public class SelectedTapLockEnvelope implements IRelease {
         restart.setColorCode(ColorLib.ColorCode.BLUE);
     }
 
-    public boolean registerToManager(ActorManager manager, IActorEditor edit) {
+    public boolean registerToManager(Chain root, IActorEditor edit) {
+        ActorManager manager = new ActorManager(root);
         if (setter != null) {
             manager.add(setter);
         } else {

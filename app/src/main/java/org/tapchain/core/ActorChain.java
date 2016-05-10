@@ -117,11 +117,5 @@ public class ActorChain extends Chain {
 		Actor push(Object obj);
 	}
 
-	public interface IControllable {
-		void ctrlStart() throws ChainException, InterruptedException;
-		void ctrlStop() throws ChainException;
-
-	}
-
 
 }

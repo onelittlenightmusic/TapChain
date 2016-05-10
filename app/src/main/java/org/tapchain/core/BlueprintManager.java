@@ -16,17 +16,20 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
     IBlueprint defaultView = null;
 	Factory<TYPE> factory = null;
 	protected Object outer;
+    Chain root_chain;
+
 	//1.Initialization
-	public BlueprintManager() {
+	public BlueprintManager(Chain c) {
+        setChain(c);
 	}
 	
-	public BlueprintManager(Factory<TYPE> _factory) {
-		this();
+	public BlueprintManager(Chain c, Factory<TYPE> _factory) {
+		this(c);
 		factory = _factory;
 	}
 	
 	public BlueprintManager(BlueprintManager<TYPE> bm) {
-		this(bm.factory);
+		this(bm.getChain(), bm.factory);
 		setParent(bm);
 		setOuterInstanceForInner(bm.outer);
 		defaultView = bm.defaultView;
@@ -42,7 +45,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 	
 	public Blueprint create() {
-		return new Blueprint();
+		return new Blueprint(getChain());
 	}
 
 	public Blueprint create(Blueprint bp, TYPE... args) {
@@ -50,7 +53,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 
 	public Blueprint create(Class<? extends TYPE> _cls) {
-		return new Blueprint(_cls);
+		return new Blueprint(getChain(), _cls);
 	}
 
 	/**
@@ -221,8 +224,8 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		getRoot().setTag(tag);
 		return this;
 	}
-	public BlueprintManager<TYPE> setDefaultView(Class<? extends ViewActor> _cls) {
-		defaultView = createTapBlueprint(_cls);
+	public BlueprintManager<TYPE> setDefaultView(Chain c, Class<? extends ViewActor> _cls) {
+		defaultView = createTapBlueprint(c, _cls);
 		return this;
 	}
 
@@ -276,19 +279,19 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return prevEvent(create(_cls));
 	}
 	public BlueprintManager<TYPE> pullFrom(TYPE bp, TYPE... args) {
-		return pullFrom(new PieceBlueprintStatic(bp));
+		return pullFrom(new PieceBlueprintStatic(getChain(), bp));
 	}
 	public BlueprintManager<TYPE> and(Actor bp) {
-		return nextPassThru(new PieceBlueprintStatic(bp));
+		return nextPassThru(new PieceBlueprintStatic(getChain(), bp));
 	}
 	public BlueprintManager<TYPE> offerToFamily(Actor bp) {
-		return offerToFamily(new PieceBlueprintStatic(bp));
+		return offerToFamily(new PieceBlueprintStatic(getChain(), bp));
 	}
 	public BlueprintManager<TYPE> child(Actor bp) {
-		return child(new PieceBlueprintStatic(bp));
+		return child(new PieceBlueprintStatic(getChain(), bp));
 	}
     public BlueprintManager<TYPE> prevEvent(Actor bp) {
-        return prevEvent(new PieceBlueprintStatic(bp));
+        return prevEvent(new PieceBlueprintStatic(getChain(), bp));
     }
     public BlueprintManager<TYPE> prevEvent(Blueprint _pbp) {
         IBlueprint past = reserved;
@@ -364,13 +367,13 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 
-	public Blueprint createTapBlueprint(Class<? extends IPiece> _cls) {
+	public Blueprint createTapBlueprint(Chain c, Class<? extends IPiece> _cls) {
 		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
 				|| _cls.isLocalClass()
 				|| _cls.isAnonymousClass())
-			return new TapBlueprint(_cls).addLocalClass(outer.getClass(), outer);
+			return new TapBlueprint(c, _cls).addLocalClass(outer.getClass(), outer);
 		else
-			return new TapBlueprint(_cls);
+			return new TapBlueprint(c, _cls);
 	}
 
 	
@@ -399,6 +402,16 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
     };
     public <PARENT, EFFECT> BlueprintManager<TYPE> add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration) {
         return this;
+    }
+
+    @Override
+    public void setChain(Chain c) {
+        root_chain = c;
+    }
+
+    @Override
+    public Chain getChain() {
+        return root_chain;
     }
 
 }

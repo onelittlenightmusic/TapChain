@@ -1,8 +1,8 @@
 package org.tapchain.core;
 
 public class TapBlueprint extends Blueprint {
-	public TapBlueprint(Class<? extends IPiece> _cls) {
-		super(_cls);
+	public TapBlueprint(Chain c, Class<? extends IPiece> _cls) {
+		super(c, _cls);
 	}
 
 	public TapBlueprint(Blueprint bp, IPiece... args) {

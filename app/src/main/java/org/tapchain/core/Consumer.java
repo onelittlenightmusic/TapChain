@@ -49,7 +49,7 @@ public abstract class Consumer<VALUE, INPUT> extends
         return true;
     }
 
-    public static class ConsumerSkelton<VALUE, INPUT> extends org.tapchain.core.Consumer<VALUE, INPUT> {
+    public static class ConsumerSkelton<VALUE, INPUT> extends Consumer<VALUE, INPUT> {
         IConsumer<VALUE, INPUT> _consumer;
         VALUE _init;
 
@@ -72,7 +72,7 @@ public abstract class Consumer<VALUE, INPUT> extends
         }
     }
 
-    public static class Show extends org.tapchain.core.Consumer<String, Object> {
+    public static class Show extends Consumer<String, Object> {
         public Show() {
             super();
         }

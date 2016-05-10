@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 
 import org.tapchain.core.Actor;
+import org.tapchain.core.ActorManager;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Effector;
@@ -171,7 +172,7 @@ public class BubblePathTap extends PathTap implements ISelectable {
                     .setPercent(new WorldPoint(200f, 200f))/*.setLogLevel(true)*/;
             view._get().setOffset(this);
             view.once();
-            manager.add(view)
+            new ActorManager(getRootChain()).add(view)
                     ._in()
                     .add(new PathMover(this, 0.04f, 24).once()/*.setLogLevel(true)*/)
                     .add(new Actor.Counter(25 - 1).once()/*.setLogLevel(true)*/)

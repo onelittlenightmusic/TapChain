@@ -96,12 +96,12 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 		return this;
 	}
 
-	public ChainPiece setParentChain(Chain c) {
+	public ChainPiece setRootChain(Chain c) {
 		_root_chain = c;
 		return this;
 	}
 	
-	public Chain getParentChain() {
+	public Chain getRootChain() {
 		return _root_chain;
 	}
 
@@ -236,7 +236,7 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 
 	protected boolean _waitNext() throws InterruptedException {
 		if(controlled_by_ac)
-			getParentChain().waitNext(invalidating);
+			getRootChain().waitNext(invalidating);
         invalidating = false;
 		return true;
 	}
@@ -245,8 +245,8 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 		tick(Packet.HeartBeat);//1 is dummy data for onTick handlers
         //If invalidating is on(so this piece was kicked) but main thread stops at _waitNext,
         //Then this calls kick() again to wake up main thread.
-        if(getParentChain() != null)
-            getParentChain().kick(this);
+        if(getRootChain() != null)
+            getRootChain().kick(this);
         invalidating = true;
 	}
 

@@ -55,6 +55,7 @@ public class ShowInstance {
             return handler;
         }
     }
+
     public interface ClassDrawHandler<T> {
         String toString(T obj);
     }

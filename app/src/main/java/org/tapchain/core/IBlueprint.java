@@ -33,11 +33,10 @@ public interface IBlueprint<ACTOR extends IPiece> {
 	
 	//3.Changing state
 	/** Create new instance of this Blueprint.
-	 * @param usermaker Manager class.
-	 * @return 
+	 * @return
 	 * @throws ChainException
 	 */
-	ACTOR newInstance(IManager<ACTOR, ACTOR> usermaker) throws ChainException;
+	ACTOR newInstance() throws ChainException;
 	/** Add local blueprint into current blueprint
 	 * @param _pbp Local blueprint
 	 * @return
@@ -50,12 +49,13 @@ public interface IBlueprint<ACTOR extends IPiece> {
 	IBlueprint refresh();
 	IBlueprint copy();
 	IBlueprint copyAndRenewArg();
-	public void setTag(String tag);
-	public String getTag();
+	void setTag(String tag);
+	String getTag();
 	Class<? extends IPiece> getBlueprintClass();
-	public void setInitialization(IBlueprintInitialization i);
-	public boolean getFocused(LinkType ac);
-	public void highlight(LinkType ac);
-	public void unhighlight();
-	public void setNotification(IBlueprintFocusNotification n);
+	void setInitialization(IBlueprintInitialization i);
+	boolean getFocused(LinkType ac);
+	void highlight(LinkType ac);
+	void unhighlight();
+	void setNotification(IBlueprintFocusNotification n);
+    Chain getRootChain();
 }

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 
 import org.tapchain.AndroidActor;
 import org.tapchain.core.Actor;
+import org.tapchain.core.ActorManager;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IBlueprintFocusNotification;
@@ -35,7 +36,11 @@ public class ActorImage extends ImageView {
     public void init(IBlueprint<Actor> b) {
         try {
                 this.b = b;
-                v = (AndroidActor.AndroidView) b.getView().newInstance(null);
+                //create dummy instance not to be added to chain
+                // (this instance will be removed soon after)
+                IBlueprint<Actor> btap =  b.getView();
+                v = (AndroidActor.AndroidView)btap.newInstance();
+                new ActorManager(btap.getRootChain()).remove(v);
 //            }
         } catch (ChainException e) {
             e.printStackTrace();

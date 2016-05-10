@@ -140,11 +140,11 @@ public class ViewActor extends
 
     // 3.Changing state
     protected void addViewToAnimation() {
-        ((ActorChain) getParentChain()).add(this);
+        ((ActorChain) getRootChain()).add(this);
     }
 
     protected void removeViewFromAnimation() {
-        ((ActorChain) getParentChain()).remove(this);
+        ((ActorChain) getRootChain()).remove(this);
     }
 
     @Override

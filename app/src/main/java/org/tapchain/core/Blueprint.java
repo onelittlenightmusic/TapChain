@@ -4,10 +4,7 @@ import android.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,20 +21,27 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 	PIECE[] var = null;
 	String tag = "";
 	IBlueprintFocusNotification notif;
+    Chain root_chain;
 
 	// 1.Initialization
-	protected Blueprint() {
+	protected Blueprint(Chain c) {
 		This = new TmpInstance(this).setParent(this);
+        setRootChain(c);
 	}
 
-	public Blueprint(Class<? extends PIECE> _cls, PIECE... _args) {
-		this();
+	public Blueprint(Chain c, Class<? extends PIECE> _cls, PIECE... _args) {
+		this(c);
 		setBlueprintClass(_cls);
 		setVar(_args);
 	}
-	
+
+    /**
+     * Copy construction method.
+     * @param bp
+     * @param args
+     */
 	public Blueprint(Blueprint bp, PIECE... args) {
-		this();
+		this(bp.getRootChain());
 		setBlueprintClass(bp.getBlueprintClass());
 		This = bp.This();
 		setVar(args);
@@ -48,6 +52,15 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		children = bp.children;
 		connect = bp.connect;
 	}
+
+    public void setRootChain(Chain c) {
+        root_chain = c;
+    }
+
+    @Override
+    public Chain getRootChain() {
+        return root_chain;
+    }
 
 	/**
 	 * Add argument classes and objects for current blueprint instantiation
@@ -147,39 +160,47 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 
 
 
-	public PIECE __newInstance(IManager<PIECE, PIECE> maker, Class<?>[] types,
-			Object[] args) throws ChainException {
+	public PIECE __newInstance(Class<?>[] types, Object[] args) throws ChainException {
 		PIECE rtn = null;
 		try {
+            IManager<PIECE, PIECE> am = null;
+//            if(maker != null)
+                am = (IManager<PIECE, PIECE>)new ActorManager(getRootChain());
 			rtn = __newRawInstance(types, args);
 //			Log.w("test", "Instance tag: "+ getTag());
 			rtn.setTag(getTag());
 			This.setInstance(rtn);
-			__init_children(rtn, maker);
-			init_user(rtn, maker);
-			if (maker != null) {
-				maker._move(This.getInstance());
-				maker._mark();
-				if (var != null)
-					for (PIECE b : var) {
-						if (b == null)
-							continue;
-						maker.pullFrom(b);
-						maker._gotomark();
-					}
-			}
+			__init_children(rtn, am);
+			init_user(rtn, am);
+
+            if(am != null && rtn != null && getRootChain() != null)
+                Log.w("test", String.format("%s/%s: ADDED %s", am.getChain().getName(), getRootChain().getName(), rtn.getTag()));
+			if (am != null) {
+//                IManager<PIECE, PIECE> am = maker;
+                am._move(This.getInstance());
+                am._mark();
+                if (var != null)
+                    for (PIECE b : var) {
+                        if (b == null)
+                            continue;
+                        am.pullFrom(b);
+                        am._gotomark();
+                    }
+//			}
+//                if (am != null)
+              am.add(rtn).save();
+            }
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw /* ex = */new ChainException(maker,
-					"PieceFactory: cant create new instance");
+			throw /* ex = */new ChainException("PieceFactory: cant create new instance");
 		}
-		if (maker != null) {
-			maker.add(rtn);
-		}
+//		if (maker != null) {
+//			maker.add(rtn);
+//		}
 		return rtn;
 	}
 
-	protected PIECE __newInstance(IManager<PIECE, PIECE> maker)
+	protected PIECE __newInstance()
 			throws ChainException {
 		ArrayList<Class<?>> _types = new ArrayList<>();
 		ArrayList<Object> _obj = new ArrayList<>();
@@ -193,15 +214,15 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 		}
 		PIECE rtn;
 		if (_types.isEmpty())
-			rtn = __newInstance(maker, null, null);
+			rtn = __newInstance(null, null);
         else
-    		rtn = __newInstance(maker, _types.toArray(new Class<?>[] {}),
+    		rtn = __newInstance(_types.toArray(new Class<?>[] {}),
 				_obj.toArray());
 		return rtn;
 	}
 
-	public PIECE newInstance(IManager<PIECE, PIECE> maker) throws ChainException {
-		return __newInstance(maker);
+	public PIECE newInstance() throws ChainException {
+		return __newInstance();
 	}
 
 
@@ -215,10 +236,10 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			throws IllegalAccessException, InstantiationException,
 			ChainException, InterruptedException {
 		for (IBlueprint local : children) {
-			local.newInstance(maker);
+			local.newInstance();
 		}
 		for (ConnectionBlueprint cb : connect)
-			cb.connect(maker);
+			cb.connect();
 		return rtn;
 	}
 
@@ -326,14 +347,15 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			appendee_pack = stack_target;
 		}
 
-		public void connect(IManager<PIECE, PIECE> maker) throws ChainException,
+		public void connect() throws ChainException,
 				InterruptedException, IllegalAccessException,
 				InstantiationException {
-			((PieceManager) maker)
+			new PieceManager<PIECE>()
 					.append(Appender.This().getInstance(), appender_pack,
 							Appendee.This().getInstance(), appendee_pack, false);
 			if (view != null)
-				maker.add(view.newInstance(null));
+//				maker.add(view.newInstance());
+                view.newInstance();
 		}
 
 		public ConnectionBlueprint setview(Blueprint _view) {
@@ -346,8 +368,8 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 	public static class PieceBlueprintStatic<T extends IPiece> extends Blueprint<T> {
 		T instance = null;
 
-		public PieceBlueprintStatic(T bp) {
-			super();
+		public PieceBlueprintStatic(Chain c, T bp) {
+			super(c);
 			instance = bp;
 		}
 

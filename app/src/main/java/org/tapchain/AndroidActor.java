@@ -619,7 +619,12 @@ public class AndroidActor {
 			setColor(in.readInt());
 		}
 
-	}
+        @Override
+        protected void removeViewFromAnimation() {
+            super.removeViewFromAnimation();
+            bm_scaled.recycle();
+        }
+    }
 
 	public static class AndroidImageMovable extends AndroidImageView implements
 			IBoostable {

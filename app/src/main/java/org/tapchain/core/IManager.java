@@ -148,4 +148,18 @@ public interface IManager<T, U> {
      * @return
      */
     <PARENT, EFFECT> IManager<T, U> add(final IEffector<PARENT, EFFECT> effector, final EFFECT init, int duration);
+
+    /**
+     * Setter for root chain. Root chain is a target chain object to add actor onto.
+     * @param c
+     * @return
+     */
+
+    void setChain(Chain c);
+
+    /**
+     * Getter for root chain. Root chain is a target chain object to add actor onto.
+     * @return
+     */
+    Chain getChain();
 }

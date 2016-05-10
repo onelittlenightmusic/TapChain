@@ -1,7 +1,5 @@
 package org.tapchain.editor;
 
-import android.util.Log;
-
 import org.tapchain.ActorTap;
 import org.tapchain.MyFocusControl;
 import org.tapchain.core.Actor;
@@ -42,15 +40,14 @@ import java.util.List;
  * style for tap instantiation and ActorManager for editing actors and taps.
  */
 @SuppressWarnings("serial")
-public abstract class TapChainEditor extends EditorManager implements IControlCallback, ILogHandler,
+public abstract class TapChainEditor extends Editor implements IControlCallback, ILogHandler,
 		IActorEditor {
 	IWindow win = null;
     HashMap<FACTORY_KEY, Factory<Actor>> factories = new HashMap<>();
 	Factory<Actor> factory = new Factory<>(),
 			recent = new Factory<>(), relatives = new Factory<>(),
 			goalFactory = new Factory<>();
-	protected ActorBlueprintManager blueprintManager = new ActorBlueprintManager(
-			factory), goalBlueprintManager = null;
+	protected ActorBlueprintManager blueprintManager, goalBlueprintManager = null;
 	private StyleCollection styles = null;
     private IPoint nextConnectivityPoint = null;
     ISensorView sensorView = null;
@@ -64,8 +61,10 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     EditMode editmode = EditMode.ADD;
 
 	protected TapChainEditor(IWindow w) {
+        super();
 		setWindow(w);
-		goalBlueprintManager = new ActorBlueprintManager(goalFactory);
+        blueprintManager =  new ActorBlueprintManager(getChain(), factory);
+		goalBlueprintManager = new ActorBlueprintManager(getChain(), goalFactory);
 		setAllCallback(this);
 		setPathInterval(1000);
 		setLog(this);
@@ -151,8 +150,8 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
 	public void setStyle(StyleCollection s) {
 		styles = s;
 		blueprintManager.setOuterInstanceForInner(s.getOuter());
-		blueprintManager.setDefaultView(s.getView());
-		Blueprint connbp = blueprintManager.createTapBlueprint(s.getConnect());
+		blueprintManager.setDefaultView(s.getViewChain(), s.getView());
+		Blueprint connbp = blueprintManager.createTapBlueprint(s.getViewChain(), s.getConnect());
 		setPathBlueprint(connbp);
 		setActorConnectHandler(s.getConnectHandler());
 		goalBlueprintManager.setOuterInstanceForInner(s.getOuter());
@@ -291,6 +290,25 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     }
 
     /**
+     * Create an actor instance from its blueprint.
+     *
+     * @param b
+     *            the actor blueprint
+     * @param pos
+     *            position where the actor instance is added
+     * @return EditorReturn including the created actor instance and the its tap instance
+     */
+    public EditorReturn addActorFromBlueprint(IBlueprint b, IPoint pos) {
+        if(b == null)
+            return null;
+        if (pos == null) {
+            pos = getNextPos();
+        }
+        return addActor(b, pos);
+    }
+
+
+    /**
 	 * Create an actor instance from its blueprint.
 	 *
 	 * @param blueprint
@@ -324,31 +342,6 @@ public abstract class TapChainEditor extends EditorManager implements IControlCa
     public void combo(IActorTap t) {
         Actor actorNew = toActor(t), aTarget = getFocusControl().getTargetActor();
         link(aTarget, getFocusControl().getLinkType(), actorNew);
-    }
-
-    /**
-     * Create an actor instance from its blueprint.
-     *
-     * @param b
-     *            the actor blueprint
-     * @param pos
-     *            position where the actor instance is added
-     * @return EditorReturn including the created actor instance and the its tap instance
-     */
-    public EditorReturn addActorFromBlueprint(IBlueprint b, IPoint pos) {
-        if(b == null)
-            return null;
-        if (pos == null) {
-            pos = getNextPos();
-        }
-        return addActor(b, pos);
-    }
-
-    public void start() {
-		if (getChain() == null) {
-			return;
-		}
-		getChain().getOperator().start();
     }
 
 	public void show(Object canvas) {

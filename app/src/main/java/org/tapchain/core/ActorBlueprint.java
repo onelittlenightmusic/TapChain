@@ -6,8 +6,8 @@ import java.util.Map;
 public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint {
     Map<LinkType, ClassEnvelope> links;
 
-	public ActorBlueprint() {
-		super();
+	public ActorBlueprint(Chain c) {
+		super(c);
 	}
 	
 	@Override
@@ -19,8 +19,8 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 		super(ab, args);
 	}
 
-	public ActorBlueprint(Class<? extends Actor> _cls, Actor... _args) {
-		super(_cls, _args);
+	public ActorBlueprint(Chain c, Class<? extends Actor> _cls, Actor... _args) {
+		super(c, _cls, _args);
 	}
 	
 	@Override
@@ -54,8 +54,8 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 
 	
 	@Override
-	public Actor __newInstance(IManager<Actor, Actor> maker) throws ChainException {
-		Actor rtn = super.__newInstance(maker);
+	public Actor __newInstance() throws ChainException {
+		Actor rtn = super.__newInstance();
         rtn.setBlueprint(this);
 		return rtn;
 	}
@@ -70,8 +70,8 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
     }
 
     @Override
-    public Actor newInstance(IManager<Actor, Actor> maker) throws ChainException {
-        Actor rtn = super.newInstance(maker);
+    public Actor newInstance() throws ChainException {
+        Actor rtn = super.newInstance();
         if(logLevel)
             rtn.setLogLevel(true);
         return rtn;

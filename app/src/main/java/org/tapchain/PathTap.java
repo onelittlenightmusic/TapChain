@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.ActorManager;
+import org.tapchain.core.Chain;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.Effector;
 import org.tapchain.core.IPath;
@@ -16,7 +17,7 @@ import org.tapchain.editor.IPathTap;
 public class PathTap extends AndroidView implements IPathTap {
 		IPath myPath = null;
 		IPoint recent = null;
-		ActorManager manager;
+		Chain root;
 
 		public PathTap() {
 			super();
@@ -70,10 +71,10 @@ public class PathTap extends AndroidView implements IPathTap {
 			return p.subNew(getCenter()).getAbs() < 50f;
 		}
 
-	@Override
-	public void setEditor(ActorManager manager) {
-		this.manager = manager;
-	}
+//	@Override
+//	public void setEditor(ActorManager manager) {
+//		this.chain = manager;
+//	}
 
 	@Override
 	public IPoint getPoint(float beta) {

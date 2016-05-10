@@ -265,7 +265,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         if (commit == null)
             return;
         try {
-            edit.editTap()
+            new ActorManager(getRootChain())
                     .add(new AndroidActor.AndroidTTS(getOwnActivity(), CodingLib.talk(actor.getTag(), commit)))
                     .save();
         } catch (ChainException e) {
@@ -280,7 +280,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         WorldPoint final_size = sizeDefault.scalerNew(getGridSize());
         Effector.NewSizer size = new Effector.NewSizer(final_size.subNew(now_size)
                 .multiplyNew(0.25f).setDif(), 4);
-        edit.editTap()._move(this)._in().add(size.once())
+        new ActorManager(getRootChain())._move(this)._in().add(size.once())
                 ._out().save();
         return true;
     }
@@ -319,12 +319,12 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
             ((IStep) actor).onStep();
 //            Log.w("test", "onStep called");
         } else if (actor instanceof IValueArray) {
-            SelectedTapLockEnvelope e = new SelectedTapLockEnvelope(getOwnActivity(), this, actor);
-            e.registerToManager(edit.editTap(), edit);
+            EditInstance e = new EditInstance(getOwnActivity(), this, actor);
+            e.registerToManager(getRootChain(), edit);
         } else if (actor instanceof IValue) {
             Object val = ((IValue) actor)._get();
-            SelectedTapLockEnvelope e = new SelectedTapLockEnvelope(getOwnActivity(), this, val);
-            e.registerToManager(edit.editTap(), edit);
+            EditInstance e = new EditInstance(getOwnActivity(), this, val);
+            e.registerToManager(getRootChain(), edit);
         }
     }
 
@@ -332,7 +332,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
         setOffsetVector();
         LinkType lt = (iActorTap == this) ? linkType : linkType.reverse();
-        edit.editTap().remove((Actor) getAccessoryTap(lt));
+        new ActorManager(getRootChain()).remove((Actor) getAccessoryTap(lt));
         unsetAccessoryTap(lt);
     }
 
@@ -349,13 +349,13 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 
     @Override
-    public boolean onPush(Actor t, Object obj, ActorManager actorManager) {
-        super.onPush(t, obj, actorManager);
-        setPushOutBalloon(this, LinkType.PUSH, obj, actorManager);
+    public boolean onPush(Actor t, Object obj) {
+        super.onPush(t, obj);
+        setPushOutBalloon(this, LinkType.PUSH, obj);
         return true;
     }
 
-    void setPushOutBalloon(IActorTap t, LinkType linkType, Object obj, ActorManager actorManager) {
+    void setPushOutBalloon(IActorTap t, LinkType linkType, Object obj) {
         if (t.getActor().isConnectedTo(linkType)) {
             return;
         }
@@ -367,7 +367,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
         ClassEnvelope classEnvelope = new ClassEnvelope(obj.getClass());
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelope);
-        actorManager.add((Actor) balloon).save();
+        new ActorManager(getRootChain()).add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
     }
 
@@ -463,8 +463,8 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         errorMark.setColorCode(ColorCode.RED)
                 .setPercent(new WorldPoint(200f, 200f));
         errorMark._get().setOffset(t);
-        edit.editTap()
-                .add(errorMark
+        ActorManager manager = new ActorManager(getRootChain());
+        manager.add(errorMark
                 )
                 ._in()
                 .add(new Effector.Reset(false)/*.setLogLevel(true)*/)
@@ -475,7 +475,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         LinkType linkType = actorPullException.getLinkType();
         ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
-        edit.editTap().add((Actor) balloon).save();
+        manager.add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
         edit.highlightLinkables(linkType, t, classEnvelopeInLink);
     }
@@ -483,7 +483,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
         LinkType linkType = actorPullException.getLinkType();
         if (linkType != null) {
-            edit.editTap().remove((Actor) t.getAccessoryTap(linkType));
+            new ActorManager(getRootChain()).remove((Actor) t.getAccessoryTap(linkType));
             t.unsetAccessoryTap(linkType);
             edit.unhighlightAllLinkables();
         }

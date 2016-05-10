@@ -111,7 +111,7 @@ public class Chain implements JSONSerializable {
 	// 3.Changing state
 	public IPiece addPiece(IPiece cp) {
 		if (cp instanceof ChainPiece)
-			((ChainPiece) cp).setParentChain(this);
+			((ChainPiece) cp).setRootChain(this);
 		if (mode == AUTO_MODE) {
 			if (cp instanceof ChainPiece) {
 				((ChainPiece) cp).start();

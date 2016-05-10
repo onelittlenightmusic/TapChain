@@ -9,7 +9,7 @@ public abstract class Manager<T extends IPiece> implements IManager<T, T> {
 		return this;
 	}
 
-	@Override
+    @Override
 	public Manager<T> add(T obj) {
 		return null;
 	}
@@ -56,9 +56,8 @@ public abstract class Manager<T extends IPiece> implements IManager<T, T> {
 		return this;
 	}
 
-	public IManager<T, T> setLog(ILogHandler handle) {
+	public void setLog(ILogHandler handle) {
 		log = handle;
-		return this;
 	}
 
 	@Override

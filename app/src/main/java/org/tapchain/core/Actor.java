@@ -1,12 +1,10 @@
 package org.tapchain.core;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.tapchain.core.ActorChain.IActorInit;
-import org.tapchain.core.ActorChain.IControllable;
 import org.tapchain.core.ActorChain.ILight;
 import org.tapchain.core.ActorChain.IRecorder;
 import org.tapchain.core.ActorChain.ISound;
@@ -23,10 +21,8 @@ import org.tapchain.editor.IActorTap;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,13 +36,6 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("serial")
 public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         IPieceHead, JSONSerializable {
-//    static Map<Class<?>, HashMap<LinkType, ClassEnvelope>> mapLinkClass
-//            = new HashMap<Class<?>, HashMap<LinkType, ClassEnvelope>>() {
-////        {
-////            for (LinkType linkType : LinkType.values())
-////                put(linkType, new HashMap<>());
-////        }
-//    };
 
     static Map<Class<?>, LinkedList<LinkType>> classLimits = new HashMap<>();
 
@@ -69,15 +58,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
 
     public Map<LinkType, ClassEnvelope> initializeLinks(Class<? extends IPiece> registeredClass) {
-////        if (initedClass.contains(registeredClass))
-////            return __getMap(registeredClass);
-//        if (Controllable.class.isAssignableFrom(registeredClass)) {
-//            ClassLibReturn classReturn = getParameters(registeredClass, /* userParameters, */
-//                    Controllable.class);
-//            return  staticRegisterLinkClass(registeredClass, classReturn);
-//        }
-//        return getLinkClassesFromLib();
-////        initedClass.add(registeredClass);
         return overrideLinks(registeredClass, registeredClass, Controllable.class);
     }
 
@@ -145,32 +125,17 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     }
 
     public ClassEnvelope getLinkClassFromLib(LinkType ac) {
-//        if (!mapLinkClass.containsKey(cc))
-//            return null;
         return linkClasses.get(ac);
     }
-
-//    public ClassEnvelope getLinkClassFromLib(LinkType linkType) {
-//        return getLinkClassFromLib(this.getClass(), linkType);
-//    }
 
     public Map<LinkType, ClassEnvelope> getLinkClassesFromLib() {
         return linkClasses;
     }
 
-//    private Map<LinkType, ClassEnvelope> __getMap() {
-//        return linkClasses;
-//    }
-//
-//    private static Map<LinkType, ClassEnvelope> __initLinkClass(Class<?> cls) {
-//        return mapLinkClass.put(cls, new HashMap<>());
-//    }
-
     protected void __addLinkClass(Class<?> cc, LinkType linkType,
                                   Class<?> clz) {
         __addLinkClass(cc, linkType, new ClassEnvelope(Arrays.asList(clz)));
         log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
-
     }
 
     protected void __addLinkClass(Class<?> cc, LinkType linkType,
@@ -263,6 +228,10 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         if (wait)
             rtn.waitWake();
         return rtn;
+    }
+
+    protected ActorManager newManager() {
+        return new ActorManager(getRootChain());
     }
 
     // 3.Changing state
@@ -471,44 +440,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             __setAssociatedClasses(overrideLinks(thisClass, sampleClass, targetClass));
         }
 
-//        public void __initValue(ClassEnvelope classEnvelope) {
-//            if (classEnvelope != null && this instanceof IValue) {
-//                if (((IValue) this)._get() != null)
-//                    return;
-//                Class<?> cls = classEnvelope.getRawClass();
-//                if (IPoint.class.isAssignableFrom(cls)) {
-//                    return;
-//                } else if (cls == Integer.class) {
-//                    ((IValue) this)._set(1);
-//                    return;
-//                }
-//
-//                try {
-//                    ((IValue) this)._set(cls.newInstance());
-//                } catch (IllegalArgumentException | InstantiationException e) {
-//                    e.printStackTrace();
-//                } catch (IllegalAccessException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-
-        //        public INPUT getInputDummy() {
-//            return null;
-//        }
-//
-//        public OUTPUT getOutputDummy() {
-//            return null;
-//        }
-//
-//        public PARENT getParentDummy() {
-//            return null;
-//        }
-//
-//        public VALUE getValueDummy() {
-//            return null;
-//        }
-//
         public INPUT pull() throws ChainException {
             Packet input = L("pull()").go(super.pullInActor());
             pullTag = input.getTag();
@@ -655,14 +586,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             _wake(false);
             ctrlStop();
             return this;
-
         }
 
-        @Override
         public void ctrlStart() throws ChainException, InterruptedException {
         }
 
-        @Override
         public void ctrlStop() {
         }
 
@@ -700,6 +628,11 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
         protected void setNowTag(String now) {
             nowTag = now;
+        }
+
+        @Override
+        public void fork(Actor a) {
+            newManager()._move(this).pushTo(a).save();
         }
     }
 
@@ -1069,82 +1002,6 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 
     }
 
-    public static class Stun extends Loop {
-        boolean started = false;
-
-        @Override
-        public boolean actorRun(Actor act) throws ChainException {
-            started = !started;
-            return started;
-        }
-    }
-
-    static class WorldPointFilter extends
-            Filter<WorldPoint, WorldPoint, WorldPoint> {
-        // 1.Initialization
-        public WorldPointFilter(/* Actor p */) {
-            super();
-        }
-
-        WorldPoint getWorldPoint() throws ChainException {
-            return pull();
-        }
-
-        @Override
-        public ChainPiece setParentChain(Chain c) {
-            ChainPiece rtn = super.setParentChain(c);
-            postSetParent(c);
-            return rtn;
-        }
-
-        protected void postSetParent(Chain c) {
-        }
-
-        @Override
-        public WorldPoint func(IValue<WorldPoint> val, WorldPoint p) {
-            return null;
-        }
-
-        @Override
-        public void init(IValue<WorldPoint> val) {
-            val._set(new WorldPoint());
-        }
-    }
-
-    public static class TouchUpFilter extends Filter<Object, Object, Object> {
-        // 1.Initialization
-        public TouchUpFilter() {
-            super();
-        }
-
-        @Override
-        public Object func(IValue<Object> val, Object obj) {
-            return null;
-        }
-
-        @Override
-        public void init(IValue<Object> val) {
-
-        }
-    }
-
-    public static class WaitEndHeap extends Filter<Object, Object, Object> {
-        WaitEndHeap() {
-            super();
-        }
-
-        @Override
-        public Object func(IValue<Object> val, Object obj) {
-            return null;
-        }
-
-        @Override
-        public void init(IValue<Object> val) {
-
-        }
-
-    }
-
 
     public interface IInit<VALUE> {
         void init(IValue<VALUE> val);
@@ -1165,7 +1022,10 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
 //            return;
         Actor instance;
         try {
-            instance = bp.newInstance(null);
+            instance = bp.newInstance();
+            //create dummy instance not to be added to chain
+            // (this instance will be removed soon after)
+            new ActorManager(bp.getRootChain()).remove(instance);
             return instance.getLinkClassesFromLib();
         } catch (Exception e) {
             e.printStackTrace();

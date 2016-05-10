@@ -9,8 +9,10 @@ public class StyleCollection {
 	Object outer;
 	IActionStyle actionStyle;
 	IActorConnectHandler actorConnectHandler;
-	public StyleCollection(Object context, Class<? extends ViewActor> pieceview, Class<? extends IPiece> connectview, IActionStyle actionstyle, IActorSharedHandler eh, IActorConnectHandler ch) {
+    Chain viewChain;
+	public StyleCollection(Object context, Chain viewChain, Class<? extends ViewActor> pieceview, Class<? extends IPiece> connectview, IActionStyle actionstyle, IActorSharedHandler eh, IActorConnectHandler ch) {
 		outer = context;
+        this.viewChain = viewChain;
 		view = pieceview;
 		connect = connectview;
 		actionStyle = actionstyle;
@@ -31,6 +33,9 @@ public class StyleCollection {
 	public Class<? extends ViewActor> getView() {
 		return view;
 	}
+    public Chain getViewChain() {
+        return viewChain;
+    }
 	public IActionStyle getActionStyle() {
 		return actionStyle;
 	}

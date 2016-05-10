@@ -123,7 +123,7 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 
 
     @Override
-	public boolean onPush(Actor t, Object obj, ActorManager actorManager) {
+	public boolean onPush(Actor t, Object obj) {
 			return true;
 	}
 

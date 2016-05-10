@@ -56,8 +56,10 @@ public class TapChainAndroidEditor extends TapChainEditor {
         BitmapMaker.setActivity(act);
         // Setting styles
         ActorEventHandler aeh = new ActorEventHandler(this, activity);
-        setStyle(new StyleCollection(this, BubbleTapStyle.class,
-                BubblePathTap.class, new AndroidInteractionStyle(),
+        setStyle(new StyleCollection(this, editTap().getChain(),
+                BubbleTapStyle.class,
+                BubblePathTap.class,
+                new AndroidInteractionStyle(),
                 aeh, aeh));
         // setInteract(new LocalInteraction());
 //        geos.add(new Geometry(
@@ -125,10 +127,10 @@ public class TapChainAndroidEditor extends TapChainEditor {
             .save()
 
 
-            .add(AndroidActor.AndroidRecognizer.class, act)
-            .view(R.drawable.mic)
-            .tag("Recognizer").setLogLevel()
-            .save()
+//            .add(AndroidActor.AndroidRecognizer.class, act)
+//            .view(R.drawable.mic)
+//            .tag("Recognizer").setLogLevel()
+//            .save()
 
 //				.addFocusable(AndroidActor.AndroidCamera.class)
 //				.view(R.drawable.pic)
@@ -232,26 +234,29 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //            .view(R.drawable.motor).tag("Consumer").save()
 //            .add((IValue<Integer> self, IValue<Integer> p) -> p._set(self._get()+p._get()), 3, 1)
 //            .view(R.drawable.motor).tag("Effector").save()
-                .add(self->self._get(), new Power(0f))
+                .add(Power::GENERATE, new Power(0f))
                 .view(R.drawable.motor)
                 .tag("Power Generator")
                 .save()
-                .add((IValue<Power> self, Power i) -> Power.plus(i, self._get()), new Power(1f))
+                .add(Power::FILTER_PLUS, new Power(1f))
                 .view(R.drawable.motor)
                 .tag("Power Filter")
                 .save()
-                .add((IValue<Power> self, Power i) -> { self._set(i); Log.w("test", String.format("OK %d", i.to_f())); }, new Power(0))
+//                .add((IValue<Power> self, Power i) -> { self._set(i); Log.w("test", String.format("OK %d", i.to_f())); }, new Power(0))
+                .add(Power::CONSUME, new Power(0))
                 .view(R.drawable.motor)
                 .tag("Power Consumer")
+//                .setLogLevel()
                 .save()
-                .add((IValue<Power> self, IValue<Power> p) -> p._set(Power.plus(self._get(), p._get())), new Power(3), 1)
+//                .add((IValue<Power> self, IValue<Power> p) -> p._set(Power.plus(self._get(), p._get())), new Power(3), 1)
+                .add(Power::EFFECT, new Power(3), 1)
                 .view(R.drawable.motor)
                 .tag("Power Effector")
                 .save()
         ;
 
-        ShowInstance.addClassImage(Power.class, R.drawable.electricity, Power::str);
-
+        ShowInstance.addClassImage(Power.class, R.drawable.electricity, Power::STR);
+        EditInstance.addEditCreator(Power.class, Power::EDIT);
     }
 
     public void setActivity(Activity act) {
@@ -272,11 +277,39 @@ public class TapChainAndroidEditor extends TapChainEditor {
         public String toString() {
             return String.valueOf(p);
         }
-        public static String str(Power power) {
+        public static String STR(Power power) {
             return Float.toString(power.p);
         }
         public static Power plus(Power a, Power b) {
             return new Power(a.to_f() + b.to_f());
+        }
+        public static Power GENERATE(IValue<Power> self) {
+            return self._get();
+        }
+        public static Power FILTER_PLUS(IValue<Power> self, Power i) {
+            return Power.plus(i, self._get());
+        }
+        public static void CONSUME(IValue<Power> self, Power i) {
+            self._set(i);
+            Log.w("test", String.format("OK %f", i.to_f()));
+        }
+        public static void EFFECT(IValue<Power> self, IValue<Power> p) {
+            p._set(Power.plus(self._get(), p._get()));
+        }
+        public static ActorTap EDIT(IActorTap parent) {
+            return new MySetFloatTapStyle(parent) {
+                @Override
+                public void setParentValue(IPoint pos, IPoint vp) {
+                    float j = (pos.subNew(getParentTap().getCenter()).theta()-startangle)/oneangle;
+                    if (j < 0) j += 10f;
+                    j = Math.round(j*10f)*0.1f;
+                    getParentTap().setMyActorValue(new Power(j));
+                }
+                @Override
+                public boolean equalMyValue(Integer val) {
+                    return val == ((Float)((Power)getParentTap().getMyActorValue()).to_f()).intValue();
+                }
+            };
         }
     }
 
