@@ -1,6 +1,6 @@
 package org.tapchain;
 
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.editor.IActorTap;
 
@@ -27,7 +27,7 @@ public class MySetFloatTapStyle extends MySetIntegerTapStyle {
 		return val == ((Float)getParentTap().getMyActorValue()).intValue();
 	}
 	@Override
-	public boolean onRelease(IEditor edit, IPoint pos) {
+	public boolean onRelease(ITapChain edit, IPoint pos) {
 		setParentValue(pos, null);
 		getParentTap().commitMyActorValue();
         return true;

@@ -4,7 +4,7 @@ import org.tapchain.core.Blueprint.TmpInstance;
 
 /** Blueprint interface.
  * Blueprint interface is the template of mutable objects.
- * Manager can create mutable objects from Blueprint.
+ * Manager can __create mutable objects from Blueprint.
  * @author Hiro Osaki/android
  */
 public interface IBlueprint<ACTOR extends IPiece> {

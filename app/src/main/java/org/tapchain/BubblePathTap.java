@@ -21,7 +21,8 @@ import org.tapchain.core.TapMath;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.ColorLib;
-import org.tapchain.editor.IActorEditor;
+import org.tapchain.editor.TapManager;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.realworld.R;
 import org.tapchain.viewlib.ShowInstance;
 
@@ -174,8 +175,8 @@ public class BubblePathTap extends PathTap implements ISelectable {
             view.once();
             new ActorManager(getRootChain()).add(view)
                     ._in()
-                    .add(new PathMover(this, 0.04f, 24).once()/*.setLogLevel(true)*/)
-                    .add(new Actor.Counter(25 - 1).once()/*.setLogLevel(true)*/)
+                    .add(new PathMover(this, 0.1f, 10).once()/*.setLogLevel(true)*/)
+                    .add(new Actor.Counter(10 - 1).once()/*.setLogLevel(true)*/)
                     .nextEvent(new Effector.Reset(false).once())
                     .save();
 
@@ -187,8 +188,8 @@ public class BubblePathTap extends PathTap implements ISelectable {
     }
 
     @Override
-    public void onSelected(IActorEditor edit, IPoint pos) {
+    public void onSelected(ITapChain tapChain, IPoint pos) {
         IPath path = getMyPath();
-        edit.disconnect(path);
+        new TapManager(tapChain).disconnect(path);
     }
 }

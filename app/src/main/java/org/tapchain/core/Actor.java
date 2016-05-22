@@ -97,6 +97,10 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         return this;
     }
 
+    public int getTime() {
+        return time;
+    }
+
     public static boolean staticHasClassLimit(
             Class<?> cls, LinkType al) {
         if (!classLimits.containsKey(cls))
@@ -1023,7 +1027,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         Actor instance;
         try {
             instance = bp.newInstance();
-            //create dummy instance not to be added to chain
+            //__create dummy instance not to be added to chain
             // (this instance will be removed soon after)
             new ActorManager(bp.getRootChain()).remove(instance);
             return instance.getLinkClassesFromLib();

@@ -5,11 +5,12 @@ import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IActorEditor;
+import org.tapchain.editor.IActorManager;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IAttachHandler;
+import org.tapchain.editor.ITapChain;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -19,7 +20,7 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 
-public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IActorEditor, Actor, IActorTap> {
+public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<ITapChain, Actor, IActorTap> {
 	/**
 	 * 
 	 */
@@ -100,9 +101,9 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<IAct
 
 
 	@Override
-	public boolean onTouch(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
+	public boolean onTouch(ITapChain tapChain, IActorTap t2, Actor a1, Actor a2) {
 		boolean rtn = false;
-		if (edit.link(a1, LinkType.PUSH, a2)) {
+		if (tapChain.link(a1, LinkType.PUSH, a2)) {
 			rtn = true;
 		}
 		return rtn;

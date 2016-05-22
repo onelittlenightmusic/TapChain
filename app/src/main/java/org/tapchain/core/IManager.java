@@ -3,7 +3,7 @@ package org.tapchain.core;
 /** Manager.
  * Manager is model class in TapChain.
  * TapChain creates and edits chains of piece class.
- * Manager has permission to create and editActor chains.
+ * Manager has permission to __create and editActor chains.
  * @author Hiro Osaki/android
  *
  * @param <T> Piece class

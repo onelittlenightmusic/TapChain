@@ -1,6 +1,6 @@
 package org.tapchain;
 
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.editor.IActorTap;
 
@@ -12,7 +12,7 @@ public class MyRestartOptionTapStyle extends MySimpleOptionTapStyle {
 	}
 
     @Override
-	public boolean onRelease(IEditor edit, IPoint pos) {
+	public boolean onRelease(ITapChain edit, IPoint pos) {
 		((Controllable)getParentTap().getActor()).interrupt(ControllableSignal.RESTART);
         return true;
 	}

@@ -10,7 +10,7 @@ import android.view.View;
 import org.tapchain.core.Actor;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IBlueprint;
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 
 /**
  * Created by hiro on 2015/12/26.
@@ -21,7 +21,7 @@ public class ActorImageButton extends ActorImage implements
     final MainActivity act;
     private GestureDetector touchDetector;
     Factory<Actor> factory;
-    TapChainEditor.FACTORY_KEY key;
+    TapChain.FACTORY_KEY key;
     int num;
 
     public ActorImageButton(Context context, AttributeSet attr) {
@@ -29,7 +29,7 @@ public class ActorImageButton extends ActorImage implements
         registerToFactory();
         act = (MainActivity) context;
         touchDetector = new GestureDetector(act, this);
-//        factory = ((MainActivity)context).getEditor().getFactory(TapChainEditor.FACTORY_KEY.ALL);
+//        factory = ((MainActivity)context).getSystemChain().getFactory(TapChainEditor.FACTORY_KEY.ALL);
 //        this.key = TapChainEditor.FACTORY_KEY.ALL;
 //        num = 0;
         setOnTouchListener(this);
@@ -38,11 +38,11 @@ public class ActorImageButton extends ActorImage implements
                 R.styleable.ActorImageButton);
         String factory_key = a.getString(R.styleable.ActorImageButton_factoryKey);
         Integer num_in_factory = a.getInteger(R.styleable.ActorImageButton_numInFactory, 0);
-        TapChainEditor.FACTORY_KEY key = TapChainEditor.FACTORY_KEY.valueOf(factory_key);
+        TapChain.FACTORY_KEY key = TapChain.FACTORY_KEY.valueOf(factory_key);
 //        init(context, key, null, num_in_factory);
-        factory = ((MainActivity)context).getEditor().getFactory(key);
+        factory = ((MainActivity)context).getTapChain().getFactory(key);
 //        if(factory == null)
-//            factory = ((MainActivity)c).getEditor().getFactory(key);
+//            factory = ((MainActivity)c).getSystemChain().getFactory(key);
         init(factory.get(num_in_factory));
     }
 
@@ -61,7 +61,7 @@ public class ActorImageButton extends ActorImage implements
 //    public void init(Context c, TapChainEditor.FACTORY_KEY key, Factory<Actor> f, final int j) {
 //        factory = f;
 //        if(f == null)
-//            factory = ((MainActivity)c).getEditor().getFactory(key);
+//            factory = ((MainActivity)c).getSystemChain().getFactory(key);
 //        num = j;
 //        this.key = key;
 //    }

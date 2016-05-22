@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.tapchain.core.Actor;
 import org.tapchain.core.ChainException;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.IRegister;
@@ -34,7 +34,7 @@ public class OptionTapStyle extends ActorTap implements IScrollable, IRegister {
 	}
 	
 	@Override
-	public final boolean onScrolled(IEditor edit, IPoint pos, IPoint vp) {
+	public final boolean onScrolled(ITapChain edit, IPoint pos, IPoint vp) {
 //		setCenter(pos);
 		for(IScrollHandler s : handlers)
 			s.onScroll(edit, this, pos, vp);

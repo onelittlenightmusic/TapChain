@@ -5,5 +5,5 @@ import org.tapchain.core.Actor;
 /**
  * Created by hiro on 2015/05/21.
  */
-public interface IActorAttachHandler extends IAttachHandler<IActorEditor, Actor, IActorTap> {
+public interface IActorAttachHandler extends IAttachHandler<ITapChain, Actor, IActorTap> {
 }

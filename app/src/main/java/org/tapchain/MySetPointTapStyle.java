@@ -1,6 +1,6 @@
 package org.tapchain;
 
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.WorldPoint;
@@ -45,7 +45,7 @@ public class MySetPointTapStyle extends OptionTapStyle implements IScrollHandler
 	}
 
 	@Override
-	public void onScroll(IEditor edit, IActorTap tap, IPoint pos, IPoint vp) {
+	public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
 			setCenter(pos);
 			getParentTap().setMyActorValue(vp/*.plusNew(offset)*/);
 	}

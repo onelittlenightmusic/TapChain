@@ -6,17 +6,7 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
 	}
 
 	@Override
-	public Blueprint create() {
-		return new ActorBlueprint(getChain());
-	}
-
-	@Override
-	public Blueprint create(Blueprint bp, Actor... args) {
-		return new ActorBlueprint(bp, args);
-	}
-
-	@Override
-	public Blueprint create(Class<? extends Actor> _cls) {
+	public Blueprint __create(Class<? extends Actor> _cls) {
 		return new ActorBlueprint(getChain(), _cls);
 	}
 	

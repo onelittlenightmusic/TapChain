@@ -36,7 +36,7 @@ public class ActorImage extends ImageView {
     public void init(IBlueprint<Actor> b) {
         try {
                 this.b = b;
-                //create dummy instance not to be added to chain
+                //__create dummy instance not to be added to chain
                 // (this instance will be removed soon after)
                 IBlueprint<Actor> btap =  b.getView();
                 v = (AndroidActor.AndroidView)btap.newInstance();

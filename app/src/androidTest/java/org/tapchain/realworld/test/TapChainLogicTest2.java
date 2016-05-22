@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.Effector;
 import org.tapchain.core.IValue;
+import org.tapchain.editor.TapManager;
 import org.tapchain.realworld.MainActivity;
 
 import java.lang.reflect.Constructor;
@@ -35,7 +36,7 @@ public class TapChainLogicTest2 {
 
     @Test
     public void testSomeFunction() {
-        ActorManager e = view.getEditor().editTap();
+        ActorManager e = new TapManager(view.getTapChain()).editTap();
         e.add((IValue<Integer> v) -> 1, 0)
                 .pushTo((IValue<Integer> v, Integer i) -> i + v._get(), 1)
                 .pushTo((IValue<Integer> v, Integer i) -> {

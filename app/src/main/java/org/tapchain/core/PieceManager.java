@@ -125,12 +125,12 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return rtn;
 	}
 
-    protected static <PIECE extends Piece> PathType getPathType(PIECE pIn, PIECE pOut) {
+    public static <PIECE extends Piece> PathType getPathType(PIECE pIn, PIECE pOut) {
         if(pIn != null && pOut != null)
             return pIn.getPathTypeTo(pOut);
         return null;
     }
-    protected static <PIECE extends Piece> Boolean isOutTo(PIECE pIn, PIECE pOut) {
+    public static <PIECE extends Piece> Boolean isOutTo(PIECE pIn, PIECE pOut) {
         if(pIn != null && pOut != null)
             return pIn.isOutTo(pOut);
         return null;

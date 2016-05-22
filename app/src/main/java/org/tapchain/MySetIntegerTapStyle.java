@@ -1,6 +1,6 @@
 package org.tapchain;
 
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.IScrollHandler;
@@ -79,12 +79,12 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	}
 
 	@Override
-	public void onScroll(IEditor edit, IActorTap tap, IPoint pos, IPoint vp) {
+	public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
 		setParentValue(pos, vp);
 	}
 
 	@Override
-	public boolean onRelease(IEditor edit, IPoint pos) {
+	public boolean onRelease(ITapChain edit, IPoint pos) {
         if(((WorldPoint)pos.subNew(getParentTap().getCenter())).len() < 150f) {
             setParentValue(pos, null);
             commitParentValue();

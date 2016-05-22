@@ -16,7 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 
 import java.util.ArrayList;
 
@@ -31,7 +31,7 @@ public class GridFragment extends Fragment {
     boolean autohide = false;
     ImageView ShowingDisabled;
     TabHost tabH;
-    ArrayList<TapChainEditor.FACTORY_KEY> factoryList = new ArrayList<>();
+    ArrayList<TapChain.FACTORY_KEY> factoryList = new ArrayList<>();
 
     public GridFragment() {
         super();
@@ -86,11 +86,11 @@ public class GridFragment extends Fragment {
 
         // setup must be called if the tabhost is programmatically created.
         tabH.setup();
-        addTab(tabH, "TS1", TapChainEditor.FACTORY_KEY.ALL,
+        addTab(tabH, "TS1", TapChain.FACTORY_KEY.ALL,
                 0xaa000000, R.drawable.plus);
-        addTab(tabH, "TS2", TapChainEditor.FACTORY_KEY.LOG,
+        addTab(tabH, "TS2", TapChain.FACTORY_KEY.LOG,
                 0xaa220000, R.drawable.history);
-        addTab(tabH, "TS3", TapChainEditor.FACTORY_KEY.RELATIVES,
+        addTab(tabH, "TS3", TapChain.FACTORY_KEY.RELATIVES,
                 0xaa000022, R.drawable.relatives);
         ImageView img = new ImageView(act);
         img.setImageDrawable(getResources()
@@ -109,7 +109,7 @@ public class GridFragment extends Fragment {
     }
 
     public void addTab(TabHost h, String _tag,
-                       final TapChainEditor.FACTORY_KEY key, final int color, int resource) {
+                       final TapChain.FACTORY_KEY key, final int color, int resource) {
         TabHost.TabSpec ts = h.newTabSpec(_tag);
         ts.setIndicator(""/* label */, getResources().getDrawable(resource));
         ts.setContent(tag -> new SelectGridView(getActivity(), key, color));
@@ -177,7 +177,7 @@ public class GridFragment extends Fragment {
         ShowingDisabled.setVisibility(View.INVISIBLE);
     }
 
-    public TapChainEditor.FACTORY_KEY getCurrentFactory() {
+    public TapChain.FACTORY_KEY getCurrentFactory() {
         int tabNum = tabH.getCurrentTab();
         return factoryList.get(tabNum);
     }

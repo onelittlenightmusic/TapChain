@@ -12,7 +12,7 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.LinkType;
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 
 /**
  *
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param tag actor tag
      * @return generated actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
+    public Actor add(TapChain.FACTORY_KEY key, String tag) {
         return getCanvas().add(key, tag);
     }
 
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param y y of location where actor will be added
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
+    public Actor add(TapChain.FACTORY_KEY key, String tag, float x, float y) {
         return getCanvas().add(key, tag, x, y);
     }
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param dy y of first velocity
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float dx,
+    public Actor add(TapChain.FACTORY_KEY key, String tag, float x, float y, float dx,
                      float dy) {
         return getCanvas().add(key, tag, x, y, dx, dy);
     }
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param id actor id
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int id) {
+    public Actor add(TapChain.FACTORY_KEY key, int id) {
         return getCanvas().add(key, id);
     }
 
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param y y of location where actor will be added
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int id, float x, float y) {
+    public Actor add(TapChain.FACTORY_KEY key, int id, float x, float y) {
         return getCanvas().add(key, id, x, y);
     }
 
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param dy y of first velocity
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float dx,
+    public Actor add(TapChain.FACTORY_KEY key, int code, float x, float y, float dx,
                      float dy) {
         return getCanvas().add(key, code, x, y, dx, dy);
     }
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
      * @param a2 actor which is connected from a1
      */
     public void connect(Actor a1, LinkType type, Actor a2) {
-        getEditor().link(a1, type, a2);
+        getTapChain().link(a1, type, a2);
     }
 
     // 2.Getters and setters
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
         });
     }
 
-    public TapChainEditor getEditor() {
+    public TapChain getTapChain() {
         return getCanvas().getEditor();
     }
 
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
                 e.printStackTrace();
             }
         else
-            add(TapChainEditor.FACTORY_KEY.ALL, data.getIntExtra("TEST", 0), 0f, 0f);
+            add(TapChain.FACTORY_KEY.ALL, data.getIntExtra("TEST", 0), 0f, 0f);
         return;
     }
 

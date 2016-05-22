@@ -30,27 +30,21 @@ import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.ITap;
 import org.tapchain.editor.PaletteSort;
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 
 /**
  * Created by hiro on 2015/12/29.
  */
 public class CanvasViewImpl extends TapChainWritingView {
     Rect r = new Rect();
-    private TapChainEditor editor;
+    private TapChain tapChain;
     public static int vector_max = 700;//, border2 = 3 * vector_max / 2;
     boolean magnet = false;
     Actor touch = null;
 
-    public CanvasViewImpl(Context context) {
-        super(context);
-        paint.setColor(0xff303030);
-        paint.setStyle(Paint.Style.FILL);
-    }
-
-    public void setEditor(TapChainEditor editor) {
-        this.editor = editor;
-        editor.editTap()
+    public void setTapChain(TapChain tapChain) {
+        this.tapChain = tapChain;
+        tapChain.editTap()
             .add(touch = new AndroidActor.AndroidView() {
                 Paint paint_ = new Paint();
 
@@ -61,7 +55,7 @@ public class CanvasViewImpl extends TapChainWritingView {
                     IPoint p = (WorldPoint) pullInActor().getObject();
                     setCenter(p);
 
-                    ITap t = getEditor().searchTouchedTap(p);
+                    ITap t = getTapChain().searchTouchedTap(p);
                     int c = Color.BLACK;
                     if (t != null) {
                         c = Color.WHITE;
@@ -87,6 +81,12 @@ public class CanvasViewImpl extends TapChainWritingView {
             .save();
     }
 
+    public CanvasViewImpl(Context context) {
+        super(context);
+        paint.setColor(0xff303030);
+        paint.setStyle(Paint.Style.FILL);
+    }
+
     @Override
     public void paintBackground(Canvas canvas) {
         canvas.drawRect(r, paint);
@@ -103,36 +103,34 @@ public class CanvasViewImpl extends TapChainWritingView {
     @Override
     public void myDraw(Canvas canvas) {
         canvas.setMatrix(matrix);
-        getEditor().show(canvas);
-        getEditor().userShow(canvas);
+        getTapChain().show(canvas);
+        getTapChain().userShow(canvas);
         canvas.drawText(
                 "View = "
-                        + Integer.toString(getEditor()
-                        .editTap().getChain()
+                        + Integer.toString(getTapChain()
                         .getViewNum()), 20, 20,
                 paint_text);
         canvas.drawText(
                 "Effect = "
-                        + Integer.toString(getEditor()
-                        .editTap().getChain()
+                        + Integer.toString(getTapChain()
                         .getPieces().size()), 20,
                 40, paint_text);
         canvas.drawText(
                 "UserView = "
-                        + Integer.toString(getEditor()
-                        .getChain().getViewNum()),
+                        + Integer.toString(getTapChain()
+                        .getViewNum()),
                 20, 60, paint_text);
         canvas.drawText(
                 "UserEffect = "
-                        + Integer.toString(getEditor()
-                        .getChain().getPieces()
+                        + Integer.toString(getTapChain()
+                        .getPieces()
                         .size()), 20, 80,
                 paint_text);
 
     }
 
-    public TapChainEditor getEditor() {
-        return editor;
+    public TapChain getTapChain() {
+        return tapChain;
     }
 
     @Override
@@ -161,8 +159,8 @@ public class CanvasViewImpl extends TapChainWritingView {
             if (standby) {
                 return true;
             }
-            Factory f = act.getEditor().getFactory(f1.getCurrentFactory());
-            IBlueprintInitialization i = getEditor().standbyRegistration(f, selected);
+            Factory f = act.getTapChain().getFactory(f1.getCurrentFactory());
+            IBlueprintInitialization i = getTapChain().standbyRegistration(f, selected);
             if (i != null) {
                 standby = true;
                 return true;
@@ -194,7 +192,7 @@ public class CanvasViewImpl extends TapChainWritingView {
     }
 
     private void _onFling(ActorTap t, IPoint vp) {
-        getEditor().editTap()._move(t)._in()
+        getTapChain().editTap()._move(t)._in()
                 .add(new Accel(vp).once()).save();
     }
     private void _onFlingBackground(IPoint v) {
@@ -208,17 +206,11 @@ public class CanvasViewImpl extends TapChainWritingView {
 
     private void moveBackground(final float dx, final float dy) {
         // Background center starts moving and slows down gradually.
-        getEditor().editTap().addActor(new IActor() {
-            float delta = 0.1f;
-            int t = 0;
-
-            @Override
-            public boolean actorRun(Actor act) {
-                delta = 0.15f * (float)Math.sqrt((10f - t) / 10f);
-                move(delta * dx, delta * dy);
-                act.invalidate();
-                return ++t < 10;
-            }
+        getTapChain().editTap().addActor(act -> {
+            float delta = 0.15f * (float)Math.sqrt((10f - act.getTime()) / 10f);
+            move(delta * dx, delta * dy);
+            act.invalidate();
+            return act.getTime() < 10;
         }).save();
     }
 
@@ -229,7 +221,7 @@ public class CanvasViewImpl extends TapChainWritingView {
      * @return
      */
     public ITap onDown(IPoint iPoint) {
-        ITap t = getEditor().searchTouchedTap(iPoint);
+        ITap t = getTapChain().searchTouchedTap(iPoint);
         touch.offer(iPoint);
         return t;//captureTap(t);
     }
@@ -243,7 +235,7 @@ public class CanvasViewImpl extends TapChainWritingView {
 
     public boolean onLockedScroll(IActorTap selected, final IPoint wp) {
         if (selected instanceof ILockedScroll)
-            ((ILockedScroll)selected).onLockedScroll(getEditor(), selected, wp);
+            ((ILockedScroll)selected).onLockedScroll(getTapChain(), selected, wp);
         return true;
     }
 
@@ -258,7 +250,7 @@ public class CanvasViewImpl extends TapChainWritingView {
             AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
             a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
             a._get().setOffset(selected);
-            getEditor().editTap()
+            getTapChain().editTap()
                     .add(a)
                     ._in()
                     .add(new Effector.Sleep(2000))
@@ -290,9 +282,9 @@ public class CanvasViewImpl extends TapChainWritingView {
         }
         if (selected instanceof IScrollable) {
 //                Log.w("test", String.format("%s scrolled", selectedTap));
-            ((IScrollable) selected).onScrolled(getEditor(), pos, vp);
+            ((IScrollable) selected).onScrolled(getTapChain(), pos, vp);
         }
-//        getEditor().invalidate(selected);
+//        getSystemChain().invalidate(selected);
         selected.invalidate();
         return true;
     }
@@ -329,14 +321,14 @@ public class CanvasViewImpl extends TapChainWritingView {
             delta -= 0.01f;
             boolean rtn = ++j < 10 || d.getAbs() > 30;
             super.actorRun(act);
-            if (getEditor().checkAndConnect(((IActorTap) getTarget()))) {
+            if (getTapChain().checkAndConnect(((IActorTap) getTarget()))) {
                 round((IActorTap) getTarget());
                 return false;
             }
             if (!rtn) {
                 ActorTap v = (ActorTap) getTarget();
                 round(v);
-                getEditor().checkAndConnect(v);
+                getTapChain().checkAndConnect(v);
             }
             return rtn;
         }

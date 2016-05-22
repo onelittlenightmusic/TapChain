@@ -10,7 +10,7 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.IBlueprintFocusNotification;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.WorldPoint;
@@ -195,7 +195,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	}
 
 	@Override
-	public boolean onRelease(IEditor edit, IPoint pos) {
+	public boolean onRelease(ITapChain edit, IPoint pos) {
         return true;
 	}
 

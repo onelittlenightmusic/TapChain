@@ -72,7 +72,7 @@ public class PathTap extends AndroidView implements IPathTap {
 		}
 
 //	@Override
-//	public void setEditor(ActorManager manager) {
+//	public void setTapChain(ActorManager manager) {
 //		this.chain = manager;
 //	}
 

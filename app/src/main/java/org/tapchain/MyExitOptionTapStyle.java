@@ -1,6 +1,7 @@
 package org.tapchain;
 
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.TapManager;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.editor.IActorTap;
 
@@ -12,8 +13,8 @@ public class MyExitOptionTapStyle extends MySimpleOptionTapStyle {
 	}
 
     @Override
-	public boolean onRelease(IEditor edit, IPoint pos) {
-		edit.remove(getParentTap().getActor());
+	public boolean onRelease(ITapChain tapChain, IPoint pos) {
+        new TapManager(tapChain).remove(getParentTap().getActor());
         return true;
 	}
 }

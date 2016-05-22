@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.tapchain.TapChainAndroidEditor;
+import org.tapchain.AndroidTapChain;
 import org.tapchain.core.Actor;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPoint;
 import org.tapchain.editor.EditorReturn;
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 
 /**
  * CanvasFragment controls creation of canvas view and canvas model.
@@ -24,7 +24,7 @@ public class CanvasFragment extends Fragment {
     CanvasViewImpl view;
 //    Activity act;
     static String CANVAS = "Canvas";
-    TapChainEditor editor;
+    TapChain editor;
 
     public CanvasFragment() {
         super();
@@ -43,7 +43,7 @@ public class CanvasFragment extends Fragment {
         if (view == null) {
             view = new CanvasViewImpl(act);
             if(editor == null) {
-                editor = new TapChainAndroidEditor(view, act);
+                editor = new AndroidTapChain(view, act);
 
                 try {
                     editor.editBlueprint()
@@ -58,7 +58,7 @@ public class CanvasFragment extends Fragment {
 
                 editor.invalidate();
             }
-            view.setEditor(editor);
+            view.setTapChain(editor);
         }
         return this.view;
     }
@@ -74,7 +74,7 @@ public class CanvasFragment extends Fragment {
      * @param tag actor tag
      * @return generated actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag) {
+    public Actor add(TapChain.FACTORY_KEY key, String tag) {
         return add(key, tag, null, null);
     }
 
@@ -86,7 +86,7 @@ public class CanvasFragment extends Fragment {
      * @param y y of location where actor will be added
      * @return
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y) {
+    public Actor add(TapChain.FACTORY_KEY key, String tag, float x, float y) {
         return add(key, tag, view.getPosition(x, y), null);
     }
 
@@ -100,12 +100,12 @@ public class CanvasFragment extends Fragment {
      * @param vy y of first velocity
      * @return
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
+    public Actor add(TapChain.FACTORY_KEY key, String tag, float x, float y, float vx, float vy) {
         return add(key, tag, view.getPosition(x, y), view.getVector(vx, vy));
     }
 
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
+    public Actor add(TapChain.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
         EditorReturn editorReturn = editor.addActorFromBlueprint(key, tag, pos);
         if (editorReturn == null)
             return null;
@@ -127,7 +127,7 @@ public class CanvasFragment extends Fragment {
      * @param id actor id
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int id) {
+    public Actor add(TapChain.FACTORY_KEY key, int id) {
         return add(key, id, null, null);
     }
 
@@ -139,7 +139,7 @@ public class CanvasFragment extends Fragment {
      * @param y y of location where actor will be added
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int id, float x, float y) {
+    public Actor add(TapChain.FACTORY_KEY key, int id, float x, float y) {
         return add(key, id, view.getPosition(x, y), null);
     }
 
@@ -153,11 +153,11 @@ public class CanvasFragment extends Fragment {
      * @param dy y of first velocity
      * @return added actor
      */
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code, float x, float y, float dx, float dy) {
+    public Actor add(TapChain.FACTORY_KEY key, int code, float x, float y, float dx, float dy) {
         return add(key, code, view.getPosition(x, y), view.getVector(dx, dy));
     }
 
-    public Actor add(TapChainEditor.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
+    public Actor add(TapChain.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
         EditorReturn editorReturn = editor.addActorFromBlueprint(key, code, pos);
         if (editorReturn == null)
             return null;
@@ -174,7 +174,7 @@ public class CanvasFragment extends Fragment {
         return editorReturn.getActor();
     }
 
-    public TapChainEditor getEditor() {
+    public TapChain getEditor() {
         return editor;
     }
 

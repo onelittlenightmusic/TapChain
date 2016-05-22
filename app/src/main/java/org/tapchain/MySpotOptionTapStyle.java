@@ -6,7 +6,7 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.ColorLib;
 import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.editor.IFocusControl;
 import org.tapchain.editor.IFocusable;
 import org.tapchain.realworld.R;
@@ -59,7 +59,7 @@ public class MySpotOptionTapStyle extends MySimpleOptionTapStyle implements IFoc
     }
 
     @Override
-    public boolean onRelease(IEditor edit, IPoint pos) {
+    public boolean onRelease(ITapChain edit, IPoint pos) {
         boolean rtn = super.onRelease(edit, pos);
         edit.changeFocus(al, this, clazz);
         return rtn;

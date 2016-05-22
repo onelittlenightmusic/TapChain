@@ -15,6 +15,6 @@ public interface IPathTap extends IView, IPiece<Actor>, Tickable<IPath>, ITap {
 	ControllableSignal interrupt(ControllableSignal end);
 	IPoint getRecentPoint();
 	void setRecentPoint(IPoint newKey);
-//	void setEditor(ActorManager manager);
+//	void setTapChain(ActorManager manager);
 	IPoint getPoint(float beta);
 }

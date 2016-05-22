@@ -1,7 +1,7 @@
 package org.tapchain.core;
 
-import org.tapchain.editor.IActorEditor;
+import org.tapchain.editor.ITapChain;
 
 public interface ISelectable {
-	void onSelected(IActorEditor edit, IPoint pos);
+	void onSelected(ITapChain tapChain, IPoint pos);
 }

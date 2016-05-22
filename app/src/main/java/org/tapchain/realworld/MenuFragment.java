@@ -12,7 +12,7 @@ import android.widget.ImageButton;
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link MenuFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * __create an instance of this fragment.
  */
 public class MenuFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -30,7 +30,7 @@ public class MenuFragment extends Fragment {
     }
 
     /**
-     * Use this factory method to create a new instance of
+     * Use this factory method to __create a new instance of
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
@@ -64,7 +64,7 @@ public class MenuFragment extends Fragment {
         ImageButton finish = (ImageButton)v.findViewById(R.id.finish);
         finish.setOnClickListener(v1 -> getActivity().finish());
         ImageButton dustbox = (ImageButton)v.findViewById(R.id.dustbox);
-        dustbox.setOnClickListener(v1 -> ((MainActivity)getActivity()).getEditor().reset());
+        dustbox.setOnClickListener(v1 -> ((MainActivity)getActivity()).getTapChain().reset());
         final ImageButton menuToggle = (ImageButton)v.findViewById(R.id.menu_toggle);
         menuToggle.setOnClickListener(v1 -> {
                     boolean gridshow = false;

@@ -1,7 +1,7 @@
 package org.tapchain.core;
 
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 
 public interface IScrollable {
-	boolean onScrolled(IEditor edit, IPoint pos, IPoint vp);
+	boolean onScrolled(ITapChain edit, IPoint pos, IPoint vp);
 }

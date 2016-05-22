@@ -49,7 +49,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
 //                Log.w("Action", "onSingleTapConfirmed called");
-                getEditor().onSingleTouch(getPosition(e.getX(), e.getY()));
+                getTapChain().onSingleTouch(getPosition(e.getX(), e.getY()));
                 return false;
             }
 
@@ -123,7 +123,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
                 if (oldDist > 10f) {
                     mode = ZOOM;
                     Log.w(TAG, "mode=ZOOM");
-                    getEditor().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
+                    getTapChain().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -146,7 +146,7 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mode = NONE;
-                getEditor().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
+                getTapChain().releaseTap(selected, getPosition(ev.getX(), ev.getY()));
                 break;
             case MotionEvent.ACTION_POINTER_UP:
                 mode = NONE;

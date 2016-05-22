@@ -11,8 +11,6 @@ import org.tapchain.core.ChainException;
 import org.tapchain.core.ChainController.IControlCallback;
 import org.tapchain.core.ChainPiece;
 import org.tapchain.core.ChainPiece.PieceState;
-import org.tapchain.core.Effector;
-import org.tapchain.core.IActorConnectHandler;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IConnectHandler;
 import org.tapchain.core.IErrorHandler;
@@ -25,41 +23,32 @@ import org.tapchain.core.Packet;
 import org.tapchain.core.PathType;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unchecked")
-public class Editor extends ActorManager {
-	ActorManager tapManager;
-	IActorConnectHandler actorConnectHandler;
-	Blueprint blueprintForPathTap;
-
-	ConcurrentHashMap<Actor, IActorTap> dictPiece = new ConcurrentHashMap<>();
-	ConcurrentHashMap<IPath, PathTap> dictPath = new ConcurrentHashMap<>();
-
+public class TapManager extends ActorManager implements IActorManager {
 	Map<PieceState, Actor> plist = new EnumMap<>(
             PieceState.class);
 
     /**
      * Constructor
      */
-    public Editor() {
-        super();
-        tapManager = new ActorManager();
-        editTap().createChain(50).getChain().setName("System");
-        createChain(100).getChain().setAutoEnd(false).setName("User");
-        Actor ptmp;
-        List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
-                0xff777777, 0xff447777, 0xff774444);
-        for (PieceState state : PieceState.values()) {
-            ptmp = new Effector.Colorer().color_init(colors.get(state.ordinal()))
-                    .setParentType(PathType.OFFER).boost();
-            tapManager.add(ptmp).save();
-            plist.put(state, ptmp);
-        }
+//    public Editor(Chain actorChain, Chain systemActorChain) {
+    public TapManager(ITapChain actorChain) {
+        super((Chain)actorChain);
+//        setChain(actorChain);
+//        tapManager = new ActorManager(systemActorChain);
+
+//        Actor ptmp;
+//        List<Integer> colors = Arrays.asList(0xff447744, 0xf447744,
+//                0xff777777, 0xff447777, 0xff774444);
+//        for (PieceState state : PieceState.values()) {
+//            ptmp = new Effector.Colorer().color_init(colors.get(state.ordinal()))
+//                    .setParentType(PathType.OFFER).boost();
+//            tapManager.add(ptmp).save();
+//            plist.put(state, ptmp);
+//        }
     }
 
 	private int intervalMs = 0;
@@ -68,45 +57,20 @@ public class Editor extends ActorManager {
      * Copy constructor
      * @param e EditorManager to copy
      */
-	public Editor(Editor e) {
+	public TapManager(TapManager e) {
 		super(e);
-		tapManager = e.tapManager;
-		dictPiece = e.dictPiece;
-		dictPath = e.dictPath;
+//		tapManager = e.tapManager;
+//		dictPiece = e.dictPiece;
+//		dictPath = e.dictPath;
 	}
 
-	public ActorManager setPathBlueprint(Blueprint p) {
-		blueprintForPathTap = p;
-		return this;
-	}
-
-	public ActorManager setActorConnectHandler(IActorConnectHandler a) {
-		actorConnectHandler = a;
-		return this;
-	}
+    @Override
+    public EditorChain getChain() {
+        return (EditorChain)super.getChain();
+    }
 
 	public ActorManager editTap() {
-		return tapManager;
-	}
-
-	public Collection<IActorTap> getTaps() {
-		return dictPiece.values();
-	}
-
-	public Collection<Actor> getActors() {
-		return dictPiece.keySet();
-	}
-
-	public IActorTap toTap(Actor bp) {
-		if (dictPiece.get(bp) != null)
-			return dictPiece.get(bp);
-		return null;
-	}
-
-	public PathTap getTapPath(IPath path) {
-		if (dictPath.get(path) != null)
-			return dictPath.get(path);
-		return null;
+		return new ActorManager(getChain().getSystemChain());
 	}
 
 	protected void setAllCallback(IControlCallback control) {
@@ -135,17 +99,17 @@ public class Editor extends ActorManager {
 		final ActorTap _view = (ActorTap) bp.newInstance();
 		if (_view == null)
 			throw new ChainException(actor, "view not created");
-		dictPiece.put(actor, _view);
+		getChain().putPiece(actor, _view);
 		if(actor.getLogLevel())
 			((ChainPiece)_view).setLogLevel(true);
 		_view.setMyActor(actor);
         actor.setStatusHandler(new IStatusHandler<IPiece>() {
             @Override
             public void changeViewState(PieceState state) {
-                synchronized (_view) {
-                    plist.get(state).offer(_view);
-                }
-                _view.changeState(state);
+//                synchronized (_view) {
+//                    plist.get(state).offer(_view);
+//                }
+//                _view.changeState(state);
             }
 
             @Override
@@ -176,16 +140,16 @@ public class Editor extends ActorManager {
 											PathType yp, boolean addView) {
 		Chain.ConnectionResultPath rtn = super.connect(x, xp, y, yp, addView);
 			if(rtn != null) {
-				if(addView && blueprintForPathTap != null) {
+				if(addView && getChain().blueprintForPathTap != null) {
 					//PathTap instantiation
-					IActorTap xTap = toTap(x), yTap = toTap(y);
-					IBlueprint newBlueprintForPath = blueprintForPathTap.copyAndRenewArg()
+					IActorTap xTap = getChain().toTap(x), yTap = getChain().toTap(y);
+					IBlueprint newBlueprintForPath = getChain().blueprintForPathTap.copyAndRenewArg()
 							.addArg(yTap, xTap, yp, xp, rtn.getResult());
 					IPathTap pathTap = __setPathView(rtn.getResult(), newBlueprintForPath);
 
 					//Post process 1 ( invoking common handler )
-					if(actorConnectHandler != null)
-						actorConnectHandler.onConnect(yTap, pathTap, xTap, LinkType.fromPathType(yp, true));
+					if(getChain().actorConnectHandler != null)
+						getChain().actorConnectHandler.onConnect(yTap, pathTap, xTap, LinkType.fromPathType(yp, true));
 
 					//Post process 2 ( invoking individual handler if registered )
 					for(IActorTap iTap: Arrays.asList(xTap, yTap))
@@ -209,7 +173,7 @@ public class Editor extends ActorManager {
 			e.printStackTrace();
 			return null;
 		}
-		dictPath.put(path, _view);
+		getChain().putPath(path, _view);
 		_view.setMyPath(path);
 		path.setStatusHandler(new IStatusHandler<IPath>() {
             @Override
@@ -242,8 +206,8 @@ public class Editor extends ActorManager {
 	void __unsetView(Actor bp) {
 		if (bp == null)
 			return;
-		IActorTap v = toTap(bp);
-		dictPiece.remove(bp);
+		IActorTap v = getChain().toTap(bp);
+		getChain().removePiece(bp);
 		if (v == null)
 			return;
 		if(v instanceof ITapControlInterface)
@@ -261,8 +225,8 @@ public class Editor extends ActorManager {
 	void __unsetPathView(IPath path) {
 		if (path == null)
 			return;
-		PathTap v = getTapPath(path);
-		dictPath.remove(path);
+		PathTap v = getChain().getTapPath(path);
+		getChain().removePath(path);
 		if (v == null)
 			return;
 		v.unsetMyPath();
@@ -278,12 +242,12 @@ public class Editor extends ActorManager {
     }
 
 	public void onRefreshView(Actor bp, Actor obj) {
-		IActorTap v = dictPiece.get(bp);
-		dictPiece.remove(bp);
+		IActorTap v = getChain().toTap(bp);
+		getChain().removePiece(bp);
 		if (bp.compareTo(obj) > 0) {
 			bp.initNum();
 		}
-		dictPiece.put(bp, v);
+		getChain().putPiece(bp, v);
 	}
 
     @Override

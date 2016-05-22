@@ -13,7 +13,7 @@ import android.util.Log;
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
-import org.tapchain.core.ActorChain.IView;
+import org.tapchain.core.Blueprint;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Consumer;
 import org.tapchain.core.D2Point;
@@ -33,7 +33,7 @@ import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.IActorTap;
 import org.tapchain.editor.IFocusable;
 import org.tapchain.editor.IWindow;
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 import org.tapchain.game.CarEngineer;
 import org.tapchain.game.ElectricityFactory;
 import org.tapchain.game.Motor;
@@ -44,19 +44,19 @@ import org.tapchain.viewlib.ShowInstance;
 import java.util.concurrent.CountDownLatch;
 
 @SuppressWarnings("serial")
-public class TapChainAndroidEditor extends TapChainEditor {
+public class AndroidTapChain extends TapChain {
 
     // 1.Initialization
     Activity act = null;
 
-    public TapChainAndroidEditor(IWindow w, Activity activity) {
+    public AndroidTapChain(IWindow w, Activity activity) {
         super(w);
 
         act = activity;
         BitmapMaker.setActivity(act);
         // Setting styles
         ActorEventHandler aeh = new ActorEventHandler(this, activity);
-        setStyle(new StyleCollection(this, editTap().getChain(),
+        setStyle(new StyleCollection(this, getSystemChain(),
                 BubbleTapStyle.class,
                 BubblePathTap.class,
                 new AndroidInteractionStyle(),
@@ -255,17 +255,22 @@ public class TapChainAndroidEditor extends TapChainEditor {
                 .save()
         ;
 
+        b = (Blueprint) editBlueprint()
+                .add(this::FILTER_PLUS_ADD, new Power(1f))
+                .view(R.drawable.motor)
+                .tag("Power Filter 2")
+                .save().getBlueprint();
+
         ShowInstance.addClassImage(Power.class, R.drawable.electricity, Power::STR);
         EditInstance.addEditCreator(Power.class, Power::EDIT);
     }
 
+    Blueprint b;
     public void setActivity(Activity act) {
         this.act = act;
     }
 
     // 2.Getters and setters
-
-
     public static class Power {
         float p = 0f;
         public Power(float value) {
@@ -313,6 +318,14 @@ public class TapChainAndroidEditor extends TapChainEditor {
         }
     }
 
+    WorldPoint now = new WorldPoint(100f, 100f);
+    public Power FILTER_PLUS_ADD(IValue<Power> self, Power i) {
+        if(((Actor)self).getTime()==5) {
+//            tapChain().add(this::FILTER_PLUS_ADD, new Power(1f)).save();
+            addActorFromBlueprint(b, now.plus(100f, 100f));
+        }
+        return Power.plus(i, self._get());
+    }
 
 
     // 3.Changing state
@@ -325,12 +338,12 @@ public class TapChainAndroidEditor extends TapChainEditor {
 //
     public class BubbleTapStyle extends MyTapStyle2 {
         public BubbleTapStyle() {
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act);
+            super(AndroidTapChain.this, AndroidTapChain.this.act);
             setBackground(bubble_init());
         }
 
         public BubbleTapStyle(Integer bm) {
-            super(TapChainAndroidEditor.this, TapChainAndroidEditor.this.act, bm);
+            super(AndroidTapChain.this, AndroidTapChain.this.act, bm);
             setBackground(bubble_init());
         }
 

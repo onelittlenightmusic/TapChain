@@ -3,7 +3,7 @@ package org.tapchain.core;
 import java.lang.reflect.Modifier;
 
 import org.tapchain.core.Blueprint.PieceBlueprintStatic;
-import org.tapchain.core.actors.ViewActor;
+import org.tapchain.editor.EditorChain;
 
 import android.util.Log;
 
@@ -13,7 +13,6 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	private IBlueprint<TYPE> root = null;
 	IBlueprint reserved = null;
     IBlueprint marked = null;
-    IBlueprint defaultView = null;
 	Factory<TYPE> factory = null;
 	protected Object outer;
     Chain root_chain;
@@ -32,7 +31,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		this(bm.getChain(), bm.factory);
 		setParent(bm);
 		setOuterInstanceForInner(bm.outer);
-		defaultView = bm.defaultView;
+//		defaultView = bm.defaultView;
 	}
 	
 	//2.Getters and setters
@@ -44,17 +43,28 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return parentManager;
 	}
 	
-	public Blueprint create() {
-		return new Blueprint(getChain());
-	}
-
-	public Blueprint create(Blueprint bp, TYPE... args) {
-		return new Blueprint(bp, args);
-	}
-
-	public Blueprint create(Class<? extends TYPE> _cls) {
+	public Blueprint __create(Class<? extends TYPE> _cls) {
 		return new Blueprint(getChain(), _cls);
 	}
+
+    public Blueprint __create(Class<? extends TYPE> _cls, Object... outer) {
+        if(outer == null)
+            return __create(_cls);
+        if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
+                || _cls.isLocalClass()
+                || (_cls.isAnonymousClass() && !Modifier.isStatic(_cls.getModifiers()))) {
+            Blueprint bp = __create(_cls);
+            for (Object obj : outer)
+                bp.addLocalClass(obj.getClass(), obj);
+            return bp;
+        }
+        else
+            return __create(_cls);
+    }
+
+    public Blueprint create(Class<? extends TYPE> _cls) {
+        return __create(_cls, outer);
+    }
 
 	/**
 	 * @return the root
@@ -115,18 +125,19 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
     }
 
     public BlueprintManager<TYPE> addWithOuterObject(Class<? extends TYPE> _cls, Object... outer) {
-		if(outer == null)
-			return add(create(_cls));
-		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
-				|| _cls.isLocalClass()
-				|| (_cls.isAnonymousClass() && !Modifier.isStatic(_cls.getModifiers()))) {
-			Blueprint bp = create(_cls);
-			for (Object obj : outer)
-				bp.addLocalClass(obj.getClass(), obj);
-			return add(bp);
-		}
-		else
-			return add(create(_cls));
+//		if(outer == null)
+//			return add(__create(_cls));
+//		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
+//				|| _cls.isLocalClass()
+//				|| (_cls.isAnonymousClass() && !Modifier.isStatic(_cls.getModifiers()))) {
+//			Blueprint bp = __create(_cls);
+//			for (Object obj : outer)
+//				bp.addLocalClass(obj.getClass(), obj);
+//			return add(bp);
+//		}
+//		else
+//			return add(__create(_cls));
+        return add(__create(_cls, outer));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -214,8 +225,8 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 	public BlueprintManager<TYPE> view(Object... objs) {
-		if(!isSetView())
-			setView(defaultView.copyAndRenewArg());
+		if(!isSetView() && getChain() instanceof EditorChain)
+			setView(((EditorChain)getChain()).getDefaultView().copyAndRenewArg());
 		getView().addArg(objs);
 		return this;
 	}
@@ -224,17 +235,17 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		getRoot().setTag(tag);
 		return this;
 	}
-	public BlueprintManager<TYPE> setDefaultView(Chain c, Class<? extends ViewActor> _cls) {
-		defaultView = createTapBlueprint(c, _cls);
-		return this;
-	}
+//	public BlueprintManager<TYPE> setDefaultView(Chain c, Class<? extends ViewActor> _cls) {
+//		defaultView = createTapBlueprint(c, _cls);
+//		return this;
+//	}
 
 	public BlueprintManager<TYPE> addLocal(IBlueprint _pbp) {
 		reserved = getRoot().addLocal(_pbp);
 		return this;
 	}
 	public BlueprintManager<TYPE> addLocal(Class<? extends TYPE> _cls) {
-		return addLocal(create(_cls));
+		return addLocal(__create(_cls));
 	}
 	@Override
 	public BlueprintManager<TYPE> pullFrom(IBlueprint _pbp) {
@@ -264,19 +275,19 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 	}
 	
 	public BlueprintManager<TYPE> pullFrom(Class<? extends TYPE> _cls) {
-		return pullFrom(create(_cls));
+		return pullFrom(__create(_cls));
 	}
 	public BlueprintManager<TYPE> nextEvent(Class<? extends TYPE> _cls) {
-		return nextPassThru(create(_cls));
+		return nextPassThru(__create(_cls));
 	}
 	public BlueprintManager<TYPE> offerToFamily(Class<? extends TYPE> _cls) {
-		return offerToFamily(create(_cls));
+		return offerToFamily(__create(_cls));
 	}
 	public BlueprintManager<TYPE> child(Class<? extends TYPE> _cls) {
-		return child(create(_cls));
+		return child(__create(_cls));
 	}
 	public BlueprintManager<TYPE> prevEvent(Class<? extends TYPE> _cls) {
-		return prevEvent(create(_cls));
+		return prevEvent(__create(_cls));
 	}
 	public BlueprintManager<TYPE> pullFrom(TYPE bp, TYPE... args) {
 		return pullFrom(new PieceBlueprintStatic(getChain(), bp));
@@ -329,16 +340,16 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 
-	public BlueprintManager<TYPE> setSystem(Class<? extends TYPE> _cls) {
-		IBlueprint blueprint;
-		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
-				|| _cls.isLocalClass()
-				|| _cls.isAnonymousClass())
-			blueprint = create(_cls).addLocalClass(outer.getClass(), outer);
-		else
-			blueprint = create(_cls);
-		return setView(blueprint);
-	}
+//	public BlueprintManager<TYPE> setSystem(Class<? extends TYPE> _cls) {
+//		IBlueprint blueprint;
+//		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
+//				|| _cls.isLocalClass()
+//				|| _cls.isAnonymousClass())
+//			blueprint = __create(_cls).addLocalClass(outer.getClass(), outer);
+//		else
+//			blueprint = __create(_cls);
+//		return setView(blueprint);
+//	}
 	public BlueprintManager<TYPE> setView(IBlueprint view) {
 		getRoot().setView(view);
 		reserved = view;
@@ -367,14 +378,14 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 
-	public Blueprint createTapBlueprint(Chain c, Class<? extends IPiece> _cls) {
-		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
-				|| _cls.isLocalClass()
-				|| _cls.isAnonymousClass())
-			return new TapBlueprint(c, _cls).addLocalClass(outer.getClass(), outer);
-		else
-			return new TapBlueprint(c, _cls);
-	}
+//	public Blueprint createTapBlueprint(Class<? extends IPiece> _cls) {
+//		if((_cls.isMemberClass() && !Modifier.isStatic(_cls.getModifiers()))
+//				|| _cls.isLocalClass()
+//				|| _cls.isAnonymousClass())
+//			return new TapBlueprint(getChain(), _cls).addLocalClass(outer.getClass(), outer);
+//		else
+//			return new TapBlueprint(getChain(), _cls);
+//	}
 
 	
 	public void log(String tag, String l) {

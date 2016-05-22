@@ -2,7 +2,7 @@ package org.tapchain;
 
 import org.tapchain.core.LinkType;
 import org.tapchain.core.ClassEnvelope;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.IScrollHandler;
@@ -34,12 +34,12 @@ public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, I
 	}
 
 	@Override
-	public void onScroll(IEditor edit, IActorTap tap, IPoint pos, IPoint vp) {
+	public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
 		setCenter(pos);
 	}
 	
 	@Override
-	public boolean onRelease(IEditor edit, IPoint pos) {
+	public boolean onRelease(ITapChain edit, IPoint pos) {
 		edit.checkAndConnect(this);
         return true;
 	}

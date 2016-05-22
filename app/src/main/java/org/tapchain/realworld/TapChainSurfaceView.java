@@ -10,7 +10,6 @@ import android.graphics.PointF;
 import android.os.AsyncTask;
 import android.text.DynamicLayout;
 import android.text.Layout;
-import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -22,7 +21,7 @@ import org.tapchain.editor.PaletteSort;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IWindow;
-import org.tapchain.editor.TapChainEditor;
+import org.tapchain.editor.TapChain;
 import org.tapchain.game.ISensorView;
 
 import static java.lang.Math.sqrt;
@@ -115,17 +114,17 @@ public abstract class TapChainSurfaceView
                                int height) {
         window_size.x = getWidth();
         window_size.y = getHeight();
-        getEditor().invalidate();
+        getTapChain().invalidate();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         window_size.x = getWidth();
         window_size.y = getHeight();
-        getEditor().invalidate();
+        getTapChain().invalidate();
     }
 
-    public abstract TapChainEditor getEditor();
+    public abstract TapChain getTapChain();
 
 
     float spacing(MotionEvent event) {

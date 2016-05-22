@@ -12,7 +12,7 @@ import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Effector;
 import org.tapchain.editor.ColorLib;
 import org.tapchain.editor.ColorLib.ColorCode;
-import org.tapchain.TapChainAndroidEditor.StateLog;
+import org.tapchain.AndroidTapChain.StateLog;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorInputException;
 import org.tapchain.core.ActorManager;
@@ -43,11 +43,13 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.Packet;
 import org.tapchain.core.Value;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorEditor;
+import org.tapchain.editor.EditorChain;
+import org.tapchain.editor.IActorManager;
 import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.editor.IPathTap;
 import org.tapchain.editor.ITap;
+import org.tapchain.editor.TapChain;
 import org.tapchain.realworld.R;
 import org.tapchain.viewlib.DrawLib;
 import org.tapchain.viewlib.ShowInstance;
@@ -63,7 +65,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     /**
      *
      */
-    private final IActorEditor edit;
+    private final TapChain tapChain;
     Paint _paint = new Paint(),
             textPaint = new Paint(),
             miniTextPaint = new Paint();
@@ -81,13 +83,13 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     float textSize = 60f, miniTextSize = 10f;
 
     // 1.Initialization
-    public MyTapStyle2(IActorEditor edit, Activity activity) {
-        this(edit, activity, null);
+    public MyTapStyle2(TapChain tapChain, Activity activity) {
+        this(tapChain, activity, null);
     }
 
-    public MyTapStyle2(IActorEditor edit, Activity activity, Integer fg) {
+    public MyTapStyle2(TapChain tapChain, Activity activity, Integer fg) {
         super(activity);
-        this.edit = edit;
+        this.tapChain = tapChain;
         myview_init(fg);
 
         _paint.setStyle(Paint.Style.FILL);
@@ -286,7 +288,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     @Override
-    public boolean onScrolled(IEditor edit, IPoint pos, IPoint vp) {
+    public boolean onScrolled(ITapChain edit, IPoint pos, IPoint vp) {
         setCenter(pos);
         return false;
     }
@@ -313,18 +315,18 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     @Override
-    public void onSelected(IActorEditor edit, IPoint pos) {
+    public void onSelected(ITapChain tapChain, IPoint pos) {
         Actor actor = getActor();
         if (actor instanceof IStep) {
             ((IStep) actor).onStep();
 //            Log.w("test", "onStep called");
         } else if (actor instanceof IValueArray) {
             EditInstance e = new EditInstance(getOwnActivity(), this, actor);
-            e.registerToManager(getRootChain(), edit);
+            e.registerToManager(getRootChain(), tapChain);
         } else if (actor instanceof IValue) {
             Object val = ((IValue) actor)._get();
             EditInstance e = new EditInstance(getOwnActivity(), this, val);
-            e.registerToManager(getRootChain(), edit);
+            e.registerToManager(getRootChain(), tapChain);
         }
     }
 
@@ -342,7 +344,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     @Override
-    public boolean onRelease(IEditor edit, IPoint pos) {
+    public boolean onRelease(ITapChain edit, IPoint pos) {
         edit.checkAndConnect(this);
         return true;
     }
@@ -373,7 +375,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 
     @Override
-    public boolean onLockedScroll(IEditor edit, ITap selectedTap, IPoint wp) {
+    public boolean onLockedScroll(ITapChain edit, ITap selectedTap, IPoint wp) {
         setParentSize(this, wp);
         return false;
     }
@@ -401,11 +403,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         isZero = col1.isEmpty() || col2.isEmpty();
         float divCol1 = 1f / ((float) col1.size());
         for (Actor vec1 : col1) {
-            average.setOffset(edit.toTap(vec1), -divCol1);
+            average.setOffset(tapChain.toTap(vec1), -divCol1);
         }
         float divCol2 = 1f / ((float) col2.size());
         for (Actor vec2 : col2) {
-            average.setOffset(edit.toTap(vec2), divCol2);
+            average.setOffset(tapChain.toTap(vec2), divCol2);
         }
         if (!isZero)
             partnersOffsetAverage._set(average);
@@ -477,7 +479,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
         manager.add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
-        edit.highlightLinkables(linkType, t, classEnvelopeInLink);
+        tapChain.highlightLinkables(linkType, t, classEnvelopeInLink);
     }
 
     public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
@@ -485,7 +487,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         if (linkType != null) {
             new ActorManager(getRootChain()).remove((Actor) t.getAccessoryTap(linkType));
             t.unsetAccessoryTap(linkType);
-            edit.unhighlightAllLinkables();
+            tapChain.unhighlightAllLinkables();
         }
     }
 }

@@ -11,9 +11,9 @@ import org.tapchain.core.IValueArray;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.ColorLib;
-import org.tapchain.editor.IActorEditor;
+import org.tapchain.editor.IActorManager;
 import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IEditor;
+import org.tapchain.editor.ITapChain;
 import org.tapchain.game.MyFloat;
 import org.tapchain.game.MySetPedalTapStyle;
 import org.tapchain.realworld.R;
@@ -80,7 +80,7 @@ public class EditInstance implements IRelease {
         restart.setColorCode(ColorLib.ColorCode.BLUE);
     }
 
-    public boolean registerToManager(Chain root, IActorEditor edit) {
+    public boolean registerToManager(Chain root, ITapChain tapChain) {
         ActorManager manager = new ActorManager(root);
         if (setter != null) {
             manager.add(setter);
@@ -95,12 +95,12 @@ public class EditInstance implements IRelease {
         if (restart != null)
             manager.add(restart);
         manager.save();
-        edit.lockReleaseTap(this);
+        tapChain.lockReleaseTap(this);
         return true;
     }
 
-    public void clear(IEditor edit) {
-        ActorManager manager = edit.editTap();
+    public void clear() {
+        ActorManager manager = new ActorManager(setter.getRootChain());
         if (setter != null) {
             manager.remove(setter);
             setter = null;
@@ -124,11 +124,11 @@ public class EditInstance implements IRelease {
     }
 
     @Override
-    public boolean onRelease(IEditor edit, IPoint pos) {
+    public boolean onRelease(ITapChain edit, IPoint pos) {
         boolean rtn = false;
         if (setter instanceof IRelease)
             rtn = ((IRelease) setter).onRelease(edit, pos);
-        clear(edit);
+        clear();
         return rtn;
     }
 }

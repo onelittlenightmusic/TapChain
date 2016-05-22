@@ -15,7 +15,7 @@ import org.tapchain.core.LinkType;
 import java.util.Collection;
 import java.util.List;
 
-public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManager<ACTOR, ACTOR> {
+public interface ITapChain<ACTOR extends IPiece, VIEW extends ITap> {
     /**
      * Check if an actor tap touches any other actor taps, then link their actors.
      *
@@ -24,33 +24,6 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManag
      * @return True when a actor is checked and connected.
      */
     boolean checkAndConnect(VIEW selected);
-
-    /**
-     * Get a collection of all taps
-     * @return collection of all taps
-     */
-    Collection<VIEW> getTaps();
-
-    /**
-     * Get a collection of all actors
-     * @return collection of all actors
-     */
-    Collection<ACTOR> getActors();
-
-    /**
-     * Get tap from actor
-     * @param actor actor
-     * @return tap
-     */
-    VIEW toTap(ACTOR actor);
-
-    /**
-     * Get actor from tap
-     * @param view tap
-     * @return actor
-     */
-    ACTOR toActor(VIEW view);
-
 
     /**
      * Get a manager for editing only taps (not actors).
@@ -96,4 +69,31 @@ public interface IEditor<ACTOR extends IPiece, VIEW extends ITap> extends IManag
     void shake(int duration);
 
     void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz);
+
+    /**
+     * Create an actor instance from its blueprint.
+     *
+     * @param key
+     *           the key for the factory in which actor blueprint is registered
+     * @param num
+     *            the number of the actor blueprint
+     * @param pos
+     *            position where the actor instance sho0uld be added
+     * @return EditorReturn including the created actor instance and the its tap instance
+     */
+    EditorReturn addActorFromBlueprint(TapChain.FACTORY_KEY key, int num,
+                                       IPoint pos);
+
+    /**
+     * Create an actor instance from its blueprint.
+     * @param key
+     *           the key for the factory in which actor blueprint is registered
+     * @param tag
+     *           the tag of the actor blueprint
+     * @param pos
+     *           position where the actor instance sho0uld be added
+     * @return EditorReturn including the created actor instance and the its tap instance
+     */
+    EditorReturn addActorFromBlueprint(TapChain.FACTORY_KEY key, String tag,
+                                       IPoint pos);
 }

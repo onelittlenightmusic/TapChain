@@ -14,7 +14,8 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.ActorManager;
 import org.tapchain.core.IValue;
 import org.tapchain.core.LinkType;
-import org.tapchain.editor.TapChainEditor.FACTORY_KEY;
+import org.tapchain.editor.TapChain.FACTORY_KEY;
+import org.tapchain.editor.TapManager;
 import org.tapchain.realworld.MainActivity;
 
 import static java.lang.Thread.sleep;
@@ -50,7 +51,7 @@ public class MainActivityOldTest extends ActivityInstrumentationTestCase2<MainAc
 //
     @Test
     public void testSomeFunction() {
-        ActorManager e = view.getEditor().editTap();
+        ActorManager e = new TapManager(view.getTapChain()).editTap();
 //                e.add(new Actor.GeneratorSkelton<>(()->1, 0));
         e.add((IValue<Integer> v)->1, 0)
                 .pushTo((IValue<Integer> v, Integer i) -> i + 1, 0)

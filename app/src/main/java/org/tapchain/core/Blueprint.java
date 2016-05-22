@@ -192,7 +192,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
             }
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw /* ex = */new ChainException("PieceFactory: cant create new instance");
+			throw /* ex = */new ChainException("PieceFactory: cant __create new instance");
 		}
 //		if (maker != null) {
 //			maker.add(rtn);

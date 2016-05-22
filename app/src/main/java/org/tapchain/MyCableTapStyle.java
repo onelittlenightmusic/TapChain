@@ -23,8 +23,9 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorAttachHandler;
-import org.tapchain.editor.IActorEditor;
+import org.tapchain.editor.IActorManager;
 import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.ITapChain;
 
 import java.io.Serializable;
 
@@ -202,14 +203,14 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 
 	String heapOut = "_out", heapIn = "_in";
 	@Override
-	public boolean onTouch(IActorEditor edit, IActorTap t2, Actor a1, Actor a2) {
+	public boolean onTouch(ITapChain tapChain, IActorTap t2, Actor a1, Actor a2) {
 		boolean rtn = false;
 			if(getTag().equals(heapOut)) {
-				if(edit.link(a1, LinkType.PUSH, a2)) {
+				if(tapChain.link(a1, LinkType.PUSH, a2)) {
 					rtn = true;
 				} else {
 				}
-			} else if (edit.link(a1, LinkType.PULL, a2)) {
+			} else if (tapChain.link(a1, LinkType.PULL, a2)) {
 				rtn = true;
 			} else {
 			}

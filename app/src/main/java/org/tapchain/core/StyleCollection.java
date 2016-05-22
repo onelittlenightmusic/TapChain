@@ -10,8 +10,8 @@ public class StyleCollection {
 	IActionStyle actionStyle;
 	IActorConnectHandler actorConnectHandler;
     Chain viewChain;
-	public StyleCollection(Object context, Chain viewChain, Class<? extends ViewActor> pieceview, Class<? extends IPiece> connectview, IActionStyle actionstyle, IActorSharedHandler eh, IActorConnectHandler ch) {
-		outer = context;
+	public StyleCollection(Object outer, Chain viewChain, Class<? extends ViewActor> pieceview, Class<? extends IPiece> connectview, IActionStyle actionstyle, IActorSharedHandler eh, IActorConnectHandler ch) {
+		this.outer = outer;
         this.viewChain = viewChain;
 		view = pieceview;
 		connect = connectview;

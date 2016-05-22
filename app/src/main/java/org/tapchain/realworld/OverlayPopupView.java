@@ -9,9 +9,7 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Factory;
 import org.tapchain.core.IBlueprint;
-import org.tapchain.editor.TapChainEditor;
 
 /**
  * Created by hiro on 2015/12/26.
