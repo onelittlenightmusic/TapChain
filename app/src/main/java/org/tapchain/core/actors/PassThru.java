@@ -1,7 +1,7 @@
 package org.tapchain.core.actors;
 
 import org.tapchain.core.Filter;
-import org.tapchain.core.IFunc;
+import org.tapchain.core.IFilter;
 import org.tapchain.core.IValue;
 
 /**
@@ -19,7 +19,7 @@ public abstract class PassThru<VALUE> extends Filter<Void, VALUE, VALUE> {
         }
     }
 
-    public interface IPassThru<VALUE> extends IFunc<VALUE, VALUE, VALUE> {
+    public interface IPassThru<VALUE> extends IFilter<VALUE, VALUE, VALUE> {
         @Override
         default VALUE func(IValue<VALUE> val, VALUE in) {
             return in;

@@ -1,10 +1,12 @@
 package org.tapchain.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 	ValueChangeNotifier notif;
+    HashMap<String, IBlueprint> tapViewMap = new HashMap<>();
 
 	public Factory() {
 		super();
@@ -20,6 +22,7 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 
 	public synchronized Factory<PIECE> Register(IBlueprint root) {
 		add(root);
+        tapViewMap.put(root.getTag(), root.getView());
 		return this;
 	}
 	
@@ -31,6 +34,10 @@ public class Factory<PIECE extends Piece> extends ArrayList<IBlueprint<PIECE>> {
 	public List<IBlueprint<PIECE>> getList() {
 		return this;
 	}
+
+    public IBlueprint getView(String tag) {
+        return tapViewMap.get(tag);
+    }
 
 	public void clear() {
 		super.clear();

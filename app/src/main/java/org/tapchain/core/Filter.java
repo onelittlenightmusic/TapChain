@@ -8,7 +8,7 @@ import android.util.Log;
 @SuppressWarnings("unchecked")
 public abstract class Filter<VALUE, INPUT, OUTPUT> extends
         Actor.Controllable<Self, INPUT, OUTPUT, Void> implements
-        IFunc<VALUE, INPUT, OUTPUT>, IValue<VALUE>, Actor.IInit<VALUE>, ICommit {
+        IFilter<VALUE, INPUT, OUTPUT>, IValue<VALUE>, Actor.IInit<VALUE>, ICommit {
     VALUE o;
     INPUT event;
 
@@ -81,11 +81,11 @@ public abstract class Filter<VALUE, INPUT, OUTPUT> extends
 
 
     public static class FilterSkelton<VALUE, INPUT, OUTPUT> extends org.tapchain.core.Filter<VALUE, INPUT, OUTPUT> {
-        IFunc<VALUE, INPUT, OUTPUT> _func;
+        IFilter<VALUE, INPUT, OUTPUT> _func;
         VALUE _init;
 
-        public FilterSkelton(IFunc<VALUE, INPUT, OUTPUT> f, VALUE i) {
-            super(f, IFunc.class);
+        public FilterSkelton(IFilter<VALUE, INPUT, OUTPUT> f, VALUE i) {
+            super(f, IFilter.class);
             _func = f;
             _init = i;
         }

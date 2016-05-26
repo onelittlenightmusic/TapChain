@@ -7,14 +7,14 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 
 import org.tapchain.core.IPoint;
-import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.ITap;
+import org.tapchain.editor.IActorTapView;
+import org.tapchain.editor.ITapView;
 
 /**
  * Created by hiro on 2015/12/27.
  */
 public abstract class TapChainWritingView extends TapChainSurfaceView {
-    IActorTap selected;
+    IActorTapView selected;
     Matrix savedMatrix = new Matrix();
 
     public TapChainWritingView(Context context) {
@@ -93,13 +93,13 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
         });
     }
 
-    protected abstract boolean scroll(IActorTap selected, IPoint v, IPoint position);
+    protected abstract boolean scroll(IActorTapView selected, IPoint v, IPoint position);
 
-    protected abstract ITap onDown(IPoint position);
+    protected abstract ITapView onDown(IPoint position);
 
-    protected abstract boolean onLongPress(IActorTap selected);
+    protected abstract boolean onLongPress(IActorTapView selected);
 
-    protected abstract boolean onFling(IActorTap selected, IPoint vector);
+    protected abstract boolean onFling(IActorTapView selected, IPoint vector);
 
     public boolean onTouchEvent(MotionEvent ev) {
         if (gdetect.onTouchEvent(ev))
@@ -108,9 +108,9 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
 //        Log.w(TAG, String.format("Action=%d", action));
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                ITap selectedTap = onDown(getPosition(ev.getX(), ev.getY()));
-                if (selectedTap instanceof IActorTap)
-                    selected = (IActorTap) selectedTap;
+                ITapView selectedTap = onDown(getPosition(ev.getX(), ev.getY()));
+                if (selectedTap instanceof IActorTapView)
+                    selected = (IActorTapView) selectedTap;
                 else
                     selected = null;
                 resetRegistration();
@@ -158,12 +158,12 @@ public abstract class TapChainWritingView extends TapChainSurfaceView {
 
 
     /**
-     * @return the editor
+     * @return the tapChain
      */
 
 
 
-    public abstract boolean standbyRegistration(IActorTap selected, int x, int y);
+    public abstract boolean standbyRegistration(IActorTapView selected, int x, int y);
 
     public abstract void resetRegistration();
 

@@ -8,23 +8,23 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.tapchain.editor.ITap;
-import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.IPathTap;
+import org.tapchain.editor.ITapView;
+import org.tapchain.editor.IActorTapView;
+import org.tapchain.editor.IPathTapView;
 
 public class TapLib {
-	static Map<IPoint, List<IActorTap>> map = new TreeMap<IPoint, List<IActorTap>>();
-	static Map<IPoint, List<IPathTap>> mapPath = new TreeMap<IPoint, List<IPathTap>>();
+	static Map<IPoint, List<IActorTapView>> map = new TreeMap<IPoint, List<IActorTapView>>();
+	static Map<IPoint, List<IPathTapView>> mapPath = new TreeMap<IPoint, List<IPathTapView>>();
 
-	public static Collection<IActorTap> getTaps(IPoint pt) {
+	public static Collection<IActorTapView> getTaps(IPoint pt) {
 		return map.get(pt);
 	}
 	
-	public static Collection<IActorTap> getRangeTaps(IPoint min, IPoint max) {
-		List<IActorTap> rtn = new LinkedList<IActorTap>();
-		SortedMap<IPoint, List<IActorTap>> s = ((TreeMap<IPoint, List<IActorTap>>)map).subMap(min, max);
+	public static Collection<IActorTapView> getRangeTaps(IPoint min, IPoint max) {
+		List<IActorTapView> rtn = new LinkedList<IActorTapView>();
+		SortedMap<IPoint, List<IActorTapView>> s = ((TreeMap<IPoint, List<IActorTapView>>)map).subMap(min, max);
 		float minx = min.x(), miny = min.y(), maxx = max.x(), maxy = max.y();
-		for(Entry<IPoint, List<IActorTap>> tList: s.entrySet()) {
+		for(Entry<IPoint, List<IActorTapView>> tList: s.entrySet()) {
 			IPoint k = tList.getKey();
 			float thisx = k.x(), thisy = k.y();
 			if(thisx >= minx && thisx <= maxx && thisy >= miny && thisy <= maxy)
@@ -33,33 +33,33 @@ public class TapLib {
 		return rtn;
 	}
 	
-	public static void setTap(ITap t) {
-		if(t instanceof IActorTap)
-			setTap((IActorTap)t);
-		else if(t instanceof IPathTap)
-			setTap((IPathTap)t);
+	public static void setTap(ITapView t) {
+		if(t instanceof IActorTapView)
+			setTap((IActorTapView)t);
+		else if(t instanceof IPathTapView)
+			setTap((IPathTapView)t);
 	}
 	
-	public static synchronized void setTap(IActorTap t1) {
+	public static synchronized void setTap(IActorTapView t1) {
 		removeTap(t1);
 		IPoint newKey = t1._get().copy();
-		LinkedList<IActorTap> tList = (LinkedList<IActorTap>) map.get(newKey);
+		LinkedList<IActorTapView> tList = (LinkedList<IActorTapView>) map.get(newKey);
 		if(tList == null) {
-			tList = new LinkedList<IActorTap>();
+			tList = new LinkedList<IActorTapView>();
 			map.put(newKey, tList);
 		}
 		tList.addFirst(t1);
 		t1.setRecentPoint(newKey);
-		Collection<IActorTap> tList2 = t1.getAccessoryTaps();
+		Collection<IActorTapView> tList2 = t1.getAccessoryTaps();
 		if(tList2 != null)
-			for(IActorTap t: tList2)
+			for(IActorTapView t: tList2)
 				setTap(t);
 	}
 	
-	public static synchronized void removeTap(IActorTap t1) {
+	public static synchronized void removeTap(IActorTapView t1) {
 		IPoint oldKey = t1.getRecentPoint();
 		if(oldKey != null) {
-			Collection<IActorTap> tList = getTaps(oldKey);
+			Collection<IActorTapView> tList = getTaps(oldKey);
 			if(tList != null) {
 				tList.remove(t1);
 			}
@@ -67,38 +67,38 @@ public class TapLib {
 		}
 	}
 
-	public static Collection<ITap> getAllSystemPieces() {
-		LinkedList<ITap> rtn = new LinkedList<ITap>();
-		for(List<IActorTap> tList: map.values())
+	public static Collection<ITapView> getAllSystemPieces() {
+		LinkedList<ITapView> rtn = new LinkedList<ITapView>();
+		for(List<IActorTapView> tList: map.values())
 			rtn.addAll(tList);
-		for(List<IPathTap> tList: mapPath.values())
+		for(List<IPathTapView> tList: mapPath.values())
 			rtn.addAll(tList);
 		return rtn;
 	}
 
-	public static void setTap(IPathTap tp) {
+	public static void setTap(IPathTapView tp) {
 		removeTap(tp);
 		IPoint newKey = tp._get().copy();
-		LinkedList<IPathTap> tList = (LinkedList<IPathTap>) mapPath.get(newKey);
+		LinkedList<IPathTapView> tList = (LinkedList<IPathTapView>) mapPath.get(newKey);
 		if(tList == null) {
-			tList = new LinkedList<IPathTap>();
+			tList = new LinkedList<IPathTapView>();
 			mapPath.put(newKey, tList);
 		}
 		tList.addFirst(tp);
 		tp.setRecentPoint(newKey);
 	}
 
-	public static void removeTap(IPathTap tp) {
+	public static void removeTap(IPathTapView tp) {
 		IPoint oldKey = tp.getRecentPoint();
 		if(oldKey != null) {
-			Collection<IPathTap> tList = getTapPath(oldKey);
+			Collection<IPathTapView> tList = getTapPath(oldKey);
 			if(tList != null) {
 				tList.remove(tp);
 			}
 		}
 	}
 
-	private static Collection<IPathTap> getTapPath(IPoint oldKey) {
+	private static Collection<IPathTapView> getTapPath(IPoint oldKey) {
 		return mapPath.get(oldKey);
 	}
 }

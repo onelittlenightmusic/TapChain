@@ -16,7 +16,7 @@ import org.tapchain.core.ClassLib.ClassLibReturn;
 import org.tapchain.core.PathPack.InPathPack;
 import org.tapchain.core.PathPack.OutPathPack.Output;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -668,8 +668,8 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         TICK(true, false, false) {
             @Override
             public boolean getContinueCode(Controllable actor) {
-                if (actor instanceof IActorTap)
-                    ((IActorTap) actor).onTick(null, null);
+                if (actor instanceof IActorTapView)
+                    ((IActorTapView) actor).onTick(null, null);
                 return true;
             }
         };

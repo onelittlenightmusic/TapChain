@@ -2,12 +2,12 @@ package org.tapchain;
 
 import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
 import android.graphics.Bitmap;
 
-public class MyRestartOptionTapStyle extends MySimpleOptionTapStyle {
-	public MyRestartOptionTapStyle(IActorTap t, Bitmap bm_fg) {
+public class MyRestartOptionTapViewStyle extends MySimpleOptionTapViewStyle {
+	public MyRestartOptionTapViewStyle(IActorTapView t, Bitmap bm_fg) {
 		super(t, bm_fg);
 	}
 

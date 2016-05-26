@@ -8,7 +8,7 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.ColorLib;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.ITapChain;
 import org.tapchain.editor.IFocusControl;
 import org.tapchain.editor.IFocusable;
@@ -17,7 +17,7 @@ import org.tapchain.realworld.R;
 /**
  * Created by hiro on 2015/05/04.
  */
-public class MyBeamTapStyle extends BeamTapStyle implements IRelease, IFocusable {
+public class MyBeamTapViewStyle extends BeamTapViewStyle implements IRelease, IFocusable {
     /**
      *
      */
@@ -26,7 +26,7 @@ public class MyBeamTapStyle extends BeamTapStyle implements IRelease, IFocusable
     ClassEnvelope clazz = null;
     IActorSharedHandler handler;
 
-	public MyBeamTapStyle(Resources r, IActorTap t, LinkType al, ClassEnvelope clz) {
+	public MyBeamTapViewStyle(Resources r, IActorTapView t, LinkType al, ClassEnvelope clz) {
         super(r, t, BitmapMaker.makeOrReuse("Beam", R.drawable.beam, 50, 50));
         this.al = al;
         this.clazz = clz;

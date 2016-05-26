@@ -1,7 +1,6 @@
 package org.tapchain.core;
 
 public abstract class Manager<T extends IPiece> implements IManager<T, T> {
-//	IErrorHandler error = null;
 	ILogHandler log = null;
 
 	@Override
@@ -62,16 +61,9 @@ public abstract class Manager<T extends IPiece> implements IManager<T, T> {
 
 	@Override
 	public IManager<T, T> error(ChainException e) {
-//		if (error != null)
-//			error.onError(null, e);
 		return this;
 	}
 
-//	public IManager<T, T> setError(IErrorHandler handle) {
-//		error = handle;
-//		return this;
-//	}
-	
 	@Override
 	public IManager<T, T> _out() {
 		return this;

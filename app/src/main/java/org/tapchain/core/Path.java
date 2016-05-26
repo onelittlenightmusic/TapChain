@@ -79,14 +79,15 @@ public class Path implements Tickable, IPath {
 		return 1;
 	}
 
-	;
-
 	@Override
 	public int getTickInterval() {
-		if( h != null)
-			return h.getTickInterval();
-		return 0;
+		return tickInterval;
 	}
+
+    int tickInterval = 0;
+    public void setTickInterval(int interval) {
+        this.tickInterval = interval;
+    }
 
 	public Path setStatusHandler(IStatusHandler<IPath> h) {
 		this.h = h;

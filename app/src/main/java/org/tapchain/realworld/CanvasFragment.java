@@ -12,7 +12,9 @@ import org.tapchain.core.Actor;
 import org.tapchain.core.IBlueprint;
 import org.tapchain.core.IPoint;
 import org.tapchain.editor.EditorReturn;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.TapChain;
+import org.tapchain.editor.TapManager;
 
 /**
  * CanvasFragment controls creation of canvas view and canvas model.
@@ -24,7 +26,7 @@ public class CanvasFragment extends Fragment {
     CanvasViewImpl view;
 //    Activity act;
     static String CANVAS = "Canvas";
-    TapChain editor;
+    TapChain tapChain;
 
     public CanvasFragment() {
         super();
@@ -42,11 +44,11 @@ public class CanvasFragment extends Fragment {
         Activity act = getActivity();
         if (view == null) {
             view = new CanvasViewImpl(act);
-            if(editor == null) {
-                editor = new AndroidTapChain(view, act);
+            if(tapChain == null) {
+                tapChain = new AndroidTapChain(view, act);
 
                 try {
-                    editor.editBlueprint()
+                    tapChain.editBlueprint()
                             .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Generator$WordGenerator"), "A", false)
                             .view(getResources().getIdentifier("a" , "drawable", getActivity().getPackageName()))
                             .tag("Word")
@@ -56,9 +58,9 @@ public class CanvasFragment extends Fragment {
                     e.printStackTrace();
                 }
 
-                editor.invalidate();
+                tapChain.invalidate();
             }
-            view.setTapChain(editor);
+            view.setTapChain(tapChain);
         }
         return this.view;
     }
@@ -106,19 +108,7 @@ public class CanvasFragment extends Fragment {
 
 
     public Actor add(TapChain.FACTORY_KEY key, String tag, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = editor.addActorFromBlueprint(key, tag, pos);
-        if (editorReturn == null)
-            return null;
-        //TODO: resolve duplication
-        IPoint resultPoint = editorReturn.getTap()._get();
-        if(!view.isInWindow(resultPoint.x(), resultPoint.y()) && pos != null)
-            //Centering
-            view._onFlingBackgroundTo(pos.x(), pos.y());
-
-        if (vec == null)
-            return editorReturn.getActor();
-        view.onFling(editorReturn.getTap(), vec);
-        return editorReturn.getActor();
+        return add(tapChain.factoryToBlueprint(key, tag), pos, vec);
     }
 
     /**
@@ -158,24 +148,11 @@ public class CanvasFragment extends Fragment {
     }
 
     public Actor add(TapChain.FACTORY_KEY key, int code, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = editor.addActorFromBlueprint(key, code, pos);
-        if (editorReturn == null)
-            return null;
-
-        //TODO: DRY
-        IPoint resultPoint = editorReturn.getTap()._get();
-        if(!view.isInWindow(resultPoint.x(), resultPoint.y()) && pos != null)
-            //Centering
-            view._onFlingBackgroundTo(pos.x(), pos.y());
-
-        if (vec == null)
-            return editorReturn.getActor();
-        view.onFling(editorReturn.getTap(), vec);
-        return editorReturn.getActor();
+        return add(tapChain.factoryToBlueprint(key, code), pos, vec);
     }
 
-    public TapChain getEditor() {
-        return editor;
+    public TapChain getTapChain() {
+        return tapChain;
     }
 
     /**
@@ -202,20 +179,20 @@ public class CanvasFragment extends Fragment {
      * @return
      */
     public Actor add(IBlueprint<Actor> b, IPoint pos, IPoint vec) {
-        EditorReturn editorReturn = editor.addActorFromBlueprint(b, pos);
-        if (editorReturn == null)
+        Actor actor = new TapManager(tapChain).add(b, pos);
+        if (actor == null)
             return null;
 
-        //TODO: DRY
-        IPoint resultPoint = editorReturn.getTap()._get();
+        IActorTapView tap = tapChain.toTap(actor);
+        IPoint resultPoint = tap._get();
         if(!view.isInWindow(resultPoint.x(), resultPoint.y()) && pos != null)
             //Centering
             view._onFlingBackgroundTo(pos.x(), pos.y());
 
         if (vec == null)
-            return editorReturn.getActor();
-        view.onFling(editorReturn.getTap(), vec);
-        return editorReturn.getActor();
+            return actor;
+        view.onFling(tap, vec);
+        return actor;
     }
 
 }

@@ -7,13 +7,13 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.viewlib.DrawLib;
 import org.tapchain.viewlib.ShowInstance;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-public class MySetTimeTapStyle extends OptionTapStyle implements IScrollHandler, IRelease {
+public class MySetTimeTapViewStyle extends OptionTapViewStyle implements IScrollHandler, IRelease {
 		/**
 		 * 
 		 */
@@ -21,7 +21,7 @@ public class MySetTimeTapStyle extends OptionTapStyle implements IScrollHandler,
 		float radi = 100f;
 		Bitmap bm_fg = null;
 
-		MySetTimeTapStyle(IActorTap _p, Bitmap bm_fg) {
+		MySetTimeTapViewStyle(IActorTapView _p, Bitmap bm_fg) {
 			super(_p);
 			setSize(new WorldPoint(300f, 300f));
 			this.bm_fg = bm_fg;
@@ -56,7 +56,7 @@ public class MySetTimeTapStyle extends OptionTapStyle implements IScrollHandler,
 		}
 
 		@Override
-		public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
+		public void onScroll(ITapChain edit, IActorTapView tap, IPoint pos, IPoint vp) {
 			setParentValue(pos, vp);
 		}
 

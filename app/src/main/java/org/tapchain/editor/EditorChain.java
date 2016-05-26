@@ -1,6 +1,6 @@
 package org.tapchain.editor;
 
-import org.tapchain.PathTap;
+import org.tapchain.PathTapView;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ActorChain;
 import org.tapchain.core.Blueprint;
@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EditorChain extends ActorChain {
     ActorChain systemActorChain = new ActorChain(50);
-    ConcurrentHashMap<Actor, IActorTap> dictPiece = new ConcurrentHashMap<>();
-    ConcurrentHashMap<IPath, PathTap> dictPath = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Actor, IActorTapView> dictPiece = new ConcurrentHashMap<>();
+    ConcurrentHashMap<IPath, PathTapView> dictPath = new ConcurrentHashMap<>();
     IBlueprint defaultView = null;
 
     IActorConnectHandler actorConnectHandler;
@@ -36,7 +36,7 @@ public class EditorChain extends ActorChain {
      * Get a collection of all taps
      * @return collection of all taps
      */
-    public Collection<IActorTap> getTaps() {
+    public Collection<IActorTapView> getTaps() {
         return dictPiece.values();
     }
 
@@ -53,7 +53,7 @@ public class EditorChain extends ActorChain {
      * @param actor actor
      * @return tap
      */
-    public IActorTap toTap(Actor actor) {
+    public IActorTapView toTap(Actor actor) {
         if (dictPiece.get(actor) != null)
             return dictPiece.get(actor);
         return null;
@@ -64,7 +64,7 @@ public class EditorChain extends ActorChain {
      * @param path tap
      * @return actor
      */
-    public PathTap getTapPath(IPath path) {
+    public PathTapView getTapPath(IPath path) {
         if (dictPath.get(path) != null)
             return dictPath.get(path);
         return null;
@@ -79,11 +79,11 @@ public class EditorChain extends ActorChain {
     }
 
 
-    public void putPiece(Actor actor, IActorTap view) {
+    public void putPiece(Actor actor, IActorTapView view) {
         dictPiece.put(actor, view);
     }
 
-    public void putPath(IPath path, PathTap view) {
+    public void putPath(IPath path, PathTapView view) {
         dictPath.put(path, view);
     }
 

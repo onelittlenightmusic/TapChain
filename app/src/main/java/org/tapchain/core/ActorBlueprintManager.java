@@ -24,7 +24,7 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
     }
 
     @Override
-    public <VALUE, INPUT, OUTPUT> ActorBlueprintManager add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+    public <VALUE, INPUT, OUTPUT> ActorBlueprintManager add(final IFilter<VALUE, INPUT, OUTPUT> func, final VALUE init) {
         add(Filter.FilterSkelton.class, func, init);
         return this;
     }

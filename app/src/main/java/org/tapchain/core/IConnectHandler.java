@@ -1,10 +1,10 @@
 package org.tapchain.core;
 
-import org.tapchain.editor.ITap;
+import org.tapchain.editor.ITapView;
 
 /**
  * Created by hiro on 2015/05/28.
  */
-public interface IConnectHandler<ACTORVIEW extends ITap, PATHVIEW extends ITap> {
+public interface IConnectHandler<ACTORVIEW extends ITapView, PATHVIEW extends ITapView> {
     void onConnect(ACTORVIEW actorview, PATHVIEW pathview, ACTORVIEW actorview2, LinkType linkType);
 }

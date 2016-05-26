@@ -23,13 +23,12 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.IActorAttachHandler;
-import org.tapchain.editor.IActorManager;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.ITapChain;
 
 import java.io.Serializable;
 
-public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IBlueprintFocusNotification, IRelease, IActorAttachHandler {
+public class MyCableTapViewStyle extends AdapterTapViewStyle implements Serializable, IBlueprintFocusNotification, IRelease, IActorAttachHandler {
 	/**
 	 * 
 	 */
@@ -89,7 +88,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 		}
 	}
 	private Direction dir = Direction.RIGHT;
-	public MyCableTapStyle(IActorTap t) {
+	public MyCableTapViewStyle(IActorTapView t) {
 		super(t);
 		setMyActor(t.getActor());
 		setSize(new WorldPoint(80f, 80f));
@@ -104,7 +103,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 		paint.setFilterBitmap(true);
 	}
 	
-	public MyCableTapStyle(IActorTap t, LinkType al, ClassEnvelope c, String tag) {
+	public MyCableTapViewStyle(IActorTapView t, LinkType al, ClassEnvelope c, String tag) {
 		this(t);
 		ce = c;
 		setLink(al);
@@ -121,7 +120,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 	@Override
 	public boolean view_user(Canvas canvas, IPoint cp, IPoint size,
 			int alpha) {
-		RectF r2 = ((ActorTap)getParentTap()).getScreenRectF();
+		RectF r2 = ((ActorTapView)getParentTap()).getScreenRectF();
 		float x0, y0, x1, y1, x2, y2, theta;
 		if(getLink() == LinkType.PUSH) {
 			x0 = cp.x();
@@ -203,7 +202,7 @@ public class MyCableTapStyle extends AdapterTapStyle implements Serializable, IB
 
 	String heapOut = "_out", heapIn = "_in";
 	@Override
-	public boolean onTouch(ITapChain tapChain, IActorTap t2, Actor a1, Actor a2) {
+	public boolean onTouch(ITapChain tapChain, IActorTapView t2, Actor a1, Actor a2) {
 		boolean rtn = false;
 			if(getTag().equals(heapOut)) {
 				if(tapChain.link(a1, LinkType.PUSH, a2)) {

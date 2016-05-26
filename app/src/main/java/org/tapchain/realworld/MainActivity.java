@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
     }
 
     public TapChain getTapChain() {
-        return getCanvas().getEditor();
+        return getCanvas().getTapChain();
     }
 
     @Override

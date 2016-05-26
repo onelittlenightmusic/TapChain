@@ -118,7 +118,7 @@ public interface IManager<T, U> {
      * @param <OUTPUT>
      * @return
      */
-    <VALUE, INPUT, OUTPUT> IManager<T, U> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init);
+    <VALUE, INPUT, OUTPUT> IManager<T, U> add(final IFilter<VALUE, INPUT, OUTPUT> func, final VALUE init);
 
     /**
      *

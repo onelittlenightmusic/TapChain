@@ -1,21 +1,17 @@
 package org.tapchain.game;
 
-import org.tapchain.MySetFloatTapStyle;
+import org.tapchain.MySetFloatTapViewStyle;
 import org.tapchain.core.IPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.RectF;
-
-public class MySetPedalTapStyle extends MySetFloatTapStyle {
+public class MySetPedalTapViewStyle extends MySetFloatTapViewStyle {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7318531384117387864L;
 
-	public MySetPedalTapStyle(IActorTap _p) {
+	public MySetPedalTapViewStyle(IActorTapView _p) {
 			super(_p);
 			startangle = -30f;
 			oneangle = 10f;

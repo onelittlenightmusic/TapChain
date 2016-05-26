@@ -402,7 +402,7 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		return this;
 	}
 
-    public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+    public <VALUE, INPUT, OUTPUT> BlueprintManager<TYPE> add(final IFilter<VALUE, INPUT, OUTPUT> func, final VALUE init) {
         return this;
     };
     public <VALUE, OUTPUT> BlueprintManager<TYPE> add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {

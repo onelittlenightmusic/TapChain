@@ -11,11 +11,10 @@ import org.tapchain.core.IValueArray;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
 import org.tapchain.editor.ColorLib;
-import org.tapchain.editor.IActorManager;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.ITapChain;
 import org.tapchain.game.MyFloat;
-import org.tapchain.game.MySetPedalTapStyle;
+import org.tapchain.game.MySetPedalTapViewStyle;
 import org.tapchain.realworld.R;
 
 import java.util.Calendar;
@@ -25,13 +24,13 @@ import java.util.HashMap;
  * Created by hiro on 2016/01/06.
  */
 public class EditInstance implements IRelease {
-    ActorTap setter, exit, restart;
+    ActorTapView setter, exit, restart;
     ViewActor setterText;
-    IActorTap t;
+    IActorTapView t;
     static HashMap<Class<?>, ClassEditCreator> classEdits = new HashMap<>();
 
     public interface ClassEditCreator {
-        ActorTap createEditorTap(IActorTap parent);
+        ActorTapView createEditorTap(IActorTapView parent);
     }
 
     static void addEditCreator(Class<?> cls, ClassEditCreator cec) {
@@ -42,7 +41,7 @@ public class EditInstance implements IRelease {
         classEdits.remove(cls);
     }
 
-    EditInstance(Activity act, IActorTap _p, Object val2) {
+    EditInstance(Activity act, IActorTapView _p, Object val2) {
         t = _p;
         if(classEdits.containsKey(val2.getClass())) {
             setter = classEdits.get(val2.getClass()).createEditorTap(_p);
@@ -51,30 +50,30 @@ public class EditInstance implements IRelease {
             setterText._get().setOffset(_p);
             return;
         } else if (val2 instanceof IValueArray) {
-            setter = new MySetSquarePathTapStyle(_p, BitmapMaker.makeOrReuse(
+            setter = new MySetSquarePathTapViewStyle(_p, BitmapMaker.makeOrReuse(
                     "pathExt", R.drawable.widen, 200, 200));
 //            setter.setCenter((IPoint)((IValueArray)val2)._valueGetLast());
         } else if (val2 instanceof IPoint) {
-            setter = new MySetPointTapStyle(_p, BitmapMaker.makeOrReuse(
+            setter = new MySetPointTapViewStyle(_p, BitmapMaker.makeOrReuse(
                     "pointExt", R.drawable.widen, 200, 200));
         } else if (val2 instanceof Integer) {
-            setter = new MySetIntegerTapStyle(_p);
+            setter = new MySetIntegerTapViewStyle(_p);
         } else if (val2 instanceof Float) {
-            setter = new MySetFloatTapStyle(_p);
+            setter = new MySetFloatTapViewStyle(_p);
         } else if (val2 instanceof MyFloat) {
-            setter = new MySetPedalTapStyle(_p);
+            setter = new MySetPedalTapViewStyle(_p);
         } else if (val2 instanceof Calendar) {
-            setter = new MySetTimeTapStyle(_p, BitmapMaker.makeOrReuse(
+            setter = new MySetTimeTapViewStyle(_p, BitmapMaker.makeOrReuse(
                     "pointExt", R.drawable.widen, 200, 200));
         } else {
             return;
         }
 
-        exit = new MyExitOptionTapStyle(_p, BitmapMaker.makeOrReuse(
+        exit = new MyExitOptionTapViewStyle(_p, BitmapMaker.makeOrReuse(
                 "exit", R.drawable.dust, 70, 70));
         exit.setCenter(new WorldPoint(180f, -180f));
         exit.setColorCode(ColorLib.ColorCode.RED);
-        restart = new MyRestartOptionTapStyle(_p, BitmapMaker.makeOrReuse(
+        restart = new MyRestartOptionTapViewStyle(_p, BitmapMaker.makeOrReuse(
                 "restart", R.drawable.reload, 70, 70));
         restart.setCenter(new WorldPoint(180f, 180f));
         restart.setColorCode(ColorLib.ColorCode.BLUE);
@@ -119,7 +118,7 @@ public class EditInstance implements IRelease {
         }
     }
 
-    public IActorTap getTap() {
+    public IActorTapView getTap() {
         return t;
     }
 

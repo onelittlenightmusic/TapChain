@@ -4,7 +4,6 @@ import android.app.Activity;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
-import org.tapchain.core.ActorManager;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
@@ -12,24 +11,24 @@ import org.tapchain.core.IValue;
 import org.tapchain.core.Packet;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.ITapControlInterface;
 
 import java.util.Collection;
 import java.util.HashMap;
 
-public class ActorTap extends AndroidView implements IActorTap, ITapControlInterface {
+public class ActorTapView extends AndroidView implements IActorTapView, ITapControlInterface {
 	IPoint gridSize = new WorldPoint(1, 1);
 	IPoint recent = null;
 	private Actor mytapchain = null;
-	private HashMap<Object, IActorTap> tapSet = null;
+	private HashMap<Object, IActorTapView> tapSet = null;
 	private IPoint minGridSize = new WorldPoint(1,1);
 
-	public ActorTap() {
+	public ActorTapView() {
 		super();
 	}
 
-    public ActorTap(Activity act) {
+    public ActorTapView(Activity act) {
         super(act);
     }
 
@@ -79,28 +78,28 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
 	}
 
 	@Override
-	public IActorTap getAccessoryTap(Object key) {
+	public IActorTapView getAccessoryTap(Object key) {
 		if(tapSet == null)
 			return null;
 		return tapSet.get(key);
 	}
 
 	@Override
-	public Collection<IActorTap> getAccessoryTaps() {
+	public Collection<IActorTapView> getAccessoryTaps() {
 		if(tapSet == null)
 			return null;
 		return tapSet.values();
 	}
 	
 	@Override
-	public IActorTap setAccessoryTap(Object key, IActorTap tap) {
+	public IActorTapView setAccessoryTap(Object key, IActorTapView tap) {
 		if(tapSet == null)
 			tapSet = new HashMap<>();
 		return tapSet.put(key, tap);
 	}
 
 	@Override
-	public IActorTap unsetAccessoryTap(Object key) {
+	public IActorTapView unsetAccessoryTap(Object key) {
 		if(tapSet == null)
 			return null;
 		return tapSet.remove(key);
@@ -115,7 +114,7 @@ public class ActorTap extends AndroidView implements IActorTap, ITapControlInter
     @Override
 	public void ctrlStop() {
 		if(tapSet != null)
-			for(IActorTap accessory: tapSet.values()) 
+			for(IActorTapView accessory: tapSet.values())
 				accessory.end();
         TapLib.removeTap(this);
         super.ctrlStop();

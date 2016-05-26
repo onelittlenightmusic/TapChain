@@ -382,12 +382,17 @@ public class ChainPiece<PARTNER extends Piece> extends Piece<PARTNER> implements
 		return 0;
 	}
 
+    int tickInterval = 0;
 	@Override
 	public int getTickInterval() {
-		if (_statusHandler != null)
-			return _statusHandler.getTickInterval();
-		return 0;
+//		if (_statusHandler != null)
+//			return _statusHandler.getTickInterval();
+		return tickInterval;
 	}
+
+    public void setTickInterval(int interval) {
+        tickInterval = interval;
+    }
 
 	protected ChainPiece.PieceState restoreState() {
 		status = status_bak;

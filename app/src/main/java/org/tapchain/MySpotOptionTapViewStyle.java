@@ -5,7 +5,7 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.ColorLib;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.ITapChain;
 import org.tapchain.editor.IFocusControl;
 import org.tapchain.editor.IFocusable;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 /**
  * Created by hiro on 2015/05/04.
  */
-public class MySpotOptionTapStyle extends MySimpleOptionTapStyle implements IFocusable {
+public class MySpotOptionTapViewStyle extends MySimpleOptionTapViewStyle implements IFocusable {
     static HashMap<LinkType, SpotProperties> spotProperties = new HashMap<LinkType, SpotProperties>() {
         /**
          *
@@ -51,7 +51,7 @@ public class MySpotOptionTapStyle extends MySimpleOptionTapStyle implements IFoc
     LinkType al = null;
     ClassEnvelope clazz = null;
 
-	public MySpotOptionTapStyle(IActorTap t, LinkType al, ClassEnvelope clz) {
+	public MySpotOptionTapViewStyle(IActorTapView t, LinkType al, ClassEnvelope clz) {
         super(t, spotProperties.get(al).getBitmap());
         this.al = al;
         this.clazz = clz;

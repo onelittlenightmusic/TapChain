@@ -50,13 +50,6 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		return chain;
 	}
 
-	public PieceManager SetCallback(IControlCallback cb) {
-		cc_cache = cb;
-		if (chain != null && cc_cache != null)
-			chain.setCallback(cc_cache);
-		return this;
-	}
-
 	// 3.Changing state
 	@SuppressWarnings("unchecked")
 	@Override
@@ -291,7 +284,7 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 //		Log.w("PieceManager", String.format(format, l));
 	}
 
-    public <VALUE, INPUT, OUTPUT> PieceManager<PIECE> add(final IFunc<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+    public <VALUE, INPUT, OUTPUT> PieceManager<PIECE> add(final IFilter<VALUE, INPUT, OUTPUT> func, final VALUE init) {
         return this;
     };
     public <VALUE, OUTPUT> PieceManager<PIECE> add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
@@ -305,10 +298,10 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
         return this;
     }
 
-    @Override
-    public void setLog(ILogHandler _log) {
-        super.setLog(_log);
-        if(chain != null)
-            chain.setLog(_log);
-    }
+//    @Override
+//    public void setLog(ILogHandler _log) {
+//        super.setLog(_log);
+//        if(chain != null)
+//            chain.setLog(_log);
+//    }
 }

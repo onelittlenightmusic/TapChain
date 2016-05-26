@@ -1,18 +1,17 @@
 package org.tapchain;
 
-import org.tapchain.core.D2Point;
 import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.viewlib.DrawLib;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-public class MySetPathTapStyle extends OptionTapStyle implements IScrollHandler {
+public class MySetPointTapViewStyle extends OptionTapViewStyle implements IScrollHandler {
 	/**
 	 * 
 	 */
@@ -20,9 +19,8 @@ public class MySetPathTapStyle extends OptionTapStyle implements IScrollHandler 
 	float radi = 10f;
 	Paint focuspaint = new Paint();
 	Bitmap bm_fg = null;
-//	IPoint offset = new WorldPoint(100, 100);
 
-	MySetPathTapStyle(IActorTap _p, Bitmap bm_fg) {
+	MySetPointTapViewStyle(IActorTapView _p, Bitmap bm_fg) {
 		super(_p);
 		setSize(new WorldPoint(200f, 200f));
 		this.bm_fg = bm_fg;
@@ -32,7 +30,7 @@ public class MySetPathTapStyle extends OptionTapStyle implements IScrollHandler 
 	@Override
 	public void view_init() {
 		getPaint().setColor(0x77ffffff);
-		_get().setOffset(getParentTap());
+			setCenter(getParentTap()._get());
 		focuspaint.setColor(0x40ffffff);
 		focuspaint.setAntiAlias(true);
 	}
@@ -47,7 +45,8 @@ public class MySetPathTapStyle extends OptionTapStyle implements IScrollHandler 
 	}
 
 	@Override
-	public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
-		getParentTap().setMyActorValue(new D2Point(pos, vp));
+	public void onScroll(ITapChain edit, IActorTapView tap, IPoint pos, IPoint vp) {
+			setCenter(pos);
+			getParentTap().setMyActorValue(vp/*.plusNew(offset)*/);
 	}
 }

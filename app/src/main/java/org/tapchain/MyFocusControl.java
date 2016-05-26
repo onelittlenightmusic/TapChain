@@ -8,7 +8,7 @@ import org.tapchain.core.LinkType;
 import org.tapchain.editor.IFocusControl;
 import org.tapchain.editor.IFocusable;
 
-public class MyFocusControl extends ActorTap implements IFocusControl {
+public class MyFocusControl extends ActorTapView implements IFocusControl {
 	HashMap<IFocusable, LinkType> array = new HashMap<IFocusable, LinkType>();
 	private static final long serialVersionUID = 1L;
 	Actor spotTargetActor = null;

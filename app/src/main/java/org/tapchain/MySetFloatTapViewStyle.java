@@ -2,15 +2,15 @@ package org.tapchain;
 
 import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
-public class MySetFloatTapStyle extends MySetIntegerTapStyle {
+public class MySetFloatTapViewStyle extends MySetIntegerTapViewStyle {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	protected MySetFloatTapStyle(IActorTap _p) {
+	protected MySetFloatTapViewStyle(IActorTapView _p) {
 		super(_p);
 
 	}

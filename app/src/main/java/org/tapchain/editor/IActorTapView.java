@@ -3,13 +3,12 @@ package org.tapchain.editor;
 import java.util.Collection;
 
 import org.tapchain.core.Actor;
-import org.tapchain.core.Actor.ControllableSignal;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
 
-public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap, IPiece<Actor> {
+public interface IActorTapView extends Tickable<Actor>, Pushable<Actor>, ITapView, IPiece<Actor> {
 	Actor getActor();
 	Object getMyActorValue();
 	boolean setMyActorValue(Object obj);
@@ -19,10 +18,10 @@ public interface IActorTap extends Tickable<Actor>, Pushable<Actor>, ITap, IPiec
 	boolean setGridSize(IPoint add);
 	IValue<IPoint> getSize();
 	void changeState(IState state);
-	IActorTap getAccessoryTap(Object key);
-	Collection<IActorTap> getAccessoryTaps();
-	IActorTap setAccessoryTap(Object key, IActorTap tap);
-	IActorTap unsetAccessoryTap(Object key);
+	IActorTapView getAccessoryTap(Object key);
+	Collection<IActorTapView> getAccessoryTaps();
+	IActorTapView setAccessoryTap(Object key, IActorTapView tap);
+	IActorTapView unsetAccessoryTap(Object key);
 	IPoint getRecentPoint();
 	void setRecentPoint(IPoint p);
 }

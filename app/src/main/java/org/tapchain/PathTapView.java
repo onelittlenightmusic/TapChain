@@ -3,7 +3,6 @@ package org.tapchain;
 import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
-import org.tapchain.core.ActorManager;
 import org.tapchain.core.Chain;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.Effector;
@@ -12,14 +11,14 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.Packet;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IPathTap;
+import org.tapchain.editor.IPathTapView;
 
-public class PathTap extends AndroidView implements IPathTap {
+public class PathTapView extends AndroidView implements IPathTapView {
 		IPath myPath = null;
 		IPoint recent = null;
 		Chain root;
 
-		public PathTap() {
+		public PathTapView() {
 			super();
 		}
 
@@ -84,8 +83,8 @@ public class PathTap extends AndroidView implements IPathTap {
 	public static class PathMover extends Effector.ValueEffector<IPoint> {
 		float beta = 0f;
 		float dif = 0.01f;
-		PathTap pathTap;
-		PathMover(PathTap pathTap, float dif, int duration) {
+		PathTapView pathTap;
+		PathMover(PathTapView pathTap, float dif, int duration) {
 			super();
 			this.pathTap = pathTap;
 			this.dif = dif;

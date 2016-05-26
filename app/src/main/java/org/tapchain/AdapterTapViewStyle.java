@@ -6,10 +6,10 @@ import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.IScrollHandler;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
-public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, IRelease {
-	public AdapterTapStyle(IActorTap t) {
+public class AdapterTapViewStyle extends OptionTapViewStyle implements IScrollHandler, IRelease {
+	public AdapterTapViewStyle(IActorTapView t) {
 		super(t);
 		registerHandler(this);
 	}
@@ -34,7 +34,7 @@ public class AdapterTapStyle extends OptionTapStyle implements IScrollHandler, I
 	}
 
 	@Override
-	public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
+	public void onScroll(ITapChain edit, IActorTapView tap, IPoint pos, IPoint vp) {
 		setCenter(pos);
 	}
 	

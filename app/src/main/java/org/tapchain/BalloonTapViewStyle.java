@@ -14,7 +14,7 @@ import org.tapchain.editor.ITapChain;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.viewlib.DrawLib;
 
 import android.graphics.Bitmap;
@@ -28,7 +28,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
 
-public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBlueprintFocusNotification, IRelease {
+public class BalloonTapViewStyle extends OptionTapViewStyle implements Serializable, IBlueprintFocusNotification, IRelease {
 	/**
 	 * 
 	 */
@@ -89,7 +89,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	}
 	private Direction dir = Direction.RIGHT;
 	private LinkType ac = LinkType.PUSH;
-	public BalloonTapStyle(IActorTap t) {
+	public BalloonTapViewStyle(IActorTapView t) {
 		super(t);
 		setMyActor(t.getActor());
 		setSize(new WorldPoint(60f, 60f));
@@ -109,7 +109,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 		paint.setFilterBitmap(true);
 	}
 	
-	public BalloonTapStyle(IActorTap t, LinkType al, ClassEnvelope c, String tag) {
+	public BalloonTapViewStyle(IActorTapView t, LinkType al, ClassEnvelope c, String tag) {
 		this(t);
 //		ce = c;
 		Bitmap i = BitmapMaker.getClassImage(c, 50, 50);
@@ -148,7 +148,7 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 		canvas.restore();
 		RectF r = getScreenRectF();
 		float[] d = dir.getRectA(r);
-		RectF r2 = ((ActorTap)getParentTap()).getScreenRectF();
+		RectF r2 = ((ActorTapView)getParentTap()).getScreenRectF();
 		float x2 = r2.left + 20f, y2 = r2.top + 25f;
 		Path p = new Path();
 		p.moveTo(d[0], d[1]);
@@ -200,9 +200,9 @@ public class BalloonTapStyle extends OptionTapStyle implements Serializable, IBl
 	}
 
     static String _out = "_out", _in = "_in";
-    public static OptionTapStyle createBalloon(IActorTap t, LinkType linkType, ClassEnvelope ce) {
-        OptionTapStyle balloon = null;
-        balloon = new BalloonTapStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
+    public static OptionTapViewStyle createBalloon(IActorTapView t, LinkType linkType, ClassEnvelope ce) {
+        OptionTapViewStyle balloon = null;
+        balloon = new BalloonTapViewStyle(t, linkType, ce, linkType.getOutOrIn() ? _out : _in);
         balloon.setCenter(new WorldPoint(100f, 100f));
         balloon._get().setOffset(t);
         return balloon;

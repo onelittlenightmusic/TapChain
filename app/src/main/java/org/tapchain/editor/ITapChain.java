@@ -5,17 +5,15 @@ import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Factory;
 import org.tapchain.core.IActionStyle;
 import org.tapchain.core.IBlueprint;
-import org.tapchain.core.IManager;
 import org.tapchain.core.IPath;
 import org.tapchain.core.IPiece;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.LinkType;
 
-import java.util.Collection;
 import java.util.List;
 
-public interface ITapChain<ACTOR extends IPiece, VIEW extends ITap> {
+public interface ITapChain<ACTOR extends IPiece, VIEW extends ITapView> {
     /**
      * Check if an actor tap touches any other actor taps, then link their actors.
      *
@@ -50,7 +48,7 @@ public interface ITapChain<ACTOR extends IPiece, VIEW extends ITap> {
 
     void resetNextPos();
 
-    List<IBlueprint<ACTOR>> highlightLinkables(LinkType reverse, IActorTap target, ClassEnvelope ce);
+    List<IBlueprint<ACTOR>> highlightLinkables(LinkType reverse, IActorTapView target, ClassEnvelope ce);
 
     /**
      * Connect an actor to another actor
@@ -70,30 +68,4 @@ public interface ITapChain<ACTOR extends IPiece, VIEW extends ITap> {
 
     void changeFocus(LinkType al, IFocusable spot, ClassEnvelope clazz);
 
-    /**
-     * Create an actor instance from its blueprint.
-     *
-     * @param key
-     *           the key for the factory in which actor blueprint is registered
-     * @param num
-     *            the number of the actor blueprint
-     * @param pos
-     *            position where the actor instance sho0uld be added
-     * @return EditorReturn including the created actor instance and the its tap instance
-     */
-    EditorReturn addActorFromBlueprint(TapChain.FACTORY_KEY key, int num,
-                                       IPoint pos);
-
-    /**
-     * Create an actor instance from its blueprint.
-     * @param key
-     *           the key for the factory in which actor blueprint is registered
-     * @param tag
-     *           the tag of the actor blueprint
-     * @param pos
-     *           position where the actor instance sho0uld be added
-     * @return EditorReturn including the created actor instance and the its tap instance
-     */
-    EditorReturn addActorFromBlueprint(TapChain.FACTORY_KEY key, String tag,
-                                       IPoint pos);
 }

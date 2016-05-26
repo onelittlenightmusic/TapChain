@@ -9,17 +9,17 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.IRegister;
 import org.tapchain.core.IScrollable;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
-public class OptionTapStyle extends ActorTap implements IScrollable, IRegister {
+public class OptionTapViewStyle extends ActorTapView implements IScrollable, IRegister {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4678324567401425522L;
-	private IActorTap parentTap = null;
+	private IActorTapView parentTap = null;
 	private ConcurrentLinkedQueue<IScrollHandler> handlers = new ConcurrentLinkedQueue<IScrollHandler>();
 
-	public OptionTapStyle(IActorTap t) {
+	public OptionTapViewStyle(IActorTapView t) {
 		super();
 		parentTap = t;
 		setMyActor(parentTap.getActor());
@@ -29,7 +29,7 @@ public class OptionTapStyle extends ActorTap implements IScrollable, IRegister {
 			e.printStackTrace();
 		}
 	}
-	public IActorTap getParentTap() {
+	public IActorTapView getParentTap() {
 		return parentTap;
 	}
 	

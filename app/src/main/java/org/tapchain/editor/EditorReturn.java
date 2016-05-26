@@ -7,9 +7,9 @@ import org.tapchain.core.Actor;
  */
 public class EditorReturn {
     Actor _actor;
-    IActorTap _tap;
+    IActorTapView _tap;
 
-    public EditorReturn(Actor actor, IActorTap tap) {
+    public EditorReturn(Actor actor, IActorTapView tap) {
         _actor = actor;
         _tap = tap;
     }
@@ -18,7 +18,7 @@ public class EditorReturn {
         return _actor;
     }
 
-    public IActorTap getTap() {
+    public IActorTapView getTap() {
         return _tap;
     }
 

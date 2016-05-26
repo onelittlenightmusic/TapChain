@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by hiro on 2015/05/05.
  */
-public class BubblePathTap extends PathTap implements ISelectable {
+public class BubblePathTapView extends PathTapView implements ISelectable {
     ViewActor start, stop;
     PathType starttype, stoptype;
     Paint paint, paint2;
@@ -49,9 +49,9 @@ public class BubblePathTap extends PathTap implements ISelectable {
     int sampling_rate = 1, sampling_count = 0;
 
 
-    public BubblePathTap(ViewActor start, ViewActor stop,
-                         PathType startType, PathType stopType,
-                         org.tapchain.core.Path p) {
+    public BubblePathTapView(ViewActor start, ViewActor stop,
+                             PathType startType, PathType stopType,
+                             org.tapchain.core.Path p) {
         super();
         bm_heart = BitmapMaker.makeOrReuse(getName(),
                 R.drawable.heart_bright, 30, 30);
@@ -62,8 +62,8 @@ public class BubblePathTap extends PathTap implements ISelectable {
         this.stoptype = stopType;
         sp1 = start.getCenter();
         sp2 = stop.getCenter();
-        sp12 = ((MyTapStyle2)start).getOffsetVector(gamma);
-        sp21 = ((MyTapStyle2)stop).getOffsetVector(-gamma);
+        sp12 = ((MyTapViewStyle2)start).getOffsetVector(gamma);
+        sp21 = ((MyTapViewStyle2)stop).getOffsetVector(-gamma);
         cls = p.getConnectionClass();
     }
 

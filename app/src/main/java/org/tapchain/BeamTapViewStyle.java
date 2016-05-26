@@ -5,10 +5,9 @@ import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.core.Actor;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IActorManager;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.IAttachHandler;
 import org.tapchain.editor.ITapChain;
 
@@ -20,7 +19,7 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 
-public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<ITapChain, Actor, IActorTap> {
+public class BeamTapViewStyle extends AdapterTapViewStyle implements IAttachHandler<ITapChain, Actor, IActorTapView> {
 	/**
 	 * 
 	 */
@@ -32,7 +31,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<ITap
 
 	// IPoint offset = new WorldPoint(100, 100);
 
-	BeamTapStyle(Resources r, IActorTap _p, Bitmap bm_fg, IPoint initPos) {
+	BeamTapViewStyle(Resources r, IActorTapView _p, Bitmap bm_fg, IPoint initPos) {
 		super(_p);
 		setSize(new WorldPoint(100f, 100f));
 		bitmap = new BitmapDrawable(r, bm_fg);
@@ -44,7 +43,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<ITap
 		init(initPos);
 	}
 
-	BeamTapStyle(Resources r, IActorTap _p, Bitmap bm_fg) {
+	BeamTapViewStyle(Resources r, IActorTapView _p, Bitmap bm_fg) {
 		this(r, _p, bm_fg, null);
 	}
 
@@ -101,7 +100,7 @@ public class BeamTapStyle extends AdapterTapStyle implements IAttachHandler<ITap
 
 
 	@Override
-	public boolean onTouch(ITapChain tapChain, IActorTap t2, Actor a1, Actor a2) {
+	public boolean onTouch(ITapChain tapChain, IActorTapView t2, Actor a1, Actor a2) {
 		boolean rtn = false;
 		if (tapChain.link(a1, LinkType.PUSH, a2)) {
 			rtn = true;

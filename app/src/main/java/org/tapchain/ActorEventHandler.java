@@ -11,17 +11,17 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.LinkType;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.editor.TapManager;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.IAttachHandler;
 import org.tapchain.editor.ITapChain;
-import org.tapchain.editor.IPathTap;
+import org.tapchain.editor.IPathTapView;
 import org.tapchain.editor.TapChain.InteractionType;
 import org.tapchain.realworld.R;
 
 import static org.tapchain.core.LinkType.*;
 
 public class ActorEventHandler implements IActorSharedHandler, IActorConnectHandler {
-    ITapChain<Actor, ActorTap> tapChain;
+    ITapChain<Actor, ActorTapView> tapChain;
     Integer addSoundHammer = R.raw.button;
     Integer addSoundFail = R.raw.failbuzzer;
     Activity act = null;
@@ -32,7 +32,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     }
 
     @Override
-    public boolean onAttach(IActorTap t1, IActorTap t2, Actor a1, Actor a2, InteractionType type) {
+    public boolean onAttach(IActorTapView t1, IActorTapView t2, Actor a1, Actor a2, InteractionType type) {
         if(!type.touching()) {
             //check whether actors are already connected
             LinkType linkType = tapChain.getLinkType(a1, a2);
@@ -62,7 +62,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
     }
 
     @Override
-    public void onAdd(final Actor p, final IActorTap v, final IBlueprint b, IPoint pos) {
+    public void onAdd(final Actor p, final IActorTapView v, IPoint pos) {
         try
         {
             new TapManager(tapChain).editTap()
@@ -78,7 +78,7 @@ public class ActorEventHandler implements IActorSharedHandler, IActorConnectHand
 
 
     @Override
-    public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
+    public void onConnect(IActorTapView iActorTap, IPathTapView iPathTap, IActorTapView iActorTap2, LinkType linkType) {
         tapChain.shake(100);
     }
 }

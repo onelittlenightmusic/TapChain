@@ -10,13 +10,12 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import org.tapchain.ActorTap;
+import org.tapchain.ActorTapView;
 import org.tapchain.AndroidActor;
 import org.tapchain.core.Actor;
 import org.tapchain.core.ChainException;
 import org.tapchain.core.Effector;
 import org.tapchain.core.Factory;
-import org.tapchain.core.IActor;
 import org.tapchain.core.IBlueprintInitialization;
 import org.tapchain.core.ILockedScroll;
 import org.tapchain.core.IPoint;
@@ -27,8 +26,8 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.TapLib;
 import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IActorTap;
-import org.tapchain.editor.ITap;
+import org.tapchain.editor.IActorTapView;
+import org.tapchain.editor.ITapView;
 import org.tapchain.editor.PaletteSort;
 import org.tapchain.editor.TapChain;
 
@@ -55,7 +54,7 @@ public class CanvasViewImpl extends TapChainWritingView {
                     IPoint p = (WorldPoint) pullInActor().getObject();
                     setCenter(p);
 
-                    ITap t = getTapChain().searchTouchedTap(p);
+                    ITapView t = getTapChain().searchTouchedTap(p);
                     int c = Color.BLACK;
                     if (t != null) {
                         c = Color.WHITE;
@@ -151,7 +150,7 @@ public class CanvasViewImpl extends TapChainWritingView {
     boolean standby = false;
 
     @Override
-    public boolean standbyRegistration(IActorTap selected, int x, int y) {
+    public boolean standbyRegistration(IActorTapView selected, int x, int y) {
         final MainActivity act = (MainActivity) getContext();
         GridFragment f1 = act.getGrid();
         if (f1 != null
@@ -180,18 +179,18 @@ public class CanvasViewImpl extends TapChainWritingView {
      * @return True when selected tap is null
      */
     @Override
-    public boolean onFling(IActorTap selected, IPoint vector) {
+    public boolean onFling(IActorTapView selected, IPoint vector) {
         if (vector.x() < vector_max && vector.x() > -vector_max && vector.y() < vector_max && vector.y() > -vector_max)
             return true;//onUp(point);
         if (selected != null) {
-            _onFling((ActorTap) selected, new WorldPoint(vector).setDif());
+            _onFling((ActorTapView) selected, new WorldPoint(vector).setDif());
         } else {
             _onFlingBackground(vector);
         }
         return true;
     }
 
-    private void _onFling(ActorTap t, IPoint vp) {
+    private void _onFling(ActorTapView t, IPoint vp) {
         getTapChain().editTap()._move(t)._in()
                 .add(new Accel(vp).once()).save();
     }
@@ -220,8 +219,8 @@ public class CanvasViewImpl extends TapChainWritingView {
      *          down point
      * @return
      */
-    public ITap onDown(IPoint iPoint) {
-        ITap t = getTapChain().searchTouchedTap(iPoint);
+    public ITapView onDown(IPoint iPoint) {
+        ITapView t = getTapChain().searchTouchedTap(iPoint);
         touch.offer(iPoint);
         return t;//captureTap(t);
     }
@@ -233,14 +232,14 @@ public class CanvasViewImpl extends TapChainWritingView {
 //        return true;
 //    }
 
-    public boolean onLockedScroll(IActorTap selected, final IPoint wp) {
+    public boolean onLockedScroll(IActorTapView selected, final IPoint wp) {
         if (selected instanceof ILockedScroll)
             ((ILockedScroll)selected).onLockedScroll(getTapChain(), selected, wp);
         return true;
     }
 
     @Override
-    public boolean onLongPress(IActorTap selected) {
+    public boolean onLongPress(IActorTapView selected) {
         if(selected == null)
             return false;
         if (selected instanceof IPressed)
@@ -276,7 +275,7 @@ public class CanvasViewImpl extends TapChainWritingView {
      * @return true
      */
     @Override
-    public boolean scroll(IActorTap selected, final IPoint vp, final IPoint pos) {
+    public boolean scroll(IActorTapView selected, final IPoint vp, final IPoint pos) {
         if (selected == null) {
             return false;
         }
@@ -321,12 +320,12 @@ public class CanvasViewImpl extends TapChainWritingView {
             delta -= 0.01f;
             boolean rtn = ++j < 10 || d.getAbs() > 30;
             super.actorRun(act);
-            if (getTapChain().checkAndConnect(((IActorTap) getTarget()))) {
-                round((IActorTap) getTarget());
+            if (getTapChain().checkAndConnect(((IActorTapView) getTarget()))) {
+                round((IActorTapView) getTarget());
                 return false;
             }
             if (!rtn) {
-                ActorTap v = (ActorTap) getTarget();
+                ActorTapView v = (ActorTapView) getTarget();
                 round(v);
                 getTapChain().checkAndConnect(v);
             }
@@ -339,7 +338,7 @@ public class CanvasViewImpl extends TapChainWritingView {
         return magnet;
     }
 
-    private void round(IActorTap startTap2) {
+    private void round(IActorTapView startTap2) {
 //        if (styles == null || getInteract() == null)
 //            return;
         startTap2._set(pointOnAdd((startTap2._get())));

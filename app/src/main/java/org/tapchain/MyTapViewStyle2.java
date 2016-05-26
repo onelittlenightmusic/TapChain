@@ -43,12 +43,10 @@ import org.tapchain.core.LinkType;
 import org.tapchain.core.Packet;
 import org.tapchain.core.Value;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.EditorChain;
-import org.tapchain.editor.IActorManager;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.ITapChain;
-import org.tapchain.editor.IPathTap;
-import org.tapchain.editor.ITap;
+import org.tapchain.editor.IPathTapView;
+import org.tapchain.editor.ITapView;
 import org.tapchain.editor.TapChain;
 import org.tapchain.realworld.R;
 import org.tapchain.viewlib.DrawLib;
@@ -58,9 +56,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
+public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScrollable,
         ISelectable, IRelease, ILockedScroll, IBlueprintFocusNotification,
-        IConnectHandler<IActorTap, IPathTap>, IErrorHandler<Actor> {
+        IConnectHandler<IActorTapView, IPathTapView>, IErrorHandler<Actor> {
 
     /**
      *
@@ -83,11 +81,11 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     float textSize = 60f, miniTextSize = 10f;
 
     // 1.Initialization
-    public MyTapStyle2(TapChain tapChain, Activity activity) {
+    public MyTapViewStyle2(TapChain tapChain, Activity activity) {
         this(tapChain, activity, null);
     }
 
-    public MyTapStyle2(TapChain tapChain, Activity activity, Integer fg) {
+    public MyTapViewStyle2(TapChain tapChain, Activity activity, Integer fg) {
         super(activity);
         this.tapChain = tapChain;
         myview_init(fg);
@@ -207,7 +205,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
 
 
     @Override
-    public MyTapStyle2 setPercent(IPoint wp) {
+    public MyTapViewStyle2 setPercent(IPoint wp) {
         super.setPercent(wp);
         setSize(sizeOpened.multiplyNew(0.01f * getPercent().x())
                 .plus(sizeClosed).plus(sizeClosed));
@@ -215,7 +213,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     @Override
-    public MyTapStyle2 setColor(int _color) {
+    public MyTapViewStyle2 setColor(int _color) {
         return this;
     }
 
@@ -331,7 +329,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
     }
 
     @Override
-    public void onConnect(IActorTap iActorTap, IPathTap iPathTap, IActorTap iActorTap2, LinkType linkType) {
+    public void onConnect(IActorTapView iActorTap, IPathTapView iPathTap, IActorTapView iActorTap2, LinkType linkType) {
         setOffsetVector();
         LinkType lt = (iActorTap == this) ? linkType : linkType.reverse();
         new ActorManager(getRootChain()).remove((Actor) getAccessoryTap(lt));
@@ -357,30 +355,30 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         return true;
     }
 
-    void setPushOutBalloon(IActorTap t, LinkType linkType, Object obj) {
+    void setPushOutBalloon(IActorTapView t, LinkType linkType, Object obj) {
         if (t.getActor().isConnectedTo(linkType)) {
             return;
         }
-        IActorTap accessoryTap = t.getAccessoryTap(linkType);
+        IActorTapView accessoryTap = t.getAccessoryTap(linkType);
         if (accessoryTap != null) {
             accessoryTap.setMyActorValue(obj);
             return;
         }
 
         ClassEnvelope classEnvelope = new ClassEnvelope(obj.getClass());
-        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelope);
+        IActorTapView balloon = BalloonTapViewStyle.createBalloon(t, linkType, classEnvelope);
         new ActorManager(getRootChain()).add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
     }
 
 
     @Override
-    public boolean onLockedScroll(ITapChain edit, ITap selectedTap, IPoint wp) {
+    public boolean onLockedScroll(ITapChain edit, ITapView selectedTap, IPoint wp) {
         setParentSize(this, wp);
         return false;
     }
 
-    public void setParentSize(IActorTap _p, IPoint pos) {
+    public void setParentSize(IActorTapView _p, IPoint pos) {
         IPoint p = _p.getGridSize();
         IPoint p2 = pos.subNew(_p.getCenter())
                 .plus(new WorldPoint(50f, 50f)).multiply(0.01f).round(1)
@@ -460,7 +458,7 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         return actor;
     }
 
-    public void onPullLocked(IActorTap t, ActorPullException actorPullException) {
+    public void onPullLocked(IActorTapView t, ActorPullException actorPullException) {
         AndroidActor.AndroidImageView errorMark = new AndroidActor.AndroidImageView(getOwnActivity(), R.drawable.error);
         errorMark.setColorCode(ColorCode.RED)
                 .setPercent(new WorldPoint(200f, 200f));
@@ -476,13 +474,13 @@ public class MyTapStyle2 extends ActorTap implements Serializable, IScrollable,
         //Create error balloon
         LinkType linkType = actorPullException.getLinkType();
         ClassEnvelope classEnvelopeInLink = actorPullException.getClassEnvelopeInLink();
-        IActorTap balloon = BalloonTapStyle.createBalloon(t, linkType, classEnvelopeInLink);
+        IActorTapView balloon = BalloonTapViewStyle.createBalloon(t, linkType, classEnvelopeInLink);
         manager.add((Actor) balloon).save();
         t.setAccessoryTap(linkType, balloon);
         tapChain.highlightLinkables(linkType, t, classEnvelopeInLink);
     }
 
-    public void onPullUnlocked(IActorTap t, ActorPullException actorPullException) {
+    public void onPullUnlocked(IActorTapView t, ActorPullException actorPullException) {
         LinkType linkType = actorPullException.getLinkType();
         if (linkType != null) {
             new ActorManager(getRootChain()).remove((Actor) t.getAccessoryTap(linkType));

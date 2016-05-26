@@ -21,6 +21,7 @@ import org.tapchain.core.Effector;
 import org.tapchain.core.Filter;
 import org.tapchain.core.Generator;
 import org.tapchain.core.IActionStyle;
+import org.tapchain.core.IFilter;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
@@ -30,10 +31,12 @@ import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.PassThru;
 import org.tapchain.core.actors.PushOut;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.EditorReturn;
+import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.IFocusable;
 import org.tapchain.editor.IWindow;
 import org.tapchain.editor.TapChain;
+import org.tapchain.editor.TapManager;
 import org.tapchain.game.CarEngineer;
 import org.tapchain.game.ElectricityFactory;
 import org.tapchain.game.Motor;
@@ -57,8 +60,8 @@ public class AndroidTapChain extends TapChain {
         // Setting styles
         ActorEventHandler aeh = new ActorEventHandler(this, activity);
         setStyle(new StyleCollection(this, getSystemChain(),
-                BubbleTapStyle.class,
-                BubblePathTap.class,
+                BubbleTapViewStyle.class,
+                BubblePathTapView.class,
                 new AndroidInteractionStyle(),
                 aeh, aeh));
         // setInteract(new LocalInteraction());
@@ -255,17 +258,23 @@ public class AndroidTapChain extends TapChain {
                 .save()
         ;
 
-        b = (Blueprint) editBlueprint()
-                .add(this::FILTER_PLUS_ADD, new Power(1f))
+        f = (IValue<Power> self, Power i) -> {
+            if (((Actor) self).getTime() == 5) {
+                Actor actor = new TapManager(this).add(f, new Power(i.to_f()+2)).tag("Power Filter 2").save().getPiece();
+                onAddAndInstallView(now.plus(100f, 100f), actor);
+            }
+            return Power.plus(i, self._get());
+        };
+        editBlueprint()
+                .add(f, new Power(1f))
                 .view(R.drawable.motor)
                 .tag("Power Filter 2")
-                .save().getBlueprint();
+                .save();
 
         ShowInstance.addClassImage(Power.class, R.drawable.electricity, Power::STR);
         EditInstance.addEditCreator(Power.class, Power::EDIT);
     }
-
-    Blueprint b;
+    IFilter<Power, Power, Power> f;
     public void setActivity(Activity act) {
         this.act = act;
     }
@@ -301,8 +310,8 @@ public class AndroidTapChain extends TapChain {
         public static void EFFECT(IValue<Power> self, IValue<Power> p) {
             p._set(Power.plus(self._get(), p._get()));
         }
-        public static ActorTap EDIT(IActorTap parent) {
-            return new MySetFloatTapStyle(parent) {
+        public static ActorTapView EDIT(IActorTapView parent) {
+            return new MySetFloatTapViewStyle(parent) {
                 @Override
                 public void setParentValue(IPoint pos, IPoint vp) {
                     float j = (pos.subNew(getParentTap().getCenter()).theta()-startangle)/oneangle;
@@ -319,30 +328,23 @@ public class AndroidTapChain extends TapChain {
     }
 
     WorldPoint now = new WorldPoint(100f, 100f);
-    public Power FILTER_PLUS_ADD(IValue<Power> self, Power i) {
-        if(((Actor)self).getTime()==5) {
-//            tapChain().add(this::FILTER_PLUS_ADD, new Power(1f)).save();
-            addActorFromBlueprint(b, now.plus(100f, 100f));
-        }
-        return Power.plus(i, self._get());
-    }
+//    public Power FILTER_PLUS_ADD(IValue<Power> self, Power i) {
+//        if(((Actor)self).getTime()==5) {
+////            tapChain().add(this::FILTER_PLUS_ADD, new Power(1f)).save();
+//            addActorFromBlueprint(b, now.plus(100f, 100f));
+//        }
+//        return Power.plus(i, self._get());
+//    }
 
 
     // 3.Changing state
-//    @Override
-//    public ITap onDown(IPoint iPoint) {
-//        ITap rtn = super.onDown(iPoint);
-//        touch.offer(iPoint);
-//        return rtn;
-//    }
-//
-    public class BubbleTapStyle extends MyTapStyle2 {
-        public BubbleTapStyle() {
+    public class BubbleTapViewStyle extends MyTapViewStyle2 {
+        public BubbleTapViewStyle() {
             super(AndroidTapChain.this, AndroidTapChain.this.act);
             setBackground(bubble_init());
         }
 
-        public BubbleTapStyle(Integer bm) {
+        public BubbleTapViewStyle(Integer bm) {
             super(AndroidTapChain.this, AndroidTapChain.this.act, bm);
             setBackground(bubble_init());
         }
@@ -362,16 +364,6 @@ public class AndroidTapChain extends TapChain {
             super();
 //            setLinkClass(LinkType.PUSH, IPoint.class);
         }
-
-//        @Override
-//        public boolean relation_impl(ViewActor _a, ViewActor _b)
-//                throws InterruptedException {
-//            c.await();
-//            c = new CountDownLatch(1);
-//            pushInActor(a.getCenter().multiplyNew(0.5f)
-//                    .plusNew(b.getCenter().multiplyNew(0.5f)), "");
-//            return true;// checkTouch(a, b);
-//        }
 
         @Override
         public InteractionType checkTouchType(IView f1, IView f2) {
@@ -448,7 +440,7 @@ public class AndroidTapChain extends TapChain {
 
         }
 
-        public class Mark extends ActorTap {
+        public class Mark extends ActorTapView {
             AndroidView v;
             final ShapeDrawable d = new ShapeDrawable(new RoundRectShape(
                     new float[]{150, 150, 150, 150, 150, 150, 150, 150},
@@ -541,38 +533,8 @@ public class AndroidTapChain extends TapChain {
 
     }
 
-//    @Override
-//    public boolean onLongPress(IActorTap selected) {
-//        boolean rtn = super.onLongPress(selected);
-//        if(selected == null)
-//            return false;
-//        if (rtn) {
-//            AndroidActor.AndroidDashRect a = new AndroidActor.AndroidDashRect();
-//            a.setSize(new WorldPoint(200f, 200f)).setColor(0xffffffff);
-//            a._get().setOffset(selected);
-//            editTap()
-//                    .add(a)
-//                    ._in()
-//                    .add(new Actor.Sleep(2000))
-//                    .nextEvent(new Actor.Ender())
-//                    ._out()
-//                    .save();
-//        }
-//        Actor a = (selected).getActor();
-//        a.setLogLevel(true);
-//        a.setLogTag("test");
-//        Log.w("test", String.format("%s's setLogLevel true(lock:%s[%s], state:%s)",
-//                a.getTag(), a.getLockStatus() ? "free" : "locked",
-//                a.getLockTag(),
-//                a.getState()));
-//        a.printLastExecLog();
-//        return rtn;
-//    }
-
-
-
     @Override
-    protected void createFocus(IActorTap v) {
+    protected void createFocus(IActorTapView v) {
         final Actor actor = v.getActor();
         ClassEnvelope firstClassEnvelope = null;
         LinkType first = null;
@@ -592,13 +554,13 @@ public class AndroidTapChain extends TapChain {
             IFocusable spot;
             switch (al) {
                 case PUSH:
-                    MyBeamTapStyle beam = new MyBeamTapStyle(act.getResources(), v, al, clz);
-                    if (v instanceof MyTapStyle2)
-                        beam.init(((MyTapStyle2) v).getOffsetVectorRawCopy());
+                    MyBeamTapViewStyle beam = new MyBeamTapViewStyle(act.getResources(), v, al, clz);
+                    if (v instanceof MyTapViewStyle2)
+                        beam.init(((MyTapViewStyle2) v).getOffsetVectorRawCopy());
                     spot = beam;
                     break;
                 case TO_CHILD:
-                    spot = new MySpotOptionTapStyle(v, al, clz);
+                    spot = new MySpotOptionTapViewStyle(v, al, clz);
                     break;
                 default:
                     continue;

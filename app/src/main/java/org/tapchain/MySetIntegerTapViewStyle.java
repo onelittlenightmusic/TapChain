@@ -5,13 +5,13 @@ import org.tapchain.core.IPoint;
 import org.tapchain.core.IRelease;
 import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.WorldPoint;
-import org.tapchain.editor.IActorTap;
+import org.tapchain.editor.IActorTapView;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandler, IRelease {
+public class MySetIntegerTapViewStyle extends OptionTapViewStyle implements IScrollHandler, IRelease {
 	/**
 	 * 
 	 */
@@ -22,7 +22,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	int textSize = 20;
 	protected float startangle = -90f, oneangle = 36f, spaceangle = 3f;
 
-	MySetIntegerTapStyle(IActorTap _p) {
+	MySetIntegerTapViewStyle(IActorTapView _p) {
 		super(_p);
 		setSize(new WorldPoint(200f, 200f));
 		this.registerHandler(this);
@@ -79,7 +79,7 @@ public class MySetIntegerTapStyle extends OptionTapStyle implements IScrollHandl
 	}
 
 	@Override
-	public void onScroll(ITapChain edit, IActorTap tap, IPoint pos, IPoint vp) {
+	public void onScroll(ITapChain edit, IActorTapView tap, IPoint pos, IPoint vp) {
 		setParentValue(pos, vp);
 	}
 
