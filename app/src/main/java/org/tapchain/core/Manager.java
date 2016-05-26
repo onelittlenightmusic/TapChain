@@ -82,4 +82,15 @@ public abstract class Manager<T extends IPiece> implements IManager<T, T> {
 	public IManager<T, T> _in(IPiece piece) {
 		return this;
 	}
+
+    @Override
+    public IManager<T, T> tag(String tag) {
+        return this;
+    }
+
+    @Override
+    public IManager<T, T> view(Object... args) {
+        return this;
+    }
+
 }

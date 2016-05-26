@@ -260,7 +260,7 @@ public class AndroidTapChain extends TapChain {
 
         f = (IValue<Power> self, Power i) -> {
             if (((Actor) self).getTime() == 5) {
-                Actor actor = new TapManager(this).add(f, new Power(i.to_f()+2)).tag("Power Filter 2").save().getPiece();
+                Actor actor = new TapManager(this).add(f, new Power(i.to_f()+2)).view(R.drawable.motor).save().getPiece();
                 onAddAndInstallView(now.plus(100f, 100f), actor);
             }
             return Power.plus(i, self._get());

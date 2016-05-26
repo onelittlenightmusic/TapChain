@@ -180,9 +180,15 @@ public class ActorManager extends PieceManager<Actor> {
         return this;
     }
 
+    @Override
     public ActorManager tag(String s) {
         if(getPiece() != null)
             getPiece().setTag(s);
+        return this;
+    }
+
+    @Override
+    public ActorManager view(Object... args) {
         return this;
     }
 

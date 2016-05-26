@@ -224,13 +224,16 @@ public class BlueprintManager<TYPE extends Piece> implements IManager<IBlueprint
 		reserved.addArg(objs);
 		return this;
 	}
+
+    @Override
 	public BlueprintManager<TYPE> view(Object... objs) {
 		if(!isSetView() && getChain() instanceof EditorChain)
 			setView(((EditorChain)getChain()).getDefaultView().copyAndRenewArg());
 		getView().addArg(objs);
 		return this;
 	}
-	
+
+    @Override
 	public BlueprintManager<TYPE> tag(String tag) {
 		getRoot().setTag(tag);
 		return this;

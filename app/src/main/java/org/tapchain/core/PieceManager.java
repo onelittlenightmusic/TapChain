@@ -304,4 +304,5 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 //        if(chain != null)
 //            chain.setLog(_log);
 //    }
+
 }

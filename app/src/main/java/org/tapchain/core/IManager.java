@@ -162,4 +162,8 @@ public interface IManager<T, U> {
      * @return
      */
     Chain getChain();
+
+    IManager<T, U> view(Object... objs);
+
+    IManager<T, U> tag(String tag);
 }

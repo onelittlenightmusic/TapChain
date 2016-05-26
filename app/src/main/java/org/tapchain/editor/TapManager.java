@@ -29,8 +29,8 @@ import java.util.Map;
 public class TapManager extends ActorManager implements IActorManager {
     Map<PieceState, Actor> plist = new EnumMap<>(
             PieceState.class);
-
-    EditorReturn addedTap = null;
+    IBlueprint viewBlueprint;
+    EditorReturn addedTap;
 
     /**
      * Constructor
@@ -92,7 +92,12 @@ public class TapManager extends ActorManager implements IActorManager {
         super.save();
         Actor actor = getPiece();
         addedTap = null;
-        Blueprint view = (Blueprint) ((TapChain)getChain()).getFactory().getView(actor.getTag());
+        Blueprint view;
+        if(viewBlueprint != null) {
+            view = (Blueprint) viewBlueprint;
+        } else {
+            view = (Blueprint) ((TapChain)getChain()).getFactory().getView(actor.getTag());
+        }
         try {
             if (view != null) {
                 ActorTapView v = __setPieceView(actor, view);
@@ -108,6 +113,12 @@ public class TapManager extends ActorManager implements IActorManager {
 
     public EditorReturn getReturn() {
         return addedTap;
+    }
+
+    @Override
+    public TapManager view(Object... args) {
+        viewBlueprint = getChain().getDefaultView().copyAndRenewArg().addArg(args);
+        return this;
     }
 
     ActorTapView __setPieceView(Actor actor, final Blueprint bp)
