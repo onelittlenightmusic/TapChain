@@ -46,7 +46,6 @@ public abstract class TapChain extends EditorChain implements IControlCallback, 
 	Factory<Actor> factory = new Factory<>(),
 			recent = new Factory<>(), relatives = new Factory<>();
 //			goalFactory = new Factory<>();
-	protected ActorBlueprintManager blueprintManager;
 //    , goalBlueprintManager = null;
 	private StyleCollection styles = null;
     private IPoint nextConnectivityPoint = null;
@@ -69,7 +68,7 @@ public abstract class TapChain extends EditorChain implements IControlCallback, 
 //        createChain(100).getChain().setAutoEnd(false).setName("User");
 
         setWindow(w);
-        blueprintManager =  new ActorBlueprintManager(this, factory);
+//        blueprintManager =  new ActorBlueprintManager(this, factory);
 //		goalBlueprintManager = new ActorBlueprintManager(this, goalFactory);
         setCallback(this);
         getSystemChain().setCallback(this);
@@ -135,7 +134,7 @@ public abstract class TapChain extends EditorChain implements IControlCallback, 
 	}
 
 	public ActorBlueprintManager editBlueprint() {
-		return blueprintManager;
+		return new ActorBlueprintManager(this, factory);
 	}
 
 	public Actor toActor(IActorTapView tap) {
@@ -540,7 +539,7 @@ public abstract class TapChain extends EditorChain implements IControlCallback, 
     protected void createFocus(IActorTapView v) {
     }
 
-    MyFocusControl focusControl = new MyFocusControl();
+    MyFocusControl focusControl = new MyFocusControl(this);
 
     protected MyFocusControl getFocusControl() {
         return focusControl;

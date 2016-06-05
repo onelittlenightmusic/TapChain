@@ -82,7 +82,7 @@ public class CanvasViewImpl extends TapChainWritingView {
 
     public CanvasViewImpl(Context context) {
         super(context);
-        paint.setColor(0xff303030);
+        paint.setColor(0xff101010);
         paint.setStyle(Paint.Style.FILL);
     }
 

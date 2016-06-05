@@ -245,62 +245,62 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 
 	@SuppressWarnings("serial")
 	public static class PartnerList<PARTNER extends IPiece> implements Serializable {
-		ConcurrentHashMap<PARTNER, IPath> partner;
+		HashMap<PARTNER, IPath> partner;
         PartnersByType partnersByTypeForOut = new PartnersByType();
         PartnersByType partnersByTypeForIn = new PartnersByType();
 		PartnerList() {
-			partner = new ConcurrentHashMap<PARTNER, IPath>();
+			partner = new HashMap<PARTNER, IPath>();
 		}
-		public PathType getPathTypeTo(IPiece cp) {
+		public synchronized PathType getPathTypeTo(IPiece cp) {
 			IPath _path = null;
 			if((_path = partner.get(cp)) == null)
 				return null;
 			else
 				return _path.getOutConnector().getPack().getPathType();
 		}
-		public ChainPiece.PartnerList setPartner(IPath o, PARTNER cp, PathType type) {
+		public synchronized ChainPiece.PartnerList setPartner(IPath o, PARTNER cp, PathType type) {
 			partner.put(cp, o);
             boolean outOrIn = o.isOut(cp);
             getPartnersByType(outOrIn).get(type).add(cp);
 			return this;
 		}
-		public ChainPiece.PartnerList unsetPartner(IPiece cp) {
+		public synchronized ChainPiece.PartnerList unsetPartner(IPiece cp) {
 			IPath p = partner.remove(cp);
             boolean outOrIn = p.isOut(cp);
             for(PathType type: PathType.values())
                 getPartnersByType(outOrIn).get(type).remove(cp);
 			return this;
 		}
-		public boolean isConnectedTo(IPiece cp) {
+		public synchronized boolean isConnectedTo(IPiece cp) {
 			return partner.containsKey(cp);
 		}
-		public boolean isConnectedTo(IPiece cp, PathType pt) {
+		public synchronized boolean isConnectedTo(IPiece cp, PathType pt) {
 			IPath _path = null;
 			if((_path = partner.get(cp)) != null)
 				if(_path.getPathType() == pt)
 					return true;
 			return false;
 		}
-		public Collection<IPath> getPaths() {
+		public synchronized Collection<IPath> getPaths() {
 			return partner.values();
 		}
-		public void detachAll() {
+		public synchronized void detachAll() {
 			for(IPath pair : partner.values())
 				pair.detach();
 			partner.clear();
 		}
-		public IPath getPathTo(IPiece cp) {
+		public synchronized IPath getPathTo(IPiece cp) {
 			return partner.get(cp);
 		}
-		public Collection<PARTNER> getPartners() {
+		public synchronized Collection<PARTNER> getPartners() {
 			return partner.keySet();
 		}
 
-        public PartnersByType getPartnersByType(boolean outOrIn) {
+        public synchronized PartnersByType getPartnersByType(boolean outOrIn) {
             return outOrIn? partnersByTypeForOut : partnersByTypeForIn;
         }
 
-		public Collection<PARTNER> getPartners(PathType pathType, boolean outOrIn, Piece piece) {
+		public synchronized Collection<PARTNER> getPartners(PathType pathType, boolean outOrIn, Piece piece) {
 //			Collection<PARTNER> rtn = new ArrayList<PARTNER>();
 //			if(getPartners().isEmpty())
 //				return rtn;

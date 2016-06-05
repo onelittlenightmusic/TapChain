@@ -7,18 +7,22 @@ import org.tapchain.core.ActorManager;
 import org.tapchain.core.LinkType;
 import org.tapchain.editor.IFocusControl;
 import org.tapchain.editor.IFocusable;
+import org.tapchain.editor.TapChain;
+import org.tapchain.editor.TapManager;
 
 public class MyFocusControl extends ActorTapView implements IFocusControl {
 	HashMap<IFocusable, LinkType> array = new HashMap<IFocusable, LinkType>();
 	private static final long serialVersionUID = 1L;
 	Actor spotTargetActor = null;
 	LinkType selectedLinkType = null;
+    TapChain tapChain;
 
 	public enum SpotGroupLayout {
 		RIGHT, LEFT, TOP, BOTTOM
 	}
-	public MyFocusControl() {
+	public MyFocusControl(TapChain t) {
 		super();
+        tapChain = t;
 	}
 	
 
@@ -59,7 +63,8 @@ public class MyFocusControl extends ActorTapView implements IFocusControl {
 		array.put(spot, al);
 	}
 	
-	public void save(ActorManager manager) {
+	public void save() {
+        ActorManager manager = new TapManager(tapChain).editTap();
 		for(IFocusable focusable : array.keySet()) {
 			manager.add((Actor) focusable).save();
 		}

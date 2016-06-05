@@ -13,7 +13,6 @@ import android.util.Log;
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
-import org.tapchain.core.Blueprint;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Consumer;
 import org.tapchain.core.D2Point;
@@ -31,7 +30,6 @@ import org.tapchain.core.WorldPoint;
 import org.tapchain.core.actors.PassThru;
 import org.tapchain.core.actors.PushOut;
 import org.tapchain.core.actors.ViewActor;
-import org.tapchain.editor.EditorReturn;
 import org.tapchain.editor.IActorTapView;
 import org.tapchain.editor.IFocusable;
 import org.tapchain.editor.IWindow;
@@ -237,52 +235,69 @@ public class AndroidTapChain extends TapChain {
 //            .view(R.drawable.motor).tag("Consumer").save()
 //            .add((IValue<Integer> self, IValue<Integer> p) -> p._set(self._get()+p._get()), 3, 1)
 //            .view(R.drawable.motor).tag("Effector").save()
-                .add(Power::GENERATE, new Power(0f))
+                .add(ElectricPower::GENERATE, new ElectricPower(0f))
                 .view(R.drawable.motor)
                 .tag("Power Generator")
                 .save()
-                .add(Power::FILTER_PLUS, new Power(1f))
+                .add(ElectricPower::FILTER_PLUS, new ElectricPower(1f))
                 .view(R.drawable.motor)
                 .tag("Power Filter")
                 .save()
 //                .add((IValue<Power> self, Power i) -> { self._set(i); Log.w("test", String.format("OK %d", i.to_f())); }, new Power(0))
-                .add(Power::CONSUME, new Power(0))
+                .add(ElectricPower::CONSUME, new ElectricPower(0))
                 .view(R.drawable.motor)
                 .tag("Power Consumer")
 //                .setLogLevel()
                 .save()
 //                .add((IValue<Power> self, IValue<Power> p) -> p._set(Power.plus(self._get(), p._get())), new Power(3), 1)
-                .add(Power::EFFECT, new Power(3), 1)
+                .add(ElectricPower::EFFECT, new ElectricPower(3), 1)
                 .view(R.drawable.motor)
                 .tag("Power Effector")
                 .save()
         ;
 
-        f = (IValue<Power> self, Power i) -> {
+        f = (IValue<ElectricPower> self, ElectricPower i) -> {
             if (((Actor) self).getTime() == 5) {
-                Actor actor = new TapManager(this).add(f, new Power(i.to_f()+2)).view(R.drawable.motor).save().getPiece();
-                onAddAndInstallView(now.plus(100f, 100f), actor);
+//                Actor actor =
+                        new TapManager(this)
+                        .add(f, new ElectricPower(i.to_f()*100))
+                        .view(R.drawable.motor)
+                        .save().pullFrom((Actor)self);
+
+//                onAddAndInstallView(now.plus(100f, 100f), actor);
             }
-            return Power.plus(i, self._get());
+            return ElectricPower.plus(i, self._get());
         };
         editBlueprint()
-                .add(f, new Power(1f))
+                .add(f, new ElectricPower(1f))
                 .view(R.drawable.motor)
                 .tag("Power Filter 2")
                 .save();
 
-        ShowInstance.addClassImage(Power.class, R.drawable.electricity, Power::STR);
-        EditInstance.addEditCreator(Power.class, Power::EDIT);
+        editBlueprint()
+                .add(Fuel::GENERATE, new Fuel(1f))
+                .view(R.drawable.pa)
+                .tag("Fuel Generator")
+                .save()
+                .add(Fuel::FILTER_CONVERT, new ElectricPower(1f))
+                .view(R.drawable.choki)
+                .tag("Power Converter")
+                .save();
+
+        ShowInstance.addClassImage(ElectricPower.class, R.drawable.electricity, ElectricPower::STR);
+        ShowInstance.addClassImage(Fuel.class, R.drawable.dust, Fuel::STR);
+        EditInstance.addEditCreator(ElectricPower.class, ElectricPower::EDIT);
+        EditInstance.addEditCreator(Fuel.class, Fuel::EDIT);
     }
-    IFilter<Power, Power, Power> f;
+    IFilter<ElectricPower, ElectricPower, ElectricPower> f;
     public void setActivity(Activity act) {
         this.act = act;
     }
 
     // 2.Getters and setters
-    public static class Power {
+    public static class ElectricPower {
         float p = 0f;
-        public Power(float value) {
+        public ElectricPower(float value) {
             p = value;
         }
         public float to_f() {
@@ -291,24 +306,24 @@ public class AndroidTapChain extends TapChain {
         public String toString() {
             return String.valueOf(p);
         }
-        public static String STR(Power power) {
-            return Float.toString(power.p);
+        public static String STR(ElectricPower electricPower) {
+            return Float.toString(electricPower.p);
         }
-        public static Power plus(Power a, Power b) {
-            return new Power(a.to_f() + b.to_f());
+        public static ElectricPower plus(ElectricPower a, ElectricPower b) {
+            return new ElectricPower(a.to_f() + b.to_f());
         }
-        public static Power GENERATE(IValue<Power> self) {
+        public static ElectricPower GENERATE(IValue<ElectricPower> self) {
             return self._get();
         }
-        public static Power FILTER_PLUS(IValue<Power> self, Power i) {
-            return Power.plus(i, self._get());
+        public static ElectricPower FILTER_PLUS(IValue<ElectricPower> self, ElectricPower i) {
+            return ElectricPower.plus(i, self._get());
         }
-        public static void CONSUME(IValue<Power> self, Power i) {
+        public static void CONSUME(IValue<ElectricPower> self, ElectricPower i) {
             self._set(i);
             Log.w("test", String.format("OK %f", i.to_f()));
         }
-        public static void EFFECT(IValue<Power> self, IValue<Power> p) {
-            p._set(Power.plus(self._get(), p._get()));
+        public static void EFFECT(IValue<ElectricPower> self, IValue<ElectricPower> p) {
+            p._set(ElectricPower.plus(self._get(), p._get()));
         }
         public static ActorTapView EDIT(IActorTapView parent) {
             return new MySetFloatTapViewStyle(parent) {
@@ -317,17 +332,50 @@ public class AndroidTapChain extends TapChain {
                     float j = (pos.subNew(getParentTap().getCenter()).theta()-startangle)/oneangle;
                     if (j < 0) j += 10f;
                     j = Math.round(j*10f)*0.1f;
-                    getParentTap().setMyActorValue(new Power(j));
+                    getParentTap().setMyActorValue(new ElectricPower(j));
                 }
                 @Override
                 public boolean equalMyValue(Integer val) {
-                    return val == ((Float)((Power)getParentTap().getMyActorValue()).to_f()).intValue();
+                    return val == ((Float)((ElectricPower)getParentTap().getMyActorValue()).to_f()).intValue();
                 }
             };
         }
     }
 
-    WorldPoint now = new WorldPoint(100f, 100f);
+    public static class Fuel {
+        float p = 0f;
+        public Fuel(float f) {
+            p = f;
+        }
+        public float to_f() {return p;}
+        public String toString() { return Float.toString(p); }
+        public static String STR(Fuel fuel) {
+            return Float.toString(fuel.p);
+        }
+        public static Fuel GENERATE(IValue<Fuel> self) {
+            return self._get();
+        }
+        public static ElectricPower FILTER_CONVERT(IValue<ElectricPower> self, Fuel i) {
+            return new ElectricPower(i.to_f()+ self._get().to_f());
+        }
+        public static ActorTapView EDIT(IActorTapView parent) {
+            return new MySetFloatTapViewStyle(parent) {
+                @Override
+                public void setParentValue(IPoint pos, IPoint vp) {
+                    float j = (pos.subNew(getParentTap().getCenter()).theta()-startangle)/oneangle;
+                    if (j < 0) j += 10f;
+                    j = Math.round(j*10f)*0.1f;
+                    getParentTap().setMyActorValue(new Fuel(j));
+                }
+                @Override
+                public boolean equalMyValue(Integer val) {
+                    return val == ((Float)((Fuel)getParentTap().getMyActorValue()).to_f()).intValue();
+                }
+            };
+        }
+    }
+
+    WorldPoint now = new WorldPoint(400f, 400f);
 //    public Power FILTER_PLUS_ADD(IValue<Power> self, Power i) {
 //        if(((Actor)self).getTime()==5) {
 ////            tapChain().add(this::FILTER_PLUS_ADD, new Power(1f)).save();
@@ -577,7 +625,7 @@ public class AndroidTapChain extends TapChain {
             changeFocus(null, null, null);
             return;
         }
-        getFocusControl().save(editTap());
+        getFocusControl().save();
         getFocusControl().setTargetActor(actor);
         changeFocus(first, firstSpot, firstClassEnvelope);
     }

@@ -38,6 +38,7 @@ public class TapManager extends ActorManager implements IActorManager {
 //    public Editor(Chain actorChain, Chain systemActorChain) {
     public TapManager(ITapChain actorChain) {
         super((Chain) actorChain);
+        enableView();
     }
 
     /***
@@ -47,6 +48,7 @@ public class TapManager extends ActorManager implements IActorManager {
      */
     public TapManager(TapManager e) {
         super(e);
+        enableView();
     }
 
     @Override

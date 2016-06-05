@@ -14,6 +14,6 @@ public interface IFocusControl {
     void setTargetActor(Actor actor);
     LinkType getLinkType();
     Actor getTargetActor();
-    void save(ActorManager manager);
+    void save();
     void setSpotActorLink(LinkType al);
 }

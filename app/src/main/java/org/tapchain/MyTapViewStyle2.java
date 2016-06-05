@@ -90,10 +90,11 @@ public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScro
         this.tapChain = tapChain;
         myview_init(fg);
 
-        _paint.setStyle(Paint.Style.FILL);
+        _paint.setStyle(Paint.Style.STROKE);
         _paint.setAntiAlias(true);
         _paint.setAlpha(120);
-        _paint.setColor(0x44ffffff);
+        _paint.setColor(0xffffffff);
+        _paint.setStrokeWidth(3f);
         _paint.setTextAlign(Align.CENTER);
         _paint.setFilterBitmap(true);
 
@@ -119,6 +120,7 @@ public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScro
 
     //	@Override
     public void initBackground() {
+        inited = true;
         if (getActor() == null)
             return;
         if (getActor().getBlueprint() == null)
@@ -134,7 +136,6 @@ public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScro
                 return;
         }
 
-        inited = true;
     }
 
     public void setBackground(Bitmap background) {

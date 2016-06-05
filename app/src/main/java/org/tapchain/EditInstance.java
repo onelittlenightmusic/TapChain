@@ -43,6 +43,8 @@ public class EditInstance implements IRelease {
 
     EditInstance(Activity act, IActorTapView _p, Object val2) {
         t = _p;
+        if(val2 == null)
+            return;
         if(classEdits.containsKey(val2.getClass())) {
             setter = classEdits.get(val2.getClass()).createEditorTap(_p);
         } else if (val2 instanceof String) {

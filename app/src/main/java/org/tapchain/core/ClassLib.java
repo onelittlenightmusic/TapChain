@@ -29,16 +29,16 @@ public class ClassLib {
         for (int i = 0; i < Math.min(rtn2.getArgs().size(), newList.size()); i++) {
             convert.put(rtn2.getArgs().get(i), newList.get(i));
         }
-        log(String.format("converting %s", convert.toString()));
+//        log(String.format("converting %s", convert.toString()));
         convertToOriginalType2(rtn2, convert);
-        log(String.format("encapsuling %s", convert.toString()));
+//        log(String.format("encapsuling %s", convert.toString()));
         encapsuleParameterToEnvelope2(rtn2, convert);
         return rtn2.getRtn();
     }
 
     public static ClassLibReturnInner getParameterizedTypeInner(Class<?> cls,
                                                                 Class<?> target) {
-        log(String.format(">>>>>%s, target=%s", cls.getSimpleName(), target.getSimpleName()));
+//        log(String.format(">>>>>%s, target=%s", cls.getSimpleName(), target.getSimpleName()));
         ClassLibReturnInner rtn2;
         if (target != null && inited2.containsKey(target) && inited2.get(target).containsKey(cls)) {
             rtn2 = inited2.get(target).get(cls).copy();
@@ -110,7 +110,7 @@ public class ClassLib {
                         new ConcurrentHashMap<Class<?>, ClassLibReturnInner>());
             inited2.get(target).put(cls, rtn2.copy());
         }
-        log(String.format("<<<<<%s=%s", cls.getSimpleName(), rtn2.toString()));
+//        log(String.format("<<<<<%s=%s", cls.getSimpleName(), rtn2.toString()));
         return rtn2;
     }
 
@@ -179,7 +179,7 @@ public class ClassLib {
 
     }
 
-    public static class ClassLibReturn extends ConcurrentHashMap<Type, Type> {
+    public static class ClassLibReturn extends HashMap<Type, Type> {
         public ClassEnvelope searchByName(String name) {
             for (Entry<Type, Type> entry : entrySet())
                 if (entry.getKey().toString().equals(name)) {

@@ -2,6 +2,7 @@ package org.tapchain.core;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 
@@ -38,7 +39,7 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		x = x2;
 		y = y2;
 	}
-	
+
 	@Override
 	public WorldPoint clear() {
 		x = 0f;

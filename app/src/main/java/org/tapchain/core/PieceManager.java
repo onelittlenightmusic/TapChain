@@ -10,6 +10,8 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	protected Chain chain = null;
 	PIECE pt = null, pt_b = null;
 	IControlCallback cc_cache = () -> true;
+    boolean requireView = false;
+    boolean logEnabled = false;
 
 	// 1.Initialization
 	public PieceManager() {
@@ -49,6 +51,11 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	public Chain getChain() {
 		return chain;
 	}
+
+    public PieceManager enableView() {
+        requireView = true;
+        return this;
+    }
 
 	// 3.Changing state
 	@SuppressWarnings("unchecked")
@@ -94,17 +101,20 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	public synchronized ConnectionResultPath connect(PIECE pIn, PathType tIn,
 												   PIECE pOut, PathType tOut, boolean addView) {
 		ConnectionResultPath rtn = null;
-		logLocal("_connect started %s",
+        if(logEnabled)
+    		logLocal("_connect started %s",
 				toString(pIn, tIn, pOut, tOut));
 		if (pIn.isConnectedTo(pOut)) {
-			logLocal(
+            if(logEnabled)
+    			logLocal(
 					"link Failed: pieces are already connected %s",
 					toString(pIn, tIn, pOut, tOut));
 			return null;
 		}
 		ClassEnvelope cls = __canConnect(pIn, tIn, pOut, tOut);
 		if (cls == null) {
-			logLocal("link Failed: Argument is null %s",
+            if(logEnabled)
+    			logLocal("link Failed: Argument is null %s",
 					toString(pIn, tIn, pOut, tOut));
 			return null;
 		}
@@ -178,13 +188,13 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	}
 
     PieceManager prevPassThru(PIECE cp) {
-        append(pt, PathType.PASSTHRU, cp, PathType.PASSTHRU, false);
+        append(pt, PathType.PASSTHRU, cp, PathType.PASSTHRU, requireView);
         add(cp);
         return this;
     }
 
     PieceManager nextPassThru(PIECE cp) {
-        append(cp, PathType.PASSTHRU, pt, PathType.PASSTHRU, false);
+        append(cp, PathType.PASSTHRU, pt, PathType.PASSTHRU, requireView);
         add(cp);
         return this;
     }
@@ -256,18 +266,18 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 	}
 
 	PieceManager _appendPassThru(PIECE to, PIECE from) {
-		append(from, PathType.PASSTHRU, to, PathType.PASSTHRU, false);
+		append(from, PathType.PASSTHRU, to, PathType.PASSTHRU, requireView);
 		return this;
 	}
 
 	PieceManager _appendOffer(PIECE to, PIECE from) {
-		append(from, PathType.OFFER, to, PathType.OFFER, false);
+		append(from, PathType.OFFER, to, PathType.OFFER, requireView);
 		return this;
 	}
 
     PieceManager _appendNextEventToPrevEvent(PIECE cpbase, PIECE target) {
         if (pt != null)
-            append(cpbase, PathType.EVENT, target, PathType.EVENT, false);
+            append(cpbase, PathType.EVENT, target, PathType.EVENT, requireView);
         return this;
     }
 

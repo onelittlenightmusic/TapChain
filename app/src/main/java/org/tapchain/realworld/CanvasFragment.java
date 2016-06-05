@@ -47,16 +47,16 @@ public class CanvasFragment extends Fragment {
             if(tapChain == null) {
                 tapChain = new AndroidTapChain(view, act);
 
-                try {
-                    tapChain.editBlueprint()
-                            .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Generator$WordGenerator"), "A", false)
-                            .view(getResources().getIdentifier("a" , "drawable", getActivity().getPackageName()))
-                            .tag("Word")
-                            //                .setLogLevel()
-                            .save();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    tapChain.editBlueprint()
+//                            .add((Class<? extends Actor>)Class.forName("org.tapchain.core.Generator$WordGenerator"), "A", false)
+//                            .view(getResources().getIdentifier("a" , "drawable", getActivity().getPackageName()))
+//                            .tag("Word")
+//                            //                .setLogLevel()
+//                            .save();
+//                } catch (ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                }
 
                 tapChain.invalidate();
             }

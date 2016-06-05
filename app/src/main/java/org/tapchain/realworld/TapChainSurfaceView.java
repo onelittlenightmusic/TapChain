@@ -62,6 +62,7 @@ public abstract class TapChainSurfaceView
         mTextLayout = new DynamicLayout(buf, mTextPaint, 500, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         setFocusable(true);
         requestFocus();
+        matrix.postScale(0.5f, 0.5f);
     }
 
     public void onDraw() {

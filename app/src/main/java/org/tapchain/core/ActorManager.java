@@ -3,7 +3,9 @@ package org.tapchain.core;
 
 import org.tapchain.core.ChainPiece.PieceState;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 
 public class ActorManager extends PieceManager<Actor> {
@@ -153,7 +155,9 @@ public class ActorManager extends PieceManager<Actor> {
             return;
         unsetPieceView(actor);
         actor.onRemove(newSession());
-        for (Actor partner : actor.getPartners()) {
+        Set<Actor> a = (Set) actor.getPartners();
+        Actor[] aa = a.toArray(new Actor[a.size()]);
+        for (Actor partner : aa) {
             disconnect(actor, partner);
         }
         super.remove(actor);
