@@ -25,17 +25,38 @@ public class ActorBlueprintManager extends BlueprintManager<Actor> {
 
     @Override
     public <VALUE, INPUT, OUTPUT> ActorBlueprintManager add(final IFilter<VALUE, INPUT, OUTPUT> func, final VALUE init) {
-        add(Filter.FilterSkelton.class, func, init);
+//        add(Filter.FilterSkelton.class, func, init);
+        class LocalFilter extends Filter.FilterSkelton<VALUE, INPUT, OUTPUT> {
+            public LocalFilter(final IFilter<VALUE, INPUT, OUTPUT> func, final VALUE init) {
+                super(func, init);
+            }
+        }
+        addWithOuterObject(LocalFilter.class, this).arg(func, init);
         return this;
     }
     @Override
     public <VALUE, OUTPUT> ActorBlueprintManager add(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
-        add(Generator.GeneratorSkelton.class, generator, init);
+//        add(Generator.GeneratorSkelton.class, generator, init);
+//        IGenerator<VALUE, OUTPUT> g = val -> generator.generate(val);
+        class LocalGenerator extends Generator.GeneratorSkelton<VALUE, OUTPUT> {
+            public LocalGenerator(final IGenerator<VALUE, OUTPUT> generator, final VALUE init) {
+                super(generator, init);
+            }
+        }
+        addWithOuterObject(LocalGenerator.class, this).arg(generator, init);
+//        addWithOuterObject(new Generator.GeneratorSkelton<VALUE, OUTPUT>(generator, init){}.getClass(), this).arg(generator, init);
         return this;
     }
     @Override
     public <VALUE, INPUT> ActorBlueprintManager add(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
-        add(Consumer.ConsumerSkelton.class, consumer, init);
+//        add(Consumer.ConsumerSkelton.class, consumer, init);
+//        addWithOuterObject(new Consumer.ConsumerSkelton<VALUE, INPUT>(consumer,init){}.getClass(), this);
+        class LocalConsumer extends Consumer.ConsumerSkelton<VALUE, INPUT> {
+            public LocalConsumer(final IConsumer<VALUE, INPUT> consumer, final VALUE init) {
+                super(consumer, init);
+            }
+        }
+        addWithOuterObject(LocalConsumer.class, this).arg(consumer, init);
         return this;
     }
 

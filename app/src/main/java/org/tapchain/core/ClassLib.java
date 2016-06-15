@@ -63,6 +63,7 @@ public class ClassLib {
                 if (target == null || target.isAssignableFrom(c)) {
                     superClass = c;
                     newList = _getParameterizedType(type);
+                    log(String.format("}Interface:%s", type.toString()));
                     break;
                 }
                 log(String.format("}Interface:%s", type.toString()));

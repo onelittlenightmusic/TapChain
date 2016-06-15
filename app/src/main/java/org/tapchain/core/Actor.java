@@ -1,6 +1,7 @@
 package org.tapchain.core;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,19 +62,20 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         return overrideLinks(registeredClass, registeredClass, Controllable.class);
     }
 
-    public Map<LinkType, ClassEnvelope> overrideLinks(Class<? extends IPiece> registeredClass,
+    public Map<LinkType, ClassEnvelope> overrideLinks(Class<?> registeredClass,
                                                       Class<?> sampleClass,
                                                       Class<?> baseClass) {
         if (Controllable.class.isAssignableFrom(registeredClass)) {
             ClassLibReturn classReturn = getParameters(sampleClass, /* userParameters, */
                     baseClass);
+//            Log.w("Actor:override", String.format("%s <= %s", sampleClass.getSimpleName(), classReturn.toString()));
             return staticRegisterLinkClass(registeredClass, classReturn);
 //            initedClass.add(registeredClass);
         }
         return getLinkClassesFromLib();
     }
 
-    public Map<LinkType, ClassEnvelope> staticRegisterLinkClass(Class<? extends IPiece> cls, ClassLibReturn classReturn) {
+    public Map<LinkType, ClassEnvelope> staticRegisterLinkClass(Class<?> cls, ClassLibReturn classReturn) {
         ClassEnvelope parameter;
 //        __initLinkClass(cls);
         for (Entry<LinkType, String> e : linkTypeName.entrySet()) {
@@ -84,9 +86,9 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
             LinkType link = e.getKey();
             Type rawType = parameter.getRawType();
             if (rawType == Self.class)
-                __addLinkClass(cls, link, cls);
+                __addLinkClass(link, cls);
             else if (rawType != Void.class && !staticHasClassLimit(cls, link))
-                __addLinkClass(cls, link, parameter);
+                __addLinkClass(link, parameter);
         }
         return getLinkClassesFromLib();
     }
@@ -136,17 +138,17 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
         return linkClasses;
     }
 
-    protected void __addLinkClass(Class<?> cc, LinkType linkType,
+    protected void __addLinkClass(LinkType linkType,
                                   Class<?> clz) {
-        __addLinkClass(cc, linkType, new ClassEnvelope(Arrays.asList(clz)));
-        log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
+        __addLinkClass(linkType, new ClassEnvelope(Arrays.asList(clz)));
+//        log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
     }
 
-    protected void __addLinkClass(Class<?> cc, LinkType linkType,
+    protected void __addLinkClass(LinkType linkType,
                                   ClassEnvelope clz) {
         getLinkClassesFromLib().put(linkType, clz);
 //        linkClasses.put(linkType, clz);
-        log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
+//        log(String.format("=====%s, added(%s, %s)", cc.getSimpleName(), linkType.toString(), clz.getSimpleName()));
     }
 
     @Override

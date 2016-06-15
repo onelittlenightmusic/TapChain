@@ -13,6 +13,7 @@ import android.util.Log;
 import org.tapchain.AndroidActor.AndroidImageMovable;
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Actor;
+import org.tapchain.core.ChainException;
 import org.tapchain.core.ClassEnvelope;
 import org.tapchain.core.Consumer;
 import org.tapchain.core.D2Point;
@@ -20,7 +21,10 @@ import org.tapchain.core.Effector;
 import org.tapchain.core.Filter;
 import org.tapchain.core.Generator;
 import org.tapchain.core.IActionStyle;
+import org.tapchain.core.IConsumer;
+import org.tapchain.core.IEffector;
 import org.tapchain.core.IFilter;
+import org.tapchain.core.IGenerator;
 import org.tapchain.core.IPoint;
 import org.tapchain.core.IState;
 import org.tapchain.core.IValue;
@@ -235,59 +239,121 @@ public class AndroidTapChain extends TapChain {
 //            .view(R.drawable.motor).tag("Consumer").save()
 //            .add((IValue<Integer> self, IValue<Integer> p) -> p._set(self._get()+p._get()), 3, 1)
 //            .view(R.drawable.motor).tag("Effector").save()
-                .add(ElectricPower::GENERATE, new ElectricPower(0f))
-                .view(R.drawable.motor)
+                .add(new IGenerator<ElectricPower, ElectricPower>() {
+                    @Override
+                    public ElectricPower generate(IValue<ElectricPower> self1) {
+                        return ElectricPower.GENERATE(self1);
+                    }
+                }, new ElectricPower(3f))
+                .view(R.drawable.electricity)
                 .tag("Power Generator")
                 .save()
-                .add(ElectricPower::FILTER_PLUS, new ElectricPower(1f))
+                .add(new IFilter<ElectricPower, ElectricPower, ElectricPower>() {
+                    @Override
+                    public ElectricPower func(IValue<ElectricPower> self1, ElectricPower i1) {
+                        return ElectricPower.FILTER_PLUS(self1, i1);
+                    }
+                }, new ElectricPower(1f))
                 .view(R.drawable.motor)
                 .tag("Power Filter")
                 .save()
 //                .add((IValue<Power> self, Power i) -> { self._set(i); Log.w("test", String.format("OK %d", i.to_f())); }, new Power(0))
-                .add(ElectricPower::CONSUME, new ElectricPower(0))
+                .add(new IConsumer<ElectricPower, ElectricPower>() {
+                    @Override
+                    public void consume(IValue<ElectricPower> self1, ElectricPower i1) {
+                        ElectricPower.CONSUME(self1, i1);
+                    }
+                }, new ElectricPower(0))
                 .view(R.drawable.motor)
                 .tag("Power Consumer")
 //                .setLogLevel()
                 .save()
 //                .add((IValue<Power> self, IValue<Power> p) -> p._set(Power.plus(self._get(), p._get())), new Power(3), 1)
-                .add(ElectricPower::EFFECT, new ElectricPower(3), 1)
+                .add(new IEffector<IValue<ElectricPower>, ElectricPower>() {
+                    @Override
+                    public void effect(IValue<ElectricPower> self1, IValue<ElectricPower> p) throws ChainException {
+                        ElectricPower.EFFECT(self1, p);
+                    }
+                }, new ElectricPower(3), 1)
                 .view(R.drawable.motor)
                 .tag("Power Effector")
                 .save()
         ;
 
-        f = (IValue<ElectricPower> self, ElectricPower i) -> {
-            if (((Actor) self).getTime() == 5) {
+        f = new IFilter<ElectricPower, ElectricPower, ElectricPower>() {
+            @Override
+            public ElectricPower func(IValue<ElectricPower> self, ElectricPower i) {
+                if (((Actor) self).getTime() == 5) {
 //                Actor actor =
-                        new TapManager(this)
-                        .add(f, new ElectricPower(i.to_f()*100))
-                        .view(R.drawable.motor)
-                        .save().pullFrom((Actor)self);
+                    new TapManager(AndroidTapChain.this)
+                            .add(f, new ElectricPower(i.to_f() * 100))
+                            .view(R.drawable.motor)
+                            .save().pullFrom((Actor) self);
 
 //                onAddAndInstallView(now.plus(100f, 100f), actor);
+                }
+                return ElectricPower.plus(i, self._get());
             }
-            return ElectricPower.plus(i, self._get());
         };
         editBlueprint()
                 .add(f, new ElectricPower(1f))
-                .view(R.drawable.motor)
+                .view(R.drawable.motor2)
                 .tag("Power Filter 2")
                 .save();
 
         editBlueprint()
-                .add(Fuel::GENERATE, new Fuel(1f))
-                .view(R.drawable.pa)
+                .add(new IGenerator<Fuel, Fuel>() {
+                    @Override
+                    public Fuel generate(IValue<Fuel> self) {
+                        return Fuel.GENERATE(self);
+                    }
+                }, new Fuel(1f))
+                .view(R.drawable.oil)
                 .tag("Fuel Generator")
                 .save()
-                .add(Fuel::FILTER_CONVERT, new ElectricPower(1f))
-                .view(R.drawable.choki)
-                .tag("Power Converter")
+                .add(new IFilter<ElectricPower, Fuel, ElectricPower>() {
+                    @Override
+                    public ElectricPower func(IValue<ElectricPower> self, Fuel i) {
+                        return Fuel.FUEL_TO_ELECTRIC(self, i);
+                    }
+                }, new ElectricPower(1f))
+                .view(R.drawable.engine)
+                .tag("Power Converter").setLogLevel()
+                .save()
+                .add(new IGenerator<Wind, Wind>() {
+                    @Override
+                    public Wind generate(IValue<Wind> self) {
+                        return Wind.GENERATE(self);
+                    }
+                }, new Wind(1f))
+                .view(R.drawable.wind2)
+                .tag("Wind Generator")
+                .save()
+                .add(new IFilter<Fan, Wind, ElectricPower>() {
+                    @Override
+                    public ElectricPower func(IValue<Fan> self, Wind i) {
+                        return Fan.WIND_TO_ELECTRIC(self, i);
+                    }
+                }, new Fan(1f))
+                .view(R.drawable.propeller)
+                .tag("fan")
                 .save();
 
+//        IFilter<ElectricPower, Fuel, ElectricPower> filter = new IFilter<ElectricPower, Fuel, ElectricPower>() {
+//            @Override
+//            public ElectricPower func(IValue<ElectricPower> self, Fuel i) {
+//                return Fuel.FUEL_TO_ELECTRIC(self, i);
+//            }
+//        };
+//        Log.w("test", ((ParameterizedType)filter.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0].toString());
         ShowInstance.addClassImage(ElectricPower.class, R.drawable.electricity, ElectricPower::STR);
-        ShowInstance.addClassImage(Fuel.class, R.drawable.dust, Fuel::STR);
+        ShowInstance.addClassImage(Fuel.class, R.drawable.oil, Fuel::STR);
+        ShowInstance.addClassImage(Wind.class, R.drawable.wind, Wind::STR);
+        ShowInstance.addClassImage(Fan.class, R.drawable.propeller2, Fan::STR);
         EditInstance.addEditCreator(ElectricPower.class, ElectricPower::EDIT);
         EditInstance.addEditCreator(Fuel.class, Fuel::EDIT);
+        EditInstance.addEditCreator(Wind.class, Wind::EDIT);
+        EditInstance.addEditCreator(Fan.class, Fan::EDIT);
     }
     IFilter<ElectricPower, ElectricPower, ElectricPower> f;
     public void setActivity(Activity act) {
@@ -355,7 +421,7 @@ public class AndroidTapChain extends TapChain {
         public static Fuel GENERATE(IValue<Fuel> self) {
             return self._get();
         }
-        public static ElectricPower FILTER_CONVERT(IValue<ElectricPower> self, Fuel i) {
+        public static ElectricPower FUEL_TO_ELECTRIC(IValue<ElectricPower> self, Fuel i) {
             return new ElectricPower(i.to_f()+ self._get().to_f());
         }
         public static ActorTapView EDIT(IActorTapView parent) {
@@ -373,8 +439,64 @@ public class AndroidTapChain extends TapChain {
                 }
             };
         }
+
+
+    }
+    public static class Fan {
+        float p = 1f;
+        public Fan(float f) { p = f; }
+        public static ElectricPower WIND_TO_ELECTRIC(IValue<Fan> self, Wind i) {
+            return new ElectricPower(i.to_f() * self._get().p);
+        }
+        public static String STR(Fan fan) {
+            return Float.toString(fan.p);
+        }
+        public static ActorTapView EDIT(IActorTapView parent) {
+            return new MySetFloatTapViewStyle(parent) {
+                @Override
+                public void setParentValue(IPoint pos, IPoint vp) {
+                    float j = (pos.subNew(getParentTap().getCenter()).theta()-startangle)/oneangle;
+                    if (j < 0) j += 10f;
+                    j = Math.round(j*10f)*0.1f;
+                    getParentTap().setMyActorValue(new Fan(j));
+                }
+                @Override
+                public boolean equalMyValue(Integer val) {
+                    return val == ((Float)((Fan)getParentTap().getMyActorValue()).p).intValue();
+                }
+            };
+        }
     }
 
+    public static class Wind {
+        float p = 0f;
+        public Wind(float f) {
+            p = f;
+        }
+        public float to_f() {return p;}
+        public String toString() { return Float.toString(p); }
+        public static String STR(Wind wind) {
+            return Float.toString(wind.p);
+        }
+        public static Wind GENERATE(IValue<Wind> self) {
+            return self._get();
+        }
+        public static ActorTapView EDIT(IActorTapView parent) {
+            return new MySetFloatTapViewStyle(parent) {
+                @Override
+                public void setParentValue(IPoint pos, IPoint vp) {
+                    float j = (pos.subNew(getParentTap().getCenter()).theta()-startangle)/oneangle;
+                    if (j < 0) j += 10f;
+                    j = Math.round(j*10f)*0.1f;
+                    getParentTap().setMyActorValue(new Wind(j));
+                }
+                @Override
+                public boolean equalMyValue(Integer val) {
+                    return val == ((Float)((Wind)getParentTap().getMyActorValue()).to_f()).intValue();
+                }
+            };
+        }
+    }
     WorldPoint now = new WorldPoint(400f, 400f);
 //    public Power FILTER_PLUS_ADD(IValue<Power> self, Power i) {
 //        if(((Actor)self).getTime()==5) {

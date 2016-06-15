@@ -57,8 +57,7 @@ public class CanvasFragment extends Fragment {
 //                } catch (ClassNotFoundException e) {
 //                    e.printStackTrace();
 //                }
-
-                tapChain.invalidate();
+//                tapChain.invalidate();
             }
             view.setTapChain(tapChain);
         }

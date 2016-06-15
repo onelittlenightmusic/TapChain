@@ -277,24 +277,6 @@ public abstract class TapChain extends EditorChain implements IControlCallback, 
         return b;
     }
 
-//    public EditorReturn addActorFromBlueprint(IBlueprint b, IPoint pos) {
-//        return addActor(b, pos);
-//    }
-
-
-//    private EditorReturn addActor(final IBlueprint<Actor> blueprint, final IPoint iPoint) {
-//        try {
-//            // Create new instance actor
-//            EditorReturn rtn = new TapManager(this).add(blueprint, iPoint);
-////            save();
-//
-//            return rtn;
-//        } catch (ChainException e) {
-//            addLog(e.getErrorMessage());
-//        }
-//        return null;
-//    }
-
     public void onAddAndInstallView(final IPoint iPoint, Actor actor) {
         if (actor  == null) {
             return;

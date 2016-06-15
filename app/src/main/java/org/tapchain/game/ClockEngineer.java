@@ -15,8 +15,8 @@ public class ClockEngineer {
 		int x = 0;
 		public Pin(Float dt) {
 			super();
-            __addLinkClass(Pin.class, LinkType.PULL, Integer.class);
-            __addLinkClass(Pin.class, LinkType.TO_CHILD, Pin.class);
+            __addLinkClass(LinkType.PULL, Integer.class);
+            __addLinkClass(LinkType.TO_CHILD, Pin.class);
 			this.dt = dt;
 		}
 		@Override

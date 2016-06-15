@@ -1,5 +1,7 @@
 package org.tapchain.core;
 
+import android.util.Log;
+
 import java.util.Map;
 
 
@@ -22,21 +24,21 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 	public ActorBlueprint(Chain c, Class<? extends Actor> _cls, Actor... _args) {
 		super(c, _cls, _args);
 	}
-	
-	@Override
-	protected Blueprint setBlueprintClass(Class<? extends Actor> _cls) {
-		super.setBlueprintClass(_cls);
-		register();
-		return this;
-	}
-
-	@Override
-
-	protected Blueprint addLocalClass(Class<?> parent_type, Object parent_obj) {
-		super.addLocalClass(parent_type, parent_obj);
-		register();
-		return this;
-	}
+//
+//	@Override
+//	protected Blueprint setBlueprintClass(Class<? extends Actor> _cls) {
+//		super.setBlueprintClass(_cls);
+////		register();
+//		return this;
+//	}
+//
+//	@Override
+//
+//	protected Blueprint addLocalClass(Class<?> parent_type, Object parent_obj) {
+//		super.addLocalClass(parent_type, parent_obj);
+////		register();
+//		return this;
+//	}
 
 	public ClassEnvelope getConnectClass(LinkType lt) {
         if(links == null)
@@ -79,5 +81,7 @@ public class ActorBlueprint extends Blueprint<Actor> implements IActorBlueprint 
 
     public void register() {
         links = Actor.classLoadToLib(this);
+        if(logLevel)
+            Log.w("ActorBlueprint", String.format("%s <= register", getTag()));
     }
 }

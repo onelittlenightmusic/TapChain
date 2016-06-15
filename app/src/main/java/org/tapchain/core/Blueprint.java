@@ -142,7 +142,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 			A:for(Constructor c: cls.getConstructors()) {
 				Class[] ts = c.getParameterTypes();
 				if(ts.length != types.length) {
-//                    log("Not assignable %d->%d", ts.length, types.length);
+                    log("Not assignable %d->%d", ts.length, types.length);
                     continue A;
                 }
 				for(int i = 0; i < ts.length; i++) {
@@ -434,7 +434,7 @@ public class Blueprint<PIECE extends IPiece> implements IBlueprint<PIECE>, JSONS
 	}
 	
 	public void log(String format, Object...l) {
-//        Log.w("test", String.format(format, l));
+//        Log.w("Blueprint", String.format(format, l));
 	}
 
 	@Override

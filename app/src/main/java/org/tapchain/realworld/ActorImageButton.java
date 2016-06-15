@@ -3,6 +3,7 @@ package org.tapchain.realworld;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,9 +30,7 @@ public class ActorImageButton extends ActorImage implements
         registerToFactory();
         act = (MainActivity) context;
         touchDetector = new GestureDetector(act, this);
-//        factory = ((MainActivity)context).getSystemChain().getFactory(TapChainEditor.FACTORY_KEY.ALL);
-//        this.key = TapChainEditor.FACTORY_KEY.ALL;
-//        num = 0;
+        touchDetector.setIsLongpressEnabled(false);
         setOnTouchListener(this);
         TypedArray a= context.obtainStyledAttributes(
                 attr,
@@ -39,10 +38,7 @@ public class ActorImageButton extends ActorImage implements
         String factory_key = a.getString(R.styleable.ActorImageButton_factoryKey);
         Integer num_in_factory = a.getInteger(R.styleable.ActorImageButton_numInFactory, 0);
         TapChain.FACTORY_KEY key = TapChain.FACTORY_KEY.valueOf(factory_key);
-//        init(context, key, null, num_in_factory);
         factory = ((MainActivity)context).getTapChain().getFactory(key);
-//        if(factory == null)
-//            factory = ((MainActivity)c).getSystemChain().getFactory(key);
         init(factory.get(num_in_factory));
     }
 
@@ -51,20 +47,9 @@ public class ActorImageButton extends ActorImage implements
         registerToFactory();
         act = (MainActivity) c;
         touchDetector = new GestureDetector(act, this);
-//        factory = f;
-//        this.key = key;
-//        num = j;
+        touchDetector.setIsLongpressEnabled(false);
         setOnTouchListener(this);
-//        init(c, key, f, j);
     }
-
-//    public void init(Context c, TapChainEditor.FACTORY_KEY key, Factory<Actor> f, final int j) {
-//        factory = f;
-//        if(f == null)
-//            factory = ((MainActivity)c).getSystemChain().getFactory(key);
-//        num = j;
-//        this.key = key;
-//    }
 
     private GridFragment returnPaletteAble() {
         GridFragment f1 = act.getGrid();
@@ -77,7 +62,6 @@ public class ActorImageButton extends ActorImage implements
         if (touchDetector.onTouchEvent(event))
             return true;
         int action = event.getAction();
-        // Log.w("Action", String.format("action = %d", action));
         switch (action) {
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
@@ -141,6 +125,7 @@ public class ActorImageButton extends ActorImage implements
 
     @Override
     public void onShowPress(MotionEvent e) {
+        Log.w("test", "onShowPress");
     }
 
     @Override
