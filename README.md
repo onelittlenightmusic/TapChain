@@ -1,9 +1,9 @@
-=== TapChain ===
+# TapChain
 Author: Hiroyuki Osaki
 Donate link: http://tbd/
-version: 20120323
+version: code name "realworld" 0.1 alpha (2016/6)
 
-== Description ==
+## Description
 TapChain is a application for children to create computer programs.
 TapChain is open source.
 Anyone can contribute to enhance TapChain.
@@ -58,13 +58,11 @@ Using one of the tools above mentioned, Means, Gestures, Voices, Songs, Drawings
 Not only using but also creating by children themselves to express their feelings to others is the best solution.
    That is the goal of TapChain, As Inspiration strikes.
 
-== Installation ==
+# Installation
 Access to Google Play Store.(Future work)
 
-== Frequently Asked Questions ==
+# Frequently Asked Questions
 
-== Changelog ==
-
-= code name: "realworld" =
-= 0.1 alpha =
-2012/3/23 First commit to github
+# Changelog
+## 2012/3/23 First commit to github
+## 2016/6/28 code name: "realworld" 0.1 alpha
