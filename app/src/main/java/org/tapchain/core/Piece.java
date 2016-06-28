@@ -85,6 +85,8 @@ public abstract class Piece<PARTNER extends IPiece> implements IPiece<PARTNER> {
 		return partnerList.getPartners();
 	}
 
+    public HashMap<PARTNER, IPath> getPartnerList() { return partnerList.partner; }
+
 	@Override
 	public Collection<PARTNER> getPartners(PathType pathType, boolean outOrIn) {
 		return partnerList.getPartners(pathType, outOrIn, this);

@@ -1,8 +1,8 @@
 package org.tapchain.core;
 
 public interface IPieceHead {
-	abstract boolean pieceRun(IPiece f) throws InterruptedException,
+	boolean pieceRun(IPiece f) throws InterruptedException,
 			ChainException;
 
-	abstract boolean pieceReset(IPiece f);
+	boolean pieceReset(IPiece f);
 }

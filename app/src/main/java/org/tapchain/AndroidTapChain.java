@@ -726,7 +726,7 @@ public class AndroidTapChain extends TapChain {
                 case PUSH:
                     MyBeamTapViewStyle beam = new MyBeamTapViewStyle(act.getResources(), v, al, clz);
                     if (v instanceof MyTapViewStyle2)
-                        beam.init(((MyTapViewStyle2) v).getOffsetVectorRawCopy());
+                        beam.init(((MyTapViewStyle2) v).getOffsetVectorRawCopy(clz));
                     spot = beam;
                     break;
                 case TO_CHILD:

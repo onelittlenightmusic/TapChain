@@ -60,11 +60,11 @@ public class BubblePathTapView extends PathTapView implements ISelectable {
         this.stop = stop;
         this.starttype = startType;
         this.stoptype = stopType;
+        cls = p.getConnectionClass();
         sp1 = start.getCenter();
         sp2 = stop.getCenter();
-        sp12 = ((MyTapViewStyle2)start).getOffsetVector(gamma);
-        sp21 = ((MyTapViewStyle2)stop).getOffsetVector(-gamma);
-        cls = p.getConnectionClass();
+        sp12 = ((MyTapViewStyle2)start).getOffsetVector(cls, gamma);
+        sp21 = ((MyTapViewStyle2)stop).getOffsetVector(cls, -gamma);
     }
 
     @Override
@@ -79,7 +79,23 @@ public class BubblePathTapView extends PathTapView implements ISelectable {
         paint2.setColor(Color.argb(255, 255, 255, 255));
         paint2.setTextAlign(Paint.Align.CENTER);
         if (starttype == PathType.OFFER)
-            paint.setColor(Color.argb(220, 100, 200, 255));
+            switch(cls.getRawClass().getSimpleName()) {
+                case "String":
+                    paint.setColor(Color.argb(255, 200, 230, 200));
+                    break;
+                case "Integer":
+                    paint.setColor(Color.argb(255, 220, 100, 100));
+                    break;
+                case "Wind":
+                    paint.setColor(Color.argb(255, 220, 100, 200));
+                    break;
+                case "ElectricPower":
+                    paint.setColor(Color.argb(255, 220, 220, 100));
+                    break;
+                case "Fuel":
+                    paint.setColor(Color.argb(255, 100, 220, 200));
+                    break;
+            }
         paint2.setAntiAlias(true);
     }
 

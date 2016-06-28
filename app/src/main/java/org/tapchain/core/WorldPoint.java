@@ -222,6 +222,14 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 		offset.put(pt, alpha);
 		return this;
 	}
+
+    public void setOffset(float alphaAll) {
+        if(offset != null) {
+            for (Map.Entry<IValue<IPoint>, Float> o : offset.entrySet()) {
+                offset.put(o.getKey(), o.getValue() * alphaAll);
+            }
+        }
+    }
 	
 	@Override
 	public IPoint setOffset(IValue<IPoint> pt, boolean keep) {
@@ -330,11 +338,6 @@ public class WorldPoint implements IPoint, Comparable, Serializable {
 	static final WorldPoint zero = new WorldPoint(0f, 0f);
 	public static WorldPoint zero() {
 		return zero;
-	}
-
-	public float len() {
-		float x = x(), y = y();
-		return (float)Math.sqrt((double)(x*x+y*y));
 	}
 
 }

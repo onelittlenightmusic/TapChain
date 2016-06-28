@@ -7,9 +7,12 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.RectF;
+import android.util.Log;
 
 import org.tapchain.AndroidActor.AndroidView;
 import org.tapchain.core.Effector;
+import org.tapchain.core.IPath;
+import org.tapchain.core.Piece;
 import org.tapchain.editor.ColorLib;
 import org.tapchain.editor.ColorLib.ColorCode;
 import org.tapchain.AndroidTapChain.StateLog;
@@ -54,6 +57,8 @@ import org.tapchain.viewlib.ShowInstance;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScrollable,
@@ -185,8 +190,8 @@ public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScro
             return true;
         }
 
-        float theta = getOffsetVectorRawCopy().theta();
         // Draw Extensions _in association with IValue interface
+        float theta = getOffsetVectorRawCopy(getActor().getLinkClassFromLib(LinkType.PUSH)).theta();
         DrawLib.drawBitmapCenter(canvas, bm_fg, theta, WorldPoint.zero(),
                 _paint);
         canvas.restore();
@@ -395,49 +400,75 @@ public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScro
     boolean isZero = true;
 
     public void setOffsetVector() {
-        partnersOffsetAverage._get().clear();
-        WorldPoint average = (WorldPoint) partnersOffsetAverageRaw._get().clear();
-        Collection<Actor> col1 = getActor().getPartners(LinkType.PULL);
-        Collection<Actor> col2 = getActor().getPartners(LinkType.PUSH);
-        isZero = col1.isEmpty() || col2.isEmpty();
-        float divCol1 = 1f / ((float) col1.size());
-        for (Actor vec1 : col1) {
-            average.setOffset(tapChain.toTap(vec1), -divCol1);
+//        Class<?> cls = Object.class;
+        for(OffsetVector vector: partnersOffsetAverage.values()) {
+            vector.counter = 0;
+            vector.average.clear();
         }
-        float divCol2 = 1f / ((float) col2.size());
-        for (Actor vec2 : col2) {
-            average.setOffset(tapChain.toTap(vec2), divCol2);
+        HashMap<Actor, IPath> map = getActor().getPartnerList();
+            for (Map.Entry<Actor, IPath> kv : map.entrySet()) {
+                Actor vec1 = kv.getKey();
+                int push = kv.getValue().isOut(vec1) ? -1 : 1;
+                OffsetVector vector = getOffsetVector(kv.getValue().getConnectionClass());
+                vector.average.setOffset(tapChain.toTap(vec1), push * 0.5f);
+                vector.counter += push;
+            }
+        for(OffsetVector vector: partnersOffsetAverage.values()) {
+            vector.average.setOffset(this, - vector.counter * 0.5f);
+            vector.set(true);
         }
-        if (!isZero)
-            partnersOffsetAverage._set(average);
+//        }
     }
 
-    private Value<IPoint> partnersOffsetAverage = new Value<IPoint>(new WorldPoint(0f, 0f));
-    private Value<IPoint> partnersOffsetAverageRaw = new Value<IPoint>(new WorldPoint(0f, 0f));
+    private HashMap<ClassEnvelope, OffsetVector> partnersOffsetAverage = new HashMap<>();
 
-    WorldPoint offsetVector = new WorldPoint(0, 0);
-
-    public WorldPoint getOffsetVector(float alpha) {
-        offsetVector = new WorldPoint(WorldPoint.zero());
+//    ClassEnvelope simpleCE= new ClassEnvelope(Object.class);
+    public WorldPoint getOffsetVector(ClassEnvelope cls, float alpha) {
+        WorldPoint offsetVector = new WorldPoint(WorldPoint.zero());
         offsetVector.setOffset(this);
-        offsetVector.setOffset(partnersOffsetAverage, alpha);
+        offsetVector.setOffset(getOffsetVector(cls).offset, alpha);
         return offsetVector;
     }
 
-    public WorldPoint getOffsetVectorRawCopy() {
-        boolean pullZero = false;
-        WorldPoint rtn = new WorldPoint(partnersOffsetAverageRaw._get());
+    public OffsetVector getOffsetVector(ClassEnvelope cls) {
+        if(cls == null) {
+            Log.w("test", String.format("Class(null)<=%s", getTag()));
+            new Throwable().printStackTrace();
+            return null;
+        } else
+            Log.w("test", String.format("Class(%s)", cls.toString()));
+        if(!partnersOffsetAverage.containsKey(cls))
+            partnersOffsetAverage.put(cls, new OffsetVector());
+        return partnersOffsetAverage.get(cls);
+    }
+
+    class OffsetVector {
+        Value<IPoint> offset;
+        WorldPoint average;
+        int counter;
+        public OffsetVector() {
+            this(new WorldPoint(10f, 0f));
+        }
+        public OffsetVector(WorldPoint ave) {
+            average = ave;
+            offset = new Value<>(new WorldPoint());
+        }
+        public void set(boolean averageOn) {
+            offset._set(averageOn ? average : new WorldPoint());
+        }
+    }
+
+    public WorldPoint getOffsetVectorRawCopy(ClassEnvelope clz) {
         if (getActor().getPartners(LinkType.PULL).size() == 0) {
-            rtn.sub(this._get());
-            pullZero = true;
+            if (getActor().getPartners(LinkType.PUSH).size() == 0) {
+                return new WorldPoint(150f, 0f);
+            }
         }
-        if (getActor().getPartners(LinkType.PUSH).size() == 0) {
-            rtn.plus(this._get());
-            //Pull and Push are both no connection
-            if (pullZero)
-                rtn = new WorldPoint(150f, 0f);
-        }
-        return rtn.multiply(150f / rtn.len());
+        OffsetVector vector = getOffsetVector(clz);
+        if(vector == null)
+            return new WorldPoint(150f, 0f);
+        WorldPoint rtn = new WorldPoint(vector.average);
+        return rtn.multiply(150f / rtn.getAbs());
     }
 
     @Override

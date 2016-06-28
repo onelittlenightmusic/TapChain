@@ -85,7 +85,7 @@ public class MySetIntegerTapViewStyle extends OptionTapViewStyle implements IScr
 
 	@Override
 	public boolean onRelease(ITapChain edit, IPoint pos) {
-        if(((WorldPoint)pos.subNew(getParentTap().getCenter())).len() < 150f) {
+        if(((WorldPoint)pos.subNew(getParentTap().getCenter())).getAbs() < 150f) {
             setParentValue(pos, null);
             commitParentValue();
             return true;

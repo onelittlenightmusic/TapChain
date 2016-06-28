@@ -168,6 +168,16 @@ public class ClassEnvelope implements ParameterizedType, Comparable<ClassEnvelop
 	public void log(String format, String... l) {
 //		Log.w("ClassEnvelope", String.format(format, (Object[])l));
 	}
-	
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof ClassEnvelope)
+            return raw == ((ClassEnvelope)obj).getRawClass();
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return raw.hashCode();
+    }
 }

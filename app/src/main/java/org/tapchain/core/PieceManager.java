@@ -125,6 +125,9 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 		}
         assert rtn != null;
         rtn.setConnectionClass(cls);
+        IPath path = rtn.getResult();
+//        ClassEnvelope cls = rtn.getConnectionClass();
+        path.setConnectionClass(cls);
 		return rtn;
 	}
 
@@ -163,12 +166,10 @@ public class PieceManager<PIECE extends Piece> extends Manager<PIECE> {
 				((ChainPiece) x).postAppend();
 			if (y instanceof ChainPiece)
 				((ChainPiece) y).postAppend();
-			IPath path = io.getResult();
-			ClassEnvelope cls = io.getConnectionClass();
-			path.setConnectionClass(cls);
-			logLocal("append(PieceManager) Succeeded %s<%s>",
-				toString(x, xp, y, yp), cls.getSimpleName());
-
+//			logLocal("append(PieceManager) Succeeded %s<%s>",
+//				toString(x, xp, y, yp), cls.getSimpleName());
+//
+            IPath path = io.getResult();
 			path.start();
 			return io;
 	}
