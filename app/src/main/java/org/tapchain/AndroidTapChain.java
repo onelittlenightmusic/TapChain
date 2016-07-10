@@ -96,11 +96,6 @@ public class AndroidTapChain extends TapChain {
             .tag("Ray")
             .save()
 //
-//				.addFocusable(Actor.ScrollableAdjuster.class).view(R.drawable.flag).tag("Adjuster")
-
-//				.addFocusable(Actor.Booster.class).view(R.drawable.boost1).tag("Booster")
-//				.addFocusable(Actor.Charger.class).view(R.drawable.battery1).tag("Charger")
-
             .add(Effector.Mover.class, new WorldPoint(1f, 0f))
             .view(R.drawable.right2)
             .tag("Mover")
@@ -125,30 +120,10 @@ public class AndroidTapChain extends TapChain {
             .tag("Word")
             .save()
 
-            .add(AndroidActor.AndroidMail.class, act, "mailto:heretic55@docomo.ne.jp")
-            .view(R.drawable.mail2)
-            .tag("Mail to Mari")
-//                .setLogLevel()
-            .save()
-
-
-//            .add(AndroidActor.AndroidRecognizer.class, act)
-//            .view(R.drawable.mic)
-//            .tag("Recognizer").setLogLevel()
-//            .save()
-
-//				.addFocusable(AndroidActor.AndroidCamera.class)
-//				.view(R.drawable.pic)
-//				.tag("Camera")
-
-
             .add(Generator.IntegerGenerator.class, 1, false)
             .view(R.drawable.num)
             .tag("Number")
             .save()
-
-//                .add(Actor.PlusIntegerFilter.class).view(R.drawable.plus2).tag("Plus").save()
-//                .add(Actor.MultiIntegerFilter.class).view(R.drawable.multi2).tag("Multiply").save()
 
             .add(PushOut.IntegerPushOut.class)
             .view(R.drawable.boost1)

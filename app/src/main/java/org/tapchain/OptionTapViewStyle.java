@@ -10,6 +10,7 @@ import org.tapchain.core.IScrollHandler;
 import org.tapchain.core.IRegister;
 import org.tapchain.core.IScrollable;
 import org.tapchain.editor.IActorTapView;
+import org.tapchain.editor.TapChain;
 
 public class OptionTapViewStyle extends ActorTapView implements IScrollable, IRegister {
 	/**
@@ -34,7 +35,7 @@ public class OptionTapViewStyle extends ActorTapView implements IScrollable, IRe
 	}
 	
 	@Override
-	public final boolean onScrolled(ITapChain edit, IPoint pos, IPoint vp) {
+	public final boolean onScrolled(TapChain edit, IPoint pos, IPoint vp) {
 //		setCenter(pos);
 		for(IScrollHandler s : handlers)
 			s.onScroll(edit, this, pos, vp);

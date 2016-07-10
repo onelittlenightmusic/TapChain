@@ -292,7 +292,7 @@ public class MyTapViewStyle2 extends ActorTapView implements Serializable, IScro
     }
 
     @Override
-    public boolean onScrolled(ITapChain edit, IPoint pos, IPoint vp) {
+    public boolean onScrolled(TapChain edit, IPoint pos, IPoint vp) {
         setCenter(pos);
         return false;
     }
