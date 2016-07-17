@@ -1,8 +1,9 @@
 package org.tapchain.realworld;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +18,7 @@ import org.tapchain.editor.TapChain;
 /**
  *
  */
-public class MainActivity extends AppCompatActivity implements IIntentHandler {
+public class MainActivity extends Activity implements IIntentHandler {
     SparseArray<IntentHandler> intentHandlers = new SparseArray<>();
 
     @Override
@@ -51,9 +52,9 @@ public class MainActivity extends AppCompatActivity implements IIntentHandler {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }

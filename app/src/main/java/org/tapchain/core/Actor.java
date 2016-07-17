@@ -1,6 +1,6 @@
 package org.tapchain.core;
 
-import android.support.annotation.NonNull;
+//import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -243,7 +243,7 @@ public class Actor extends ChainPiece<Actor> implements Comparable<Actor>,
     // 3.Changing state
 
     @Override
-    public int compareTo(@NonNull Actor obj) {
+    public int compareTo(Actor obj) {
         return -mynum + obj.mynum;
     }
 

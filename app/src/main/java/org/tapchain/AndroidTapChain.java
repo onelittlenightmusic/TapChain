@@ -130,11 +130,11 @@ public class AndroidTapChain extends TapChain {
             .tag("PushOut")
             .save()
 
-            .add(PassThru.IntegerPassThru.class)
-            .view(R.drawable.right2)
-            .tag("PassThru")
-            .save()
-
+//            .add(PassThru.IntegerPassThru.class)
+//            .view(R.drawable.right2)
+//            .tag("PassThru")
+//            .save()
+//
             .add(Filter.PlusIntegerFilter.class)
             .view(R.drawable.plus2)
             .tag("Plus")/*.setLogLevel()*/
