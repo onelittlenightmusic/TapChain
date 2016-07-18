@@ -4,8 +4,15 @@
              android:background="#ffffff"
              android:orientation="vertical">
 
-    <fragment android:id="@+id/canvas_fragment"
-              android:name="org.tapchain.realworld.MainActivityFragment"
+    <!--<fragment android:id="@+id/canvas_fragment"-->
+              <!--android:name="org.tapchain.realworld.MainActivityFragment"-->
+              <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+              <!--xmlns:tools="http://schemas.android.com/tools"-->
+              <!--android:layout_width="match_parent"-->
+              <!--android:layout_height="match_parent"-->
+              <!--tools:layout="@layout/fragment_main"/>-->
+
+    <RelativeLayout android:id="@+id/canvas_fragment"
               xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
